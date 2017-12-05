@@ -8,6 +8,7 @@
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
   		<testSourceDirectory>src/test/java</testSourceDirectory>
+  		<finalName>openEO_WCPS_Driver</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>

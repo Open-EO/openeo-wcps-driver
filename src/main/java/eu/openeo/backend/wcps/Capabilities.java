@@ -11,7 +11,7 @@ public class Capabilities {
 	@GET
 	@Produces("application/json")
 	public String getCapabilities() {
-		return "body:{version:{0.0.1}}";
+		return "body:{wcps}";
 	}
 	
 	@Path("/version")
