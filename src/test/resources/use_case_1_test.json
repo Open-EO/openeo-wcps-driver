@@ -1,0 +1,34 @@
+{
+  "process_graph": {
+    "process_id": "min_time",
+    "args": {
+      "time_series": {
+        "process_id": "NDVI",
+        "args": {
+          "imagery": {
+            "process_id": "filter_daterange",
+            "args": {
+              "imagery": {
+                "process_id": "filter_bbox",
+                "args": {
+                "imagery": {
+                    "product_id": "S2_L2A_T32TPS_20M"
+                },
+                "left" :652000,
+                "right" :672000,
+                "top" :5161000,
+                "bottom" :5181000,
+                "srs" : "EPSG:32632"
+                }
+              }
+            },
+            "from": "2017-01-01",
+            "to": "2017-01-31"
+          }
+        },
+        "red": "B04",
+        "nir": "B8A"
+      }
+    }
+  }
+}
