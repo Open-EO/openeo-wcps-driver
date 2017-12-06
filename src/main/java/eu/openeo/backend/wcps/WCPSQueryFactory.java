@@ -43,24 +43,34 @@ public class WCPSQueryFactory {
 		for(int a = 0; a < aggregates.size(); a++) {
 			
 		}
-		wcpsStringBuilder.append("$c1");
 		if(filters.size() > 0) {
-			wcpsStringBuilder.append("[");
-			for(int f = 0; f < filters.size(); f++) {
-				Filter filter = filters.get(f);
-				wcpsStringBuilder.append(filter.getAxis() + 
-										 "(" + 
-										 filter.getLowerBound() + 
-										 ":" + 
-										 filter.getUpperBound() + 
-										 ")");
-				if(f < filters.size() - 1) {
-					wcpsStringBuilder.append(",");
-				}
-			}
-			wcpsStringBuilder.append("]");
+			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
 		}
 		wcpsStringBuilder.append(", netcdf )");
+	}
+	
+	/**
+	 * Helper Method to create a string describing an arbitrary filtering as defined from the process graph
+	 * @param collectionName
+	 * @return
+	 */
+	private String createFilteredCollectionString(String collectionName) {
+		StringBuilder stringBuilder = new StringBuilder(collectionName);
+		stringBuilder.append("[");
+		for(int f = 0; f < filters.size(); f++) {
+			Filter filter = filters.get(f);
+			stringBuilder.append(filter.getAxis() + 
+									 "(" + 
+									 filter.getLowerBound() + 
+									 ":" + 
+									 filter.getUpperBound() + 
+									 ")");
+			if(f < filters.size() - 1) {
+				stringBuilder.append(",");
+			}
+		}
+		stringBuilder.append("]");
+		return stringBuilder.toString();
 	}
 	
 	/**
@@ -85,6 +95,8 @@ public class WCPSQueryFactory {
 	        	System.out.println("currently working on: " + name);
 	        	if(name.contains("filter")) {
 	        		createFilterFromProcess(processParent);
+	        	}else {
+	        		createAggregateFromProcess(processParent);
 	        	}
 	        } else
 	        if(keyStr.equals("args")) {
@@ -190,7 +202,53 @@ public class WCPSQueryFactory {
 	 * @param process
 	 */
 	private void createAggregateFromProcess(JSONObject process) {
-		
+		boolean isTemporalAggregate = false;
+		boolean isNDVIAggregate = false;
+		for (Object key : process.keySet()) {
+			String keyStr = (String)key;
+			if(keyStr.equals("process_id")) {
+	        	String name = (String) process.get(keyStr);
+	        	System.out.println("currently working on: " + name);
+	        	if(name.contains("date") || name.contains("time")) {
+	        		isTemporalAggregate = true;
+        		} else
+        		if(name.contains("NDVI")) {
+        			isNDVIAggregate = true;
+        		}
+	        }
+		}
+		for (Object key : process.keySet()) {
+			String keyStr = (String)key;
+			if(keyStr.equals("args")) {
+	        	JSONObject argsObject = (JSONObject) process.get(keyStr);
+	        	if(isTemporalAggregate) {
+	        		
+	        	}
+	        	if(isNDVIAggregate) {
+	        		createNDVIAggregateFromProcess(argsObject);
+	        	}
+		        
+	        }
+		}
+	}
+	
+	private void createNDVIAggregateFromProcess(JSONObject argsObject) {
+		String red = null;
+		String nir = null;
+		for (Object argsKey : argsObject.keySet()) {
+        	String argsKeyStr = (String)argsKey;
+        	if(argsKeyStr.equals("red")) {
+        		red = "" + argsObject.get(argsKey).toString();
+        	} else
+    		if(argsKeyStr.equals("nir")) {
+    			nir = "" + argsObject.get(argsKey).toString();
+        	}
+        }
+		Vector<String> params = new Vector<String>();
+		params.add(red);
+		params.add(nir);
+		if(red != null && nir != null)
+		aggregates.add(new Aggregate(new String("feature"), new String("NDVI"), params));
 	}
 
 }
