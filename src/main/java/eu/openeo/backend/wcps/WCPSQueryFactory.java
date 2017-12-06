@@ -60,7 +60,7 @@ public class WCPSQueryFactory {
 			}
 			wcpsStringBuilder.append("]");
 		}
-		wcpsStringBuilder.append(", tiff )");
+		wcpsStringBuilder.append(", netcdf )");
 	}
 	
 	/**
