@@ -61,12 +61,24 @@ public class WCPSQueryFactory {
 		stringBuilder.append("[");
 		for(int f = 0; f < filters.size(); f++) {
 			Filter filter = filters.get(f);
-			stringBuilder.append(filter.getAxis() + 
-									 "(" + 
-									 filter.getLowerBound() + 
-									 ":" + 
-									 filter.getUpperBound() + 
-									 ")");
+			String axis = filter.getAxis();
+			stringBuilder.append(axis + "(");
+			if(axis.contains("DATE")) {
+				stringBuilder.append("\""); 
+			}
+			stringBuilder.append(filter.getLowerBound());
+			if(axis.contains("DATE")) {
+				stringBuilder.append("\""); 
+			}
+			stringBuilder.append(":");
+			 if(axis.contains("DATE")) {
+					stringBuilder.append("\""); 
+				}
+			 stringBuilder.append(filter.getLowerBound());
+			 if(axis.contains("DATE")) {
+					stringBuilder.append("\""); 
+				}
+			 stringBuilder.append(")");
 			if(f < filters.size() - 1) {
 				stringBuilder.append(",");
 			}
