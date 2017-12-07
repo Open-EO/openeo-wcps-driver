@@ -41,7 +41,9 @@ public class WCPSQueryFactory {
 		}
 		wcpsStringBuilder.append(") return encode ( ");
 		for(int a = 0; a < aggregates.size(); a++) {
-			
+			if(aggregates.get(a).getOperator().equals("NDVI")) {
+				wcpsStringBuilder.append(createNDVIWCPSString("$c1", aggregates.get(a)));
+			}
 		}
 		if(filters.size() > 0) {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
@@ -70,6 +72,30 @@ public class WCPSQueryFactory {
 			}
 		}
 		stringBuilder.append("]");
+		return stringBuilder.toString();
+	}
+	
+	private String createNDVIWCPSString(String collectionName, Aggregate ndviAggregate) {
+		String redBandName = ndviAggregate.getParams().get(0);
+		String nirBandName = ndviAggregate.getParams().get(1);
+		String filterString = createFilteredCollectionString(collectionName);
+		filterString = filterString.substring(collectionName.length());
+		String red = createBandSubsetString(collectionName, redBandName, filterString);
+		String nir = createBandSubsetString(collectionName, nirBandName, filterString);
+		StringBuilder stringBuilder = new StringBuilder("((double)");
+		stringBuilder.append(nir + " - " + red);
+		stringBuilder.append(") / ((double)");
+		stringBuilder.append(nir + " + " + red);
+		stringBuilder.append(")");
+		filters.removeAllElements();
+		return stringBuilder.toString();
+	}
+	
+	private String createBandSubsetString(String collectionName, String bandName, String subsetString) {
+		StringBuilder stringBuilder = new StringBuilder(collectionName);
+		stringBuilder.append(".");
+		stringBuilder.append(bandName);
+		stringBuilder.append(subsetString);
 		return stringBuilder.toString();
 	}
 	
