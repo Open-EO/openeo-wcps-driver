@@ -2,6 +2,7 @@ package eu.openeo.backend.wcps;
 
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -15,6 +16,8 @@ public class WCPSQueryFactory {
 	private Vector<Collection> collectionIDs;
 	private Vector<Filter> filters;
 	private Vector<Aggregate> aggregates;
+	
+	Logger log = Logger.getLogger(this.getClass());
 	
 	/**
 	 * Creates WCPS query from openEO process Graph
@@ -130,7 +133,7 @@ public class WCPSQueryFactory {
 	        String keyStr = (String)key;
 	        if(keyStr.equals("process_id")) {
 	        	String name = (String) processParent.get(keyStr);
-	        	System.out.println("currently working on: " + name);
+	        	log.debug("currently working on: " + name);
 	        	if(name.contains("filter")) {
 	        		createFilterFromProcess(processParent);
 	        	}else {
@@ -154,7 +157,7 @@ public class WCPSQueryFactory {
 	        if(keyStr.equals("collection_id")) {
 	        	String name = (String) processParent.get(keyStr);
 	        	collectionIDs.add(new Collection(name));
-	        	System.out.println("found actual dataset: " + name);
+	        	log.debug("found actual dataset: " + name);
 	        }
 	    }
 		return result;
@@ -171,7 +174,7 @@ public class WCPSQueryFactory {
 			String keyStr = (String)key;
 			if(keyStr.equals("process_id")) {
 	        	String name = (String) process.get(keyStr);
-	        	System.out.println("currently working on: " + name);
+	        	log.debug("currently working on: " + name);
 	        	if(name.contains("date")) {
         			isTemporalFilter = true;
         		} else
@@ -246,7 +249,7 @@ public class WCPSQueryFactory {
 			String keyStr = (String)key;
 			if(keyStr.equals("process_id")) {
 	        	String name = (String) process.get(keyStr);
-	        	System.out.println("currently working on: " + name);
+	        	log.debug("currently working on: " + name);
 	        	if(name.contains("date") || name.contains("time")) {
 	        		isTemporalAggregate = true;
         		} else
