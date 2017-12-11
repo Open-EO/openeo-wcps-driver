@@ -7,8 +7,14 @@
 	<packaging>war</packaging>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
-  		<testSourceDirectory>src/test/java</testSourceDirectory>
-  		<finalName>openEO_WCPS_Driver</finalName>
+		<testSourceDirectory>src/test/java</testSourceDirectory>
+		<finalName>openEO_WCPS_Driver</finalName>
+		<resources>
+	        <resource>
+	            <directory>src/main/resources</directory>
+	            <filtering>true</filtering>
+	        </resource>
+    	</resources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -24,12 +30,42 @@
 				<configuration>
 					<warSourceDirectory>WebContent</warSourceDirectory>
 					<webResources>
-			           <resource>
-			             <directory>WebContent</directory>
-			           </resource>
-			        </webResources>
+						<resource>
+							<directory>WebContent</directory>
+						</resource>
+						<resource>
+							<directory>src/main/resources</directory>
+						</resource>
+					</webResources>
 				</configuration>
 			</plugin>
+			<!-- 
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>config.properties</file>
+							</files>
+						</configuration>
+					</execution>
+					
+					<execution>
+						<goals>
+							<goal>set-system-properties</goal>
+						</goals>
+					</execution>
+					
+				</executions>
+			</plugin>
+			 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>

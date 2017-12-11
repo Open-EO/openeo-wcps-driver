@@ -25,7 +25,7 @@ public class Data {
 		try {
 			StringBuilder result = new StringBuilder();
 			URL url;
-			url = new URL("http://10.8.244.147:8080/rasdaman/ows?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCapabilities");
+			url = new URL(PropertiesHelper.readProperties("wcps-endpoint") + "?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCapabilities");
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
@@ -59,7 +59,7 @@ public class Data {
 		URL url;
 		try {
 			url = new URL(
-					"http://10.8.244.147:8080/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID="
+					PropertiesHelper.readProperties("wcps-endpoint") + "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID="
 							+ coverageName);
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();

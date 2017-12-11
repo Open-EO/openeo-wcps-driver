@@ -1,8 +1,9 @@
 package eu.openeo.backend.wcps;
 
 import org.junit.jupiter.api.Test;
-
 import eu.openeo.backend.wcps.WCPSQueryFactory;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.FileReader;
 import org.json.simple.JSONObject;
@@ -19,9 +20,8 @@ public class TestWCPSQueryFactory {
 			System.out.println(wcpsQueryFactory.getWCPSString());
 		} catch (Exception e) {
 			e.printStackTrace();
+			fail("Error during graph parsing: " + e.getMessage());
 		}
-		
-        System.out.println("This test method should be run");
     }
 
 }
