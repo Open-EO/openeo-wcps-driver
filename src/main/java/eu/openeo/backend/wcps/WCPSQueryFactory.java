@@ -52,7 +52,7 @@ public class WCPSQueryFactory {
 		if (filters.size() > 0) {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
 		}
-		wcpsStringBuilder.append(", netcdf )");
+		wcpsStringBuilder.append(", \"JSON\" )");
 	}
 
 	/**

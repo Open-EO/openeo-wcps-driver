@@ -14,10 +14,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
+
 @Path("/data")
 public class Data {
 
 	public static int PRETTY_PRINT_INDENT_FACTOR = 4;
+	//TODO remove all print lines and error print and send them to Logger instance instead
+	Logger log = Logger.getLogger(this.getClass());
 	@GET
 	@Produces("application/xml")
 	public Response getData() {
