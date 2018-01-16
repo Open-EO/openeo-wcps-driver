@@ -35,14 +35,14 @@ public class Download {
 		try {
 			Class.forName("org.sqlite.JDBC");
 
-			connection = DriverManager.getConnection("jdbc:sqlite:openeo.db");
+			connection = DriverManager.getConnection("jdbc:sqlite:" + PropertiesHelper.readProperties("job-database"));
 
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 
-			ResultSet resultSet = statement.executeQuery("SELECT job-query FROM jobs WHERE job-id='" + jobID + "'");
+			ResultSet resultSet = statement.executeQuery("SELECT jobquery FROM jobs WHERE jobid='" + jobID + "'");
 			while (resultSet.next()) {
-				jobQuery=resultSet.getString("job-query");
+				jobQuery=resultSet.getString("jobquery");
 				log.debug("The job with id \"" + jobID + "\" was found: " + jobQuery);
 			}
 
@@ -54,6 +54,9 @@ public class Download {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
 					.build();
+		} catch (IOException ioe) {
+			log.error("An error occured while reading properties file: " + ioe.getMessage());
+			return Response.serverError().entity("An error occured while reading properties file: " + ioe.getMessage()).build();
 		} finally {
 			try {
 				if (connection != null)
@@ -71,7 +74,7 @@ public class Download {
 							"&VERSION=2.0.1" + 
 							"&REQUEST=ProcessCoverages" + 
 							"&QUERY=" + 
-							URLEncoder.encode(jobQuery, "UTF-8"));
+							URLEncoder.encode(jobQuery, "UTF-8").replace("+", "%20"));
 			
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");

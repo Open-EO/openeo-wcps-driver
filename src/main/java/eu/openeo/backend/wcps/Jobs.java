@@ -13,7 +13,7 @@ import org.json.simple.parser.ParseException;
 
 //import java.util.HashMap;
 import java.util.UUID;
-
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -42,18 +42,18 @@ public class Jobs {
 		WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraph);
 		UUID jobID = UUID.randomUUID();
 		log.debug("Graph successfully parsed and saved with ID: " + jobID);
+		log.debug("WCPS query: " + wcpsFactory.getWCPSString());
 		Connection connection = null;
 		try {
 			Class.forName("org.sqlite.JDBC");
-
-			connection = DriverManager.getConnection("jdbc:sqlite:openeo.db");
+			connection = DriverManager.getConnection("jdbc:sqlite:" + PropertiesHelper.readProperties("job-database")); 
 
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 			
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS jobs (job-id STRING, job-query STRING, UNIQUE(job-id))");
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS jobs (jobid STRING, jobquery STRING, UNIQUE(jobid))");
 			
-			statement.executeUpdate("INSERT INTO jobs (job-id, job-query) VALUES ('" + jobID.toString() + "','" + wcpsFactory.getWCPSString() + "')");
+			statement.executeUpdate("INSERT INTO jobs (jobid, jobquery) VALUES ('" + jobID.toString() + "','" + wcpsFactory.getWCPSString() + "')");
 			
 			
 		} catch (ClassNotFoundException cnfe) {
@@ -62,6 +62,9 @@ public class Jobs {
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage()).build();
+		} catch (IOException ioe) {
+			log.error("An error occured while reading properties file: " + ioe.getMessage());
+			return Response.serverError().entity("An error occured while reading properties file: " + ioe.getMessage()).build();
 		} finally {
 			try {
 				if (connection != null)

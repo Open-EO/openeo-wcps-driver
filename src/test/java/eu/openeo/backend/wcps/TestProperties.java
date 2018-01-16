@@ -14,7 +14,7 @@ class TestProperties {
 	void testReadingOfProperties() {
 		String url;
 		try {
-			url = readProperties("wcps-endpoint");
+			url = readProperties("job-database");
 			if(url == null) {
 				fail("failed to read enpoint from properties");
 			}else {
