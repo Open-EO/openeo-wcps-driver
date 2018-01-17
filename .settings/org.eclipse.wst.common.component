@@ -5,6 +5,7 @@
         <wb-resource deploy-path="/" source-path="/src/WebContent"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/gen/java"/>
         <property name="context-root" value="openEO_WCPS_Driver"/>
         <property name="java-output-path" value="/openEO_WCPS_Driver/build/classes"/>
     </wb-module>
