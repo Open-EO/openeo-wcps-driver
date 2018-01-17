@@ -44,7 +44,10 @@ public class WCPSQueryFactory {
 			wcpsStringBuilder.append(collectionIDs.get(c - 1).getName() + " ");
 		}
 		wcpsStringBuilder.append(") return encode ( ");
-		for (int a = 0; a < aggregates.size(); a++) {
+		for (int a = aggregates.size() - 1; a >= 0; a--) {
+			if (aggregates.get(a).getOperator().equals("min")) {
+				wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
+			}
 			if (aggregates.get(a).getOperator().equals("NDVI")) {
 				wcpsStringBuilder.append(createNDVIWCPSString("$c1", aggregates.get(a)));
 			}
@@ -68,27 +71,62 @@ public class WCPSQueryFactory {
 		for (int f = 0; f < filters.size(); f++) {
 			Filter filter = filters.get(f);
 			String axis = filter.getAxis();
+			String low = filter.getLowerBound();
+			String high = filter.getUpperBound();
 			stringBuilder.append(axis + "(");
-			if (axis.contains("DATE")) {
+			if (axis.contains("DATE") && !low.contains("$")) {
 				stringBuilder.append("\"");
 			}
-			stringBuilder.append(filter.getLowerBound());
-			if (axis.contains("DATE")) {
+			stringBuilder.append(low);
+			if (axis.contains("DATE")&& !low.contains("$")) {
 				stringBuilder.append("\"");
 			}
-			stringBuilder.append(":");
-			if (axis.contains("DATE")) {
-				stringBuilder.append("\"");
-			}
-			stringBuilder.append(filter.getUpperBound());
-			if (axis.contains("DATE")) {
-				stringBuilder.append("\"");
+			if(high != null) {
+				stringBuilder.append(":");
+				if (axis.contains("DATE")) {
+					stringBuilder.append("\"");
+				}
+				
+				stringBuilder.append(high);
+				if (axis.contains("DATE")) {
+					stringBuilder.append("\"");
+				}
 			}
 			stringBuilder.append(")");
 			if (f < filters.size() - 1) {
 				stringBuilder.append(",");
 			}
 		}
+		stringBuilder.append("]");
+		return stringBuilder.toString();
+	}
+	
+	private String createFilteredCollectionString(String collectionName, Filter filter) {
+		StringBuilder stringBuilder = new StringBuilder(collectionName);
+		stringBuilder.append("[");
+		String axis = filter.getAxis();
+		String low = filter.getLowerBound();
+		String high = filter.getUpperBound();
+		stringBuilder.append(axis + "(");
+		if (axis.contains("DATE") && !low.contains("$")) {
+			stringBuilder.append("\"");
+		}
+		stringBuilder.append(low);
+		if (axis.contains("DATE")&& !low.contains("$")) {
+			stringBuilder.append("\"");
+		}
+		if(high != null) {
+			stringBuilder.append(":");
+			if (axis.contains("DATE")) {
+				stringBuilder.append("\"");
+			}
+			
+			stringBuilder.append(high);
+			if (axis.contains("DATE")) {
+				stringBuilder.append("\"");
+			}
+		}
+		stringBuilder.append(")");
 		stringBuilder.append("]");
 		return stringBuilder.toString();
 	}
@@ -106,6 +144,24 @@ public class WCPSQueryFactory {
 		stringBuilder.append(nir + " + " + red);
 		stringBuilder.append(")");
 		filters.removeAllElements();
+		return stringBuilder.toString();
+	}
+	
+	private String createTempAggWCPSString(String collectionName, Aggregate tempAggregate) {
+		String axis = tempAggregate.getAxis();
+		String operator = tempAggregate.getOperator();
+		Filter tempFilter = null;
+		for(Filter filter: this.filters) {
+			if(filter.getAxis().equals("DATE")) {
+				tempFilter = filter;
+			}
+		}
+		StringBuilder stringBuilder = new StringBuilder("condense ");
+		stringBuilder.append(operator + " over $pm t (imageCrsDomain(");
+		stringBuilder.append(createFilteredCollectionString(collectionName, tempFilter) + ",");
+		stringBuilder.append(axis + ")) using ");
+		this.filters.remove(tempFilter);
+		this.filters.add(new Filter(axis, "$pm"));
 		return stringBuilder.toString();
 	}
 
@@ -243,16 +299,18 @@ public class WCPSQueryFactory {
 	private void createAggregateFromProcess(JSONObject process) {
 		boolean isTemporalAggregate = false;
 		boolean isNDVIAggregate = false;
+		String processName = null;
 		for (Object key : process.keySet()) {
 			String keyStr = (String) key;
 			if (keyStr.equals("process_id")) {
-				String name = (String) process.get(keyStr);
-				log.debug("currently working on: " + name);
-				if (name.contains("date") || name.contains("time")) {
+				processName = (String) process.get(keyStr);
+				log.debug("currently working on: " + processName);
+				if (processName.contains("date") || processName.contains("time")) {
 					isTemporalAggregate = true;
-				} else if (name.contains("NDVI")) {
+				} else if (processName.contains("NDVI")) {
 					isNDVIAggregate = true;
 				}
+				break;
 			}
 		}
 		for (Object key : process.keySet()) {
@@ -260,7 +318,7 @@ public class WCPSQueryFactory {
 			if (keyStr.equals("args")) {
 				JSONObject argsObject = (JSONObject) process.get(keyStr);
 				if (isTemporalAggregate) {
-
+					createTemporalAggregate(processName);
 				}
 				if (isNDVIAggregate) {
 					createNDVIAggregateFromProcess(argsObject);
@@ -268,6 +326,18 @@ public class WCPSQueryFactory {
 
 			}
 		}
+	}
+	
+	private void createTemporalAggregate(String processName) {
+		String aggregateType = processName.split("_")[0];
+		Vector<String> params = new Vector<String>();
+		for(Filter filter: this.filters) {
+			if(filter.getAxis().equals("DATE")) {
+				params.add(filter.getLowerBound());
+				params.add(filter.getUpperBound());
+			}
+		}
+		aggregates.add(new Aggregate(new String("DATE"), aggregateType, params));
 	}
 
 	private void createNDVIAggregateFromProcess(JSONObject argsObject) {

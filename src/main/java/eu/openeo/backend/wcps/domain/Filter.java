@@ -12,6 +12,11 @@ public class Filter {
 		this.upperBound = upperBound;		
 	}
 	
+	public Filter(String axis, String lowerBound) {		
+		this.axis = axis;
+		this.lowerBound = lowerBound;
+	}
+	
 	public String getAxis() {
 		return axis;
 	}
