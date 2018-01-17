@@ -45,7 +45,7 @@ public class WCPSQueryFactory {
 		}
 		wcpsStringBuilder.append(") return encode ( ");
 		for (int a = aggregates.size() - 1; a >= 0; a--) {
-			if (aggregates.get(a).getOperator().equals("min")) {
+			if (aggregates.get(a).getAxis().equals("DATE")) {
 				wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
 			}
 			if (aggregates.get(a).getOperator().equals("NDVI")) {
@@ -55,7 +55,8 @@ public class WCPSQueryFactory {
 		if (filters.size() > 0) {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
 		}
-		wcpsStringBuilder.append(", \"JSON\" )");
+		//TODO define return type from process tree
+		wcpsStringBuilder.append(", \"tiff\" )");
 	}
 
 	/**
@@ -101,6 +102,13 @@ public class WCPSQueryFactory {
 		return stringBuilder.toString();
 	}
 	
+	/**
+	 * Helper Method to create a string describing a single dimension filter as defined
+	 * from the process graph
+	 * 
+	 * @param collectionName
+	 * @return
+	 */
 	private String createFilteredCollectionString(String collectionName, Filter filter) {
 		StringBuilder stringBuilder = new StringBuilder(collectionName);
 		stringBuilder.append("[");
