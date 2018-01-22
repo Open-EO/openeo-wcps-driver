@@ -24,5 +24,5 @@ public abstract class JobsApiService {
     public abstract Response jobsJobIdDelete(String jobId,SecurityContext securityContext) throws NotFoundException;
     public abstract Response jobsJobIdGet(String jobId,SecurityContext securityContext) throws NotFoundException;
     public abstract Response jobsJobIdSubscribeGet(String jobId,String upgrade,String connection,String secWebSocketKey,String secWebSocketProtocol,BigDecimal secWebSocketVersion,SecurityContext securityContext) throws NotFoundException;
-    public abstract Response jobsPost( String evaluate,ProcessGraph processGraph,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response jobsPost( String evaluate,String processGraph,SecurityContext securityContext) throws NotFoundException;
 }

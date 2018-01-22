@@ -162,7 +162,7 @@ public class JobsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
     public Response jobsPost(@ApiParam(value = "Defines how the job should be evaluated. Can be `'lazy'` (the default) or `'batch'`, where lazy means that the job runs computations only on download requests considering dynamically provided views. Batch jobs are immediately scheduled for execution by the back-end.", allowableValues="lazy, batch", defaultValue="lazy") @DefaultValue("lazy") @QueryParam("evaluate") String evaluate
-,@ApiParam(value = "Description of one or more (chained) processes including their input arguments" ) ProcessGraph processGraph
+,@ApiParam(value = "Description of one or more (chained) processes including their input arguments" ) String processGraph
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.jobsPost(evaluate,processGraph,securityContext);

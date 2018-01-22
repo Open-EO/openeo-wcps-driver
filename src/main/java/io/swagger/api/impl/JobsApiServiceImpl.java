@@ -59,7 +59,7 @@ public class JobsApiServiceImpl extends JobsApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response jobsPost( String evaluate, ProcessGraph processGraph, SecurityContext securityContext) throws NotFoundException {
+    public Response jobsPost( String evaluate, String processGraph, SecurityContext securityContext) throws NotFoundException {
     	JSONParser parser = new JSONParser();
 		JSONObject processGraphJSON;
 		try {
@@ -105,6 +105,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 				return Response.serverError().entity("An error occured while attempting to close DB connection: " + e.getMessage()).build();
 			}
 		}
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "{\"job_id\" : \"" + jobID.toString() + "\"}")).build();
+        return Response.ok().entity("{\"job_id\" : \"" + jobID.toString() + "\"}").build();
     }
 }

@@ -14,6 +14,7 @@
                 io.swagger.jaxrs.listing,
                 io.swagger.sample.resource,
                 io.swagger.api
+                io.swagger.model
             </param-value>
         </init-param>
         <init-param>

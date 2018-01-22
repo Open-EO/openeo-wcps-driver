@@ -56,7 +56,7 @@ public class WCPSQueryFactory {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
 		}
 		//TODO define return type from process tree
-		wcpsStringBuilder.append(", \"tiff\" )");
+		wcpsStringBuilder.append(", \"netcdf\" )");
 	}
 
 	/**
@@ -220,7 +220,7 @@ public class WCPSQueryFactory {
 						}
 					}
 				}
-			} else if (keyStr.equals("collection_id")) {
+			} else if (keyStr.equals("collection_id") || keyStr.equals("prodcut_id")) {
 				String name = (String) processParent.get(keyStr);
 				collectionIDs.add(new Collection(name));
 				log.debug("found actual dataset: " + name);
