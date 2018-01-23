@@ -1,6 +1,6 @@
 /*
  * OpenEO API
- * The OpenEO API specification for interoperable cloud-based processing of large Earth observation datasets. **This early draft version is incomplete and intended for working on a prototype and a proof of concept.** Things that are currently missing particularly include:   * Authentication and authorization with OAuth 2.0,   * how results of computations can be downloaded,   * how data is streamed into UDFs and how the output of UDFs is returned,   * how services are organized as microservices,   * and  how OpenSearch is interfaced
+ * The OpenEO API specification for interoperable cloud-based processing of large Earth observation datasets. **This early draft version is incomplete and intended for working on a prototype and a proof of concept.** Things that are currently missing particularly include:   * Authentication and authorization with OAuth 2.0,   * how results of computations can be downloaded,   * how data is streamed into UDFs and how the output of UDFs is returned,   * how services are organized as microservices,   * how payments can be handled,   * and how OpenSearch is interfaced
  *
  * OpenAPI spec version: 0.0.1
  * Contact: marius.appel@uni-muenster.de
@@ -13,19 +13,21 @@
 
 package io.swagger.model;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
-import javax.validation.constraints.*;
 
 /**
  * boundaries of the spatial window as coordinates expressed in the given reference system.
  */
 @ApiModel(description = "boundaries of the spatial window as coordinates expressed in the given reference system.")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-16T14:36:16.100+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-23T11:10:18.550+01:00")
 public class ViewSpaceWindow   {
   @JsonProperty("left")
   private BigDecimal left = null;

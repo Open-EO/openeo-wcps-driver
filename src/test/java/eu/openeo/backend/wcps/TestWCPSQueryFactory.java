@@ -1,13 +1,12 @@
 package eu.openeo.backend.wcps;
 
-import org.junit.jupiter.api.Test;
-import eu.openeo.backend.wcps.WCPSQueryFactory;
-
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.FileReader;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.junit.jupiter.api.Test;
 
 public class TestWCPSQueryFactory {
 	

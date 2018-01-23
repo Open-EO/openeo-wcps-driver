@@ -1,6 +1,6 @@
 /*
  * OpenEO API
- * The OpenEO API specification for interoperable cloud-based processing of large Earth observation datasets. **This early draft version is incomplete and intended for working on a prototype and a proof of concept.** Things that are currently missing particularly include:   * Authentication and authorization with OAuth 2.0,   * how results of computations can be downloaded,   * how data is streamed into UDFs and how the output of UDFs is returned,   * how services are organized as microservices,   * and  how OpenSearch is interfaced
+ * The OpenEO API specification for interoperable cloud-based processing of large Earth observation datasets. **This early draft version is incomplete and intended for working on a prototype and a proof of concept.** Things that are currently missing particularly include:   * Authentication and authorization with OAuth 2.0,   * how results of computations can be downloaded,   * how data is streamed into UDFs and how the output of UDFs is returned,   * how services are organized as microservices,   * how payments can be handled,   * and how OpenSearch is interfaced
  *
  * OpenAPI spec version: 0.0.1
  * Contact: marius.appel@uni-muenster.de
@@ -14,19 +14,19 @@
 package io.swagger.model;
 
 import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.model.ViewTimeWindow;
-import javax.validation.constraints.*;
 
 /**
  * Defines temporal resolution, window, and resampling method used for running processes on small sub datasets
  */
 @ApiModel(description = "Defines temporal resolution, window, and resampling method used for running processes on small sub datasets")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-16T14:36:16.100+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-23T11:10:18.550+01:00")
 public class ViewTime   {
   @JsonProperty("window")
   private ViewTimeWindow window = null;
@@ -103,11 +103,11 @@ public class ViewTime   {
   }
 
   /**
-   * temporal granularity given as ISO 8601 time duration. In order to avoid mixing inconsistent durations such as &#x60;&#39;P1M30DT24H&#39;&#x60; only a single integer number with date/time component such as &#x60;&#39;P1M&#39;&#x60;, &#x60;&#39;P30D&#39;&#x60;, &#x60;&#39;PT24H&#39;&#x60; should be specified.
+   * temporal granularity given as ISO 8601 time duration. In order to avoid mixing inconsistent durations such as &#x60;P1M30DT24H&#x60; only a single integer number with date/time component such as &#x60;P1M&#x60;, &#x60;P30D&#x60;, &#x60;PT24H&#x60; should be specified.
    * @return timeStep
    **/
   @JsonProperty("time_step")
-  @ApiModelProperty(value = "temporal granularity given as ISO 8601 time duration. In order to avoid mixing inconsistent durations such as `'P1M30DT24H'` only a single integer number with date/time component such as `'P1M'`, `'P30D'`, `'PT24H'` should be specified.")
+  @ApiModelProperty(value = "temporal granularity given as ISO 8601 time duration. In order to avoid mixing inconsistent durations such as `P1M30DT24H` only a single integer number with date/time component such as `P1M`, `P30D`, `PT24H` should be specified.")
   public String getTimeStep() {
     return timeStep;
   }

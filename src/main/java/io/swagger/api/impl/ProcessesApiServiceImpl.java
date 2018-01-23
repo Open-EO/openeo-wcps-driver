@@ -1,22 +1,12 @@
 package io.swagger.api.impl;
 
-import io.swagger.api.*;
-import io.swagger.model.*;
-
-import io.swagger.model.InlineResponse2002;
-import io.swagger.model.ProcessDescription;
-
-import java.util.List;
-import io.swagger.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.validation.constraints.*;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-16T14:36:16.100+01:00")
+
+import io.swagger.api.ApiResponseMessage;
+import io.swagger.api.NotFoundException;
+import io.swagger.api.ProcessesApiService;
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-23T11:10:18.550+01:00")
 public class ProcessesApiServiceImpl extends ProcessesApiService {
     @Override
     public Response processesGet( String qname, SecurityContext securityContext) throws NotFoundException {

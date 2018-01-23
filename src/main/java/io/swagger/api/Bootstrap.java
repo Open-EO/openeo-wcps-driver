@@ -1,17 +1,23 @@
 package io.swagger.api;
 
-import io.swagger.jaxrs.config.SwaggerContextService;
-import io.swagger.models.*;
-
-import io.swagger.models.auth.*;
-
-import javax.servlet.http.HttpServlet;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+
+import io.swagger.jaxrs.config.SwaggerContextService;
+import io.swagger.models.Contact;
+import io.swagger.models.Info;
+import io.swagger.models.License;
+import io.swagger.models.Swagger;
 
 public class Bootstrap extends HttpServlet {
-  @Override
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3027164743593330062L;
+
+@Override
   public void init(ServletConfig config) throws ServletException {
     Info info = new Info()
       .title("Swagger Server")

@@ -1,36 +1,26 @@
 package io.swagger.api;
 
-import io.swagger.model.*;
-import io.swagger.api.UdfApiService;
-import io.swagger.api.factories.UdfApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
 import java.util.Map;
-import io.swagger.model.UdfDescription;
-
-import java.util.Map;
-import java.util.List;
-import io.swagger.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.servlet.ServletConfig;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.*;
-import javax.validation.constraints.*;
+
+import io.swagger.annotations.ApiParam;
+import io.swagger.api.factories.UdfApiServiceFactory;
+import io.swagger.model.UdfDescription;
 
 @Path("/udf")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the udf API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-16T14:36:16.100+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-23T11:10:18.550+01:00")
 public class UdfApi  {
    private final UdfApiService delegate;
 
@@ -67,8 +57,6 @@ public class UdfApi  {
         
         @io.swagger.annotations.ApiResponse(code = 403, message = "Authorization failed, access to the requested resource has been denied.", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Job with specified identifier is not available", response = Void.class),
-        
         @io.swagger.annotations.ApiResponse(code = 501, message = "This API feature is not supported by the back-end.", response = Void.class),
         
         @io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
@@ -88,12 +76,12 @@ public class UdfApi  {
         
         @io.swagger.annotations.ApiResponse(code = 403, message = "Authorization failed, access to the requested resource has been denied.", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Job with specified identifier is not available", response = Void.class),
+        @io.swagger.annotations.ApiResponse(code = 404, message = "UDF type with specified identifier is not available", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 501, message = "This API feature is not supported by the back-end.", response = Void.class),
+        @io.swagger.annotations.ApiResponse(code = 501, message = "This API feature, language or UDF type is not supported by the back-end.", response = Void.class),
         
         @io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
-    public Response udfLangUdfTypeGet(@ApiParam(value = "Language identifier such as `'R'`",required=true, allowableValues="python, R") @PathParam("lang") String lang
+    public Response udfLangUdfTypeGet(@ApiParam(value = "Language identifier such as `R`",required=true, allowableValues="python, R") @PathParam("lang") String lang
 ,@ApiParam(value = "The UDF types define how UDFs can be exposed to the data, how they can be parallelized, and how the result schema should be structured.",required=true, allowableValues="apply_pixel, apply_scene, reduce_time, reduce_space, window_time, window_space, window_spacetime, aggregate_time, aggregate_space, aggregate_spacetime") @PathParam("udf_type") String udfType
 ,@Context SecurityContext securityContext)
     throws NotFoundException {

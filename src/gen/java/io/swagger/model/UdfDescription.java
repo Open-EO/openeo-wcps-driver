@@ -1,6 +1,6 @@
 /*
  * OpenEO API
- * The OpenEO API specification for interoperable cloud-based processing of large Earth observation datasets. **This early draft version is incomplete and intended for working on a prototype and a proof of concept.** Things that are currently missing particularly include:   * Authentication and authorization with OAuth 2.0,   * how results of computations can be downloaded,   * how data is streamed into UDFs and how the output of UDFs is returned,   * how services are organized as microservices,   * and  how OpenSearch is interfaced
+ * The OpenEO API specification for interoperable cloud-based processing of large Earth observation datasets. **This early draft version is incomplete and intended for working on a prototype and a proof of concept.** Things that are currently missing particularly include:   * Authentication and authorization with OAuth 2.0,   * how results of computations can be downloaded,   * how data is streamed into UDFs and how the output of UDFs is returned,   * how services are organized as microservices,   * how payments can be handled,   * and how OpenSearch is interfaced
  *
  * OpenAPI spec version: 0.0.1
  * Contact: marius.appel@uni-muenster.de
@@ -13,14 +13,121 @@
 
 package io.swagger.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
-import javax.validation.constraints.*;
+
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
- * UdfDescription
+ * Defines and describes a UDF using the same schema as the description of processes offered by the back-end.
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-16T14:36:16.100+01:00")
+@ApiModel(description = "Defines and describes a UDF using the same schema as the description of processes offered by the back-end.")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-23T11:10:18.550+01:00")
 public class UdfDescription   {
+  @JsonProperty("process_id")
+  private String processId = null;
+
+  @JsonProperty("description")
+  private String description = null;
+
+  @JsonProperty("link")
+  private String link = null;
+
+  @JsonProperty("args")
+  private Map<String, ProcessDescriptionArgs> args = null;
+
+  public UdfDescription processId(String processId) {
+    this.processId = processId;
+    return this;
+  }
+
+  /**
+   * The unique identifier of the process.
+   * @return processId
+   **/
+  @JsonProperty("process_id")
+  @ApiModelProperty(required = true, value = "The unique identifier of the process.")
+  @NotNull
+  public String getProcessId() {
+    return processId;
+  }
+
+  public void setProcessId(String processId) {
+    this.processId = processId;
+  }
+
+  public UdfDescription description(String description) {
+    this.description = description;
+    return this;
+  }
+
+  /**
+   * A short and concise description of what the process does and how the output looks like.
+   * @return description
+   **/
+  @JsonProperty("description")
+  @ApiModelProperty(required = true, value = "A short and concise description of what the process does and how the output looks like.")
+  @NotNull
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public UdfDescription link(String link) {
+    this.link = link;
+    return this;
+  }
+
+  /**
+   * Reference to an external process definition if the process has been defined over different back ends within OpenEO
+   * @return link
+   **/
+  @JsonProperty("link")
+  @ApiModelProperty(value = "Reference to an external process definition if the process has been defined over different back ends within OpenEO")
+  public String getLink() {
+    return link;
+  }
+
+  public void setLink(String link) {
+    this.link = link;
+  }
+
+  public UdfDescription args(Map<String, ProcessDescriptionArgs> args) {
+    this.args = args;
+    return this;
+  }
+
+  public UdfDescription putArgsItem(String key, ProcessDescriptionArgs argsItem) {
+    if (this.args == null) {
+      this.args = new HashMap<String, ProcessDescriptionArgs>();
+    }
+    this.args.put(key, argsItem);
+    return this;
+  }
+
+  /**
+   * Get args
+   * @return args
+   **/
+  @JsonProperty("args")
+  @ApiModelProperty(value = "")
+  public Map<String, ProcessDescriptionArgs> getArgs() {
+    return args;
+  }
+
+  public void setArgs(Map<String, ProcessDescriptionArgs> args) {
+    this.args = args;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -30,12 +137,16 @@ public class UdfDescription   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    return true;
+    UdfDescription udfDescription = (UdfDescription) o;
+    return Objects.equals(this.processId, udfDescription.processId) &&
+        Objects.equals(this.description, udfDescription.description) &&
+        Objects.equals(this.link, udfDescription.link) &&
+        Objects.equals(this.args, udfDescription.args);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash();
+    return Objects.hash(processId, description, link, args);
   }
 
 
@@ -44,6 +155,10 @@ public class UdfDescription   {
     StringBuilder sb = new StringBuilder();
     sb.append("class UdfDescription {\n");
     
+    sb.append("    processId: ").append(toIndentedString(processId)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    link: ").append(toIndentedString(link)).append("\n");
+    sb.append("    args: ").append(toIndentedString(args)).append("\n");
     sb.append("}");
     return sb.toString();
   }

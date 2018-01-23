@@ -1,6 +1,6 @@
 /*
  * OpenEO API
- * The OpenEO API specification for interoperable cloud-based processing of large Earth observation datasets. **This early draft version is incomplete and intended for working on a prototype and a proof of concept.** Things that are currently missing particularly include:   * Authentication and authorization with OAuth 2.0,   * how results of computations can be downloaded,   * how data is streamed into UDFs and how the output of UDFs is returned,   * how services are organized as microservices,   * and  how OpenSearch is interfaced
+ * The OpenEO API specification for interoperable cloud-based processing of large Earth observation datasets. **This early draft version is incomplete and intended for working on a prototype and a proof of concept.** Things that are currently missing particularly include:   * Authentication and authorization with OAuth 2.0,   * how results of computations can be downloaded,   * how data is streamed into UDFs and how the output of UDFs is returned,   * how services are organized as microservices,   * how payments can be handled,   * and how OpenSearch is interfaced
  *
  * OpenAPI spec version: 0.0.1
  * Contact: marius.appel@uni-muenster.de
@@ -12,11 +12,6 @@
 
 
 package io.swagger.model;
-
-import java.util.Objects;
-import io.swagger.annotations.ApiModel;
-import com.fasterxml.jackson.annotation.JsonValue;
-import javax.validation.constraints.*;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 

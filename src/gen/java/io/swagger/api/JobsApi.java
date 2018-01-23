@@ -1,38 +1,31 @@
 package io.swagger.api;
 
-import io.swagger.model.*;
-import io.swagger.api.JobsApiService;
-import io.swagger.api.factories.JobsApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
 import java.math.BigDecimal;
-import io.swagger.model.InlineResponse2003;
-import io.swagger.model.Job;
-import io.swagger.model.ProcessGraph;
-
-import java.util.Map;
-import java.util.List;
-import io.swagger.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.servlet.ServletConfig;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.*;
-import javax.validation.constraints.*;
+
+import io.swagger.annotations.ApiParam;
+import io.swagger.api.factories.JobsApiServiceFactory;
+import io.swagger.model.Job;
 
 @Path("/jobs")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the jobs API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-16T14:36:16.100+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-23T11:10:18.550+01:00")
 public class JobsApi  {
    private final JobsApiService delegate;
 
@@ -154,17 +147,20 @@ public class JobsApi  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "submits a new job to the back-end", notes = "creates a new job from one or more (chained) processes at the back-end, which will eventually run the computations", response = InlineResponse2003.class, tags={ "Job Management", })
+    @io.swagger.annotations.ApiOperation(value = "submits a new job to the back-end", notes = "creates a new job from one or more (chained) processes at the back-end, which will eventually run the computations", response = Void.class, tags={ "Job Management", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "unique job identifier", response = InlineResponse2003.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Depending on the job evaluation type, the result of posting jobs can be either a json description of the job (for lazy and batch jobs) or a result object such as a NetCDF file (for sync jobs).", response = Void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "The server is not capable to deliver the requested format.", response = Void.class),
         
         @io.swagger.annotations.ApiResponse(code = 501, message = "This API feature is not supported by the back-end.", response = Void.class),
         
         @io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
-    public Response jobsPost(@ApiParam(value = "Defines how the job should be evaluated. Can be `'lazy'` (the default) or `'batch'`, where lazy means that the job runs computations only on download requests considering dynamically provided views. Batch jobs are immediately scheduled for execution by the back-end.", allowableValues="lazy, batch", defaultValue="lazy") @DefaultValue("lazy") @QueryParam("evaluate") String evaluate
+    public Response jobsPost(@ApiParam(value = "Defines how the job should be evaluated. Can be `lazy` (the default), `batch`, or `sync` where lazy means that the job runs computations only on download requests considering dynamically provided views. Batch jobs are immediately scheduled for execution by the back-end. Synchronous jobs will be immediately executed and return the result data.", allowableValues="lazy, batch, sync", defaultValue="lazy") @DefaultValue("lazy") @QueryParam("evaluate") String evaluate
 ,@ApiParam(value = "Description of one or more (chained) processes including their input arguments" ) String processGraph
+,@ApiParam(value = "Description of the desired output format. Required in case `evaluate` is set to `sync`. If not specified the format has to be specified in the download request.", allowableValues="nc, json, wcs, wmts, tms, tif, png, jpeg") @QueryParam("format") String format
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.jobsPost(evaluate,processGraph,securityContext);
+        return delegate.jobsPost(evaluate,processGraph,format,securityContext);
     }
 }

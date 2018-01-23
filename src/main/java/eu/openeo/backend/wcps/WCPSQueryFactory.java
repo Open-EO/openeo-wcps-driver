@@ -16,6 +16,7 @@ public class WCPSQueryFactory {
 	private Vector<Collection> collectionIDs;
 	private Vector<Filter> filters;
 	private Vector<Aggregate> aggregates;
+	private String outputFormat = "json";
 
 	Logger log = Logger.getLogger(this.getClass());
 
@@ -29,6 +30,16 @@ public class WCPSQueryFactory {
 		aggregates = new Vector<Aggregate>();
 		filters = new Vector<Filter>();
 		wcpsStringBuilder = new StringBuilder("for ");
+		this.build(openEOGraph);
+	}
+	
+	public WCPSQueryFactory(JSONObject openEOGraph, String outputFormat) {
+		this(openEOGraph);
+		this.outputFormat =  outputFormat;
+		this.build(openEOGraph);
+	}
+	
+	private void build(JSONObject openEOGraph) {
 		if (openEOGraph.containsKey(new String("process_graph"))) {
 			parseOpenEOProcessGraph((JSONObject) openEOGraph.get(new String("process_graph")));
 
@@ -56,7 +67,7 @@ public class WCPSQueryFactory {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
 		}
 		//TODO define return type from process tree
-		wcpsStringBuilder.append(", \"netcdf\" )");
+		wcpsStringBuilder.append(", \"" + outputFormat + "\" )");
 	}
 
 	/**

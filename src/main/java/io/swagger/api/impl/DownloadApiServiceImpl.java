@@ -1,14 +1,6 @@
 package io.swagger.api.impl;
 
-import io.swagger.api.*;
-import io.swagger.model.*;
-
-
-import java.util.List;
-import io.swagger.api.NotFoundException;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,23 +11,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-
-import eu.openeo.backend.wcps.PropertiesHelper;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.validation.constraints.*;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+
+import eu.openeo.backend.wcps.PropertiesHelper;
+import io.swagger.api.DownloadApiService;
+import io.swagger.api.NotFoundException;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-16T14:36:16.100+01:00")
 public class DownloadApiServiceImpl extends DownloadApiService {
-	
-	Logger log = Logger.getLogger(this.getClass());
-	
+
     @Override
-    public Response downloadWcsJobIdGet(String jobId, SecurityContext securityContext) throws NotFoundException {
+    public Response downloadFormatJobIdGet(String format, String jobId, SecurityContext securityContext) throws NotFoundException {
     	Connection connection = null;
 		String jobQuery = null;
 		try {
@@ -97,9 +87,7 @@ public class DownloadApiServiceImpl extends DownloadApiService {
 					.entity("An error occured when retrieving query result from WCPS endpoint: " + e.getMessage()).build();
 		}
     }
-    @Override
-    public Response downloadWmtsJobIdGet(String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
+
+	Logger log = Logger.getLogger(this.getClass());
+	
 }

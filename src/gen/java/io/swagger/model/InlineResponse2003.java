@@ -1,6 +1,6 @@
 /*
  * OpenEO API
- * The OpenEO API specification for interoperable cloud-based processing of large Earth observation datasets. **This early draft version is incomplete and intended for working on a prototype and a proof of concept.** Things that are currently missing particularly include:   * Authentication and authorization with OAuth 2.0,   * how results of computations can be downloaded,   * how data is streamed into UDFs and how the output of UDFs is returned,   * how services are organized as microservices,   * and  how OpenSearch is interfaced
+ * The OpenEO API specification for interoperable cloud-based processing of large Earth observation datasets. **This early draft version is incomplete and intended for working on a prototype and a proof of concept.** Things that are currently missing particularly include:   * Authentication and authorization with OAuth 2.0,   * how results of computations can be downloaded,   * how data is streamed into UDFs and how the output of UDFs is returned,   * how services are organized as microservices,   * how payments can be handled,   * and how OpenSearch is interfaced
  *
  * OpenAPI spec version: 0.0.1
  * Contact: marius.appel@uni-muenster.de
@@ -14,38 +14,39 @@
 package io.swagger.model;
 
 import java.util.Objects;
+
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
+
 import io.swagger.annotations.ApiModelProperty;
-import javax.validation.constraints.*;
 
 /**
  * InlineResponse2003
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-16T14:36:16.100+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-23T11:10:18.550+01:00")
 public class InlineResponse2003   {
-  @JsonProperty("job_id")
-  private String jobId = null;
+  @JsonProperty("name")
+  private String name = null;
 
-  public InlineResponse2003 jobId(String jobId) {
-    this.jobId = jobId;
+  public InlineResponse2003 name(String name) {
+    this.name = name;
     return this;
   }
 
   /**
-   * Get jobId
-   * @return jobId
+   * Get name
+   * @return name
    **/
-  @JsonProperty("job_id")
+  @JsonProperty("name")
   @ApiModelProperty(required = true, value = "")
   @NotNull
-  public String getJobId() {
-    return jobId;
+  public String getName() {
+    return name;
   }
 
-  public void setJobId(String jobId) {
-    this.jobId = jobId;
+  public void setName(String name) {
+    this.name = name;
   }
 
 
@@ -58,12 +59,12 @@ public class InlineResponse2003   {
       return false;
     }
     InlineResponse2003 inlineResponse2003 = (InlineResponse2003) o;
-    return Objects.equals(this.jobId, inlineResponse2003.jobId);
+    return Objects.equals(this.name, inlineResponse2003.name);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(jobId);
+    return Objects.hash(name);
   }
 
 
@@ -72,7 +73,7 @@ public class InlineResponse2003   {
     StringBuilder sb = new StringBuilder();
     sb.append("class InlineResponse2003 {\n");
     
-    sb.append("    jobId: ").append(toIndentedString(jobId)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("}");
     return sb.toString();
   }

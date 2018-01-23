@@ -1,36 +1,26 @@
 package io.swagger.api;
 
-import io.swagger.model.*;
-import io.swagger.api.DataApiService;
-import io.swagger.api.factories.DataApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
-import io.swagger.model.InlineResponse200;
-import io.swagger.model.InlineResponse2001;
-
-import java.util.Map;
-import java.util.List;
-import io.swagger.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
 import javax.servlet.ServletConfig;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.*;
-import javax.validation.constraints.*;
+
+import io.swagger.annotations.ApiParam;
+import io.swagger.api.factories.DataApiServiceFactory;
+import io.swagger.model.InlineResponse200;
+import io.swagger.model.InlineResponse2001;
 
 @Path("/data")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the data API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-16T14:36:16.100+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-23T11:10:18.550+01:00")
 public class DataApi  {
    private final DataApiService delegate;
 
@@ -79,8 +69,8 @@ public class DataApi  {
     @GET
     @Path("/opensearch")
     @Consumes({ "application/json" })
-    @Produces({ "application/rss+xml", "application/atom+xml", "application/xml" })
-    @io.swagger.annotations.ApiOperation(value = "OpenSearch endpoint to receive standardized data search results.", notes = "This service offers more complex search functionality and returns results in an OpenSearch compliant RSS XML format.", response = Void.class, tags={ "EO Data Discovery", })
+    @Produces({ "application/atom+xml" })
+    @io.swagger.annotations.ApiOperation(value = "OpenSearch endpoint to receive standardized data search results.", notes = "This service offers more complex search functionality and returns results in an OpenSearch compliant Atom XML format.", response = Void.class, tags={ "EO Data Discovery", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "An array of EO datasets including their unique identifiers and some basic metadata.", response = Void.class),
         
@@ -100,7 +90,7 @@ public class DataApi  {
     @Path("/{product_id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Returns further information on a given EO product available at the back-end.", notes = "The request will ask the back-end for further details about a product specified by identifier", response = InlineResponse2001.class, tags={ "EO Data Discovery", })
+    @io.swagger.annotations.ApiOperation(value = "Returns further information on a given EO product available at the back-end.", notes = "The request will ask the back-end for further details about a product specified by the identifier `product_id`.", response = InlineResponse2001.class, tags={ "EO Data Discovery", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "JSON object with metadata of the EO dataset.", response = InlineResponse2001.class),
         
@@ -111,7 +101,7 @@ public class DataApi  {
         @io.swagger.annotations.ApiResponse(code = 501, message = "This API feature is not supported by the back-end.", response = Void.class),
         
         @io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
-    public Response dataProductIdGet(@ApiParam(value = "product identifier string such as `'MOD18Q1'`",required=true) @PathParam("product_id") String productId
+    public Response dataProductIdGet(@ApiParam(value = "product identifier string such as `MOD18Q1`",required=true) @PathParam("product_id") String productId
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.dataProductIdGet(productId,securityContext);
