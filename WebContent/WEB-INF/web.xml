@@ -13,8 +13,8 @@
             <param-value>
                 io.swagger.jaxrs.listing,
                 io.swagger.sample.resource,
-                io.swagger.api
-                io.swagger.model
+                eu.openeo.api
+                eu.openeo.model
             </param-value>
         </init-param>
         <init-param>
@@ -33,7 +33,7 @@
         <servlet-class>io.swagger.jersey.config.JerseyJaxrsConfig</servlet-class>
         <init-param>
             <param-name>api.version</param-name>
-            <param-value>1.0.0</param-value>
+            <param-value>0.0.2</param-value>
         </init-param>
         <init-param>
             <param-name>swagger.api.title</param-name>

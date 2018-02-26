@@ -44,6 +44,10 @@ public class WCPSQueryFactory {
 			parseOpenEOProcessGraph((JSONObject) openEOGraph.get(new String("process_graph")));
 
 		}
+		if (openEOGraph.containsKey(new String("output"))) {
+			this.outputFormat = (String)((JSONObject) openEOGraph.get(new String("output"))).get(new String("format"));
+			log.debug("the following output format was found: " + this.outputFormat);
+		}
 		for (int c = 1; c <= collectionIDs.size(); c++) {
 			wcpsStringBuilder.append("$c" + c);
 			if (c > 1) {
