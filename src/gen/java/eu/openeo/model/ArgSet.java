@@ -10,57 +10,76 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModel;
 
 /**
- * Defines an object schema for a collection of uniquely named arguments (argument set) as input to processes. The values can by any of the JSON data types string, number, array, boolean or null. Additionally it can be any object of type **arg_set** or **image_collection** (see models). This object is part of the process graph definition. **This type is not formalized in the Swagger 2.0 definition due to missing support for oneOf or anyOf schema combinations.** See the process graph documentation for more information.
+ * Defines an object schema for a collection of uniquely named arguments
+ * (argument set) as input to processes. The values can by any of the JSON data
+ * types string, number, array, boolean or null. Additionally it can be any
+ * object of type **arg_set** or **image_collection** (see models). This object
+ * is part of the process graph definition. **This type is not formalized in the
+ * Swagger 2.0 definition due to missing support for oneOf or anyOf schema
+ * combinations.** See the process graph documentation for more information.
  */
 @ApiModel(description = "Defines an object schema for a collection of uniquely named arguments (argument set) as input to processes. The values can by any of the JSON data types string, number, array, boolean or null. Additionally it can be any object of type **arg_set** or **image_collection** (see models). This object is part of the process graph definition. **This type is not formalized in the Swagger 2.0 definition due to missing support for oneOf or anyOf schema combinations.** See the process graph documentation for more information.")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ArgSet  implements Serializable {
+public class ArgSet implements Serializable {
+	
+	@JsonProperty("args")
+	private Map<String, Object> args = null;
+	
+	private static final long serialVersionUID = -2548173058530187756L;
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    return true;
-  }
+	public Map<String, Object> getArgs() {
+		return args;
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash();
-  }
+	public void setArgs(Map<String, Object> args) {
+		this.args = args;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		return true;
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ArgSet {\n");
-    
-    sb.append("}");
-    return sb.toString();
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash();
+	}
 
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  @SuppressWarnings("unused")
-private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class ArgSet {\n");
+
+		sb.append("}");
+		return sb.toString();
+	}
+
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	@SuppressWarnings("unused")
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

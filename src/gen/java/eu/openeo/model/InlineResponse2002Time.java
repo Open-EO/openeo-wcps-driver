@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -25,91 +24,90 @@ import io.swagger.annotations.ApiModelProperty;
  * InlineResponse2002Time
  */
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class InlineResponse2002Time  implements Serializable {
-  @JsonProperty("from")
-  private Date from = null;
+public class InlineResponse2002Time implements Serializable {
+	@JsonProperty("from")
+	private Date from = null;
 
-  @JsonProperty("to")
-  private Date to = null;
+	@JsonProperty("to")
+	private Date to = null;
 
-  public InlineResponse2002Time from(Date from) {
-    this.from = from;
-    return this;
-  }
+	public InlineResponse2002Time from(Date from) {
+		this.from = from;
+		return this;
+	}
 
-  /**
-   * Date/time in ISO 8601 format
-   * @return from
-   **/
-  @JsonProperty("from")
-  @ApiModelProperty(value = "Date/time in ISO 8601 format")
-  public Date getFrom() {
-    return from;
-  }
+	/**
+	 * Date/time in ISO 8601 format
+	 * 
+	 * @return from
+	 **/
+	@JsonProperty("from")
+	@ApiModelProperty(value = "Date/time in ISO 8601 format")
+	public Date getFrom() {
+		return from;
+	}
 
-  public void setFrom(Date from) {
-    this.from = from;
-  }
+	public void setFrom(Date from) {
+		this.from = from;
+	}
 
-  public InlineResponse2002Time to(Date to) {
-    this.to = to;
-    return this;
-  }
+	public InlineResponse2002Time to(Date to) {
+		this.to = to;
+		return this;
+	}
 
-  /**
-   * Date/time in ISO 8601 format
-   * @return to
-   **/
-  @JsonProperty("to")
-  @ApiModelProperty(value = "Date/time in ISO 8601 format")
-  public Date getTo() {
-    return to;
-  }
+	/**
+	 * Date/time in ISO 8601 format
+	 * 
+	 * @return to
+	 **/
+	@JsonProperty("to")
+	@ApiModelProperty(value = "Date/time in ISO 8601 format")
+	public Date getTo() {
+		return to;
+	}
 
-  public void setTo(Date to) {
-    this.to = to;
-  }
+	public void setTo(Date to) {
+		this.to = to;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		InlineResponse2002Time inlineResponse2002Time = (InlineResponse2002Time) o;
+		return Objects.equals(this.from, inlineResponse2002Time.from)
+				&& Objects.equals(this.to, inlineResponse2002Time.to);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    InlineResponse2002Time inlineResponse2002Time = (InlineResponse2002Time) o;
-    return Objects.equals(this.from, inlineResponse2002Time.from) &&
-        Objects.equals(this.to, inlineResponse2002Time.to);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(from, to);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(from, to);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class InlineResponse2002Time {\n");
 
+		sb.append("    from: ").append(toIndentedString(from)).append("\n");
+		sb.append("    to: ").append(toIndentedString(to)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class InlineResponse2002Time {\n");
-    
-    sb.append("    from: ").append(toIndentedString(from)).append("\n");
-    sb.append("    to: ").append(toIndentedString(to)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

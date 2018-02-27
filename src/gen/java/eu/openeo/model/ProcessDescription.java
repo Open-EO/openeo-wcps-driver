@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -30,149 +29,152 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(description = "Defines and describes a process including it's expected input arguments.")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ProcessDescription  implements Serializable {
-  @JsonProperty("process_id")
-  private String processId = null;
+public class ProcessDescription implements Serializable {
+	@JsonProperty("process_id")
+	private String processId = null;
 
-  @JsonProperty("description")
-  private String description = null;
+	@JsonProperty("description")
+	private String description = null;
 
-  @JsonProperty("link")
-  private String link = null;
+	@JsonProperty("link")
+	private String link = null;
 
-  @JsonProperty("args")
-  private Map<String, ProcessDescriptionArgs> args = null;
+	@JsonProperty("args")
+	private Map<String, ProcessDescriptionArgs> args = null;
 
-  public ProcessDescription processId(String processId) {
-    this.processId = processId;
-    return this;
-  }
+	public ProcessDescription processId(String processId) {
+		this.processId = processId;
+		return this;
+	}
 
-  /**
-   * The unique identifier of the process.
-   * @return processId
-   **/
-  @JsonProperty("process_id")
-  @ApiModelProperty(required = true, value = "The unique identifier of the process.")
-  @NotNull
-  public String getProcessId() {
-    return processId;
-  }
+	/**
+	 * The unique identifier of the process.
+	 * 
+	 * @return processId
+	 **/
+	@JsonProperty("process_id")
+	@ApiModelProperty(required = true, value = "The unique identifier of the process.")
+	@NotNull
+	public String getProcessId() {
+		return processId;
+	}
 
-  public void setProcessId(String processId) {
-    this.processId = processId;
-  }
+	public void setProcessId(String processId) {
+		this.processId = processId;
+	}
 
-  public ProcessDescription description(String description) {
-    this.description = description;
-    return this;
-  }
+	public ProcessDescription description(String description) {
+		this.description = description;
+		return this;
+	}
 
-  /**
-   * A short and concise description of what the process does and how the output looks like.
-   * @return description
-   **/
-  @JsonProperty("description")
-  @ApiModelProperty(required = true, value = "A short and concise description of what the process does and how the output looks like.")
-  @NotNull
-  public String getDescription() {
-    return description;
-  }
+	/**
+	 * A short and concise description of what the process does and how the output
+	 * looks like.
+	 * 
+	 * @return description
+	 **/
+	@JsonProperty("description")
+	@ApiModelProperty(required = true, value = "A short and concise description of what the process does and how the output looks like.")
+	@NotNull
+	public String getDescription() {
+		return description;
+	}
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-  public ProcessDescription link(String link) {
-    this.link = link;
-    return this;
-  }
+	public ProcessDescription link(String link) {
+		this.link = link;
+		return this;
+	}
 
-  /**
-   * Reference to an external process definition if the process has been defined over different back ends within OpenEO
-   * @return link
-   **/
-  @JsonProperty("link")
-  @ApiModelProperty(value = "Reference to an external process definition if the process has been defined over different back ends within OpenEO")
-  public String getLink() {
-    return link;
-  }
+	/**
+	 * Reference to an external process definition if the process has been defined
+	 * over different back ends within OpenEO
+	 * 
+	 * @return link
+	 **/
+	@JsonProperty("link")
+	@ApiModelProperty(value = "Reference to an external process definition if the process has been defined over different back ends within OpenEO")
+	public String getLink() {
+		return link;
+	}
 
-  public void setLink(String link) {
-    this.link = link;
-  }
+	public void setLink(String link) {
+		this.link = link;
+	}
 
-  public ProcessDescription args(Map<String, ProcessDescriptionArgs> args) {
-    this.args = args;
-    return this;
-  }
+	public ProcessDescription args(Map<String, ProcessDescriptionArgs> args) {
+		this.args = args;
+		return this;
+	}
 
-  public ProcessDescription putArgsItem(String key, ProcessDescriptionArgs argsItem) {
-    if (this.args == null) {
-      this.args = new HashMap<String, ProcessDescriptionArgs>();
-    }
-    this.args.put(key, argsItem);
-    return this;
-  }
+	public ProcessDescription putArgsItem(String key, ProcessDescriptionArgs argsItem) {
+		if (this.args == null) {
+			this.args = new HashMap<String, ProcessDescriptionArgs>();
+		}
+		this.args.put(key, argsItem);
+		return this;
+	}
 
-  /**
-   * Get args
-   * @return args
-   **/
-  @JsonProperty("args")
-  @ApiModelProperty(value = "")
-  public Map<String, ProcessDescriptionArgs> getArgs() {
-    return args;
-  }
+	/**
+	 * Get args
+	 * 
+	 * @return args
+	 **/
+	@JsonProperty("args")
+	@ApiModelProperty(value = "")
+	public Map<String, ProcessDescriptionArgs> getArgs() {
+		return args;
+	}
 
-  public void setArgs(Map<String, ProcessDescriptionArgs> args) {
-    this.args = args;
-  }
+	public void setArgs(Map<String, ProcessDescriptionArgs> args) {
+		this.args = args;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ProcessDescription processDescription = (ProcessDescription) o;
+		return Objects.equals(this.processId, processDescription.processId)
+				&& Objects.equals(this.description, processDescription.description)
+				&& Objects.equals(this.link, processDescription.link)
+				&& Objects.equals(this.args, processDescription.args);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    ProcessDescription processDescription = (ProcessDescription) o;
-    return Objects.equals(this.processId, processDescription.processId) &&
-        Objects.equals(this.description, processDescription.description) &&
-        Objects.equals(this.link, processDescription.link) &&
-        Objects.equals(this.args, processDescription.args);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(processId, description, link, args);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(processId, description, link, args);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class ProcessDescription {\n");
 
+		sb.append("    processId: ").append(toIndentedString(processId)).append("\n");
+		sb.append("    description: ").append(toIndentedString(description)).append("\n");
+		sb.append("    link: ").append(toIndentedString(link)).append("\n");
+		sb.append("    args: ").append(toIndentedString(args)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ProcessDescription {\n");
-    
-    sb.append("    processId: ").append(toIndentedString(processId)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    link: ").append(toIndentedString(link)).append("\n");
-    sb.append("    args: ").append(toIndentedString(args)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

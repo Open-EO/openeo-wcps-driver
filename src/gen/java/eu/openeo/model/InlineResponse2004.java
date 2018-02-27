@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -26,116 +25,115 @@ import io.swagger.annotations.ApiModelProperty;
  * InlineResponse2004
  */
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class InlineResponse2004  implements Serializable {
-  @JsonProperty("name")
-  private String name = null;
+public class InlineResponse2004 implements Serializable {
+	@JsonProperty("name")
+	private String name = null;
 
-  @JsonProperty("size")
-  private Integer size = null;
+	@JsonProperty("size")
+	private Integer size = null;
 
-  @JsonProperty("modified")
-  private String modified = null;
+	@JsonProperty("modified")
+	private String modified = null;
 
-  public InlineResponse2004 name(String name) {
-    this.name = name;
-    return this;
-  }
+	public InlineResponse2004 name(String name) {
+		this.name = name;
+		return this;
+	}
 
-  /**
-   * Path to the file
-   * @return name
-   **/
-  @JsonProperty("name")
-  @ApiModelProperty(required = true, value = "Path to the file")
-  @NotNull
-  public String getName() {
-    return name;
-  }
+	/**
+	 * Path to the file
+	 * 
+	 * @return name
+	 **/
+	@JsonProperty("name")
+	@ApiModelProperty(required = true, value = "Path to the file")
+	@NotNull
+	public String getName() {
+		return name;
+	}
 
-  public void setName(String name) {
-    this.name = name;
-  }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-  public InlineResponse2004 size(Integer size) {
-    this.size = size;
-    return this;
-  }
+	public InlineResponse2004 size(Integer size) {
+		this.size = size;
+		return this;
+	}
 
-  /**
-   * File size in bytes
-   * @return size
-   **/
-  @JsonProperty("size")
-  @ApiModelProperty(value = "File size in bytes")
-  public Integer getSize() {
-    return size;
-  }
+	/**
+	 * File size in bytes
+	 * 
+	 * @return size
+	 **/
+	@JsonProperty("size")
+	@ApiModelProperty(value = "File size in bytes")
+	public Integer getSize() {
+		return size;
+	}
 
-  public void setSize(Integer size) {
-    this.size = size;
-  }
+	public void setSize(Integer size) {
+		this.size = size;
+	}
 
-  public InlineResponse2004 modified(String modified) {
-    this.modified = modified;
-    return this;
-  }
+	public InlineResponse2004 modified(String modified) {
+		this.modified = modified;
+		return this;
+	}
 
-  /**
-   * Date and time the file has been modified at last in ISO8601 format
-   * @return modified
-   **/
-  @JsonProperty("modified")
-  @ApiModelProperty(value = "Date and time the file has been modified at last in ISO8601 format")
-  public String getModified() {
-    return modified;
-  }
+	/**
+	 * Date and time the file has been modified at last in ISO8601 format
+	 * 
+	 * @return modified
+	 **/
+	@JsonProperty("modified")
+	@ApiModelProperty(value = "Date and time the file has been modified at last in ISO8601 format")
+	public String getModified() {
+		return modified;
+	}
 
-  public void setModified(String modified) {
-    this.modified = modified;
-  }
+	public void setModified(String modified) {
+		this.modified = modified;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		InlineResponse2004 inlineResponse2004 = (InlineResponse2004) o;
+		return Objects.equals(this.name, inlineResponse2004.name) && Objects.equals(this.size, inlineResponse2004.size)
+				&& Objects.equals(this.modified, inlineResponse2004.modified);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    InlineResponse2004 inlineResponse2004 = (InlineResponse2004) o;
-    return Objects.equals(this.name, inlineResponse2004.name) &&
-        Objects.equals(this.size, inlineResponse2004.size) &&
-        Objects.equals(this.modified, inlineResponse2004.modified);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, size, modified);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(name, size, modified);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class InlineResponse2004 {\n");
 
+		sb.append("    name: ").append(toIndentedString(name)).append("\n");
+		sb.append("    size: ").append(toIndentedString(size)).append("\n");
+		sb.append("    modified: ").append(toIndentedString(modified)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class InlineResponse2004 {\n");
-    
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    size: ").append(toIndentedString(size)).append("\n");
-    sb.append("    modified: ").append(toIndentedString(modified)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

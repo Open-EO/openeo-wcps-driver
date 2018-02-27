@@ -30,24 +30,26 @@ public class WCPSQueryFactory {
 		aggregates = new Vector<Aggregate>();
 		filters = new Vector<Filter>();
 		wcpsStringBuilder = new StringBuilder("for ");
-		this.build(openEOGraph);
+		//this.build(openEOGraph);
 	}
-	
+
 	public WCPSQueryFactory(JSONObject openEOGraph, String outputFormat) {
 		this(openEOGraph);
-		this.outputFormat =  outputFormat;
+		this.outputFormat = outputFormat;
 		this.build(openEOGraph);
 	}
-	
-	private void build(JSONObject openEOGraph) {
-		if (openEOGraph.containsKey(new String("process_graph"))) {
-			parseOpenEOProcessGraph((JSONObject) openEOGraph.get(new String("process_graph")));
 
-		}
-		if (openEOGraph.containsKey(new String("output"))) {
-			this.outputFormat = (String)((JSONObject) openEOGraph.get(new String("output"))).get(new String("format"));
-			log.debug("the following output format was found: " + this.outputFormat);
-		}
+	private void build(JSONObject openEOGraph) {
+		log.debug(openEOGraph.toJSONString());
+		parseOpenEOProcessGraph( openEOGraph);
+//		if (openEOGraph.containsKey(new String("process_graph"))) {
+//			parseOpenEOProcessGraph((JSONObject) openEOGraph.get(new String("process_graph")));
+//
+//		}
+//		if (openEOGraph.containsKey(new String("output"))) {
+//			this.outputFormat = (String) ((JSONObject) openEOGraph.get(new String("output"))).get(new String("format"));
+//			log.debug("the following output format was found: " + this.outputFormat);
+//		}
 		for (int c = 1; c <= collectionIDs.size(); c++) {
 			wcpsStringBuilder.append("$c" + c);
 			if (c > 1) {
@@ -70,7 +72,7 @@ public class WCPSQueryFactory {
 		if (filters.size() > 0) {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
 		}
-		//TODO define return type from process tree
+		// TODO define return type from process tree
 		wcpsStringBuilder.append(", \"" + outputFormat + "\" )");
 	}
 
@@ -94,15 +96,15 @@ public class WCPSQueryFactory {
 				stringBuilder.append("\"");
 			}
 			stringBuilder.append(low);
-			if (axis.contains("DATE")&& !low.contains("$")) {
+			if (axis.contains("DATE") && !low.contains("$")) {
 				stringBuilder.append("\"");
 			}
-			if(high != null) {
+			if (high != null) {
 				stringBuilder.append(":");
 				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
 				}
-				
+
 				stringBuilder.append(high);
 				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
@@ -116,10 +118,10 @@ public class WCPSQueryFactory {
 		stringBuilder.append("]");
 		return stringBuilder.toString();
 	}
-	
+
 	/**
-	 * Helper Method to create a string describing a single dimension filter as defined
-	 * from the process graph
+	 * Helper Method to create a string describing a single dimension filter as
+	 * defined from the process graph
 	 * 
 	 * @param collectionName
 	 * @return
@@ -135,15 +137,15 @@ public class WCPSQueryFactory {
 			stringBuilder.append("\"");
 		}
 		stringBuilder.append(low);
-		if (axis.contains("DATE")&& !low.contains("$")) {
+		if (axis.contains("DATE") && !low.contains("$")) {
 			stringBuilder.append("\"");
 		}
-		if(high != null) {
+		if (high != null) {
 			stringBuilder.append(":");
 			if (axis.contains("DATE")) {
 				stringBuilder.append("\"");
 			}
-			
+
 			stringBuilder.append(high);
 			if (axis.contains("DATE")) {
 				stringBuilder.append("\"");
@@ -169,13 +171,13 @@ public class WCPSQueryFactory {
 		filters.removeAllElements();
 		return stringBuilder.toString();
 	}
-	
+
 	private String createTempAggWCPSString(String collectionName, Aggregate tempAggregate) {
 		String axis = tempAggregate.getAxis();
 		String operator = tempAggregate.getOperator();
 		Filter tempFilter = null;
-		for(Filter filter: this.filters) {
-			if(filter.getAxis().equals("DATE")) {
+		for (Filter filter : this.filters) {
+			if (filter.getAxis().equals("DATE")) {
 				tempFilter = filter;
 			}
 		}
@@ -226,7 +228,7 @@ public class WCPSQueryFactory {
 				JSONObject argsObject = (JSONObject) processParent.get(keyStr);
 				for (Object argsKey : argsObject.keySet()) {
 					String argsKeyStr = (String) argsKey;
-					if (argsKeyStr.equals("collections")) {
+					if (argsKeyStr.equals("collections") || argsKeyStr.equals("imagery")) {
 						JSONArray collections = (JSONArray) argsObject.get(argsKey);
 						result = parseOpenEOProcessGraph((JSONObject) collections.get(0));
 						if (result == null) {
@@ -350,12 +352,12 @@ public class WCPSQueryFactory {
 			}
 		}
 	}
-	
+
 	private void createTemporalAggregate(String processName) {
 		String aggregateType = processName.split("_")[0];
 		Vector<String> params = new Vector<String>();
-		for(Filter filter: this.filters) {
-			if(filter.getAxis().equals("DATE")) {
+		for (Filter filter : this.filters) {
+			if (filter.getAxis().equals("DATE")) {
 				params.add(filter.getLowerBound());
 				params.add(filter.getUpperBound());
 			}

@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -24,115 +23,115 @@ import io.swagger.annotations.ApiModelProperty;
  * InlineResponse2001
  */
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class InlineResponse2001  implements Serializable {
-  @JsonProperty("product_id")
-  private String productId = null;
+public class InlineResponse2001 implements Serializable {
+	@JsonProperty("product_id")
+	private String productId = null;
 
-  @JsonProperty("description")
-  private String description = null;
+	@JsonProperty("description")
+	private String description = null;
 
-  @JsonProperty("source")
-  private String source = null;
+	@JsonProperty("source")
+	private String source = null;
 
-  public InlineResponse2001 productId(String productId) {
-    this.productId = productId;
-    return this;
-  }
+	public InlineResponse2001 productId(String productId) {
+		this.productId = productId;
+		return this;
+	}
 
-  /**
-   * Get productId
-   * @return productId
-   **/
-  @JsonProperty("product_id")
-  @ApiModelProperty(value = "")
-  public String getProductId() {
-    return productId;
-  }
+	/**
+	 * Get productId
+	 * 
+	 * @return productId
+	 **/
+	@JsonProperty("product_id")
+	@ApiModelProperty(value = "")
+	public String getProductId() {
+		return productId;
+	}
 
-  public void setProductId(String productId) {
-    this.productId = productId;
-  }
+	public void setProductId(String productId) {
+		this.productId = productId;
+	}
 
-  public InlineResponse2001 description(String description) {
-    this.description = description;
-    return this;
-  }
+	public InlineResponse2001 description(String description) {
+		this.description = description;
+		return this;
+	}
 
-  /**
-   * Get description
-   * @return description
-   **/
-  @JsonProperty("description")
-  @ApiModelProperty(value = "")
-  public String getDescription() {
-    return description;
-  }
+	/**
+	 * Get description
+	 * 
+	 * @return description
+	 **/
+	@JsonProperty("description")
+	@ApiModelProperty(value = "")
+	public String getDescription() {
+		return description;
+	}
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-  public InlineResponse2001 source(String source) {
-    this.source = source;
-    return this;
-  }
+	public InlineResponse2001 source(String source) {
+		this.source = source;
+		return this;
+	}
 
-  /**
-   * Get source
-   * @return source
-   **/
-  @JsonProperty("source")
-  @ApiModelProperty(value = "")
-  public String getSource() {
-    return source;
-  }
+	/**
+	 * Get source
+	 * 
+	 * @return source
+	 **/
+	@JsonProperty("source")
+	@ApiModelProperty(value = "")
+	public String getSource() {
+		return source;
+	}
 
-  public void setSource(String source) {
-    this.source = source;
-  }
+	public void setSource(String source) {
+		this.source = source;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		InlineResponse2001 inlineResponse2001 = (InlineResponse2001) o;
+		return Objects.equals(this.productId, inlineResponse2001.productId)
+				&& Objects.equals(this.description, inlineResponse2001.description)
+				&& Objects.equals(this.source, inlineResponse2001.source);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    InlineResponse2001 inlineResponse2001 = (InlineResponse2001) o;
-    return Objects.equals(this.productId, inlineResponse2001.productId) &&
-        Objects.equals(this.description, inlineResponse2001.description) &&
-        Objects.equals(this.source, inlineResponse2001.source);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(productId, description, source);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(productId, description, source);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class InlineResponse2001 {\n");
 
+		sb.append("    productId: ").append(toIndentedString(productId)).append("\n");
+		sb.append("    description: ").append(toIndentedString(description)).append("\n");
+		sb.append("    source: ").append(toIndentedString(source)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class InlineResponse2001 {\n");
-    
-    sb.append("    productId: ").append(toIndentedString(productId)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    source: ").append(toIndentedString(source)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

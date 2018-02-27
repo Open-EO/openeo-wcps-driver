@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -24,96 +23,96 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * **DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0 DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**
+ * **DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0
+ * DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**
  */
 @ApiModel(description = "**DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0 DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ProcessDescriptionArgs  implements Serializable {
-  @JsonProperty("description")
-  private String description = null;
+public class ProcessDescriptionArgs implements Serializable {
+	@JsonProperty("description")
+	private String description = null;
 
-  @JsonProperty("required")
-  private Boolean required = true;
+	@JsonProperty("required")
+	private Boolean required = true;
 
-  public ProcessDescriptionArgs description(String description) {
-    this.description = description;
-    return this;
-  }
+	public ProcessDescriptionArgs description(String description) {
+		this.description = description;
+		return this;
+	}
 
-  /**
-   * A short and concise description of the process argument.
-   * @return description
-   **/
-  @JsonProperty("description")
-  @ApiModelProperty(required = true, value = "A short and concise description of the process argument.")
-  @NotNull
-  public String getDescription() {
-    return description;
-  }
+	/**
+	 * A short and concise description of the process argument.
+	 * 
+	 * @return description
+	 **/
+	@JsonProperty("description")
+	@ApiModelProperty(required = true, value = "A short and concise description of the process argument.")
+	@NotNull
+	public String getDescription() {
+		return description;
+	}
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-  public ProcessDescriptionArgs required(Boolean required) {
-    this.required = required;
-    return this;
-  }
+	public ProcessDescriptionArgs required(Boolean required) {
+		this.required = required;
+		return this;
+	}
 
-  /**
-   * Defines whether an argument is required or optional.
-   * @return required
-   **/
-  @JsonProperty("required")
-  @ApiModelProperty(value = "Defines whether an argument is required or optional.")
-  public Boolean isRequired() {
-    return required;
-  }
+	/**
+	 * Defines whether an argument is required or optional.
+	 * 
+	 * @return required
+	 **/
+	@JsonProperty("required")
+	@ApiModelProperty(value = "Defines whether an argument is required or optional.")
+	public Boolean isRequired() {
+		return required;
+	}
 
-  public void setRequired(Boolean required) {
-    this.required = required;
-  }
+	public void setRequired(Boolean required) {
+		this.required = required;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ProcessDescriptionArgs processDescriptionArgs = (ProcessDescriptionArgs) o;
+		return Objects.equals(this.description, processDescriptionArgs.description)
+				&& Objects.equals(this.required, processDescriptionArgs.required);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    ProcessDescriptionArgs processDescriptionArgs = (ProcessDescriptionArgs) o;
-    return Objects.equals(this.description, processDescriptionArgs.description) &&
-        Objects.equals(this.required, processDescriptionArgs.required);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(description, required);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(description, required);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class ProcessDescriptionArgs {\n");
 
+		sb.append("    description: ").append(toIndentedString(description)).append("\n");
+		sb.append("    required: ").append(toIndentedString(required)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ProcessDescriptionArgs {\n");
-    
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    required: ").append(toIndentedString(required)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

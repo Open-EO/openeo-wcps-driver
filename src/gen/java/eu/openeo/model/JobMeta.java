@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -25,193 +24,196 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Defines a metadata subset of processing jobs that have been submitted by users. To get the full metadata for a job, including view and process graph, call &#x60;GET /jobs/{job_id}&#x60;
+ * Defines a metadata subset of processing jobs that have been submitted by
+ * users. To get the full metadata for a job, including view and process graph,
+ * call &#x60;GET /jobs/{job_id}&#x60;
  */
 @ApiModel(description = "Defines a metadata subset of processing jobs that have been submitted by users. To get the full metadata for a job, including view and process graph, call `GET /jobs/{job_id}`")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class JobMeta  implements Serializable {
-  @JsonProperty("job_id")
-  private String jobId = null;
+public class JobMeta implements Serializable {
+	@JsonProperty("job_id")
+	private String jobId = null;
 
-  @JsonProperty("status")
-  private JobStatus status = null;
+	@JsonProperty("status")
+	private JobStatus status = null;
 
-  @JsonProperty("submitted")
-  private String submitted = null;
+	@JsonProperty("submitted")
+	private String submitted = null;
 
-  @JsonProperty("updated")
-  private String updated = null;
+	@JsonProperty("updated")
+	private String updated = null;
 
-  @JsonProperty("user_id")
-  private String userId = null;
+	@JsonProperty("user_id")
+	private String userId = null;
 
-  @JsonProperty("consumed_credits")
-  private BigDecimal consumedCredits = null;
+	@JsonProperty("consumed_credits")
+	private BigDecimal consumedCredits = null;
 
-  public JobMeta jobId(String jobId) {
-    this.jobId = jobId;
-    return this;
-  }
+	public JobMeta jobId(String jobId) {
+		this.jobId = jobId;
+		return this;
+	}
 
-  /**
-   * Get jobId
-   * @return jobId
-   **/
-  @JsonProperty("job_id")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public String getJobId() {
-    return jobId;
-  }
+	/**
+	 * Get jobId
+	 * 
+	 * @return jobId
+	 **/
+	@JsonProperty("job_id")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	public String getJobId() {
+		return jobId;
+	}
 
-  public void setJobId(String jobId) {
-    this.jobId = jobId;
-  }
+	public void setJobId(String jobId) {
+		this.jobId = jobId;
+	}
 
-  public JobMeta status(JobStatus status) {
-    this.status = status;
-    return this;
-  }
+	public JobMeta status(JobStatus status) {
+		this.status = status;
+		return this;
+	}
 
-  /**
-   * Get status
-   * @return status
-   **/
-  @JsonProperty("status")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public JobStatus getStatus() {
-    return status;
-  }
+	/**
+	 * Get status
+	 * 
+	 * @return status
+	 **/
+	@JsonProperty("status")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	public JobStatus getStatus() {
+		return status;
+	}
 
-  public void setStatus(JobStatus status) {
-    this.status = status;
-  }
+	public void setStatus(JobStatus status) {
+		this.status = status;
+	}
 
-  public JobMeta submitted(String submitted) {
-    this.submitted = submitted;
-    return this;
-  }
+	public JobMeta submitted(String submitted) {
+		this.submitted = submitted;
+		return this;
+	}
 
-  /**
-   * Get submitted
-   * @return submitted
-   **/
-  @JsonProperty("submitted")
-  @ApiModelProperty(value = "")
-  public String getSubmitted() {
-    return submitted;
-  }
+	/**
+	 * Get submitted
+	 * 
+	 * @return submitted
+	 **/
+	@JsonProperty("submitted")
+	@ApiModelProperty(value = "")
+	public String getSubmitted() {
+		return submitted;
+	}
 
-  public void setSubmitted(String submitted) {
-    this.submitted = submitted;
-  }
+	public void setSubmitted(String submitted) {
+		this.submitted = submitted;
+	}
 
-  public JobMeta updated(String updated) {
-    this.updated = updated;
-    return this;
-  }
+	public JobMeta updated(String updated) {
+		this.updated = updated;
+		return this;
+	}
 
-  /**
-   * Get updated
-   * @return updated
-   **/
-  @JsonProperty("updated")
-  @ApiModelProperty(value = "")
-  public String getUpdated() {
-    return updated;
-  }
+	/**
+	 * Get updated
+	 * 
+	 * @return updated
+	 **/
+	@JsonProperty("updated")
+	@ApiModelProperty(value = "")
+	public String getUpdated() {
+		return updated;
+	}
 
-  public void setUpdated(String updated) {
-    this.updated = updated;
-  }
+	public void setUpdated(String updated) {
+		this.updated = updated;
+	}
 
-  public JobMeta userId(String userId) {
-    this.userId = userId;
-    return this;
-  }
+	public JobMeta userId(String userId) {
+		this.userId = userId;
+		return this;
+	}
 
-  /**
-   * Get userId
-   * @return userId
-   **/
-  @JsonProperty("user_id")
-  @ApiModelProperty(value = "")
-  public String getUserId() {
-    return userId;
-  }
+	/**
+	 * Get userId
+	 * 
+	 * @return userId
+	 **/
+	@JsonProperty("user_id")
+	@ApiModelProperty(value = "")
+	public String getUserId() {
+		return userId;
+	}
 
-  public void setUserId(String userId) {
-    this.userId = userId;
-  }
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 
-  public JobMeta consumedCredits(BigDecimal consumedCredits) {
-    this.consumedCredits = consumedCredits;
-    return this;
-  }
+	public JobMeta consumedCredits(BigDecimal consumedCredits) {
+		this.consumedCredits = consumedCredits;
+		return this;
+	}
 
-  /**
-   * Get consumedCredits
-   * @return consumedCredits
-   **/
-  @JsonProperty("consumed_credits")
-  @ApiModelProperty(value = "")
-  public BigDecimal getConsumedCredits() {
-    return consumedCredits;
-  }
+	/**
+	 * Get consumedCredits
+	 * 
+	 * @return consumedCredits
+	 **/
+	@JsonProperty("consumed_credits")
+	@ApiModelProperty(value = "")
+	public BigDecimal getConsumedCredits() {
+		return consumedCredits;
+	}
 
-  public void setConsumedCredits(BigDecimal consumedCredits) {
-    this.consumedCredits = consumedCredits;
-  }
+	public void setConsumedCredits(BigDecimal consumedCredits) {
+		this.consumedCredits = consumedCredits;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		JobMeta jobMeta = (JobMeta) o;
+		return Objects.equals(this.jobId, jobMeta.jobId) && Objects.equals(this.status, jobMeta.status)
+				&& Objects.equals(this.submitted, jobMeta.submitted) && Objects.equals(this.updated, jobMeta.updated)
+				&& Objects.equals(this.userId, jobMeta.userId)
+				&& Objects.equals(this.consumedCredits, jobMeta.consumedCredits);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    JobMeta jobMeta = (JobMeta) o;
-    return Objects.equals(this.jobId, jobMeta.jobId) &&
-        Objects.equals(this.status, jobMeta.status) &&
-        Objects.equals(this.submitted, jobMeta.submitted) &&
-        Objects.equals(this.updated, jobMeta.updated) &&
-        Objects.equals(this.userId, jobMeta.userId) &&
-        Objects.equals(this.consumedCredits, jobMeta.consumedCredits);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(jobId, status, submitted, updated, userId, consumedCredits);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(jobId, status, submitted, updated, userId, consumedCredits);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class JobMeta {\n");
 
+		sb.append("    jobId: ").append(toIndentedString(jobId)).append("\n");
+		sb.append("    status: ").append(toIndentedString(status)).append("\n");
+		sb.append("    submitted: ").append(toIndentedString(submitted)).append("\n");
+		sb.append("    updated: ").append(toIndentedString(updated)).append("\n");
+		sb.append("    userId: ").append(toIndentedString(userId)).append("\n");
+		sb.append("    consumedCredits: ").append(toIndentedString(consumedCredits)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class JobMeta {\n");
-    
-    sb.append("    jobId: ").append(toIndentedString(jobId)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    submitted: ").append(toIndentedString(submitted)).append("\n");
-    sb.append("    updated: ").append(toIndentedString(updated)).append("\n");
-    sb.append("    userId: ").append(toIndentedString(userId)).append("\n");
-    sb.append("    consumedCredits: ").append(toIndentedString(consumedCredits)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

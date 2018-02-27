@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -26,93 +25,92 @@ import io.swagger.annotations.ApiModelProperty;
  * InlineResponse2003
  */
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class InlineResponse2003  implements Serializable {
-  @JsonProperty("process_id")
-  private String processId = null;
+public class InlineResponse2003 implements Serializable {
+	@JsonProperty("process_id")
+	private String processId = null;
 
-  @JsonProperty("description")
-  private String description = null;
+	@JsonProperty("description")
+	private String description = null;
 
-  public InlineResponse2003 processId(String processId) {
-    this.processId = processId;
-    return this;
-  }
+	public InlineResponse2003 processId(String processId) {
+		this.processId = processId;
+		return this;
+	}
 
-  /**
-   * Get processId
-   * @return processId
-   **/
-  @JsonProperty("process_id")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public String getProcessId() {
-    return processId;
-  }
+	/**
+	 * Get processId
+	 * 
+	 * @return processId
+	 **/
+	@JsonProperty("process_id")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	public String getProcessId() {
+		return processId;
+	}
 
-  public void setProcessId(String processId) {
-    this.processId = processId;
-  }
+	public void setProcessId(String processId) {
+		this.processId = processId;
+	}
 
-  public InlineResponse2003 description(String description) {
-    this.description = description;
-    return this;
-  }
+	public InlineResponse2003 description(String description) {
+		this.description = description;
+		return this;
+	}
 
-  /**
-   * Get description
-   * @return description
-   **/
-  @JsonProperty("description")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public String getDescription() {
-    return description;
-  }
+	/**
+	 * Get description
+	 * 
+	 * @return description
+	 **/
+	@JsonProperty("description")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	public String getDescription() {
+		return description;
+	}
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		InlineResponse2003 inlineResponse2003 = (InlineResponse2003) o;
+		return Objects.equals(this.processId, inlineResponse2003.processId)
+				&& Objects.equals(this.description, inlineResponse2003.description);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    InlineResponse2003 inlineResponse2003 = (InlineResponse2003) o;
-    return Objects.equals(this.processId, inlineResponse2003.processId) &&
-        Objects.equals(this.description, inlineResponse2003.description);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(processId, description);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(processId, description);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class InlineResponse2003 {\n");
 
+		sb.append("    processId: ").append(toIndentedString(processId)).append("\n");
+		sb.append("    description: ").append(toIndentedString(description)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class InlineResponse2003 {\n");
-    
-    sb.append("    processId: ").append(toIndentedString(processId)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

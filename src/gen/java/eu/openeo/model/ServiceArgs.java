@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -19,48 +18,48 @@ import java.util.Objects;
 import io.swagger.annotations.ApiModel;
 
 /**
- * Definintion of additional arguments a web service might need to be created. For example, this could specify the required version of the service, visualization details or any other service dependant configuration.
+ * Definintion of additional arguments a web service might need to be created.
+ * For example, this could specify the required version of the service,
+ * visualization details or any other service dependant configuration.
  */
 @ApiModel(description = "Definintion of additional arguments a web service might need to be created. For example, this could specify the required version of the service, visualization details or any other service dependant configuration.")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ServiceArgs  implements Serializable {
+public class ServiceArgs implements Serializable {
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    return true;
-  }
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		return true;
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash();
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash();
+	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class ServiceArgs {\n");
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ServiceArgs {\n");
-    
-    sb.append("}");
-    return sb.toString();
-  }
+		sb.append("}");
+		return sb.toString();
+	}
 
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  @SuppressWarnings("unused")
-private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	@SuppressWarnings("unused")
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

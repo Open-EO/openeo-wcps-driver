@@ -11,17 +11,15 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
 @Provider
-@Produces({MediaType.APPLICATION_JSON})
+@Produces({ MediaType.APPLICATION_JSON })
 public class JacksonJsonProvider extends JacksonJaxbJsonProvider {
 
-    public JacksonJsonProvider() {
+	public JacksonJsonProvider() {
 
-        ObjectMapper objectMapper = new ObjectMapper()
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .registerModule(new JodaModule())
-            .setDateFormat(new RFC3339DateFormat());
+		ObjectMapper objectMapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+				.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(new JodaModule())
+				.setDateFormat(new RFC3339DateFormat());
 
-        setMapper(objectMapper);
-    }
+		setMapper(objectMapper);
+	}
 }

@@ -15,28 +15,28 @@ class TestProperties {
 		String url;
 		try {
 			url = readProperties("job-database");
-			if(url == null) {
+			if (url == null) {
 				fail("failed to read enpoint from properties");
-			}else {
+			} else {
 				System.out.println(url);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("failed to read enpoint from properties with exception: " + e.getMessage());
 		}
-		
+
 	}
-	
+
 	public String readProperties(String key) throws IOException {
-	  ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-	  InputStream stream = classLoader.getResourceAsStream("config.properties");
-	 
-	  Properties properties = new Properties();
-	  properties.load(stream);
-	 
-	  String value = properties.getProperty(key);
-	 
-	  return value;
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		InputStream stream = classLoader.getResourceAsStream("config.properties");
+
+		Properties properties = new Properties();
+		properties.load(stream);
+
+		String value = properties.getProperty(key);
+
+		return value;
 	}
 
 }

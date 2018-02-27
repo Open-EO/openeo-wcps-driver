@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -24,72 +23,72 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Defines an object schema to define an image collection based on available EO data. This is part of the process graph. See the process graph documentation for more information.
+ * Defines an object schema to define an image collection based on available EO
+ * data. This is part of the process graph. See the process graph documentation
+ * for more information.
  */
 @ApiModel(description = "Defines an object schema to define an image collection based on available EO data. This is part of the process graph. See the process graph documentation for more information.")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ImageCollection  implements Serializable {
-  @JsonProperty("product_id")
-  private String productId = null;
+public class ImageCollection implements Serializable {
+	@JsonProperty("product_id")
+	private String productId = null;
 
-  public ImageCollection productId(String productId) {
-    this.productId = productId;
-    return this;
-  }
+	public ImageCollection productId(String productId) {
+		this.productId = productId;
+		return this;
+	}
 
-  /**
-   * The unique identifier of the EO data.
-   * @return productId
-   **/
-  @JsonProperty("product_id")
-  @ApiModelProperty(required = true, value = "The unique identifier of the EO data.")
-  @NotNull
-  public String getProductId() {
-    return productId;
-  }
+	/**
+	 * The unique identifier of the EO data.
+	 * 
+	 * @return productId
+	 **/
+	@JsonProperty("product_id")
+	@ApiModelProperty(required = true, value = "The unique identifier of the EO data.")
+	@NotNull
+	public String getProductId() {
+		return productId;
+	}
 
-  public void setProductId(String productId) {
-    this.productId = productId;
-  }
+	public void setProductId(String productId) {
+		this.productId = productId;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ImageCollection imageCollection = (ImageCollection) o;
+		return Objects.equals(this.productId, imageCollection.productId);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    ImageCollection imageCollection = (ImageCollection) o;
-    return Objects.equals(this.productId, imageCollection.productId);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(productId);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(productId);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class ImageCollection {\n");
 
+		sb.append("    productId: ").append(toIndentedString(productId)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ImageCollection {\n");
-    
-    sb.append("    productId: ").append(toIndentedString(productId)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

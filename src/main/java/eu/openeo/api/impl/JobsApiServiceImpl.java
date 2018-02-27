@@ -11,6 +11,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
@@ -23,30 +24,42 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import eu.openeo.api.ApiResponseMessage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.jdbc.JdbcConnectionSource;
+import com.j256.ormlite.support.ConnectionSource;
+import com.j256.ormlite.table.TableUtils;
+
 import eu.openeo.api.JobsApiService;
 import eu.openeo.api.NotFoundException;
 import eu.openeo.backend.wcps.PropertiesHelper;
 import eu.openeo.backend.wcps.WCPSQueryFactory;
-import eu.openeo.model.Job;
+import eu.openeo.model.JobFull;
+import eu.openeo.model.JobStatus;
+
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class JobsApiServiceImpl extends JobsApiService {
-	
+
 	Logger log = Logger.getLogger(this.getClass());
-	
-    @Override
-    public Response jobsJobIdCancelOptions(String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsJobIdCancelPatch(String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsJobIdDownloadGet(String jobId,  String format, SecurityContext securityContext) throws NotFoundException {
-    	Connection connection = null;
+
+	@Override
+	public Response jobsJobIdCancelOptions(String jobId, SecurityContext securityContext) throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsJobIdCancelPatch(String jobId, SecurityContext securityContext) throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsJobIdDownloadGet(String jobId, String format, SecurityContext securityContext)
+			throws NotFoundException {
+		Connection connection = null;
 		String jobQuery = null;
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -58,7 +71,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 
 			ResultSet resultSet = statement.executeQuery("SELECT jobquery FROM jobs WHERE jobid='" + jobId + "'");
 			while (resultSet.next()) {
-				jobQuery=resultSet.getString("jobquery");
+				jobQuery = resultSet.getString("jobquery");
 				log.debug("The job with id \"" + jobId + "\" was found: " + jobQuery);
 			}
 
@@ -72,7 +85,8 @@ public class JobsApiServiceImpl extends JobsApiService {
 					.build();
 		} catch (IOException ioe) {
 			log.error("An error occured while reading properties file: " + ioe.getMessage());
-			return Response.serverError().entity("An error occured while reading properties file: " + ioe.getMessage()).build();
+			return Response.serverError().entity("An error occured while reading properties file: " + ioe.getMessage())
+					.build();
 		} finally {
 			try {
 				if (connection != null)
@@ -85,13 +99,10 @@ public class JobsApiServiceImpl extends JobsApiService {
 		}
 		URL url;
 		try {
-			url = new URL(PropertiesHelper.readProperties("wcps-endpoint") + 
-							"?SERVICE=WCS" + 
-							"&VERSION=2.0.1" + 
-							"&REQUEST=ProcessCoverages" + 
-							"&QUERY=" + 
-							URLEncoder.encode(jobQuery, "UTF-8").replace("+", "%20"));
-			
+			url = new URL(PropertiesHelper.readProperties("wcps-endpoint") + "?SERVICE=WCS" + "&VERSION=2.0.1"
+					+ "&REQUEST=ProcessCoverages" + "&QUERY="
+					+ URLEncoder.encode(jobQuery, "UTF-8").replace("+", "%20"));
+
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			byte[] response = IOUtils.toByteArray(conn.getInputStream());
@@ -99,116 +110,167 @@ public class JobsApiServiceImpl extends JobsApiService {
 			return Response.ok(response, MediaType.WILDCARD).build();
 		} catch (MalformedURLException e) {
 			log.error("An error occured when creating URL from job query: " + e.getMessage());
-			return Response.serverError()
-					.entity("An error occured when creating URL from job query: " + e.getMessage()).build();
+			return Response.serverError().entity("An error occured when creating URL from job query: " + e.getMessage())
+					.build();
 		} catch (IOException e) {
 			log.error("An error occured when retrieving query result from WCPS endpoint: " + e.getMessage());
 			return Response.serverError()
-					.entity("An error occured when retrieving query result from WCPS endpoint: " + e.getMessage()).build();
+					.entity("An error occured when retrieving query result from WCPS endpoint: " + e.getMessage())
+					.build();
 		}
-    }
-    @Override
-    public Response jobsJobIdDownloadOptions(String jobId,  String format, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsJobIdGet(String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsJobIdOptions(String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsJobIdPatch(String jobId, Job job, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsJobIdPauseOptions(String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsJobIdPausePatch(String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsJobIdQueueOptions(String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsJobIdQueuePatch(String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsJobIdSubscribeGet(String jobId, String upgrade, String connection, String secWebSocketKey, String secWebSocketProtocol, BigDecimal secWebSocketVersion, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsJobIdSubscribeOptions(String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsOptions(SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response jobsPost(String job, SecurityContext securityContext) throws NotFoundException {
-    	JSONParser parser = new JSONParser();
+	}
+
+	@Override
+	public Response jobsJobIdDownloadOptions(String jobId, String format, SecurityContext securityContext)
+			throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsJobIdGet(String jobId, SecurityContext securityContext) throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsJobIdOptions(String jobId, SecurityContext securityContext) throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsJobIdPatch(String jobId, JobFull job, SecurityContext securityContext) throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsJobIdPauseOptions(String jobId, SecurityContext securityContext) throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsJobIdPausePatch(String jobId, SecurityContext securityContext) throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsJobIdQueueOptions(String jobId, SecurityContext securityContext) throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsJobIdQueuePatch(String jobId, SecurityContext securityContext) throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsJobIdSubscribeGet(String jobId, String upgrade, String connection, String secWebSocketKey,
+			String secWebSocketProtocol, BigDecimal secWebSocketVersion, SecurityContext securityContext)
+			throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsJobIdSubscribeOptions(String jobId, SecurityContext securityContext) throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsOptions(SecurityContext securityContext) throws NotFoundException {
+		// do some magic!
+		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+	}
+
+	@Override
+	public Response jobsPost(JobFull job, SecurityContext securityContext) throws NotFoundException {
+		UUID jobID = UUID.randomUUID();
+		job.setJobId(jobID.toString());
+		job.setStatus(JobStatus.SUBMITTED);
+		job.setSubmitted(new Date().toGMTString());
+		JSONParser parser = new JSONParser();
 		JSONObject processGraphJSON;
+		String outputFormat = "json";
+		ObjectMapper mapper = new ObjectMapper();
 		try {
-			log.debug("Parsing process Graph \n" + job);
-			processGraphJSON = (JSONObject) parser.parse(job);
+			log.debug("The following job was submitted: \n" + job.toString());
+			processGraphJSON = (JSONObject) parser.parse(mapper.writeValueAsString(job.getProcessGraph()));
+			outputFormat = (String)(((JSONObject) parser.parse(mapper.writeValueAsString(job.getOutput()))).get(new String("format")));
 		} catch (ParseException e) {
 			log.error(e.getMessage());
 			return Response.serverError().entity("An error occured while parsing input json: " + e.getMessage())
 					.build();
+		} catch (JsonProcessingException e) {
+			log.error(e.getMessage());
+			return Response.serverError().entity("An error occured while parsing the process graph json: " + e.getMessage())
+					.build();
 		}
-		WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
-		UUID jobID = UUID.randomUUID();
+		WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON, outputFormat);
+		
 		log.debug("Graph successfully parsed and saved with ID: " + jobID);
 		log.debug("WCPS query: " + wcpsFactory.getWCPSString());
-		Connection connection = null;
+//		ConnectionSource connection = null;
+		Connection connection = null;	
 		try {
+//			String dbURL = "jdbc:sqlite:" + PropertiesHelper.readProperties("job-database");
+//			connection =  new JdbcConnectionSource(dbURL);
+//			
+//			TableUtils.createTable(connection, JobFull.class);
+//			
+//			Dao<JobFull,String> jobDao = DaoManager.createDao(connection, JobFull.class);
+//			
+//			jobDao.create(job);			
+	
 			Class.forName("org.sqlite.JDBC");
-			connection = DriverManager.getConnection("jdbc:sqlite:" + PropertiesHelper.readProperties("job-database")); 
+			connection = DriverManager.getConnection("jdbc:sqlite:" + PropertiesHelper.readProperties("job-database"));
 
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
-			
+
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS jobs (jobid STRING, jobquery STRING, UNIQUE(jobid))");
-			
-			statement.executeUpdate("INSERT INTO jobs (jobid, jobquery) VALUES ('" + jobID.toString() + "','" + wcpsFactory.getWCPSString() + "')");
-			
+
+			statement.executeUpdate("INSERT INTO jobs (jobid, jobquery) VALUES ('" + jobID.toString() + "','"
+					+ wcpsFactory.getWCPSString() + "')");
 			
 		} catch (ClassNotFoundException cnfe) {
 			log.error("An error occured while loading database driver: " + cnfe.getMessage());
-			return Response.serverError().entity("An error occured while loading database driver: " + cnfe.getMessage()).build();
+			return Response.serverError().entity("An error occured while loading database driver: " + cnfe.getMessage())
+					.build();
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
-			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage()).build();
+			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
+					.build();
 		} catch (IOException ioe) {
 			log.error("An error occured while reading properties file: " + ioe.getMessage());
-			return Response.serverError().entity("An error occured while reading properties file: " + ioe.getMessage()).build();
+			return Response.serverError().entity("An error occured while reading properties file: " + ioe.getMessage())
+					.build();
 		} finally {
 			try {
 				if (connection != null)
 					connection.close();
 			} catch (SQLException e) {
 				log.error("An error occured while attempting to close DB connection: " + e.getMessage());
-				return Response.serverError().entity("An error occured while attempting to close DB connection: " + e.getMessage()).build();
+				return Response.serverError()
+						.entity("An error occured while attempting to close DB connection: " + e.getMessage()).build();
+//			} catch (IOException e) {
+//				log.error("An error occured while attempting to close DB connection: " + e.getMessage());
+//				return Response.serverError()
+//						.entity("An error occured while attempting to close DB connection: " + e.getMessage()).build();
 			}
 		}
-        return Response.ok().entity("{\"job_id\" : \"" + jobID.toString() + "\"}").build();
-    }
+		try {
+			return Response.ok().entity(mapper.writeValueAsString(job)).build();
+		} catch (JsonProcessingException e) {
+			log.error(e.getMessage());
+			return Response.serverError().entity("An error occured while serializing job to json: " + e.getMessage())
+					.build();
+		}
+	}
 }

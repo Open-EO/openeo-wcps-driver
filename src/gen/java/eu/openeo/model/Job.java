@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -26,97 +25,95 @@ import io.swagger.annotations.ApiModelProperty;
  * Job
  */
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class Job  implements Serializable {
-  /**
+public class Job implements Serializable {
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 5048718671282096761L;
 
-@JsonProperty("process_graph")
-  private ProcessGraph processGraph = null;
+	@JsonProperty("process_graph")
+	private ProcessGraph processGraph = null;
 
-  @JsonProperty("output")
-  private OutputFormatBody output = null;
+	@JsonProperty("output")
+	private OutputFormatBody output = null;
 
-  public Job processGraph(ProcessGraph processGraph) {
-    this.processGraph = processGraph;
-    return this;
-  }
+	public Job processGraph(ProcessGraph processGraph) {
+		this.processGraph = processGraph;
+		return this;
+	}
 
-  /**
-   * Get processGraph
-   * @return processGraph
-   **/
-  @JsonProperty("process_graph")
-  @ApiModelProperty(value = "")
-  public ProcessGraph getProcessGraph() {
-    return processGraph;
-  }
+	/**
+	 * Get processGraph
+	 * 
+	 * @return processGraph
+	 **/
+	@JsonProperty("process_graph")
+	@ApiModelProperty(value = "")
+	public ProcessGraph getProcessGraph() {
+		return processGraph;
+	}
 
-  public void setProcessGraph(ProcessGraph processGraph) {
-    this.processGraph = processGraph;
-  }
+	public void setProcessGraph(ProcessGraph processGraph) {
+		this.processGraph = processGraph;
+	}
 
-  public Job output(OutputFormatBody output) {
-    this.output = output;
-    return this;
-  }
+	public Job output(OutputFormatBody output) {
+		this.output = output;
+		return this;
+	}
 
-  /**
-   * Get output
-   * @return output
-   **/
-  @JsonProperty("output")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public OutputFormatBody getOutput() {
-    return output;
-  }
+	/**
+	 * Get output
+	 * 
+	 * @return output
+	 **/
+	@JsonProperty("output")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	public OutputFormatBody getOutput() {
+		return output;
+	}
 
-  public void setOutput(OutputFormatBody output) {
-    this.output = output;
-  }
+	public void setOutput(OutputFormatBody output) {
+		this.output = output;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Job job = (Job) o;
+		return Objects.equals(this.processGraph, job.processGraph) && Objects.equals(this.output, job.output);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    Job job = (Job) o;
-    return Objects.equals(this.processGraph, job.processGraph) &&
-        Objects.equals(this.output, job.output);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(processGraph, output);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(processGraph, output);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class Job {\n");
 
+		sb.append("    processGraph: ").append(toIndentedString(processGraph)).append("\n");
+		sb.append("    output: ").append(toIndentedString(output)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class Job {\n");
-    
-    sb.append("    processGraph: ").append(toIndentedString(processGraph)).append("\n");
-    sb.append("    output: ").append(toIndentedString(output)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

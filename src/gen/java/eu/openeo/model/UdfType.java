@@ -10,55 +10,54 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
- * The UDF types define how UDFs can be exposed to the data, how they can be parallelized, and how the result schema should be structured.
+ * The UDF types define how UDFs can be exposed to the data, how they can be
+ * parallelized, and how the result schema should be structured.
  */
 public enum UdfType {
-  
-  APPLY_PIXEL("apply_pixel"),
-  
-  APPLY_SCENE("apply_scene"),
-  
-  REDUCE_TIME("reduce_time"),
-  
-  REDUCE_SPACE("reduce_space"),
-  
-  WINDOW_TIME("window_time"),
-  
-  WINDOW_SPACE("window_space"),
-  
-  WINDOW_SPACETIME("window_spacetime"),
-  
-  AGREGATE_TIME("agregate_time"),
-  
-  AGGREGATE_SPACE("aggregate_space"),
-  
-  AGGREGATE_SPACETIME("aggregate_spacetime");
 
-  private String value;
+	APPLY_PIXEL("apply_pixel"),
 
-  UdfType(String value) {
-    this.value = value;
-  }
+	APPLY_SCENE("apply_scene"),
 
-  @Override
-  public String toString() {
-    return String.valueOf(value);
-  }
+	REDUCE_TIME("reduce_time"),
 
-  @JsonCreator
-  public static UdfType fromValue(String text) {
-    for (UdfType b : UdfType.values()) {
-      if (String.valueOf(b.value).equals(text)) {
-        return b;
-      }
-    }
-    return null;
-  }
+	REDUCE_SPACE("reduce_space"),
+
+	WINDOW_TIME("window_time"),
+
+	WINDOW_SPACE("window_space"),
+
+	WINDOW_SPACETIME("window_spacetime"),
+
+	AGREGATE_TIME("agregate_time"),
+
+	AGGREGATE_SPACE("aggregate_space"),
+
+	AGGREGATE_SPACETIME("aggregate_spacetime");
+
+	private String value;
+
+	UdfType(String value) {
+		this.value = value;
+	}
+
+	@Override
+	public String toString() {
+		return String.valueOf(value);
+	}
+
+	@JsonCreator
+	public static UdfType fromValue(String text) {
+		for (UdfType b : UdfType.values()) {
+			if (String.valueOf(b.value).equals(text)) {
+				return b;
+			}
+		}
+		return null;
+	}
 }
-

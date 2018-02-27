@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -27,163 +26,166 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(description = "spatial extent of the available imagery")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class InlineResponse2002Extent  implements Serializable {
-  @JsonProperty("srs")
-  private String srs = null;
+public class InlineResponse2002Extent implements Serializable {
+	@JsonProperty("srs")
+	private String srs = null;
 
-  @JsonProperty("left")
-  private BigDecimal left = null;
+	@JsonProperty("left")
+	private BigDecimal left = null;
 
-  @JsonProperty("right")
-  private BigDecimal right = null;
+	@JsonProperty("right")
+	private BigDecimal right = null;
 
-  @JsonProperty("top")
-  private BigDecimal top = null;
+	@JsonProperty("top")
+	private BigDecimal top = null;
 
-  @JsonProperty("bottom")
-  private BigDecimal bottom = null;
+	@JsonProperty("bottom")
+	private BigDecimal bottom = null;
 
-  public InlineResponse2002Extent srs(String srs) {
-    this.srs = srs;
-    return this;
-  }
+	public InlineResponse2002Extent srs(String srs) {
+		this.srs = srs;
+		return this;
+	}
 
-  /**
-   * spatial reference system readable by GDAL (e.g. as &#39;WKT&#39;, &#39;proj4&#39;, or &#39;EPSG:xy&#39;)
-   * @return srs
-   **/
-  @JsonProperty("srs")
-  @ApiModelProperty(value = "spatial reference system readable by GDAL (e.g. as 'WKT', 'proj4', or 'EPSG:xy')")
-  public String getSrs() {
-    return srs;
-  }
+	/**
+	 * spatial reference system readable by GDAL (e.g. as &#39;WKT&#39;,
+	 * &#39;proj4&#39;, or &#39;EPSG:xy&#39;)
+	 * 
+	 * @return srs
+	 **/
+	@JsonProperty("srs")
+	@ApiModelProperty(value = "spatial reference system readable by GDAL (e.g. as 'WKT', 'proj4', or 'EPSG:xy')")
+	public String getSrs() {
+		return srs;
+	}
 
-  public void setSrs(String srs) {
-    this.srs = srs;
-  }
+	public void setSrs(String srs) {
+		this.srs = srs;
+	}
 
-  public InlineResponse2002Extent left(BigDecimal left) {
-    this.left = left;
-    return this;
-  }
+	public InlineResponse2002Extent left(BigDecimal left) {
+		this.left = left;
+		return this;
+	}
 
-  /**
-   * Get left
-   * @return left
-   **/
-  @JsonProperty("left")
-  @ApiModelProperty(value = "")
-  public BigDecimal getLeft() {
-    return left;
-  }
+	/**
+	 * Get left
+	 * 
+	 * @return left
+	 **/
+	@JsonProperty("left")
+	@ApiModelProperty(value = "")
+	public BigDecimal getLeft() {
+		return left;
+	}
 
-  public void setLeft(BigDecimal left) {
-    this.left = left;
-  }
+	public void setLeft(BigDecimal left) {
+		this.left = left;
+	}
 
-  public InlineResponse2002Extent right(BigDecimal right) {
-    this.right = right;
-    return this;
-  }
+	public InlineResponse2002Extent right(BigDecimal right) {
+		this.right = right;
+		return this;
+	}
 
-  /**
-   * Get right
-   * @return right
-   **/
-  @JsonProperty("right")
-  @ApiModelProperty(value = "")
-  public BigDecimal getRight() {
-    return right;
-  }
+	/**
+	 * Get right
+	 * 
+	 * @return right
+	 **/
+	@JsonProperty("right")
+	@ApiModelProperty(value = "")
+	public BigDecimal getRight() {
+		return right;
+	}
 
-  public void setRight(BigDecimal right) {
-    this.right = right;
-  }
+	public void setRight(BigDecimal right) {
+		this.right = right;
+	}
 
-  public InlineResponse2002Extent top(BigDecimal top) {
-    this.top = top;
-    return this;
-  }
+	public InlineResponse2002Extent top(BigDecimal top) {
+		this.top = top;
+		return this;
+	}
 
-  /**
-   * Get top
-   * @return top
-   **/
-  @JsonProperty("top")
-  @ApiModelProperty(value = "")
-  public BigDecimal getTop() {
-    return top;
-  }
+	/**
+	 * Get top
+	 * 
+	 * @return top
+	 **/
+	@JsonProperty("top")
+	@ApiModelProperty(value = "")
+	public BigDecimal getTop() {
+		return top;
+	}
 
-  public void setTop(BigDecimal top) {
-    this.top = top;
-  }
+	public void setTop(BigDecimal top) {
+		this.top = top;
+	}
 
-  public InlineResponse2002Extent bottom(BigDecimal bottom) {
-    this.bottom = bottom;
-    return this;
-  }
+	public InlineResponse2002Extent bottom(BigDecimal bottom) {
+		this.bottom = bottom;
+		return this;
+	}
 
-  /**
-   * Get bottom
-   * @return bottom
-   **/
-  @JsonProperty("bottom")
-  @ApiModelProperty(value = "")
-  public BigDecimal getBottom() {
-    return bottom;
-  }
+	/**
+	 * Get bottom
+	 * 
+	 * @return bottom
+	 **/
+	@JsonProperty("bottom")
+	@ApiModelProperty(value = "")
+	public BigDecimal getBottom() {
+		return bottom;
+	}
 
-  public void setBottom(BigDecimal bottom) {
-    this.bottom = bottom;
-  }
+	public void setBottom(BigDecimal bottom) {
+		this.bottom = bottom;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		InlineResponse2002Extent inlineResponse2002Extent = (InlineResponse2002Extent) o;
+		return Objects.equals(this.srs, inlineResponse2002Extent.srs)
+				&& Objects.equals(this.left, inlineResponse2002Extent.left)
+				&& Objects.equals(this.right, inlineResponse2002Extent.right)
+				&& Objects.equals(this.top, inlineResponse2002Extent.top)
+				&& Objects.equals(this.bottom, inlineResponse2002Extent.bottom);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    InlineResponse2002Extent inlineResponse2002Extent = (InlineResponse2002Extent) o;
-    return Objects.equals(this.srs, inlineResponse2002Extent.srs) &&
-        Objects.equals(this.left, inlineResponse2002Extent.left) &&
-        Objects.equals(this.right, inlineResponse2002Extent.right) &&
-        Objects.equals(this.top, inlineResponse2002Extent.top) &&
-        Objects.equals(this.bottom, inlineResponse2002Extent.bottom);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(srs, left, right, top, bottom);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(srs, left, right, top, bottom);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class InlineResponse2002Extent {\n");
 
+		sb.append("    srs: ").append(toIndentedString(srs)).append("\n");
+		sb.append("    left: ").append(toIndentedString(left)).append("\n");
+		sb.append("    right: ").append(toIndentedString(right)).append("\n");
+		sb.append("    top: ").append(toIndentedString(top)).append("\n");
+		sb.append("    bottom: ").append(toIndentedString(bottom)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class InlineResponse2002Extent {\n");
-    
-    sb.append("    srs: ").append(toIndentedString(srs)).append("\n");
-    sb.append("    left: ").append(toIndentedString(left)).append("\n");
-    sb.append("    right: ").append(toIndentedString(right)).append("\n");
-    sb.append("    top: ").append(toIndentedString(top)).append("\n");
-    sb.append("    bottom: ").append(toIndentedString(bottom)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

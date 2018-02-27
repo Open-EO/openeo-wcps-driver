@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -26,93 +25,92 @@ import io.swagger.annotations.ApiModelProperty;
  * InlineResponse200
  */
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class InlineResponse200  implements Serializable {
-  @JsonProperty("default")
-  private String _default = null;
+public class InlineResponse200 implements Serializable {
+	@JsonProperty("default")
+	private String _default = null;
 
-  @JsonProperty("formats")
-  private Object formats = null;
+	@JsonProperty("formats")
+	private Object formats = null;
 
-  public InlineResponse200 _default(String _default) {
-    this._default = _default;
-    return this;
-  }
+	public InlineResponse200 _default(String _default) {
+		this._default = _default;
+		return this;
+	}
 
-  /**
-   * Get _default
-   * @return _default
-   **/
-  @JsonProperty("default")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public String getDefault() {
-    return _default;
-  }
+	/**
+	 * Get _default
+	 * 
+	 * @return _default
+	 **/
+	@JsonProperty("default")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	public String getDefault() {
+		return _default;
+	}
 
-  public void setDefault(String _default) {
-    this._default = _default;
-  }
+	public void setDefault(String _default) {
+		this._default = _default;
+	}
 
-  public InlineResponse200 formats(Object formats) {
-    this.formats = formats;
-    return this;
-  }
+	public InlineResponse200 formats(Object formats) {
+		this.formats = formats;
+		return this;
+	}
 
-  /**
-   * Get formats
-   * @return formats
-   **/
-  @JsonProperty("formats")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public Object getFormats() {
-    return formats;
-  }
+	/**
+	 * Get formats
+	 * 
+	 * @return formats
+	 **/
+	@JsonProperty("formats")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	public Object getFormats() {
+		return formats;
+	}
 
-  public void setFormats(Object formats) {
-    this.formats = formats;
-  }
+	public void setFormats(Object formats) {
+		this.formats = formats;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		InlineResponse200 inlineResponse200 = (InlineResponse200) o;
+		return Objects.equals(this._default, inlineResponse200._default)
+				&& Objects.equals(this.formats, inlineResponse200.formats);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    InlineResponse200 inlineResponse200 = (InlineResponse200) o;
-    return Objects.equals(this._default, inlineResponse200._default) &&
-        Objects.equals(this.formats, inlineResponse200.formats);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(_default, formats);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(_default, formats);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class InlineResponse200 {\n");
 
+		sb.append("    _default: ").append(toIndentedString(_default)).append("\n");
+		sb.append("    formats: ").append(toIndentedString(formats)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class InlineResponse200 {\n");
-    
-    sb.append("    _default: ").append(toIndentedString(_default)).append("\n");
-    sb.append("    formats: ").append(toIndentedString(formats)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

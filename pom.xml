@@ -208,6 +208,16 @@
 			<version>1.0.1</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.j256.ormlite</groupId>
+			<artifactId>ormlite-core</artifactId>
+			<version>5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.j256.ormlite</groupId>
+			<artifactId>ormlite-jdbc</artifactId>
+			<version>5.1</version>
+		</dependency>
 	</dependencies>
 	<properties>
 		<java.version>1.8</java.version>

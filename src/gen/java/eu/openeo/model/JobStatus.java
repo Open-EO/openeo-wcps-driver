@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -19,42 +18,41 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  * The current status of the job.
  */
 public enum JobStatus {
-  
-  SUBMITTED("submitted"),
-  
-  QUEUED("queued"),
-  
-  RUNNING("running"),
-  
-  FINISHED("finished"),
-  
-  PAUSED("paused"),
-  
-  CANCELED("canceled"),
-  
-  ERROR("error"),
-  
-  UNKNOWN("unknown");
 
-  private String value;
+	SUBMITTED("submitted"),
 
-  JobStatus(String value) {
-    this.value = value;
-  }
+	QUEUED("queued"),
 
-  @Override
-  public String toString() {
-    return String.valueOf(value);
-  }
+	RUNNING("running"),
 
-  @JsonCreator
-  public static JobStatus fromValue(String text) {
-    for (JobStatus b : JobStatus.values()) {
-      if (String.valueOf(b.value).equals(text)) {
-        return b;
-      }
-    }
-    return null;
-  }
+	FINISHED("finished"),
+
+	PAUSED("paused"),
+
+	CANCELED("canceled"),
+
+	ERROR("error"),
+
+	UNKNOWN("unknown");
+
+	private String value;
+
+	JobStatus(String value) {
+		this.value = value;
+	}
+
+	@Override
+	public String toString() {
+		return String.valueOf(value);
+	}
+
+	@JsonCreator
+	public static JobStatus fromValue(String text) {
+		for (JobStatus b : JobStatus.values()) {
+			if (String.valueOf(b.value).equals(text)) {
+				return b;
+			}
+		}
+		return null;
+	}
 }
-

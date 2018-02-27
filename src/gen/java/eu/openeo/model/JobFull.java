@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -20,6 +19,8 @@ import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -29,238 +30,254 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(description = "Defines full metadata of processing jobs that have been submitted by users.")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class JobFull  implements Serializable {
-  @JsonProperty("job_id")
-  private String jobId = null;
+@DatabaseTable(tableName = "jobs")
+public class JobFull implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8518285065901989576L;
 
-  @JsonProperty("status")
-  private JobStatus status = null;
+	@JsonProperty("job_id")
+	@DatabaseField(id = true)
+	private String jobId = null;
 
-  @JsonProperty("process_graph")
-  private ProcessGraph processGraph = null;
+	@JsonProperty("status")
+	@DatabaseField(canBeNull =  false)
+	private JobStatus status = null;
 
-  @JsonProperty("output")
-  private OutputFormatBody output = null;
+	@JsonProperty("process_graph")
+	@DatabaseField(canBeNull =  false)
+	private Object processGraph = null;
 
-  @JsonProperty("submitted")
-  private String submitted = null;
+	@JsonProperty("output")
+	@DatabaseField(canBeNull =  false)
+	private Object output = null;
 
-  @JsonProperty("updated")
-  private String updated = null;
+	@JsonProperty("submitted")
+	@DatabaseField()
+	private String submitted = null;
 
-  @JsonProperty("user_id")
-  private String userId = null;
+	@JsonProperty("updated")
+	@DatabaseField()
+	private String updated = null;
 
-  @JsonProperty("consumed_credits")
-  private BigDecimal consumedCredits = null;
+	@JsonProperty("user_id")
+	@DatabaseField()
+	private String userId = null;
 
-  public JobFull jobId(String jobId) {
-    this.jobId = jobId;
-    return this;
-  }
+	@JsonProperty("consumed_credits")
+	@DatabaseField()
+	private BigDecimal consumedCredits = null;
 
-  /**
-   * Get jobId
-   * @return jobId
-   **/
-  @JsonProperty("job_id")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public String getJobId() {
-    return jobId;
-  }
+	public JobFull jobId(String jobId) {
+		this.jobId = jobId;
+		return this;
+	}
 
-  public void setJobId(String jobId) {
-    this.jobId = jobId;
-  }
+	/**
+	 * Get jobId
+	 * 
+	 * @return jobId
+	 **/
+	@JsonProperty("job_id")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	public String getJobId() {
+		return jobId;
+	}
 
-  public JobFull status(JobStatus status) {
-    this.status = status;
-    return this;
-  }
+	public void setJobId(String jobId) {
+		this.jobId = jobId;
+	}
 
-  /**
-   * Get status
-   * @return status
-   **/
-  @JsonProperty("status")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public JobStatus getStatus() {
-    return status;
-  }
+	public JobFull status(JobStatus status) {
+		this.status = status;
+		return this;
+	}
 
-  public void setStatus(JobStatus status) {
-    this.status = status;
-  }
+	/**
+	 * Get status
+	 * 
+	 * @return status
+	 **/
+	@JsonProperty("status")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	public JobStatus getStatus() {
+		return status;
+	}
 
-  public JobFull processGraph(ProcessGraph processGraph) {
-    this.processGraph = processGraph;
-    return this;
-  }
+	public void setStatus(JobStatus status) {
+		this.status = status;
+	}
 
-  /**
-   * Get processGraph
-   * @return processGraph
-   **/
-  @JsonProperty("process_graph")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public ProcessGraph getProcessGraph() {
-    return processGraph;
-  }
+	public JobFull processGraph(Object processGraph) {
+		this.processGraph = processGraph;
+		return this;
+	}
 
-  public void setProcessGraph(ProcessGraph processGraph) {
-    this.processGraph = processGraph;
-  }
+	/**
+	 * Get processGraph
+	 * 
+	 * @return processGraph
+	 **/
+	@JsonProperty("process_graph")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	public Object getProcessGraph() {
+		return processGraph;
+	}
 
-  public JobFull output(OutputFormatBody output) {
-    this.output = output;
-    return this;
-  }
+	public void setProcessGraph(Object processGraph) {
+		this.processGraph = processGraph;
+	}
 
-  /**
-   * Get output
-   * @return output
-   **/
-  @JsonProperty("output")
-  @ApiModelProperty(value = "")
-  public OutputFormatBody getOutput() {
-    return output;
-  }
+	public JobFull output(Object output) {
+		this.output = output;
+		return this;
+	}
 
-  public void setOutput(OutputFormatBody output) {
-    this.output = output;
-  }
+	/**
+	 * Get output
+	 * 
+	 * @return output
+	 **/
+	@JsonProperty("output")
+	@ApiModelProperty(value = "")
+	public Object getOutput() {
+		return output;
+	}
 
-  public JobFull submitted(String submitted) {
-    this.submitted = submitted;
-    return this;
-  }
+	public void setOutput(Object output) {
+		this.output = output;
+	}
 
-  /**
-   * Get submitted
-   * @return submitted
-   **/
-  @JsonProperty("submitted")
-  @ApiModelProperty(value = "")
-  public String getSubmitted() {
-    return submitted;
-  }
+	public JobFull submitted(String submitted) {
+		this.submitted = submitted;
+		return this;
+	}
 
-  public void setSubmitted(String submitted) {
-    this.submitted = submitted;
-  }
+	/**
+	 * Get submitted
+	 * 
+	 * @return submitted
+	 **/
+	@JsonProperty("submitted")
+	@ApiModelProperty(value = "")
+	public String getSubmitted() {
+		return submitted;
+	}
 
-  public JobFull updated(String updated) {
-    this.updated = updated;
-    return this;
-  }
+	public void setSubmitted(String submitted) {
+		this.submitted = submitted;
+	}
 
-  /**
-   * Get updated
-   * @return updated
-   **/
-  @JsonProperty("updated")
-  @ApiModelProperty(value = "")
-  public String getUpdated() {
-    return updated;
-  }
+	public JobFull updated(String updated) {
+		this.updated = updated;
+		return this;
+	}
 
-  public void setUpdated(String updated) {
-    this.updated = updated;
-  }
+	/**
+	 * Get updated
+	 * 
+	 * @return updated
+	 **/
+	@JsonProperty("updated")
+	@ApiModelProperty(value = "")
+	public String getUpdated() {
+		return updated;
+	}
 
-  public JobFull userId(String userId) {
-    this.userId = userId;
-    return this;
-  }
+	public void setUpdated(String updated) {
+		this.updated = updated;
+	}
 
-  /**
-   * Get userId
-   * @return userId
-   **/
-  @JsonProperty("user_id")
-  @ApiModelProperty(value = "")
-  public String getUserId() {
-    return userId;
-  }
+	public JobFull userId(String userId) {
+		this.userId = userId;
+		return this;
+	}
 
-  public void setUserId(String userId) {
-    this.userId = userId;
-  }
+	/**
+	 * Get userId
+	 * 
+	 * @return userId
+	 **/
+	@JsonProperty("user_id")
+	@ApiModelProperty(value = "")
+	public String getUserId() {
+		return userId;
+	}
 
-  public JobFull consumedCredits(BigDecimal consumedCredits) {
-    this.consumedCredits = consumedCredits;
-    return this;
-  }
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 
-  /**
-   * Get consumedCredits
-   * @return consumedCredits
-   **/
-  @JsonProperty("consumed_credits")
-  @ApiModelProperty(value = "")
-  public BigDecimal getConsumedCredits() {
-    return consumedCredits;
-  }
+	public JobFull consumedCredits(BigDecimal consumedCredits) {
+		this.consumedCredits = consumedCredits;
+		return this;
+	}
 
-  public void setConsumedCredits(BigDecimal consumedCredits) {
-    this.consumedCredits = consumedCredits;
-  }
+	/**
+	 * Get consumedCredits
+	 * 
+	 * @return consumedCredits
+	 **/
+	@JsonProperty("consumed_credits")
+	@ApiModelProperty(value = "")
+	public BigDecimal getConsumedCredits() {
+		return consumedCredits;
+	}
 
+	public void setConsumedCredits(BigDecimal consumedCredits) {
+		this.consumedCredits = consumedCredits;
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    JobFull jobFull = (JobFull) o;
-    return Objects.equals(this.jobId, jobFull.jobId) &&
-        Objects.equals(this.status, jobFull.status) &&
-        Objects.equals(this.processGraph, jobFull.processGraph) &&
-        Objects.equals(this.output, jobFull.output) &&
-        Objects.equals(this.submitted, jobFull.submitted) &&
-        Objects.equals(this.updated, jobFull.updated) &&
-        Objects.equals(this.userId, jobFull.userId) &&
-        Objects.equals(this.consumedCredits, jobFull.consumedCredits);
-  }
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		JobFull jobFull = (JobFull) o;
+		return Objects.equals(this.jobId, jobFull.jobId) && Objects.equals(this.status, jobFull.status)
+				&& Objects.equals(this.processGraph, jobFull.processGraph)
+				&& Objects.equals(this.output, jobFull.output) && Objects.equals(this.submitted, jobFull.submitted)
+				&& Objects.equals(this.updated, jobFull.updated) && Objects.equals(this.userId, jobFull.userId)
+				&& Objects.equals(this.consumedCredits, jobFull.consumedCredits);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(jobId, status, processGraph, output, submitted, updated, userId, consumedCredits);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(jobId, status, processGraph, output, submitted, updated, userId, consumedCredits);
+	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class JobFull {\n");
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class JobFull {\n");
-    
-    sb.append("    jobId: ").append(toIndentedString(jobId)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    processGraph: ").append(toIndentedString(processGraph)).append("\n");
-    sb.append("    output: ").append(toIndentedString(output)).append("\n");
-    sb.append("    submitted: ").append(toIndentedString(submitted)).append("\n");
-    sb.append("    updated: ").append(toIndentedString(updated)).append("\n");
-    sb.append("    userId: ").append(toIndentedString(userId)).append("\n");
-    sb.append("    consumedCredits: ").append(toIndentedString(consumedCredits)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
+		sb.append("    jobId: ").append(toIndentedString(jobId)).append("\n");
+		sb.append("    status: ").append(toIndentedString(status)).append("\n");
+		sb.append("    processGraph: ").append(toIndentedString(processGraph)).append("\n");
+		sb.append("    output: ").append(toIndentedString(output)).append("\n");
+		sb.append("    submitted: ").append(toIndentedString(submitted)).append("\n");
+		sb.append("    updated: ").append(toIndentedString(updated)).append("\n");
+		sb.append("    userId: ").append(toIndentedString(userId)).append("\n");
+		sb.append("    consumedCredits: ").append(toIndentedString(consumedCredits)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

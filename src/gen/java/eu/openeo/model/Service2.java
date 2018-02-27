@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -24,67 +23,65 @@ import io.swagger.annotations.ApiModelProperty;
  * Service2
  */
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class Service2  implements Serializable {
-  @JsonProperty("service_args")
-  private ServiceArgs serviceArgs = null;
+public class Service2 implements Serializable {
+	@JsonProperty("service_args")
+	private ServiceArgs serviceArgs = null;
 
-  public Service2 serviceArgs(ServiceArgs serviceArgs) {
-    this.serviceArgs = serviceArgs;
-    return this;
-  }
+	public Service2 serviceArgs(ServiceArgs serviceArgs) {
+		this.serviceArgs = serviceArgs;
+		return this;
+	}
 
-  /**
-   * Get serviceArgs
-   * @return serviceArgs
-   **/
-  @JsonProperty("service_args")
-  @ApiModelProperty(value = "")
-  public ServiceArgs getServiceArgs() {
-    return serviceArgs;
-  }
+	/**
+	 * Get serviceArgs
+	 * 
+	 * @return serviceArgs
+	 **/
+	@JsonProperty("service_args")
+	@ApiModelProperty(value = "")
+	public ServiceArgs getServiceArgs() {
+		return serviceArgs;
+	}
 
-  public void setServiceArgs(ServiceArgs serviceArgs) {
-    this.serviceArgs = serviceArgs;
-  }
+	public void setServiceArgs(ServiceArgs serviceArgs) {
+		this.serviceArgs = serviceArgs;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Service2 service2 = (Service2) o;
+		return Objects.equals(this.serviceArgs, service2.serviceArgs);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    Service2 service2 = (Service2) o;
-    return Objects.equals(this.serviceArgs, service2.serviceArgs);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(serviceArgs);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(serviceArgs);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class Service2 {\n");
 
+		sb.append("    serviceArgs: ").append(toIndentedString(serviceArgs)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class Service2 {\n");
-    
-    sb.append("    serviceArgs: ").append(toIndentedString(serviceArgs)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

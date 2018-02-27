@@ -10,116 +10,122 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * A process graph defines an executable process, i.e. one process or a combination of chained processes including specific arguments.
+ * A process graph defines an executable process, i.e. one process or a
+ * combination of chained processes including specific arguments.
  */
 @ApiModel(description = "A process graph defines an executable process, i.e. one process or a combination of chained processes including specific arguments.")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ProcessGraph  implements Serializable {
-  /**
+public class ProcessGraph implements Serializable {
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 196584606548756019L;
 
-@JsonProperty("process_id")
-  private String processId = null;
+	@JsonProperty("process_id")
+	@JsonBackReference
+	private String processId = null;
+	
+	@JsonProperty("args")
+	private void unpackNested(Map<String,Object> args) {
+        this.args = new ArgSet();
+        this.args.setArgs(args);
+	}
+	
+	private ArgSet args = null;
 
-  @JsonProperty("args")
-  private ArgSet args = null;
+	public ProcessGraph processId(String processId) {
+		this.processId = processId;
+		return this;
+	}
 
-  public ProcessGraph processId(String processId) {
-    this.processId = processId;
-    return this;
-  }
+	/**
+	 * The unique identifier of the process.
+	 * 
+	 * @return processId
+	 **/
+	@JsonProperty("process_id")
+	@ApiModelProperty(required = true, value = "The unique identifier of the process.")
+	@NotNull
+	public String getProcessId() {
+		return processId;
+	}
 
-  /**
-   * The unique identifier of the process.
-   * @return processId
-   **/
-  @JsonProperty("process_id")
-  @ApiModelProperty(required = true, value = "The unique identifier of the process.")
-  @NotNull
-  public String getProcessId() {
-    return processId;
-  }
+	public void setProcessId(String processId) {
+		this.processId = processId;
+	}
 
-  public void setProcessId(String processId) {
-    this.processId = processId;
-  }
+	public ProcessGraph args(ArgSet args) {
+		this.args = args;
+		return this;
+	}
 
-  public ProcessGraph args(ArgSet args) {
-    this.args = args;
-    return this;
-  }
+	/**
+	 * Get args
+	 * 
+	 * @return args
+	 **/
+	@JsonProperty("args")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	public ArgSet getArgs() {
+		return args;
+	}
 
-  /**
-   * Get args
-   * @return args
-   **/
-  @JsonProperty("args")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
-  public ArgSet getArgs() {
-    return args;
-  }
+	public void setArgs(ArgSet args) {
+		this.args = args;
+	}
 
-  public void setArgs(ArgSet args) {
-    this.args = args;
-  }
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ProcessGraph processGraph = (ProcessGraph) o;
+		return Objects.equals(this.processId, processGraph.processId) && Objects.equals(this.args, processGraph.args);
+	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(processId, args);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    ProcessGraph processGraph = (ProcessGraph) o;
-    return Objects.equals(this.processId, processGraph.processId) &&
-        Objects.equals(this.args, processGraph.args);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class ProcessGraph {\n");
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(processId, args);
-  }
+		sb.append("    processId: ").append(toIndentedString(processId)).append("\n");
+		sb.append("    args: ").append(toIndentedString(args)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ProcessGraph {\n");
-    
-    sb.append("    processId: ").append(toIndentedString(processId)).append("\n");
-    sb.append("    args: ").append(toIndentedString(args)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-

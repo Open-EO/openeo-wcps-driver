@@ -5,17 +5,17 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class PropertiesHelper {
-	
+
 	public static String readProperties(String key) throws IOException {
-		  ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		  InputStream stream = classLoader.getResourceAsStream("config.properties");
-		 
-		  Properties properties = new Properties();
-		  properties.load(stream);
-		 
-		  String value = properties.getProperty(key);
-		 
-		  return value;
-		}
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		InputStream stream = classLoader.getResourceAsStream("config.properties");
+
+		Properties properties = new Properties();
+		properties.load(stream);
+
+		String value = properties.getProperty(key);
+
+		return value;
+	}
 
 }

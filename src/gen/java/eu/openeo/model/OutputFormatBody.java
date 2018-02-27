@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
 import java.io.Serializable;
@@ -24,72 +23,71 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Output format to be used. Supported formats and options can be retrieved using the &#x60;GET /capabilities/output_formats&#x60; endpoint.
+ * Output format to be used. Supported formats and options can be retrieved
+ * using the &#x60;GET /capabilities/output_formats&#x60; endpoint.
  */
 @ApiModel(description = "Output format to be used. Supported formats and options can be retrieved using the `GET /capabilities/output_formats` endpoint.")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class OutputFormatBody  implements Serializable {
-  @JsonProperty("format")
-  private String format = null;
+public class OutputFormatBody implements Serializable {
+	@JsonProperty("format")
+	private String format = null;
 
-  public OutputFormatBody format(String format) {
-    this.format = format;
-    return this;
-  }
+	public OutputFormatBody format(String format) {
+		this.format = format;
+		return this;
+	}
 
-  /**
-   * One of the supported output formats.
-   * @return format
-   **/
-  @JsonProperty("format")
-  @ApiModelProperty(required = true, value = "One of the supported output formats.")
-  @NotNull
-  public String getFormat() {
-    return format;
-  }
+	/**
+	 * One of the supported output formats.
+	 * 
+	 * @return format
+	 **/
+	@JsonProperty("format")
+	@ApiModelProperty(required = true, value = "One of the supported output formats.")
+	@NotNull
+	public String getFormat() {
+		return format;
+	}
 
-  public void setFormat(String format) {
-    this.format = format;
-  }
+	public void setFormat(String format) {
+		this.format = format;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		OutputFormatBody outputFormatBody = (OutputFormatBody) o;
+		return Objects.equals(this.format, outputFormatBody.format);
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    OutputFormatBody outputFormatBody = (OutputFormatBody) o;
-    return Objects.equals(this.format, outputFormatBody.format);
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(format);
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(format);
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class OutputFormatBody {\n");
 
+		sb.append("    format: ").append(toIndentedString(format)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class OutputFormatBody {\n");
-    
-    sb.append("    format: ").append(toIndentedString(format)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-
