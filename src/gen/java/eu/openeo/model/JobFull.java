@@ -18,10 +18,17 @@ import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import eu.openeo.dao.JSONObjectPersister;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -46,11 +53,11 @@ public class JobFull implements Serializable {
 	private JobStatus status = null;
 
 	@JsonProperty("process_graph")
-	@DatabaseField(canBeNull =  false)
+	@DatabaseField(canBeNull =  false, persisterClass = JSONObjectPersister.class)
 	private Object processGraph = null;
 
 	@JsonProperty("output")
-	@DatabaseField(canBeNull =  false)
+	@DatabaseField(canBeNull =  false, persisterClass = JSONObjectPersister.class)
 	private Object output = null;
 
 	@JsonProperty("submitted")
@@ -125,7 +132,19 @@ public class JobFull implements Serializable {
 	@ApiModelProperty(required = true, value = "")
 	@NotNull
 	public Object getProcessGraph() {
-		return processGraph;
+		JSONParser parser = new JSONParser();
+		ObjectMapper mapper = new ObjectMapper();
+		JSONObject processgraphLocal = null;
+		try {
+			processgraphLocal = ((JSONObject) parser.parse(mapper.writeValueAsString(this.processGraph)));
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return processgraphLocal;
 	}
 
 	public void setProcessGraph(Object processGraph) {
@@ -145,7 +164,20 @@ public class JobFull implements Serializable {
 	@JsonProperty("output")
 	@ApiModelProperty(value = "")
 	public Object getOutput() {
-		return output;
+//		return output;
+		JSONParser parser = new JSONParser();
+		ObjectMapper mapper = new ObjectMapper();
+		JSONObject outputLocal = null;
+		try {
+			outputLocal = ((JSONObject) parser.parse(mapper.writeValueAsString(this.output)));
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return outputLocal;
 	}
 
 	public void setOutput(Object output) {

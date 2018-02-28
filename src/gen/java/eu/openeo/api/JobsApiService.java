@@ -5,11 +5,11 @@ import java.math.BigDecimal;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import eu.openeo.model.Job;
 import eu.openeo.model.JobFull;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public abstract class JobsApiService {
+	
 	public abstract Response jobsJobIdCancelOptions(String jobId, SecurityContext securityContext)
 			throws NotFoundException;
 
