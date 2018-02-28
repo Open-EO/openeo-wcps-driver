@@ -69,14 +69,12 @@ public class DataApiServiceImpl extends DataApiService {
 
 	@Override
 	public Response dataOpensearchOptions(SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+		return Response.ok().build();
 	}
 
 	@Override
 	public Response dataOptions(SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+		return Response.ok().build();
 	}
 
 	@Override
@@ -115,7 +113,6 @@ public class DataApiServiceImpl extends DataApiService {
 
 	@Override
 	public Response dataProductIdOptions(String productId, SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+		return Response.ok().build();
 	}
 }

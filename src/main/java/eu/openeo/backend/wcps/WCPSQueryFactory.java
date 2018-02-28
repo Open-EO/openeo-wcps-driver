@@ -229,12 +229,22 @@ public class WCPSQueryFactory {
 				for (Object argsKey : argsObject.keySet()) {
 					String argsKeyStr = (String) argsKey;
 					if (argsKeyStr.equals("collections") || argsKeyStr.equals("imagery")) {
-						JSONArray collections = (JSONArray) argsObject.get(argsKey);
-						result = parseOpenEOProcessGraph((JSONObject) collections.get(0));
-						if (result == null) {
-							result = (JSONObject) collections.get(0);
-							break;
+						try {
+							JSONArray collections = (JSONArray) argsObject.get(argsKey);
+							result = parseOpenEOProcessGraph((JSONObject) collections.get(0));
+							if (result == null) {
+								result = (JSONObject) collections.get(0);
+								break;
+							}
+						}catch(java.lang.ClassCastException e) {
+							JSONObject collections = (JSONObject) argsObject.get(argsKey);
+							result = parseOpenEOProcessGraph(collections);
+							if (result == null) {
+								result = collections;
+								break;
+							}
 						}
+						
 					}
 				}
 			} else if (keyStr.equals("collection_id") || keyStr.equals("prodcut_id")) {
