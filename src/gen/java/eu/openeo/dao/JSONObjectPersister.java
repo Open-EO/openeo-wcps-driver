@@ -69,6 +69,8 @@ public class JSONObjectPersister extends StringType {
 			log.error("Error resultToSqlArg: " + e.getMessage());
 			log.error(results.getObject(columnPos).toString());
 			return returnObject;
+		} catch(NullPointerException e) {
+			return null;
 		}
 	}
 

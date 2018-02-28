@@ -57,7 +57,7 @@ public class JobFull implements Serializable {
 	private Object processGraph = null;
 
 	@JsonProperty("output")
-	@DatabaseField(canBeNull =  false, persisterClass = JSONObjectPersister.class)
+	@DatabaseField(persisterClass = JSONObjectPersister.class)
 	private Object output = null;
 
 	@JsonProperty("submitted")

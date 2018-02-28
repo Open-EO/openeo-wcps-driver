@@ -86,11 +86,16 @@ public class JobsApiServiceImpl extends JobsApiService {
 		WCPSQueryFactory wcpsFactory = null;
 		try {
 			job = jobDao.queryForId(jobId);
+			if(job == null) {
+				return Response.status(404).entity(new String("A job with the specified identifier is not available.")).build();
+			}
 			log.debug("The following job was retrieved: \n" + job.toString());
 			JSONObject processGraphJSON;
-			String outputFormat = format;
+			String outputFormat = "json";
+			if(format != null) {
+				outputFormat = format;
+			}
 			processGraphJSON = (JSONObject) job.getProcessGraph();
-			outputFormat = (String)(((JSONObject) job.getOutput()).get(new String("format")));
 			wcpsFactory = new WCPSQueryFactory(processGraphJSON, outputFormat);
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
@@ -140,6 +145,9 @@ public class JobsApiServiceImpl extends JobsApiService {
 		JobFull job = null;
 		try {
 			job = jobDao.queryForId(jobId);
+			if(job == null) {
+				return Response.status(404).entity(new String("A job with the specified identifier is not available.")).build();
+			}
 			log.debug("The following job was retrieved: \n" + job.toString());
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
@@ -222,7 +230,12 @@ public class JobsApiServiceImpl extends JobsApiService {
 		log.debug("The following job was submitted: \n" + job.toString());
 		log.debug("" + job.getProcessGraph().getClass().getSimpleName());
 		processGraphJSON = (JSONObject) job.getProcessGraph();
-		outputFormat = (String)(((JSONObject) job.getOutput()).get(new String("format")));
+		try {
+			outputFormat = (String)(((JSONObject) job.getOutput()).get(new String("format")));
+		}catch(Exception e) {
+			log.error("An error occured while parsing output type: " + e.getMessage());
+			log.info("assigning standard output type: json");
+		}
 		WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON, outputFormat);
 		
 		log.debug("Graph successfully parsed and saved with ID: " + jobID);
