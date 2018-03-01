@@ -1,3 +1,4 @@
 /target/
 /openeo.log
 /logs/
+/deploy_to_live.bat

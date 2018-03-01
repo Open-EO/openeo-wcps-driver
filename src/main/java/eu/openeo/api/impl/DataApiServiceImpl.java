@@ -6,12 +6,20 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.apache.log4j.Logger;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
+import org.jdom2.input.SAXBuilder;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.json.XML;
 
 import eu.openeo.api.DataApiService;
@@ -23,25 +31,38 @@ import eu.openeo.api.ApiResponseMessage;
 public class DataApiServiceImpl extends DataApiService {
 
 	Logger log = Logger.getLogger(this.getClass());
+	
+	private SAXBuilder builder = null;
+	
+	public DataApiServiceImpl() {
+		this.builder = new SAXBuilder();
+	}
 
 	@Override
 	public Response dataGet(String qname, String qgeom, String qstartdate, String qenddate,
 			SecurityContext securityContext) throws NotFoundException {
 		try {
-			StringBuilder result = new StringBuilder();
 			URL url;
 			url = new URL(PropertiesHelper.readProperties("wcps-endpoint")
 					+ "?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCapabilities");
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
-			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-			String line;
-			while ((line = rd.readLine()) != null) {
-				result.append(line);
+			Document capabilititesDoc = (Document) this.builder.build(conn.getInputStream()); 
+			Element rootNode = capabilititesDoc.getRootElement();
+			Namespace defaultNS = rootNode.getNamespace();
+			log.debug("root node info: " + rootNode.getName());		
+			List<Element> coverageList = rootNode.getChildren("Contents", defaultNS).get(0).getChildren("CoverageSummary", defaultNS);
+			JSONArray productArray = new JSONArray();
+			log.debug("number of coverages found: " + coverageList.size());
+			for(int c = 0; c < coverageList.size(); c++) {
+				Element coverage = coverageList.get(c);
+				log.debug("root node info: " + coverage.getName() + ":" + coverage.getChildText("CoverageId", defaultNS));		
+				JSONObject product = new JSONObject();
+				product.put("product_id", coverage.getChildText("CoverageId", defaultNS));
+				productArray.put(product);
 			}
-			rd.close();
-			return Response.ok(XML.toJSONObject(result.toString()).toString(4), MediaType.APPLICATION_JSON).build();
+			return Response.ok(productArray.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -56,6 +77,10 @@ public class DataApiServiceImpl extends DataApiService {
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage()))
 					.build();
+		} catch (JDOMException e) {
+			return Response.serverError()
+					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
+							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage())).build();
 		}
 	}
 
@@ -79,7 +104,6 @@ public class DataApiServiceImpl extends DataApiService {
 
 	@Override
 	public Response dataProductIdGet(String productId, SecurityContext securityContext) throws NotFoundException {
-		StringBuilder result = new StringBuilder();
 		URL url;
 		try {
 			url = new URL(PropertiesHelper.readProperties("wcps-endpoint")
@@ -87,13 +111,26 @@ public class DataApiServiceImpl extends DataApiService {
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
-			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-			String line;
-			while ((line = rd.readLine()) != null) {
-				result.append(line);
+			Document capabilititesDoc = (Document) this.builder.build(conn.getInputStream());
+			Element rootNode = capabilititesDoc.getRootElement();
+			Namespace defaultNS = rootNode.getNamespace();
+			Namespace gmlNS = rootNode.getNamespace("gmlcov");
+			Namespace sweNS = rootNode.getNamespace("swe");
+			log.debug("root node info: " + rootNode.getName());		
+			List<Element> bandList = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecird", sweNS).getChildren("field", sweNS);
+			JSONObject coverage = new JSONObject();
+			coverage.put("product_id", productId);
+			JSONArray bandArray = new JSONArray();
+			log.debug("number of coverages found: " + bandList.size());
+			for(int c = 0; c < bandList.size(); c++) {
+				Element band = bandList.get(c);
+				log.debug("root node info: " + band.getName() + ":" + band.getAttributeValue("name"));		
+				JSONObject product = new JSONObject();
+				product.put("band_id", band.getAttributeValue("name"));
+				bandArray.put(product);
 			}
-			rd.close();
-			return Response.ok(XML.toJSONObject(result.toString()).toString(4), MediaType.APPLICATION_JSON).build();
+			coverage.put("bands", bandArray);
+			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -108,6 +145,10 @@ public class DataApiServiceImpl extends DataApiService {
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while describing coverage from WCPS endpoint: " + e.getMessage()))
 					.build();
+		} catch (JDOMException e) {
+			return Response.serverError()
+					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
+							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage())).build();
 		}
 	}
 
