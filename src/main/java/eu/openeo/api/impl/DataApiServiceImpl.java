@@ -112,12 +112,23 @@ public class DataApiServiceImpl extends DataApiService {
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			Document capabilititesDoc = (Document) this.builder.build(conn.getInputStream());
+			List<Namespace> namespaces = capabilititesDoc.getNamespacesIntroduced();
 			Element rootNode = capabilititesDoc.getRootElement();
 			Namespace defaultNS = rootNode.getNamespace();
-			Namespace gmlNS = rootNode.getNamespace("gmlcov");
-			Namespace sweNS = rootNode.getNamespace("swe");
+			Namespace gmlNS = null;
+			Namespace sweNS = null;
+			for (int n = 0; n < namespaces.size(); n++) {
+				Namespace current = namespaces.get(n);
+				if(current.getPrefix().equals("swe")) {
+					sweNS = current;
+				}
+				if(current.getPrefix().equals("gmlcov")) {
+					gmlNS = current;
+				}
+			}
+			
 			log.debug("root node info: " + rootNode.getName());		
-			List<Element> bandList = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecird", sweNS).getChildren("field", sweNS);
+			List<Element> bandList = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
 			JSONObject coverage = new JSONObject();
 			coverage.put("product_id", productId);
 			JSONArray bandArray = new JSONArray();
