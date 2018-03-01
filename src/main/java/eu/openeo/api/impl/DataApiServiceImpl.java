@@ -1,8 +1,6 @@
 package eu.openeo.api.impl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,7 +18,6 @@ import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.XML;
 
 import eu.openeo.api.DataApiService;
 import eu.openeo.api.NotFoundException;
@@ -129,13 +126,40 @@ public class DataApiServiceImpl extends DataApiService {
 			
 			log.debug("root node info: " + rootNode.getName());		
 			List<Element> bandList = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
+			Element coverageDescElement = rootNode.getChild("CoverageDescription", defaultNS);
+			Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
+			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
+			
+			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
+			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
+			JSONObject extent = new JSONObject();
+			JSONObject time =  new JSONObject();
+			String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
+			for(int a = 0; a < axis.length; a++) {
+				log.debug(axis[a]);
+				if(axis[a].equals("E")){
+					extent.put("left", Double.parseDouble(minValues[a]));
+					extent.put("right", Double.parseDouble(maxValues[a]));
+				}
+				if(axis[a].equals("N")){
+					extent.put("bottom", Double.parseDouble(minValues[a]));
+					extent.put("top", Double.parseDouble(maxValues[a]));
+				}
+				if(axis[a].equals("DATE")){
+					time.put("from", minValues[a].replaceAll("\"", ""));
+					time.put("to", maxValues[a].replaceAll("\"", ""));
+				}
+			}
+			
 			JSONObject coverage = new JSONObject();
 			coverage.put("product_id", productId);
+			coverage.put("extent", extent);
+			coverage.put("time", time);
 			JSONArray bandArray = new JSONArray();
-			log.debug("number of coverages found: " + bandList.size());
+			log.debug("number of bands found: " + bandList.size());
 			for(int c = 0; c < bandList.size(); c++) {
 				Element band = bandList.get(c);
-				log.debug("root node info: " + band.getName() + ":" + band.getAttributeValue("name"));		
+				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
 				JSONObject product = new JSONObject();
 				product.put("band_id", band.getAttributeValue("name"));
 				bandArray.put(product);
