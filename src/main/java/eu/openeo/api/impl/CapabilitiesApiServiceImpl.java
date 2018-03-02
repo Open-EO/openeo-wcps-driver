@@ -24,6 +24,8 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		endpointList.put(new String("/jobs"));
 		endpointList.put(new String("/jobs/{job_id}"));
 		endpointList.put(new String("/jobs/{job_id}/download"));
+		endpointList.put(new String("/processes"));
+		endpointList.put(new String("/processes/{process_id}"));
 		return Response.ok(endpointList.toString(4), MediaType.APPLICATION_JSON).build();
 	}
 
