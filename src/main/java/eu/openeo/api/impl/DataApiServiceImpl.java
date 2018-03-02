@@ -130,6 +130,9 @@ public class DataApiServiceImpl extends DataApiService {
 			Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
 			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
 			
+			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
+			srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
+			
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
 			JSONObject extent = new JSONObject();
@@ -150,7 +153,7 @@ public class DataApiServiceImpl extends DataApiService {
 					time.put("to", maxValues[a].replaceAll("\"", ""));
 				}
 			}
-			
+			extent.put("srs", srsDescription);			
 			JSONObject coverage = new JSONObject();
 			coverage.put("product_id", productId);
 			coverage.put("extent", extent);
