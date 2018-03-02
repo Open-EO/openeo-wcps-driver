@@ -131,7 +131,11 @@ public class DataApiServiceImpl extends DataApiService {
 			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
 			
 			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
-			srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
+			try {
+				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
+			}catch(StringIndexOutOfBoundsException e) {
+				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
+			}
 			
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
@@ -140,15 +144,15 @@ public class DataApiServiceImpl extends DataApiService {
 			String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
 			for(int a = 0; a < axis.length; a++) {
 				log.debug(axis[a]);
-				if(axis[a].equals("E")){
+				if(axis[a].equals("E") || axis[a].equals("X")){
 					extent.put("left", Double.parseDouble(minValues[a]));
 					extent.put("right", Double.parseDouble(maxValues[a]));
 				}
-				if(axis[a].equals("N")){
+				if(axis[a].equals("N") || axis[a].equals("Y")){
 					extent.put("bottom", Double.parseDouble(minValues[a]));
 					extent.put("top", Double.parseDouble(maxValues[a]));
 				}
-				if(axis[a].equals("DATE")){
+				if(axis[a].equals("DATE")  || axis[a].equals("ansi")){
 					time.put("from", minValues[a].replaceAll("\"", ""));
 					time.put("to", maxValues[a].replaceAll("\"", ""));
 				}
