@@ -1,0 +1,42 @@
+[
+    {
+        "args": {
+            "red": {"description": "The name or identifier of band containing the red part of the spectrum"},
+            "nir": {"description": "The name or identifier of band containing the near infrared part of the spectrum"},
+            "imagery": {"description": "The raster or time series of rasters to calculate the ndvi on"}
+        },
+        "process_id": "NDVI",
+        "description": "Computes the normalized difference vegetation index (NDVI) for all pixels and time slices of the input dataset."
+    },
+    {
+        "args": {"imagery": {"description": "The time series of rasters to extract the minimum value from"}},
+        "process_id": "min_time",
+        "description": "Finds the minimum value of a time series for every given pixel location."
+    },
+    {
+        "args": {"imagery": {"description": "The time series of rasters to extract the maximum value from"}},
+        "process_id": "max_time",
+        "description": "Finds the maximum value of a time series for every given pixel location."
+    },
+    {
+        "args": {
+            "imagery": {"description": "The time series of rasters to filter."},
+            "from": {"description": "Inclusive start date of filter"},
+            "to": {"description": "Inclusive end date of filter"}
+        },
+        "process_id": "filter_daterange",
+        "description": "Creates a subset in including only values inside a given data range."
+    },
+    {
+        "args": {
+            "top": {"description": "Maxium northing of filter"},
+            "left": {"description": "Minimum easting of filter"},
+            "srs": {"description": "Coordinate reference system"},
+            "bottom": {"description": "Minium northing of filter"},
+            "imagery": {"description": "The raster or time series of rasters to filter."},
+            "right": {"description": "Maximum easting  of filter"}
+        },
+        "process_id": "filter_bbox",
+        "description": "Creates a subset in including only values inside a given bounding box."
+    }
+]
