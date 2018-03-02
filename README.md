@@ -8,6 +8,9 @@
 
 This repository serves for the development of the openEO driver for WC(P)S backends.
 
+### Public testing endpoint
+[Eurac Research openEO WCPS endpoint](http://saocompute.eurac.edu/openEO_WCPS_Driver/)
+
 ### Currently implemented features
 1. Listing implemented endpoints through: [/openeo/capabilities](http://saocompute.eurac.edu/openEO_WCPS_Driver/openeo/capabilities)
 2. Listing implemented processes through: [/openeo/processes](http://saocompute.eurac.edu/openEO_WCPS_Driver/openeo/processes)
@@ -28,9 +31,6 @@ This repository serves for the development of the openEO driver for WC(P)S backe
   * json
   * csv
   * netcdf
-
-### Public endpoint
-[Eurac Research openEO WCPS endpoint](http://saocompute.eurac.edu/openEO_WCPS_Driver/)
 
 ### Operating environment dependencies
 - Web server capable of hosting a war archive (e.g. apache tomcat).
