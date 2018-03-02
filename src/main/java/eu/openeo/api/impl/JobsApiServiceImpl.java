@@ -18,7 +18,6 @@ import javax.ws.rs.core.SecurityContext;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,7 +44,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 	private String wcpsEndpoint = null;
 	
 	private ObjectMapper mapper = null;
-	private JSONParser parser = null;
 	
 	public JobsApiServiceImpl() {
 		try {
@@ -59,7 +57,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 			}
 			jobDao = DaoManager.createDao(connection, JobFull.class);
 			 mapper = new ObjectMapper();
-			 parser = new JSONParser();
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 		} catch (IOException ioe) {
@@ -228,7 +225,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 		JSONObject processGraphJSON;
 		String outputFormat = "json";
 		log.debug("The following job was submitted: \n" + job.toString());
-		log.debug("" + job.getProcessGraph().getClass().getSimpleName());
 		processGraphJSON = (JSONObject) job.getProcessGraph();
 		try {
 			outputFormat = (String)(((JSONObject) job.getOutput()).get(new String("format")));
