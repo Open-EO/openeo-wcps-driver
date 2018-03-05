@@ -24,18 +24,19 @@ This repository serves for the development of the openEO driver for WC(P)S backe
 2. Listing implemented processes through: [/openeo/processes](http://saocompute.eurac.edu/openEO_WCPS_Driver/openeo/processes)
 3. Listing available datasets through:    [/openeo/data](http://saocompute.eurac.edu/openEO_WCPS_Driver/openeo/data)
 4. Submission, status info and retrieval of processing graphs via /openeo/jobs
-5. Processing of raster
+5. Direct execution and result retrieval via /openeo/execute
+6. Processing of raster
   * subsetting in srs projection space
   * Normalied Difference Vegetation Index
-6. Download of image as 
+7. Download of image as 
   * tiff
   * png
   * jpeg
-7. Processing of time series of raster
+8. Processing of time series of raster
   * subsetting along time axis
   * Min compositing along time axis
   * Max compositing along time axis
-8. Download of time series as
+9. Download of time series as
   * json
   * csv
   * netcdf
