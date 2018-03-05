@@ -247,7 +247,7 @@ public class WCPSQueryFactory {
 						
 					}
 				}
-			} else if (keyStr.equals("collection_id") || keyStr.equals("prodcut_id")) {
+			} else if (keyStr.equals("collection_id") || keyStr.equals("product_id")) {
 				String name = (String) processParent.get(keyStr);
 				collectionIDs.add(new Collection(name));
 				log.debug("found actual dataset: " + name);

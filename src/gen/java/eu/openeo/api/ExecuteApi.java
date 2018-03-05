@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import eu.openeo.api.factories.ExecuteApiServiceFactory;
-import eu.openeo.model.Job;
+import eu.openeo.model.JobFull;
 import io.swagger.annotations.ApiParam;
 
 @Path("/execute")
@@ -78,7 +78,7 @@ public class ExecuteApi {
 
 			@io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
 	public Response executePost(
-			@ApiParam(value = "Specifies the job details, e.g. the process graph and the output format.", required = true) Job job,
+			@ApiParam(value = "Specifies the job details, e.g. the process graph and the output format.", required = true) JobFull job,
 			@Context SecurityContext securityContext) throws NotFoundException {
 		return delegate.executePost(job, securityContext);
 	}
