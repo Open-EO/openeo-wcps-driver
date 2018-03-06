@@ -21,7 +21,7 @@ import org.json.JSONObject;
 
 import eu.openeo.api.DataApiService;
 import eu.openeo.api.NotFoundException;
-import eu.openeo.backend.wcps.PropertiesHelper;
+import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.api.ApiResponseMessage;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
@@ -40,7 +40,7 @@ public class DataApiServiceImpl extends DataApiService {
 			SecurityContext securityContext) throws NotFoundException {
 		try {
 			URL url;
-			url = new URL(PropertiesHelper.readProperties("wcps-endpoint")
+			url = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
 					+ "?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCapabilities");
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -103,7 +103,7 @@ public class DataApiServiceImpl extends DataApiService {
 	public Response dataProductIdGet(String productId, SecurityContext securityContext) throws NotFoundException {
 		URL url;
 		try {
-			url = new URL(PropertiesHelper.readProperties("wcps-endpoint")
+			url = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
 					+ "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + productId);
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();

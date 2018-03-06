@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -16,7 +15,7 @@ import org.json.simple.JSONObject;
 
 import eu.openeo.api.ExecuteApiService;
 import eu.openeo.api.NotFoundException;
-import eu.openeo.backend.wcps.PropertiesHelper;
+import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.backend.wcps.WCPSQueryFactory;
 import eu.openeo.model.JobFull;
 
@@ -30,7 +29,7 @@ public class ExecuteApiServiceImpl extends ExecuteApiService {
 	
 	public ExecuteApiServiceImpl() {
 		try {
-			wcpsEndpoint = PropertiesHelper.readProperties("wcps-endpoint");
+			wcpsEndpoint = ConvenienceHelper.readProperties("wcps-endpoint");
 		} catch (IOException ioe) {
 			log.error("An error occured while reading properties file: " + ioe.getMessage());
 		}
@@ -62,7 +61,7 @@ public class ExecuteApiServiceImpl extends ExecuteApiService {
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			byte[] response = IOUtils.toByteArray(conn.getInputStream());
-			return Response.ok(response, MediaType.WILDCARD).build();
+			return Response.ok(response, ConvenienceHelper.getMimeTypeFromOutput(outputFormat)).build();
 		} catch (MalformedURLException e) {
 			log.error("An error occured when creating URL from job query: " + e.getMessage());
 			return Response.serverError().entity("An error occured when creating URL from job query: " + e.getMessage())

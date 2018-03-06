@@ -29,7 +29,7 @@ import com.j256.ormlite.table.TableUtils;
 
 import eu.openeo.api.JobsApiService;
 import eu.openeo.api.NotFoundException;
-import eu.openeo.backend.wcps.PropertiesHelper;
+import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.backend.wcps.WCPSQueryFactory;
 import eu.openeo.model.JobFull;
 import eu.openeo.model.JobStatus;
@@ -47,8 +47,8 @@ public class JobsApiServiceImpl extends JobsApiService {
 	
 	public JobsApiServiceImpl() {
 		try {
-			wcpsEndpoint = PropertiesHelper.readProperties("wcps-endpoint");
-			String dbURL = "jdbc:sqlite:" + PropertiesHelper.readProperties("job-database");
+			wcpsEndpoint = ConvenienceHelper.readProperties("wcps-endpoint");
+			String dbURL = "jdbc:sqlite:" + ConvenienceHelper.readProperties("job-database");
 			connection =  new JdbcConnectionSource(dbURL);
 			try {
 				TableUtils.createTable(connection, JobFull.class);
@@ -81,14 +81,14 @@ public class JobsApiServiceImpl extends JobsApiService {
 			throws NotFoundException {
 		JobFull job = null;
 		WCPSQueryFactory wcpsFactory = null;
+		String outputFormat = "json";
 		try {
 			job = jobDao.queryForId(jobId);
 			if(job == null) {
 				return Response.status(404).entity(new String("A job with the specified identifier is not available.")).build();
 			}
 			log.debug("The following job was retrieved: \n" + job.toString());
-			JSONObject processGraphJSON;
-			String outputFormat = "json";
+			JSONObject processGraphJSON;			
 			if(format != null) {
 				outputFormat = format;
 			}
@@ -113,7 +113,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			job.setStatus(JobStatus.FINISHED);
 			job.setUpdated(new Date().toGMTString());
 			jobDao.update(job);
-			return Response.ok(response, MediaType.WILDCARD).build();
+			return Response.ok(response, ConvenienceHelper.getMimeTypeFromOutput(outputFormat)).build();
 		} catch (MalformedURLException e) {
 			log.error("An error occured when creating URL from job query: " + e.getMessage());
 			return Response.serverError().entity("An error occured when creating URL from job query: " + e.getMessage())

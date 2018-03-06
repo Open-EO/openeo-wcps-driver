@@ -1,0 +1,33 @@
+{
+    "default": "json",
+    "formats": {
+        "netcdf": {
+            "mime-type": "application/netcdf",
+            "gdal_name": "netCDF"
+        },
+        "tiff": {
+            "mime-type": "image/tiff",
+            "gdal_name": "GTiff"
+        },
+        "gif": {
+            "mime-type": "image/gif",
+            "gdal_name": "GIF"
+        },
+        "csv": {
+            "mime-type": "text/csv",
+            "gdal_name": "CSV"
+        },
+        "png": {
+            "mime-type": "image/png",
+            "gdal_name": "PNG"
+        },
+        "json": {
+            "mime-type": "application/json",
+            "gdal_name": "JSON"
+        },
+        "jpeg": {
+            "mime-type": "image/jpeg",
+            "gdal_name": "JPEG"
+        }
+    }
+}
