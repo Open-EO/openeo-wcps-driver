@@ -91,6 +91,13 @@ public class JobsApiServiceImpl extends JobsApiService {
 			JSONObject processGraphJSON;			
 			if(format != null) {
 				outputFormat = format;
+			}else {
+				try {
+					outputFormat = (String)(((JSONObject) job.getOutput()).get(new String("format")));
+				}catch(Exception e) {
+					log.error("An error occured while parsing output type: " + e.getMessage());
+					log.info("assigning standard output type: json");
+				}
 			}
 			processGraphJSON = (JSONObject) job.getProcessGraph();
 			wcpsFactory = new WCPSQueryFactory(processGraphJSON, outputFormat);
