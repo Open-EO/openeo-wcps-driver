@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.UUID;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
