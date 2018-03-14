@@ -13,7 +13,7 @@ This repository serves for the development of the openEO driver for WC(P)S backe
 ### OpenEO project description
 [openEO.org](http://openeo.org/)
 ### OpenEO core API definition
-[openEO core API](https://open-eo.github.io/openeo-api-poc/)
+[openEO core API](https://open-eo.github.io/openeo-api/)
 ### Public testing endpoint (hosted @ [Eurac Research](http://www.eurac.edu))
 [http://saocompute.eurac.edu/openEO_WCPS_Driver/](http://saocompute.eurac.edu/openEO_WCPS_Driver/)
 
