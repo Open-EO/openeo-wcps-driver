@@ -1,0 +1,10 @@
+{
+	"process_graph": {
+		"process_id": "gs:ExecuteProcessEO",
+		"args": {
+			"container": ["-t","--rm","-v", "$ApplicationRunStore:/home/desuser/data/", "-e", "INPUT_IMAGE=$Files"],
+  			"process": ["/home/desuser/processing_scripts/run_sen2cor.sh"],
+  			"cloud": [{"cardinality": 1}]
+		}
+	}
+}
