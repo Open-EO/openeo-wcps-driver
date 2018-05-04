@@ -3,8 +3,8 @@ package eu.openeo.backend.wcps;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import eu.openeo.backend.wcps.domain.Aggregate;
 import eu.openeo.backend.wcps.domain.Collection;
@@ -33,14 +33,14 @@ public class WCPSQueryFactory {
 		//this.build(openEOGraph);
 	}
 
-	public WCPSQueryFactory(JSONObject openEOGraph, String outputFormat) {
-		this(openEOGraph);
+	public WCPSQueryFactory(JSONObject processGraphJSON, String outputFormat) {
+		this(processGraphJSON);
 		this.outputFormat = outputFormat;
-		this.build(openEOGraph);
+		this.build(processGraphJSON);
 	}
 
 	private void build(JSONObject openEOGraph) {
-		log.debug(openEOGraph.toJSONString());
+		log.debug(openEOGraph.toString());
 		parseOpenEOProcessGraph( openEOGraph);
 //		if (openEOGraph.containsKey(new String("process_graph"))) {
 //			parseOpenEOProcessGraph((JSONObject) openEOGraph.get(new String("process_graph")));
@@ -230,14 +230,14 @@ public class WCPSQueryFactory {
 					String argsKeyStr = (String) argsKey;
 					if (argsKeyStr.equals("collections") || argsKeyStr.equals("imagery")) {
 						try {
-							JSONArray collections = (JSONArray) argsObject.get(argsKey);
+							JSONArray collections = (JSONArray) argsObject.get(argsKeyStr);
 							result = parseOpenEOProcessGraph((JSONObject) collections.get(0));
 							if (result == null) {
 								result = (JSONObject) collections.get(0);
 								break;
 							}
 						}catch(java.lang.ClassCastException e) {
-							JSONObject collections = (JSONObject) argsObject.get(argsKey);
+							JSONObject collections = (JSONObject) argsObject.get(argsKeyStr);
 							result = parseOpenEOProcessGraph(collections);
 							if (result == null) {
 								result = collections;
@@ -296,9 +296,9 @@ public class WCPSQueryFactory {
 		for (Object argsKey : argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
 			if (argsKeyStr.equals("from")) {
-				fromDate = (String) argsObject.get(argsKey);
+				fromDate = (String) argsObject.get(argsKeyStr);
 			} else if (argsKeyStr.equals("to")) {
-				toDate = (String) argsObject.get(argsKey);
+				toDate = (String) argsObject.get(argsKeyStr);
 			}
 		}
 		if (fromDate != null && toDate != null)
@@ -313,14 +313,14 @@ public class WCPSQueryFactory {
 		for (Object argsKey : argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
 			if (argsKeyStr.equals("left")) {
-				left = "" + argsObject.get(argsKey).toString();
+				left = "" + argsObject.get(argsKeyStr).toString();
 			} else if (argsKeyStr.equals("right")) {
-				right = "" + argsObject.get(argsKey).toString();
+				right = "" + argsObject.get(argsKeyStr).toString();
 			}
 			if (argsKeyStr.equals("top")) {
-				top = "" + argsObject.get(argsKey).toString();
+				top = "" + argsObject.get(argsKeyStr).toString();
 			} else if (argsKeyStr.equals("bottom")) {
-				bottom = "" + argsObject.get(argsKey).toString();
+				bottom = "" + argsObject.get(argsKeyStr).toString();
 			}
 		}
 		this.filters.add(new Filter("E", left, right));
@@ -381,9 +381,9 @@ public class WCPSQueryFactory {
 		for (Object argsKey : argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
 			if (argsKeyStr.equals("red")) {
-				red = "" + argsObject.get(argsKey).toString();
+				red = "" + argsObject.get(argsKeyStr).toString();
 			} else if (argsKeyStr.equals("nir")) {
-				nir = "" + argsObject.get(argsKey).toString();
+				nir = "" + argsObject.get(argsKeyStr).toString();
 			}
 		}
 		Vector<String> params = new Vector<String>();

@@ -18,7 +18,7 @@ import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -132,19 +132,19 @@ public class JobFull implements Serializable {
 	@ApiModelProperty(required = true, value = "")
 	@NotNull
 	public Object getProcessGraph() {
-		JSONParser parser = new JSONParser();
-		ObjectMapper mapper = new ObjectMapper();
-		JSONObject processgraphLocal = null;
-		try {
-			processgraphLocal = ((JSONObject) parser.parse(mapper.writeValueAsString(this.processGraph)));
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return processgraphLocal;
+//		JSONParser parser = new JSONParser();
+//		ObjectMapper mapper = new ObjectMapper();
+//		JSONObject processgraphLocal = null;
+//		try {
+//			processgraphLocal = ((JSONObject) parser.parse(mapper.writeValueAsString(this.processGraph)));
+//		} catch (JsonProcessingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (ParseException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		return this.processGraph;
 	}
 
 	public void setProcessGraph(Object processGraph) {

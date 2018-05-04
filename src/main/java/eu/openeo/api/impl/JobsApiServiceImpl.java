@@ -16,7 +16,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -158,7 +158,8 @@ public class JobsApiServiceImpl extends JobsApiService {
 					.build();
 		}
 		try {
-			return Response.ok().entity(mapper.writeValueAsString(job)).build();
+			log.debug("The following job was retrieved: \n" + mapper.writeValueAsString(job));
+			return Response.ok().entity(new JSONObject(mapper.writeValueAsString(job)).toString(4)).build();
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage());
 			return Response.serverError().entity("An error occured while serializing job to json: " + e.getMessage())
@@ -231,7 +232,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 		JSONObject processGraphJSON;
 		String outputFormat = "json";
 		log.debug("The following job was submitted: \n" + job.toString());
-		processGraphJSON = (JSONObject) job.getProcessGraph();
+		processGraphJSON = new JSONObject(job.getProcessGraph());
 		try {
 			outputFormat = (String)(((JSONObject) job.getOutput()).get(new String("format")));
 		}catch(Exception e) {

@@ -135,7 +135,7 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 		ProcessDescription process = this.processes.get(processId);
 		if(process != null) {
 			try {
-				return Response.ok(this.mapper.writeValueAsString(process)).build();
+				return Response.ok(new JSONObject(mapper.writeValueAsString(process)).toString(4)).build();
 			} catch (JsonProcessingException e) {
 				log.error("Error parsing json: " + e.getMessage());
 				return Response.serverError().entity("Error parsing json: " + e.getMessage()).build();

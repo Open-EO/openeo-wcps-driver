@@ -1,13 +1,8 @@
 package eu.openeo.api.impl;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import eu.openeo.api.ApiResponseMessage;
 import eu.openeo.api.NotFoundException;
 import eu.openeo.api.ServicesApiService;
 import eu.openeo.model.Service1;
