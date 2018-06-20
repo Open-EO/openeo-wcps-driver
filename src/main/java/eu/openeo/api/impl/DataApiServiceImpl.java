@@ -1,6 +1,8 @@
 package eu.openeo.api.impl;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -10,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -84,9 +87,35 @@ public class DataApiServiceImpl extends DataApiService {
 	@Override
 	public Response dataOpensearchGet(String q, Integer start, Integer rows, SecurityContext securityContext)
 			throws NotFoundException {
-		// do some magic!
-		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
-		//return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+		URL url;
+		log.debug("Recieved the following query: " + q);
+		try {
+			url = new URL(ConvenienceHelper.readProperties("os-endpoint") + "?any=" + q + "&resultType=hits&_content_type=json");
+			//"http://localhost:8080/euracgeonet/srv/eng/rss.search?any=eurac&resultType=hits&_content_type=json&fast="
+			log.debug("The following request was send to geonetwork: " + url.toString());
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			InputStream input = new BufferedInputStream(conn.getInputStream());
+			String result = IOUtils.toString(input, "UTF-8");
+			log.debug("The result received: " + result);
+			JSONObject queryResult = new JSONObject(result);
+
+			return Response.ok(queryResult.toString(4), MediaType.APPLICATION_JSON).build();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return Response.serverError()
+					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
+							"An error occured while describing coverage from WCPS endpoint: " + e.getMessage()))
+					.build();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return Response.serverError()
+					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
+							"An error occured while describing coverage from WCPS endpoint: " + e.getMessage()))
+					.build();
+		}
 	}
 
 	@Override
