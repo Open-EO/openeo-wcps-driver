@@ -85,14 +85,14 @@ public class DataApiServiceImpl extends DataApiService {
 	}
 
 	@Override
-	public Response dataOpensearchGet(String q, Integer start, Integer rows, SecurityContext securityContext)
+	public Response dataOpensearchGet(String q, String from, String to, Integer start, Integer rows, SecurityContext securityContext)
 			throws NotFoundException {
 		URL url;
 		log.debug("Recieved the following query: " + q);
 		try {
-			url = new URL(ConvenienceHelper.readProperties("os-endpoint") + "?any=" + q + "&resultType=hits&_content_type=json");
-			//"http://localhost:8080/euracgeonet/srv/eng/rss.search?any=eurac&resultType=hits&_content_type=json&fast="
-			log.debug("The following request was send to geonetwork: " + url.toString());
+			url = new URL(ConvenienceHelper.readProperties("os-endpoint") + "any=" + q + "&extFrom=" + from + "&extTo=" + to + "&_content_type=json&fast=md1");
+			//"http://localhost:8080/euracgeonet/srv/eng/rss.search?any=eurac&resultType=hits&_content_type=json&fast=md1"
+			log.debug("The following request was sent to geonetwork: " + url.toString());
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			InputStream input = new BufferedInputStream(conn.getInputStream());

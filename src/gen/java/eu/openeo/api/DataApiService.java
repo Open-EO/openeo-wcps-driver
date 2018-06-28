@@ -8,7 +8,7 @@ public abstract class DataApiService {
 	public abstract Response dataGet(String qname, String qgeom, String qstartdate, String qenddate,
 			SecurityContext securityContext) throws NotFoundException;
 
-	public abstract Response dataOpensearchGet(String q, Integer start, Integer rows, SecurityContext securityContext)
+	public abstract Response dataOpensearchGet(String q, String from, String to, Integer start, Integer rows, SecurityContext securityContext)
 			throws NotFoundException;
 
 	public abstract Response dataOpensearchOptions(SecurityContext securityContext) throws NotFoundException;

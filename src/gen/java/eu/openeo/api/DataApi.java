@@ -89,10 +89,12 @@ public class DataApi {
 			@io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
 	public Response dataOpensearchGet(
 			@ApiParam(value = "string expression to search available datasets") @QueryParam("q") String q,
+			@ApiParam(value = "string expression to search available datasets") @QueryParam("from") String from,
+			@ApiParam(value = "string expression to search available datasets") @QueryParam("to") String to,
 			@ApiParam(value = "page start value") @QueryParam("start") Integer start,
 			@ApiParam(value = "page size value") @QueryParam("rows") Integer rows,
 			@Context SecurityContext securityContext) throws NotFoundException {
-		return delegate.dataOpensearchGet(q, start, rows, securityContext);
+		return delegate.dataOpensearchGet(q, from, to, start, rows, securityContext);
 	}
 
 	@OPTIONS
