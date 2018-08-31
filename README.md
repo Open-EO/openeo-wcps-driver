@@ -56,3 +56,9 @@ Configuration of the running service is done in the *config.properties* file, wh
 
 ### Compiling the WAR-archive
 The current git project is setup as a runnable web archive maven project in eclipse. In order to compile the source simple run maven clean install. The project is configured to pack all necessary dependencies into the WAR so no extra libraries need to be installed on the host machine running the web server instance and one simply needs to copy the war archive into the e.g. the webapps folder of a tomcat installation. 
+
+### Migration Plan for v0.0.3
+
+- [ ] Move *capabilities* endpoint to **http://localhost:8080/openEO_WCPS_Driver/openeo**
+- [X] Move *output_formats* to endpoint to **http://localhost:8080/openEO_WCPS_Driver/openeo/output_formats**
+- [ ] Move *service_types* endpoint to **http://localhost:8080/openEO_WCPS_Driver/openeo/service_types**
