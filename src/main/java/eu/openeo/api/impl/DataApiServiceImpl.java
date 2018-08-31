@@ -84,7 +84,7 @@ public class DataApiServiceImpl extends DataApiService {
 	@Override
 	public Response dataOpensearchGet(String q, Integer start, Integer rows, SecurityContext securityContext)
 			throws NotFoundException {
-		// do some magic!
+		// do some magic
 		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
 		//return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
 	}
