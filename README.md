@@ -61,6 +61,3 @@ The current git project is setup as a runnable web archive maven project in ecli
 
 - [ ] Move *capabilities* endpoint to **http://localhost:8080/openEO_WCPS_Driver/openeo**
 - [ ] Move *output_formats* to endpoint to **http://localhost:8080/openEO_WCPS_Driver/openeo/output_formats**
-- [X] Move *data* endpoint to **http://localhost:8080/openEO_WCPS_Driver/openeo/data**
-- [X] Move *jobs* endpoint to **http://localhost:8080/openEO_WCPS_Driver/openeo/jobs**
-- [X] Move *processes* endpoint to **http://localhost:8080/openEO_WCPS_Driver/openeo/processes**
