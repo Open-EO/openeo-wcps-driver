@@ -17,6 +17,8 @@ import org.json.JSONObject;
 import eu.openeo.api.CapabilitiesApiService;
 import eu.openeo.api.NotFoundException;
 
+
+
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 	
@@ -24,18 +26,97 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 	
 	@Override
 	public Response capabilitiesGet(SecurityContext securityContext) throws NotFoundException {
+		
+		
+		JSONArray get = new JSONArray();
+		get.put(new String("GET"));
+		
+		JSONArray post = new JSONArray();
+		post.put(new String("POST"));
+		
+		JSONArray delete = new JSONArray();
+		delete.put(new String("DELETE"));
+		
+		JSONArray patch = new JSONArray();
+		patch.put(new String("PATCH"));
+		
+		
+		
+		JSONObject getCapabilities = new JSONObject();
+		getCapabilities.put("path", "/");
+		getCapabilities.put("methods", get);
+		
+		JSONObject outputFormats = new JSONObject();
+		outputFormats.put("path", "/output_formats");
+		outputFormats.put("methods", get);
+		
+		JSONObject data = new JSONObject();
+		data.put("path", "/data");
+		data.put("methods", get);
+		
+		JSONObject productID = new JSONObject();
+		productID.put("path", "/data/{product_id}");
+		productID.put("methods", get);
+		
+		JSONObject execute = new JSONObject();
+		execute.put("path", "/execute");
+		execute.put("methods", get);
+		
+		JSONObject jobs = new JSONObject();
+		jobs.put("path", "/jobs");
+		jobs.put("methods", get);
+		
+		JSONObject jobsID = new JSONObject();
+		jobsID.put("path", "/jobs/{job_id}");
+		jobsID.put("methods", get);
+		
+		JSONObject jobsIDdownload = new JSONObject();
+		jobsIDdownload.put("path", "/jobs/{job_id}/download");
+		jobsIDdownload.put("methods", get);
+		
+		JSONObject processes = new JSONObject();
+		processes.put("path", "/processes");
+		processes.put("methods", get);
+		
+		JSONObject processesID = new JSONObject();
+		processesID.put("path", "/processes/{process_id}");
+		processesID.put("methods", get);
+		
 		JSONArray endpointList = new JSONArray();
-		endpointList.put(new String("/capabilities"));
-		endpointList.put(new String("/capabilities/output_formats"));
-		endpointList.put(new String("/data"));
-		endpointList.put(new String("/data/{product_id}"));
-		endpointList.put(new String("/execute"));
-		endpointList.put(new String("/jobs"));
-		endpointList.put(new String("/jobs/{job_id}"));
-		endpointList.put(new String("/jobs/{job_id}/download"));
-		endpointList.put(new String("/processes"));
-		endpointList.put(new String("/processes/{process_id}"));
-		return Response.ok(endpointList.toString(4), MediaType.APPLICATION_JSON).build();
+		endpointList.put(getCapabilities);
+		endpointList.put(outputFormats);
+		endpointList.put(data);
+		endpointList.put(productID);
+		endpointList.put(execute);
+		endpointList.put(jobs);
+		endpointList.put(jobsID);
+		endpointList.put(processes);
+		endpointList.put(processesID);
+		
+		
+		
+		JSONObject plans = new JSONObject();
+		plans.put("name", "free");
+		plans.put("description", "Free plan. Calculates one tile per second and a maximum amount of 100 tiles per hour.");
+		plans.put("url", "http://openeo.org/plans/free-plan");
+		
+		JSONArray plan = new JSONArray();
+		plan.put(plans);
+		
+		
+		
+		JSONObject billing = new JSONObject();
+		billing.put("currency", "USD");
+		billing.put("plans", plan);
+		
+		
+		
+		JSONObject mainObj = new JSONObject();
+		mainObj.put("version", "0.3.0");
+		mainObj.put("endpoint", endpointList);
+		mainObj.put("billing", billing);
+		
+		return Response.ok(mainObj.toString(4), MediaType.APPLICATION_JSON).build();
 	}
 
 	@Override
