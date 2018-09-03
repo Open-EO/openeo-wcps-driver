@@ -60,4 +60,4 @@ The current git project is setup as a runnable web archive maven project in ecli
 ### Migration Plan for v0.3.0
 
 - [ ] Move *capabilities* endpoint to **http://localhost:8080/openEO_WCPS_Driver/openeo**
-- [ ] Move *output_formats* to endpoint to **http://localhost:8080/openEO_WCPS_Driver/openeo/output_formats**
+- [ ] Move *output_formats* endpoint to **http://localhost:8080/openEO_WCPS_Driver/openeo/output_formats**
