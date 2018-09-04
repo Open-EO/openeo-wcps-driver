@@ -1,33 +1,33 @@
 {
-    "default": "json",
+    "default": "JSON",
     "formats": {
-        "netcdf": {
+        "netCDF": {
             "mime-type": "application/netcdf",
-            "gdal_name": "netCDF"
+            "rasdaman_name": "netcdf"
         },
-        "tiff": {
+        "GTiff": {
             "mime-type": "image/tiff",
-            "gdal_name": "GTiff"
+            "rasdaman_name": "tiff"
         },
-        "gif": {
+        "GIF": {
             "mime-type": "image/gif",
-            "gdal_name": "GIF"
+            "rasdaman_name": "gif"
         },
-        "csv": {
+        "CSV": {
             "mime-type": "text/csv",
-            "gdal_name": "CSV"
+            "rasdaman_name": "csv"
         },
-        "png": {
+        "PNG": {
             "mime-type": "image/png",
-            "gdal_name": "PNG"
+            "rasdaman_name": "png"
         },
-        "json": {
+        "JSON": {
             "mime-type": "application/json",
-            "gdal_name": "JSON"
+            "rasdaman_name": "json"
         },
-        "jpeg": {
+        "JPEG": {
             "mime-type": "image/jpeg",
-            "gdal_name": "JPEG"
+            "rasdaman_name": "jpeg"
         }
     }
 }
