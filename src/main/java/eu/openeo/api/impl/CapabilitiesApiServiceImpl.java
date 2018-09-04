@@ -28,65 +28,84 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 	public Response capabilitiesGet(SecurityContext securityContext) throws NotFoundException {
 		
 		
-		JSONArray get = new JSONArray();
-		get.put(new String("GET"));
+		JSONArray getCapabilitiesMethods = new JSONArray();
+		getCapabilitiesMethods.put(new String("GET"));
+				
+		JSONArray outputFormatsMethods = new JSONArray();
+		outputFormatsMethods.put(new String("GET"));
 		
-		JSONArray post = new JSONArray();
-		post.put(new String("POST"));
+		JSONArray dataMethods = new JSONArray();
+		dataMethods.put(new String("GET"));
 		
-		JSONArray delete = new JSONArray();
-		delete.put(new String("DELETE"));
+		JSONArray dataIDMethods = new JSONArray();
+		dataIDMethods.put(new String("GET"));
 		
-		JSONArray patch = new JSONArray();
-		patch.put(new String("PATCH"));
+		JSONArray executeMethods = new JSONArray();
+		executeMethods.put(new String("GET"));
 		
+		JSONArray jobsMethods = new JSONArray();
+		jobsMethods.put(new String("GET"));
+		jobsMethods.put(new String("POST"));
+				
+		JSONArray jobsIDMethods = new JSONArray();
+		jobsIDMethods.put(new String("GET"));
+		jobsIDMethods.put(new String("DELETE"));
+		jobsIDMethods.put(new String("PATCH"));
 		
+		JSONArray jobsIDdownloadMethods = new JSONArray();
+		jobsIDdownloadMethods.put(new String("GET"));
+		
+		JSONArray processesMethods = new JSONArray();
+		processesMethods.put(new String("GET"));
+		
+		JSONArray processesIDMethods = new JSONArray();
+		processesIDMethods.put(new String("GET"));
 		
 		JSONObject getCapabilities = new JSONObject();
 		getCapabilities.put("path", "/");
-		getCapabilities.put("methods", get);
+		getCapabilities.put("methods", getCapabilitiesMethods);
 		
 		JSONObject outputFormats = new JSONObject();
 		outputFormats.put("path", "/output_formats");
-		outputFormats.put("methods", get);
+		outputFormats.put("methods", outputFormatsMethods);
 		
 		JSONObject data = new JSONObject();
 		data.put("path", "/data");
-		data.put("methods", get);
+		data.put("methods", dataMethods);
 		
-		JSONObject productID = new JSONObject();
-		productID.put("path", "/data/{product_id}");
-		productID.put("methods", get);
+		JSONObject dataID = new JSONObject();
+		dataID.put("path", "/data/{product_id}");
+		dataID.put("methods", dataIDMethods);
 		
 		JSONObject execute = new JSONObject();
 		execute.put("path", "/execute");
-		execute.put("methods", get);
+		execute.put("methods", executeMethods);
 		
 		JSONObject jobs = new JSONObject();
 		jobs.put("path", "/jobs");
-		jobs.put("methods", get);
+		jobs.put("methods", jobsMethods);
 		
 		JSONObject jobsID = new JSONObject();
 		jobsID.put("path", "/jobs/{job_id}");
-		jobsID.put("methods", get);
+		jobsID.put("methods", jobsIDMethods);
 		
 		JSONObject jobsIDdownload = new JSONObject();
 		jobsIDdownload.put("path", "/jobs/{job_id}/download");
-		jobsIDdownload.put("methods", get);
+		jobsIDdownload.put("methods", jobsIDdownloadMethods);
 		
 		JSONObject processes = new JSONObject();
 		processes.put("path", "/processes");
-		processes.put("methods", get);
+		processes.put("methods", processesMethods);
 		
 		JSONObject processesID = new JSONObject();
 		processesID.put("path", "/processes/{process_id}");
-		processesID.put("methods", get);
+		processesID.put("methods", processesIDMethods);
 		
 		JSONArray endpointList = new JSONArray();
 		endpointList.put(getCapabilities);
 		endpointList.put(outputFormats);
 		endpointList.put(data);
-		endpointList.put(productID);
+		endpointList.put(dataID);
 		endpointList.put(execute);
 		endpointList.put(jobs);
 		endpointList.put(jobsID);
@@ -106,7 +125,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		
 		
 		JSONObject billing = new JSONObject();
-		billing.put("currency", "USD");
+		billing.put("currency", "EUR");
 		billing.put("plans", plan);
 		
 		
