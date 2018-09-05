@@ -124,10 +124,10 @@ public class DataApi {
 	}
 
 	@GET
-	@Path("/{product_id}")
+	@Path("/{data_id}")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
-	@io.swagger.annotations.ApiOperation(value = "Returns further information on a given EO product available at the back-end.", notes = "The request will ask the back-end for further details about a product specified by the identifier `product_id`", response = InlineResponse2002.class, authorizations = {
+	@io.swagger.annotations.ApiOperation(value = "Returns further information on a given EO product available at the back-end.", notes = "The request will ask the back-end for further details about a product specified by the identifier `data_id`", response = InlineResponse2002.class, authorizations = {
 			@io.swagger.annotations.Authorization(value = "Bearer") }, tags = { "EO Data Discovery", })
 	@io.swagger.annotations.ApiResponses(value = {
 			@io.swagger.annotations.ApiResponse(code = 200, message = "JSON object with metadata of the EO dataset.", response = InlineResponse2002.class),
@@ -142,13 +142,13 @@ public class DataApi {
 
 			@io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
 	public Response dataProductIdGet(
-			@ApiParam(value = "product identifier string such as `MOD18Q1`", required = true) @PathParam("product_id") String productId,
+			@ApiParam(value = "product identifier string such as `MOD18Q1`", required = true) @PathParam("data_id") String productId,
 			@Context SecurityContext securityContext) throws NotFoundException {
 		return delegate.dataProductIdGet(productId, securityContext);
 	}
 
 	@OPTIONS
-	@Path("/{product_id}")
+	@Path("/{data_id}")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
@@ -158,7 +158,7 @@ public class DataApi {
 
 			@io.swagger.annotations.ApiResponse(code = 405, message = "The requested HTTP method is not supported or allowed to be requested.", response = Void.class) })
 	public Response dataProductIdOptions(
-			@ApiParam(value = "product identifier string such as `MOD18Q1`", required = true) @PathParam("product_id") String productId,
+			@ApiParam(value = "product identifier string such as `MOD18Q1`", required = true) @PathParam("data_id") String productId,
 			@Context SecurityContext securityContext) throws NotFoundException {
 		return delegate.dataProductIdOptions(productId, securityContext);
 	}

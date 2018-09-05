@@ -74,7 +74,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		data.put("methods", dataMethods);
 		
 		JSONObject dataID = new JSONObject();
-		dataID.put("path", "/data/{product_id}");
+		dataID.put("path", "/data/{data_id}");
 		dataID.put("methods", dataIDMethods);
 		
 		JSONObject execute = new JSONObject();

@@ -58,7 +58,7 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 		for(String key : this.processes.keySet()){
 			JSONObject process = new JSONObject();
 			ProcessDescription processDesc = this.processes.get(key);
-			process.put("process_id", processDesc.getProcessId());
+			process.put("name", processDesc.getProcessId());
 			process.put("description", processDesc.getDescription());
 			processArray.put(process);
 		}

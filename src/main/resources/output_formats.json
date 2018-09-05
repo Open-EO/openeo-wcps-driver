@@ -2,30 +2,37 @@
     "default": "JSON",
     "formats": {
         "netCDF": {
+            "gis_data_types": [ "raster" ],
             "mime-type": "application/netcdf",
-            "rasdaman_name": "netcdf"
+            "rasdaman_name": "netcd"
         },
         "GTiff": {
+            "gis_data_types": [ "raster" ],
             "mime-type": "image/tiff",
             "rasdaman_name": "tiff"
         },
         "GIF": {
+            "gis_data_types": [ "raster" ],
             "mime-type": "image/gif",
             "rasdaman_name": "gif"
         },
         "CSV": {
+            "gis_data_types": [ "raster" ],
             "mime-type": "text/csv",
             "rasdaman_name": "csv"
         },
         "PNG": {
+            "gis_data_types": [ "raster" ],
             "mime-type": "image/png",
             "rasdaman_name": "png"
         },
         "JSON": {
+            "gis_data_types": [ "raster" ],
             "mime-type": "application/json",
             "rasdaman_name": "json"
         },
         "JPEG": {
+            "gis_data_types": [ "raster" ],
             "mime-type": "image/jpeg",
             "rasdaman_name": "jpeg"
         }

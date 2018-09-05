@@ -56,7 +56,9 @@ public class DataApiServiceImpl extends DataApiService {
 				Element coverage = coverageList.get(c);
 				log.debug("root node info: " + coverage.getName() + ":" + coverage.getChildText("CoverageId", defaultNS));		
 				JSONObject product = new JSONObject();
-				product.put("product_id", coverage.getChildText("CoverageId", defaultNS));
+				product.put("data_id", coverage.getChildText("CoverageId", defaultNS));
+				product.put("description", coverage.getChildText("CoverageId", defaultNS));
+				product.put("source", coverage.getChildText("CoverageId", defaultNS));
 				productArray.put(product);
 			}
 			return Response.ok(productArray.toString(4), MediaType.APPLICATION_JSON).build();
@@ -140,7 +142,7 @@ public class DataApiServiceImpl extends DataApiService {
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
 			JSONObject extent = new JSONObject();
-			JSONObject time =  new JSONObject();
+			JSONArray time =  new JSONArray();
 			String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
 			for(int a = 0; a < axis.length; a++) {
 				log.debug(axis[a]);
@@ -153,15 +155,17 @@ public class DataApiServiceImpl extends DataApiService {
 					extent.put("top", Double.parseDouble(maxValues[a]));
 				}
 				if(axis[a].equals("DATE")  || axis[a].equals("ansi")){
-					time.put("from", minValues[a].replaceAll("\"", ""));
-					time.put("to", maxValues[a].replaceAll("\"", ""));
+					time.put(minValues[a].replaceAll("\"", ""));
+					time.put(maxValues[a].replaceAll("\"", ""));
 				}
 			}
 			extent.put("srs", srsDescription);			
 			JSONObject coverage = new JSONObject();
-			coverage.put("product_id", productId);
-			coverage.put("extent", extent);
-			coverage.put("time", time);
+			coverage.put("data_id", productId);
+			coverage.put("description", productId);
+			coverage.put("source", productId);
+			coverage.put("spatial_extent", extent);
+			coverage.put("temporal_extent", time);
 			JSONArray bandArray = new JSONArray();
 			log.debug("number of bands found: " + bandList.size());
 			for(int c = 0; c < bandList.size(); c++) {
@@ -169,6 +173,13 @@ public class DataApiServiceImpl extends DataApiService {
 				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
 				JSONObject product = new JSONObject();
 				product.put("band_id", band.getAttributeValue("name"));
+				product.put("name", band.getAttributeValue("name"));
+				product.put("wavelength_nm", band.getAttributeValue("name"));
+				product.put("res_m", band.getAttributeValue("name"));
+				product.put("scale", band.getAttributeValue("name"));
+				product.put("offset", band.getAttributeValue("name"));
+				product.put("type", band.getAttributeValue("name"));
+				product.put("unit", band.getAttributeValue("name"));
 				bandArray.put(product);
 			}
 			coverage.put("bands", bandArray);

@@ -139,7 +139,7 @@ public class ProcessesApi {
 
 			@io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
 	public Response processesProcessIdGet(
-			@ApiParam(value = "process identifier string such as `NDVI`", required = true) @PathParam("process_id") String processId,
+			@ApiParam(value = "process identifier string such as `NDVI`", required = true) @PathParam("name") String processId,
 			@Context SecurityContext securityContext) throws NotFoundException {
 		return delegate.processesProcessIdGet(processId, securityContext);
 	}
@@ -155,7 +155,7 @@ public class ProcessesApi {
 
 			@io.swagger.annotations.ApiResponse(code = 405, message = "The requested HTTP method is not supported or allowed to be requested.", response = Void.class) })
 	public Response processesProcessIdOptions(
-			@ApiParam(value = "process identifier string such as `NDVI`", required = true) @PathParam("process_id") String processId,
+			@ApiParam(value = "process identifier string such as `NDVI`", required = true) @PathParam("name") String processId,
 			@Context SecurityContext securityContext) throws NotFoundException {
 		return delegate.processesProcessIdOptions(processId, securityContext);
 	}

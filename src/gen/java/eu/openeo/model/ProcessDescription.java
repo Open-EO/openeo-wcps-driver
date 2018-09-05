@@ -30,7 +30,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(description = "Defines and describes a process including it's expected input arguments.")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class ProcessDescription implements Serializable {
-	@JsonProperty("process_id")
+	@JsonProperty("name")
 	private String processId = null;
 
 	@JsonProperty("description")
@@ -52,7 +52,7 @@ public class ProcessDescription implements Serializable {
 	 * 
 	 * @return processId
 	 **/
-	@JsonProperty("process_id")
+	@JsonProperty("name")
 	@ApiModelProperty(required = true, value = "The unique identifier of the process.")
 	@NotNull
 	public String getProcessId() {
