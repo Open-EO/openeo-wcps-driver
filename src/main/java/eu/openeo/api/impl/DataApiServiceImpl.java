@@ -19,10 +19,13 @@ import org.jdom2.input.SAXBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+
+
 import eu.openeo.api.DataApiService;
 import eu.openeo.api.NotFoundException;
 import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.api.ApiResponseMessage;
+
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class DataApiServiceImpl extends DataApiService {
@@ -128,9 +131,23 @@ public class DataApiServiceImpl extends DataApiService {
 			
 			log.debug("root node info: " + rootNode.getName());		
 			List<Element> bandList = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
+			
 			Element coverageDescElement = rootNode.getChild("CoverageDescription", defaultNS);
 			Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
 			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
+			Element metadataElement = rootNode.getChild("CoverageDescription", defaultNS).getChild("metadata", gmlNS).getChild("Extension", gmlNS);
+			String metadataString1 = metadataElement.getChildText("covMetadata", gmlNS);
+			
+			//JSONArray slices = metadataObj.getJSONArray("slices");
+			//JSONObject envelope = slices.getJSONObject(0);
+			String metadataString2 = metadataString1.replaceAll("\\n","");
+			String metadataString3 = metadataString2.replaceAll("\"\"","\"");
+			JSONObject metadataObj = new JSONObject(metadataString3);
+			JSONArray slices = metadataObj.getJSONArray("slices");
+			
+			
+			
+			
 			
 			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
 			try {
@@ -154,12 +171,12 @@ public class DataApiServiceImpl extends DataApiService {
 					extent.put("bottom", Double.parseDouble(minValues[a]));
 					extent.put("top", Double.parseDouble(maxValues[a]));
 				}
-				if(axis[a].equals("DATE")  || axis[a].equals("ansi")){
+				if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date")){
 					time.put(minValues[a].replaceAll("\"", ""));
 					time.put(maxValues[a].replaceAll("\"", ""));
 				}
 			}
-			extent.put("srs", srsDescription);			
+			extent.put("crs", srsDescription);			
 			JSONObject coverage = new JSONObject();
 			coverage.put("data_id", productId);
 			coverage.put("description", productId);
@@ -180,9 +197,23 @@ public class DataApiServiceImpl extends DataApiService {
 				product.put("offset", band.getAttributeValue("name"));
 				product.put("type", band.getAttributeValue("name"));
 				product.put("unit", band.getAttributeValue("name"));
+				product.put("coverageMetadata", slices);
 				bandArray.put(product);
 			}
 			coverage.put("bands", bandArray);
+			JSONArray links = new JSONArray();
+			log.debug("number of links found: " + bandList.size());
+			for(int c = 0; c < bandList.size(); c++) {
+				Element band = bandList.get(c);
+				log.debug("link info: " + band.getName() + ":" + band.getAttributeValue("name"));		
+				JSONObject linkDesc = new JSONObject();
+				linkDesc.put("href", band.getAttributeValue("name"));
+				linkDesc.put("title", band.getAttributeValue("name"));
+				linkDesc.put("rel", band.getAttributeValue("name"));
+				
+				links.put(linkDesc);
+			}
+			coverage.put("links", links);
 			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
