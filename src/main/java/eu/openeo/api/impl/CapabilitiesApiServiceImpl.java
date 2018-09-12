@@ -70,11 +70,11 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		outputFormats.put("methods", outputFormatsMethods);
 		
 		JSONObject data = new JSONObject();
-		data.put("path", "/data");
+		data.put("path", "/collections");
 		data.put("methods", dataMethods);
 		
 		JSONObject dataID = new JSONObject();
-		dataID.put("path", "/data/{data_id}");
+		dataID.put("path", "/collections/{name}");
 		dataID.put("methods", dataIDMethods);
 		
 		JSONObject execute = new JSONObject();

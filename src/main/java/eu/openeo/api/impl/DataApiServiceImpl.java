@@ -19,8 +19,6 @@ import org.jdom2.input.SAXBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-
-
 import eu.openeo.api.DataApiService;
 import eu.openeo.api.NotFoundException;
 import eu.openeo.backend.wcps.ConvenienceHelper;
@@ -42,6 +40,7 @@ public class DataApiServiceImpl extends DataApiService {
 	public Response dataGet(String qname, String qgeom, String qstartdate, String qenddate,
 			SecurityContext securityContext) throws NotFoundException {
 		try {
+						
 			URL url;
 			url = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
 					+ "?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCapabilities");
@@ -51,20 +50,118 @@ public class DataApiServiceImpl extends DataApiService {
 			Document capabilititesDoc = (Document) this.builder.build(conn.getInputStream()); 
 			Element rootNode = capabilititesDoc.getRootElement();
 			Namespace defaultNS = rootNode.getNamespace();
-			log.debug("root node info: " + rootNode.getName());		
+			log.debug("root node info: " + rootNode.getName());
 			List<Element> coverageList = rootNode.getChildren("Contents", defaultNS).get(0).getChildren("CoverageSummary", defaultNS);
+			JSONObject data = new JSONObject ();
+			JSONArray linksCollections = new JSONArray();
+				
+				JSONObject linkDesc = new JSONObject();
+				linkDesc.put("href", "https://openeo.org/api/collections");
+				linkDesc.put("rel", "self");
+				
+				JSONObject linkCsw = new JSONObject();
+				linkCsw.put("href", "https://openeo.org/api/csw");
+				linkCsw.put("rel", "alternate");
+				linkCsw.put("title", "openEO catalog (OGC Catalogue Services 3.0)");
+				
+				linksCollections.put(linkDesc);
+				linksCollections.put(linkCsw);
+			
+								
 			JSONArray productArray = new JSONArray();
 			log.debug("number of coverages found: " + coverageList.size());
+			
+						
 			for(int c = 0; c < coverageList.size(); c++) {
 				Element coverage = coverageList.get(c);
 				log.debug("root node info: " + coverage.getName() + ":" + coverage.getChildText("CoverageId", defaultNS));		
+				
 				JSONObject product = new JSONObject();
-				product.put("data_id", coverage.getChildText("CoverageId", defaultNS));
+				
+                JSONObject extentCollection = new JSONObject();
+				
+				JSONArray spatialExtent = new JSONArray();
+				JSONArray temporalExtent =  new JSONArray();
+				
+				String coverageID = coverage.getChildText("CoverageId", defaultNS);
+				
+				URL urlCollections = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
+						+ "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageID);
+				
+				HttpURLConnection connCollections = (HttpURLConnection) urlCollections.openConnection();
+				connCollections.setRequestMethod("GET");
+				Document capabilititesDocCollections = (Document) this.builder.build(connCollections.getInputStream());
+				List<Namespace> namespacesCollections = capabilititesDocCollections.getNamespacesIntroduced();
+				Element rootNodeCollections = capabilititesDocCollections.getRootElement();
+				Namespace defaultNSCollections = rootNodeCollections.getNamespace();
+				Namespace gmlNS = null;
+				Namespace sweNS = null;
+				for (int n = 0; n < namespacesCollections.size(); n++) {
+					Namespace current = namespacesCollections.get(n);
+					if(current.getPrefix().equals("swe")) {
+						sweNS = current;
+					}
+					if(current.getPrefix().equals("gmlcov")) {
+						gmlNS = current;
+					}
+				}
+				
+				log.debug("root node info: " + rootNodeCollections.getName());		
+				
+				Element coverageDescElement = rootNodeCollections.getChild("CoverageDescription", defaultNSCollections);
+				Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
+				Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
+				
+				String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
+				String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
+				
+				String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
+				for(int a = 0; a < axis.length; a++) {
+					log.debug(axis[a]);
+					if(axis[a].equals("E") || axis[a].equals("X")){
+						spatialExtent.put(Double.parseDouble(minValues[a]));
+						spatialExtent.put(Double.parseDouble(maxValues[a]));
+					}
+					if(axis[a].equals("N") || axis[a].equals("Y")){
+						spatialExtent.put(Double.parseDouble(minValues[a]));
+						spatialExtent.put(Double.parseDouble(maxValues[a]));
+					}
+					if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date")){
+						temporalExtent.put(minValues[a].replaceAll("\"", ""));
+						temporalExtent.put(maxValues[a].replaceAll("\"", ""));
+					}
+				}
+				
+									
+				extentCollection.put("spatial", spatialExtent);
+				extentCollection.put("temporal", temporalExtent);
+				
+				JSONArray linksPerCollection = new JSONArray();
+				
+				JSONObject linkDescPerCollection = new JSONObject();
+				linkDescPerCollection.put("href", "https://openeo.org/api/collections/" + coverageID);
+				linkDescPerCollection.put("rel", "self");
+				
+				JSONObject linkLicensePerCollection = new JSONObject();
+				linkLicensePerCollection.put("href", "https://openeo.org/api/collections/" + coverageID);
+				linkLicensePerCollection.put("rel", "license");
+				
+				linksPerCollection.put(linkDescPerCollection);
+				linksPerCollection.put(linkLicensePerCollection);
+				
+				product.put("name", coverage.getChildText("CoverageId", defaultNS));
+				product.put("title", coverage.getChildText("CoverageId", defaultNS));
 				product.put("description", coverage.getChildText("CoverageId", defaultNS));
-				product.put("source", coverage.getChildText("CoverageId", defaultNS));
+				product.put("license", "proprietary");
+				product.put("extent", extentCollection);
+				product.put("links", linksPerCollection);
 				productArray.put(product);
 			}
-			return Response.ok(productArray.toString(4), MediaType.APPLICATION_JSON).build();
+			
+			data.put("collections", productArray);
+			data.put("links", linksCollections);
+			return Response.ok(data.toString(4), MediaType.APPLICATION_JSON).build();
+			
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -136,84 +233,122 @@ public class DataApiServiceImpl extends DataApiService {
 			Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
 			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
 			Element metadataElement = rootNode.getChild("CoverageDescription", defaultNS).getChild("metadata", gmlNS).getChild("Extension", gmlNS);
-			String metadataString1 = metadataElement.getChildText("covMetadata", gmlNS);
-			
-			//JSONArray slices = metadataObj.getJSONArray("slices");
-			//JSONObject envelope = slices.getJSONObject(0);
-			String metadataString2 = metadataString1.replaceAll("\\n","");
-			String metadataString3 = metadataString2.replaceAll("\"\"","\"");
-			JSONObject metadataObj = new JSONObject(metadataString3);
-			JSONArray slices = metadataObj.getJSONArray("slices");
-			
-			
-			
+			JSONObject metadataObj = new JSONObject();
+			if(metadataElement != null) {
+				String metadataString1 = metadataElement.getChildText("covMetadata", gmlNS);
+				String metadataString2 = metadataString1.replaceAll("\\n","");
+				String metadataString3 = metadataString2.replaceAll("\"\"","\"");
+				metadataObj = new JSONObject(metadataString3);
+				//JSONArray slices = metadataObj.getJSONArray("slices");
+			}
 			
 			
 			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
 			try {
 				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
+				srsDescription = srsDescription.replaceAll("EPSG:","");
+				
 			}catch(StringIndexOutOfBoundsException e) {
 				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
+				srsDescription = srsDescription.replaceAll("EPSG:","");
+							
 			}
+			
+			
+            JSONObject extentCollection = new JSONObject();
+			
+			JSONArray spatialExtent = new JSONArray();
+			JSONArray temporalExtent =  new JSONArray();
 			
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
-			JSONObject extent = new JSONObject();
-			JSONArray time =  new JSONArray();
+			
 			String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
 			for(int a = 0; a < axis.length; a++) {
 				log.debug(axis[a]);
 				if(axis[a].equals("E") || axis[a].equals("X")){
-					extent.put("left", Double.parseDouble(minValues[a]));
-					extent.put("right", Double.parseDouble(maxValues[a]));
+					spatialExtent.put(Double.parseDouble(minValues[a]));
+					spatialExtent.put(Double.parseDouble(maxValues[a]));
 				}
 				if(axis[a].equals("N") || axis[a].equals("Y")){
-					extent.put("bottom", Double.parseDouble(minValues[a]));
-					extent.put("top", Double.parseDouble(maxValues[a]));
+					spatialExtent.put(Double.parseDouble(minValues[a]));
+					spatialExtent.put(Double.parseDouble(maxValues[a]));
 				}
 				if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date")){
-					time.put(minValues[a].replaceAll("\"", ""));
-					time.put(maxValues[a].replaceAll("\"", ""));
+					temporalExtent.put(minValues[a].replaceAll("\"", ""));
+					temporalExtent.put(maxValues[a].replaceAll("\"", ""));
 				}
 			}
-			extent.put("crs", srsDescription);			
+			
+			
+			JSONArray links = new JSONArray();
+			
+			JSONObject linkSelf = new JSONObject();
+			linkSelf.put("href", "https://openeo.org/api/collections/" + productId);
+			linkSelf.put("rel", "self");
+			
+			JSONObject linkLicense = new JSONObject();
+			linkLicense.put("href", "https://openeo.org/api/collections/" + productId);
+			linkLicense.put("rel", "license");
+			
+			JSONObject linkAbout = new JSONObject();
+			linkAbout.put("href", "https://openeo.org/api/collections/" + productId);
+			linkAbout.put("title", "https://openeo.org/api/collections/" + productId);
+			linkAbout.put("rel", "about");
+			
+			links.put(linkSelf);
+			links.put(linkLicense);
+			links.put(linkAbout);
+		
+			JSONArray keywords = new JSONArray();
+			
+			JSONArray provider = new JSONArray();
+			JSONObject providerInfo = new JSONObject();
+			providerInfo.put("name", productId);
+			providerInfo.put("url", productId);
+			provider.put(providerInfo);
+			
+								
 			JSONObject coverage = new JSONObject();
-			coverage.put("data_id", productId);
+			
+			coverage.put("name", productId);
+			coverage.put("title", productId);
 			coverage.put("description", productId);
-			coverage.put("source", productId);
-			coverage.put("spatial_extent", extent);
-			coverage.put("temporal_extent", time);
-			JSONArray bandArray = new JSONArray();
+			coverage.put("license", "proprietary");
+			coverage.put("keywords", keywords);
+			coverage.put("provider", provider);
+			coverage.put("links", links);
+			extentCollection.put("spatial", spatialExtent);
+			extentCollection.put("temporal", temporalExtent);
+			
+			coverage.put("extent", extentCollection);
+			coverage.put("eo:epsg", Double.parseDouble(srsDescription));
+			coverage.put("sci:citation", productId);
+			coverage.put("eo:platform", productId);
+			coverage.put("eo:constellation", productId);
+			
+			
+			JSONObject bandObject = new JSONObject();
 			log.debug("number of bands found: " + bandList.size());
+			
 			for(int c = 0; c < bandList.size(); c++) {
 				Element band = bandList.get(c);
 				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
 				JSONObject product = new JSONObject();
-				product.put("band_id", band.getAttributeValue("name"));
-				product.put("name", band.getAttributeValue("name"));
-				product.put("wavelength_nm", band.getAttributeValue("name"));
-				product.put("res_m", band.getAttributeValue("name"));
-				product.put("scale", band.getAttributeValue("name"));
-				product.put("offset", band.getAttributeValue("name"));
-				product.put("type", band.getAttributeValue("name"));
-				product.put("unit", band.getAttributeValue("name"));
-				product.put("coverageMetadata", slices);
-				bandArray.put(product);
-			}
-			coverage.put("bands", bandArray);
-			JSONArray links = new JSONArray();
-			log.debug("number of links found: " + bandList.size());
-			for(int c = 0; c < bandList.size(); c++) {
-				Element band = bandList.get(c);
-				log.debug("link info: " + band.getName() + ":" + band.getAttributeValue("name"));		
-				JSONObject linkDesc = new JSONObject();
-				linkDesc.put("href", band.getAttributeValue("name"));
-				linkDesc.put("title", band.getAttributeValue("name"));
-				linkDesc.put("rel", band.getAttributeValue("name"));
+				String bandId = band.getAttributeValue("name");
 				
-				links.put(linkDesc);
+				product.put("common_name", bandId);
+				product.put("center_wavelength", bandId);
+				product.put("resolution", bandId);
+				product.put("scale", bandId);
+				product.put("offset", bandId);
+				
+				//product.put("coverageMetadata", metadataObj);
+				bandObject.put(bandId, product);
 			}
-			coverage.put("links", links);
+			
+			coverage.put("eo:bands", bandObject);
+			
 			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
