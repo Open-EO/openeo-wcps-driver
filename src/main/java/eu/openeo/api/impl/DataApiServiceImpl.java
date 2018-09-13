@@ -343,7 +343,7 @@ public class DataApiServiceImpl extends DataApiService {
 				product.put("scale", bandId);
 				product.put("offset", bandId);
 				
-				//product.put("coverageMetadata", metadataObj);
+				product.put("coverageMetadata", metadataObj);
 				bandObject.put(bandId, product);
 			}
 			
