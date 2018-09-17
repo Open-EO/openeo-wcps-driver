@@ -300,7 +300,10 @@ public class DataApiServiceImpl extends DataApiService {
 			links.put(linkLicense);
 			links.put(linkAbout);
 		
+			
 			JSONArray keywords = new JSONArray();
+			String keyword1 = metadataObj.getString("Project");
+			keywords.put(keyword1);
 			
 			String providerName = metadataObj.getString("Creator");
 			
@@ -310,11 +313,12 @@ public class DataApiServiceImpl extends DataApiService {
 			providerInfo.put("url", productId);
 			provider.put(providerInfo);
 			
+			String title = metadataObj.getString("Title");
 								
 			JSONObject coverage = new JSONObject();
 			
 			coverage.put("name", productId);
-			coverage.put("title", productId);
+			coverage.put("title", title);
 			coverage.put("description", productId);
 			coverage.put("license", "proprietary");
 			coverage.put("keywords", keywords);
@@ -327,7 +331,7 @@ public class DataApiServiceImpl extends DataApiService {
 			coverage.put("eo:epsg", Double.parseDouble(srsDescription));
 			coverage.put("sci:citation", productId);
 			coverage.put("eo:platform", productId);
-			coverage.put("eo:constellation", productId);
+			coverage.put("eo:constellation", "Sentinel");
 			
 			
 			JSONObject bandObject = new JSONObject();
@@ -348,12 +352,12 @@ public class DataApiServiceImpl extends DataApiService {
 				product.put("scale", bandId);
 				product.put("offset", bandId);
 				
-				product.put("extraMetadata", metadataObj);
+				//product.put("extraMetadata", metadataObj);
 				bandObject.put(bandId, product);
 			}
 			
 			coverage.put("eo:bands", bandObject);
-			
+			coverage.put("extraMetadata", metadataObj);
 			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
