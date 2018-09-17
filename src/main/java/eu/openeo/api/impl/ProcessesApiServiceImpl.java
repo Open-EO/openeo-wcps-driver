@@ -54,7 +54,7 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 	
 	@Override
 	public Response processesGet(String qname, SecurityContext securityContext) throws NotFoundException {
-		JSONArray processArray = new JSONArray();		
+		JSONArray processArray = new JSONArray();
 		for(String key : this.processes.keySet()){
 			JSONObject process = new JSONObject();
 			ProcessDescription processDesc = this.processes.get(key);

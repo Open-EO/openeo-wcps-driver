@@ -302,9 +302,11 @@ public class DataApiServiceImpl extends DataApiService {
 		
 			JSONArray keywords = new JSONArray();
 			
+			String providerName = metadataObj.getString("Creator");
+			
 			JSONArray provider = new JSONArray();
 			JSONObject providerInfo = new JSONObject();
-			providerInfo.put("name", productId);
+			providerInfo.put("name", providerName);
 			providerInfo.put("url", productId);
 			provider.put(providerInfo);
 			
@@ -336,14 +338,17 @@ public class DataApiServiceImpl extends DataApiService {
 				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
 				JSONObject product = new JSONObject();
 				String bandId = band.getAttributeValue("name");
+				JSONObject bands = metadataObj.getJSONObject("bands");
+				JSONObject bandName = bands.getJSONObject(bandId);
+				String bandWavelength = bandName.getString("WAVELENGTH");
 				
 				product.put("common_name", bandId);
-				product.put("center_wavelength", bandId);
+				product.put("center_wavelength", bandWavelength);
 				product.put("resolution", bandId);
 				product.put("scale", bandId);
 				product.put("offset", bandId);
 				
-				product.put("coverageMetadata", metadataObj);
+				product.put("extraMetadata", metadataObj);
 				bandObject.put(bandId, product);
 			}
 			
