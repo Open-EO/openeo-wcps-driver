@@ -90,7 +90,7 @@ public class DataApiServiceImpl extends DataApiService {
 		URL url;
 		log.debug("Recieved the following query: " + q);
 		try {
-			url = new URL(ConvenienceHelper.readProperties("os-endpoint") + "?any=" + q + "&resultType=hits&_content_type=json");
+			url = new URL(ConvenienceHelper.readProperties("os-endpoint") + "?any=" + q + "&resultType=hits&_content_type=json&fast=md1");
 			//"http://localhost:8080/euracgeonet/srv/eng/rss.search?any=eurac&resultType=hits&_content_type=json&fast="
 			log.debug("The following request was send to geonetwork: " + url.toString());
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();

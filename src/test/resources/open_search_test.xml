@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+	<channel>
+		<title>My GeoNetwork catalogue (My organization)</title>
+		<link>http://10.8.244.162:8080/euracgeonetwork</link>
+		<description />
+		<language>eng</language>
+		<copyright />
+		<category>Geographic metadata catalog</category>
+		<generator>GeoNetwork opensource</generator>
+		<ttl>30</ttl>
+		<item xmlns:gml="http://www.opengis.net/gml"
+			xmlns:media="http://search.yahoo.com/mrss/"
+			xmlns:georss="http://www.georss.org/georss">
+			<title>ERA5_ReAnalysis_Hourly_Air_Temperature_Europe</title>
+			<link>http://10.8.244.162:8080/euracgeonetwork/srv/metadata/b1e5a42c-f2ca-4278-a10b-3bfd9d15d263
+			</link>
+			<link href="http://10.8.244.162:8080/rasdaman/ows"
+				type="text/html" rel="alternate" title="wcs-endpoint" />
+			<category>Geographic metadata catalog</category>
+			<description><![CDATA[<p><br/></p><br clear="all"/>]]></description>
+			<pubDate>17 May 2018 13:47:20 EST</pubDate>
+			<guid isPermaLink="true">http://10.8.244.162:8080/euracgeonetwork/srv/metadata/b1e5a42c-f2ca-4278-a10b-3bfd9d15d263
+			</guid><!--Bounding box in georss GML format (http://georss.org) -->
+			<georss:where>
+				<gml:Envelope>
+					<gml:lowerCorner>33.72433966 -17.2265625</gml:lowerCorner>
+					<gml:upperCorner>72.18180356 42.5390625</gml:upperCorner>
+				</gml:Envelope>
+			</georss:where>
+		</item>
+	</channel>
+</rss>
