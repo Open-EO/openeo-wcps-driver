@@ -352,12 +352,11 @@ public class DataApiServiceImpl extends DataApiService {
 				product.put("scale", bandId);
 				product.put("offset", bandId);
 				
-				//product.put("extraMetadata", metadataObj);
 				bandObject.put(bandId, product);
 			}
 			
 			coverage.put("eo:bands", bandObject);
-			coverage.put("extraMetadata", metadataObj);
+			//coverage.put("extraMetadata", metadataObj);
 			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block

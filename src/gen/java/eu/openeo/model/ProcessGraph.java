@@ -40,7 +40,7 @@ public class ProcessGraph implements Serializable {
 	@JsonBackReference
 	private String processId = null;
 	
-	@JsonProperty("args")
+	@JsonProperty("imagery")
 	private void unpackNested(Map<String,Object> args) {
         this.args = new ArgSet();
         this.args.setArgs(args);
@@ -79,7 +79,7 @@ public class ProcessGraph implements Serializable {
 	 * 
 	 * @return args
 	 **/
-	@JsonProperty("args")
+	@JsonProperty("imagery")
 	@ApiModelProperty(required = true, value = "")
 	@NotNull
 	public ArgSet getArgs() {

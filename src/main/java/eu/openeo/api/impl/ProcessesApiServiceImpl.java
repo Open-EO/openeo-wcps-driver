@@ -54,15 +54,31 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 	
 	@Override
 	public Response processesGet(String qname, SecurityContext securityContext) throws NotFoundException {
+		JSONObject processes = new JSONObject();
 		JSONArray processArray = new JSONArray();
+		JSONArray linksArray = new JSONArray();
+		JSONObject links = new JSONObject();
 		for(String key : this.processes.keySet()){
 			JSONObject process = new JSONObject();
+						
 			ProcessDescription processDesc = this.processes.get(key);
 			process.put("name", processDesc.getProcessId());
+			process.put("summary", processDesc.getSummary());
 			process.put("description", processDesc.getDescription());
+			process.put("parameters", processDesc.getParameters());
+			process.put("min_parameters", processDesc.getMinParameters());
+			process.put("returns", processDesc.getReturns());
 			processArray.put(process);
+			processes.put("processes", processArray);
+			
 		}
-		return Response.ok(processArray.toString(4), MediaType.APPLICATION_JSON).build();
+		links.put("rel", "alternate");
+		links.put("href", "https://openeo.org/processes");
+		links.put("type", "text/html");
+		links.put("title", "HTML version of the processes");
+		linksArray.put(links);
+		processes.put("links", linksArray);
+		return Response.ok(processes.toString(4), MediaType.APPLICATION_JSON).build();
 	}
 
 	@Override

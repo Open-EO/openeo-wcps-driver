@@ -224,7 +224,7 @@ public class WCPSQueryFactory {
 				} else {
 					createAggregateFromProcess(processParent);
 				}
-			} else if (keyStr.equals("args")) {
+			} else if (keyStr.equals("imagery")) {
 				JSONObject argsObject = (JSONObject) processParent.get(keyStr);
 				for (Object argsKey : argsObject.keySet()) {
 					String argsKeyStr = (String) argsKey;
@@ -277,7 +277,7 @@ public class WCPSQueryFactory {
 		}
 		for (Object key : process.keySet()) {
 			String keyStr = (String) key;
-			if (keyStr.equals("args")) {
+			if (keyStr.equals("imagery")) {
 				JSONObject argsObject = (JSONObject) process.get(keyStr);
 				if (isTemporalFilter) {
 					createDateRangeFilterFromArgs(argsObject);

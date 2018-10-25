@@ -80,7 +80,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			throws NotFoundException {
 		JobFull job = null;
 		WCPSQueryFactory wcpsFactory = null;
-		String outputFormat = "json";
+		String outputFormat = "JSON";
 		try {
 			job = jobDao.queryForId(jobId);
 			if(job == null) {
