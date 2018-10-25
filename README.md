@@ -3,7 +3,7 @@
 [![Status](https://img.shields.io/badge/Status-proof--of--concept-yellow.svg)]()
 
 ## Information
-- API version: 0.0.2
+- API version: 0.3.0
 - JAVA: 8
 
 This repository serves for the development of the openEO driver for WC(P)S backends.
