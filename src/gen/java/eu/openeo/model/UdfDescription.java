@@ -40,7 +40,7 @@ public class UdfDescription implements Serializable {
 	@JsonProperty("link")
 	private String link = null;
 
-	@JsonProperty("args")
+	@JsonProperty("imagery")
 	private Map<String, ProcessDescriptionArgs> args = null;
 
 	public UdfDescription processId(String processId) {
@@ -125,7 +125,7 @@ public class UdfDescription implements Serializable {
 	 * 
 	 * @return args
 	 **/
-	@JsonProperty("args")
+	@JsonProperty("imagery")
 	@ApiModelProperty(value = "")
 	public Map<String, ProcessDescriptionArgs> getArgs() {
 		return args;

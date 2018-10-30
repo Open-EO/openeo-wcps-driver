@@ -113,7 +113,7 @@ public class ProcessGraph implements Serializable {
 		sb.append("class ProcessGraph {\n");
 
 		sb.append("    processId: ").append(toIndentedString(processId)).append("\n");
-		sb.append("    args: ").append(toIndentedString(args)).append("\n");
+		sb.append("    imagery: ").append(toIndentedString(args)).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}
