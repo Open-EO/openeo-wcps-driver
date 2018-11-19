@@ -63,7 +63,7 @@ public class WCPSQueryFactory {
 		wcpsStringBuilder.append(") return encode ( ");
 //		for (int a = aggregates.size() - 1; a >= 0; a--) {
 		for (int a = 0; a < aggregates.size(); a++) {
-			if (aggregates.get(a).getAxis().equals("date")) {
+			if (aggregates.get(a).getAxis().equals("DATE")) {
 				wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
 			}
 			if (aggregates.get(a).getOperator().equals("NDVI")) {
@@ -93,21 +93,21 @@ public class WCPSQueryFactory {
 			String low = filter.getLowerBound();
 			String high = filter.getUpperBound();
 			stringBuilder.append(axis + "(");
-			if (axis.contains("date") && !low.contains("$")) {
+			if (axis.contains("DATE") && !low.contains("$")) {
 				stringBuilder.append("\"");
 			}
 			stringBuilder.append(low);
-			if (axis.contains("date") && !low.contains("$")) {
+			if (axis.contains("DATE") && !low.contains("$")) {
 				stringBuilder.append("\"");
 			}
 			if (high != null) {
 				stringBuilder.append(":");
-				if (axis.contains("date")) {
+				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
 				}
 
 				stringBuilder.append(high);
-				if (axis.contains("date")) {
+				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
 				}
 			}
@@ -135,21 +135,21 @@ public class WCPSQueryFactory {
 		String low = filter.getLowerBound();
 		String high = filter.getUpperBound();
 		stringBuilder.append(axis + "(");
-		if (axis.contains("date") && !low.contains("$")) {
+		if (axis.contains("DATE") && !low.contains("$")) {
 			stringBuilder.append("\"");
 		}
 		stringBuilder.append(low);
-		if (axis.contains("date") && !low.contains("$")) {
+		if (axis.contains("DATE") && !low.contains("$")) {
 			stringBuilder.append("\"");
 		}
 		if (high != null) {
 			stringBuilder.append(":");
-			if (axis.contains("date")) {
+			if (axis.contains("DATE")) {
 				stringBuilder.append("\"");
 			}
 
 			stringBuilder.append(high);
-			if (axis.contains("date")) {
+			if (axis.contains("DATE")) {
 				stringBuilder.append("\"");
 			}
 		}
@@ -184,7 +184,7 @@ public class WCPSQueryFactory {
 		String operator = tempAggregate.getOperator();
 		Filter tempFilter = null;
 		for (Filter filter : this.filters) {
-			if (filter.getAxis().equals("date")) {
+			if (filter.getAxis().equals("DATE")) {
 				tempFilter = filter;
 			}
 		}
@@ -307,7 +307,7 @@ public class WCPSQueryFactory {
 		toDate   = extentArray.get(1).toString(); 
 		
 		if (fromDate != null && toDate != null)
-			this.filters.add(new Filter("date", fromDate, toDate));
+			this.filters.add(new Filter("DATE", fromDate, toDate));
 	}
 
 	private void createBoundingBoxFilterFromArgs(JSONObject argsObject) {
@@ -359,12 +359,12 @@ public class WCPSQueryFactory {
 		String aggregateType = processName.split("_")[0];
 		Vector<String> params = new Vector<String>();
 		for (Filter filter : this.filters) {
-			if (filter.getAxis().equals("date")) {
+			if (filter.getAxis().equals("DATE")) {
 				params.add(filter.getLowerBound());
 				params.add(filter.getUpperBound());
 			}
 		}
-		aggregates.add(new Aggregate(new String("date"), aggregateType, params));
+		aggregates.add(new Aggregate(new String("DATE"), aggregateType, params));
 	}
 
 	private void createNDVIAggregateFromProcess(JSONObject argsObject) {
