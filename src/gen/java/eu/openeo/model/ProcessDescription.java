@@ -102,7 +102,7 @@ public class ProcessDescription implements Serializable {
 	}
 	
 	@JsonProperty("summary")
-	@ApiModelProperty(required = true, value = "A short and concise description of what the process does and how the output looks like.")
+	@ApiModelProperty(required = true, value = "A short line for the process")
 	@NotNull
 	public String getSummary() {
 		return summary;
@@ -164,7 +164,7 @@ public class ProcessDescription implements Serializable {
 	 * @return args
 	 **/
 	@JsonProperty("parameters")
-	@ApiModelProperty(value = "")
+	@ApiModelProperty(value = "The format of the input Parameters required")
 	public Map<String, ProcessDescriptionArgs> getParameters() {
 		return parameters;
 	}
@@ -186,7 +186,7 @@ public class ProcessDescription implements Serializable {
 	 * @return returns
 	 **/
 	@JsonProperty("returns")
-	@ApiModelProperty(value = "")
+	@ApiModelProperty(value = "The format of the returned output")
 	public ProcessDescriptionReturns getReturns() {
 		return returns;
 	}

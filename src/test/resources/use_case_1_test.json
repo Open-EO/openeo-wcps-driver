@@ -1,43 +1,38 @@
-{ "process_graph": 
+{ 
+  "title": "NDVI based on Sentinel 2",
+  "description": "Deriving minimum NDVI measurements over pixel time series of Sentinel 2 imagery",
+
+  "process_graph": 
    
    { "process_id": "max_time", 
      "imagery": 
                      
-      { "collections": [
-      	
-         { "process_id": "NDVI", 
-           "imagery": 
-                                 
-            { "collections": [
-            	
-                              { "process_id": "filter_daterange", 
-                                "imagery": 
-                                
-                                 { "collections": [
-                                 	
-                                    { "process_id": "filter_bbox", 
-                                      "imagery": 
-                                      
-                                       { "collections": [
-                                          { "collection_id": "S2_L2A_T32TPS_20M" }
-                                                        ], 
-                                         "left" : 652000, 
-                                         "right" :672000, 
-                                         "top" : 5161000, 
-                                         "bottom" : 5181000, 
-                                         "srs" : "EPSG:32632" 
-                                        } 
-                                    }
-                                                   ], 
-                                    "from": "2017-01-01", 
-                                    "to": "2017-01-31" 
-                                 } 
-                              }               ],
-                             "red": "B04", 
-                             "nir": "B8A" 
-                            } 
-                         }
-                                      ] 
-                      } 
+      {  "process_id": "NDVI", 
+         "imagery": 
+         
+            { "process_id": "filter_daterange", 
+              "imagery": 
+               
+                 { "process_id": "filter_bbox", 
+                   "imagery": {
+                      "process_id": "get_collection",  
+                      "name": "S2_L2A_T32TPS_20M"
+                  },
+                   
+                   	  "west" : 652000, 
+                      "east" : 672000, 
+                      "north" : 5161000, 
+                      "south" : 5181000, 
+                      "crs" : "EPSG:32632"
+                   
+                   
+                 },
+              "extent": [ "2017-01-01", "2017-01-31" ]
+            }, 
+        
+        "red": "B04", 
+        "nir": "B8A"
+      } 
+       
     } 
- } 
+ }

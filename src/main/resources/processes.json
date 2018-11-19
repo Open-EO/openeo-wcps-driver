@@ -92,7 +92,7 @@
         "name": "filter_daterange",
         "summary": "",
         "description": "Creates a subset in including only values inside a given data range.",
-        "min_parameters": 1,
+        "min_parameters": 2,
         "parameters": {
                        "imagery": {
                                 "description": "The time series of rasters to filter.",
@@ -105,6 +105,7 @@
                        "extent": {
                                 "type": "array",
                                 "description": "Temporal extent specified by a start and an end time, each formatted as a [RFC 3339](https://www.ietf.org/rfc/rfc3339) date-time. Open date ranges are supported and can be specified by setting one of the times to null. Setting both entries to null is not allowed.",
+                                "required": true,
                                 "example": [
                                            "2016-01-01T00:00:00Z",
                                            "2017-10-01T00:00:00Z"
@@ -132,7 +133,7 @@
         "name": "filter_bbox",
         "summary": "",
         "description": "Creates a subset in including only values inside a given bounding box.",
-        "min_parameters": 1,
+        "min_parameters": 2,
         "parameters": {
                        "imagery": {
                                 "description": "The raster or time series of rasters to filter.",
@@ -144,6 +145,7 @@
                                 },
                        "spatial_extent": {
                                 "description": "Filter by spatial extent, may include a vertical axis (height or depth).",
+                                "required": true,
                                 "schema": {
                                            "type": "object",
                                            "format": "spatial_extent"
@@ -165,7 +167,54 @@
                                 "format": "eodata"
                                }
                     }
+    },
+    {
+        "name": "get_collections",
+        "summary": "Selects a collection.",
+        "description": "Filters and selects a single collection provided by the back-end. The back-end provider decides which of the potential collections is the most relevant one to be selected.",
+        "min_parameters": 1,
+        "parameters": {
+                       "name": {
+                                "description": "Filter by collection name",
+                                "required": true,
+                                "schema": {
+                                           "type": "string",
+                                           "examples": [ "Sentinel2A-L1C" ]
+                                          }
+                                },
+                       "spatial_extent": {
+                                "description": "Filter by spatial extent, may include a vertical axis (height or depth).",
+                               
+                                "schema": {
+                                           "type": "object",
+                                           "format": "spatial_extent"
+                                          }
+
+                                },
+                       "temporal_extent": {
+                                "description": "Filter by temporal extent.",
+                                
+                                "schema": {
+                                           "type": "array",
+                                           "format": "temporal_extent"
+                                          }
+                                },         
+                       "bands": {
+                                "description": "Filter by band IDs",
+                                "schema": {
+                                          "type": "array",
+                                          "items": {
+                                                     "type": "string"
+                                                    }
+                                          }
+                                }                   
+                         },
+         "returns": {
+                     "description": "Processed EO data.",
+                     "schema": {
+                                "type": "object",
+                                "format": "eodata"
+                               }
+                    }
     }
-
-
 ]

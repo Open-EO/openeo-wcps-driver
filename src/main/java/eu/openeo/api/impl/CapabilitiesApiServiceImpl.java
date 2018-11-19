@@ -132,7 +132,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		
 		JSONObject mainObj = new JSONObject();
 		mainObj.put("version", "0.3.0");
-		mainObj.put("endpoint", endpointList);
+		mainObj.put("endpoints", endpointList);
 		mainObj.put("billing", billing);
 		
 		return Response.ok(mainObj.toString(4), MediaType.APPLICATION_JSON).build();
@@ -152,7 +152,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		} catch (IOException e) {
 			log.error("Error reading json file: " + e.getMessage());
 			return Response.serverError().entity("Error reading json file: " + e.getMessage()).build();
-		}		
+		}
 	}
 
 	@Override
