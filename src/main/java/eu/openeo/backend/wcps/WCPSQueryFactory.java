@@ -237,17 +237,21 @@ public class WCPSQueryFactory {
 				log.debug("currently working on: " + name);
 				if (name.contains("filter")) {
 					createFilterFromProcess(processParent);
-				} else {
+				} 
+				/*else if (name.contains("get_collection") && (keyStr.equals("spatial_extent") || keyStr.equals("temporal_extent"))) {
+				createFilterFromGetCollection(processParent);
+			    }*/
+				else {
 					createAggregateFromProcess(processParent);
 				}
-			} else if (/*keyStr.equals("args") ||*/ keyStr.equals("imagery")) {
+			} else if (keyStr.equals("imagery")) {
 				
 				      JSONObject argsObject = (JSONObject) processParent.get(keyStr);
 				      result = parseOpenEOProcessGraph(argsObject);
 				      
 			}
 			
-			else if (keyStr.equals("name") || keyStr.equals("product_id")) {
+			else if (keyStr.equals("name")) {
 				String name = (String) processParent.get(keyStr);
 				collectionIDs.add(new Collection(name));
 				log.debug("found actual dataset: " + name);
@@ -256,6 +260,47 @@ public class WCPSQueryFactory {
 		return result;
 	}
 
+	
+	private void createFilterFromGetCollection(JSONObject process) {
+		
+		
+		boolean isTemporalFilter = false;
+		boolean isBoundBoxFilter = false;
+		for (Object key : process.keySet()) {
+			String keyStr = (String) key;
+			if (keyStr.equals("process_id")) {
+				String name = (String) process.get(keyStr);
+				log.debug("currently working on: " + name);
+				if (name.contains("date")) {
+					isTemporalFilter = true;
+				} else if (name.contains("bbox")) {
+					isBoundBoxFilter = true;
+				}
+			}
+		}
+		for (Object key : process.keySet()) {
+			String keyStr = (String) key;
+			if (process.get("process_id").toString().contains("bbox") &&  keyStr.equals("imagery")) {
+
+				JSONObject argsObject = (JSONObject) process.get(keyStr);
+
+				if (isBoundBoxFilter) {
+
+					createBoundingBoxFilterFromArgs(process);
+				}
+			}
+
+			else if (process.get("process_id").toString().contains("date") && (keyStr.equals("extent") || keyStr.equals("temporal_extent"))) {
+				JSONArray extentArray = (JSONArray) process.get(keyStr);
+
+				if (isTemporalFilter) {
+
+					createDateRangeFilterFromArgs(extentArray);
+
+				}
+			}
+		}
+	}
 	/**
 	 * 
 	 * @param process
@@ -277,26 +322,26 @@ public class WCPSQueryFactory {
 		}
 		for (Object key : process.keySet()) {
 			String keyStr = (String) key;
-			if (/*keyStr.equals("args") ||*/ keyStr.equals("imagery")) {
-			
-			JSONObject argsObject = (JSONObject) process.get(keyStr);
-		
-			if (isBoundBoxFilter) {
-							
-					        createBoundingBoxFilterFromArgs(process);
-				  }
-			}
-		
-			else if (keyStr.equals("extent")) {
-		    	JSONArray extentArray = (JSONArray) process.get(keyStr);
-		    	
-                  if (isTemporalFilter) {
-					
-					createDateRangeFilterFromArgs(extentArray);
-					
+			if (process.get("process_id").toString().contains("bbox") &&  keyStr.equals("imagery")) {
+
+				JSONObject argsObject = (JSONObject) process.get(keyStr);
+
+				if (isBoundBoxFilter) {
+
+					createBoundingBoxFilterFromArgs(process);
 				}
-		    }
-       }
+			}
+
+			else if (process.get("process_id").toString().contains("date") && (keyStr.equals("extent") || keyStr.equals("temporal_extent"))) {
+				JSONArray extentArray = (JSONArray) process.get(keyStr);
+
+				if (isTemporalFilter) {
+
+					createDateRangeFilterFromArgs(extentArray);
+
+				}
+			}
+		}
 	}
 
 	private void createDateRangeFilterFromArgs(JSONArray extentArray) {
@@ -315,22 +360,31 @@ public class WCPSQueryFactory {
 		String right = null;
 		String top = null;
 		String bottom = null;
-		for (Object argsKey : argsObject.keySet()) {
+		//Set argsKey = argsObject.keySet();
+		for(Object argsKey: argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
-			if (argsKeyStr.equals("west")) {
-				left = "" + argsObject.get(argsKey).toString();
-			} else if (argsKeyStr.equals("east")) {
-				right = "" + argsObject.get(argsKey).toString();
+			if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
+				JSONObject extentObject = (JSONObject) argsObject.get(argsKeyStr);
+				for (Object extentKey : extentObject.keySet()) {
+					String extentKeyStr = (String) extentKey;
+	
+					if (extentKeyStr.equals("west")) {
+						left = "" + extentObject.get(extentKey).toString();
+					} else if (extentKeyStr.equals("east")) {
+						right = "" + extentObject.get(extentKey).toString();
+					}
+					if (extentKeyStr.equals("north")) {
+						top = "" + extentObject.get(extentKey).toString();
+					} else if (extentKeyStr.equals("south")) {
+						bottom = "" + extentObject.get(extentKey).toString();
+					}
+				}
 			}
-			if (argsKeyStr.equals("north")) {
-				top = "" + argsObject.get(argsKey).toString();
-			} else if (argsKeyStr.equals("south")) {
-				bottom = "" + argsObject.get(argsKey).toString();
-			}
+			
 		}
 		this.filters.add(new Filter("E", left, right));
 		this.filters.add(new Filter("N", top, bottom));
-}
+	}
 	/**
 	 * 
 	 * @param process
