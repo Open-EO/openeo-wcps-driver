@@ -236,9 +236,10 @@ public class DataApiServiceImpl extends DataApiService {
 			JSONObject metadataObj = new JSONObject();
 			if(metadataElement != null) {
 				String metadataString1 = metadataElement.getChildText("covMetadata", gmlNS);
-				String metadataString2 = metadataString1.replaceAll("\\n","");
-				String metadataString3 = metadataString2.replaceAll("\"\"","\"");
-				metadataObj = new JSONObject(metadataString3);
+				//metadataObj = new JSONObject(metadataString1);
+				//String metadataString2 = metadataString1.replaceAll("\\n","");
+				//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
+				//metadataObj = new JSONObject(metadataString3);
 				//JSONArray slices = metadataObj.getJSONArray("slices");
 			}
 			
@@ -302,23 +303,23 @@ public class DataApiServiceImpl extends DataApiService {
 		
 			
 			JSONArray keywords = new JSONArray();
-			String keyword1 = metadataObj.getString("Project");
-			keywords.put(keyword1);
+			//String keyword1 = metadataObj.getString("Project");
+			//keywords.put(keyword1);
 			
-			String providerName = metadataObj.getString("Creator");
+			//String providerName = metadataObj.getString("Creator");
 			
 			JSONArray provider = new JSONArray();
 			JSONObject providerInfo = new JSONObject();
-			providerInfo.put("name", providerName);
+			//providerInfo.put("name", providerName);
 			providerInfo.put("url", productId);
 			provider.put(providerInfo);
 			
-			String title = metadataObj.getString("Title");
+			//String title = metadataObj.getString("Title");
 								
 			JSONObject coverage = new JSONObject();
 			
 			coverage.put("name", productId);
-			coverage.put("title", title);
+			//coverage.put("title", title);
 			coverage.put("description", productId);
 			coverage.put("license", "proprietary");
 			coverage.put("keywords", keywords);
@@ -342,12 +343,12 @@ public class DataApiServiceImpl extends DataApiService {
 				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
 				JSONObject product = new JSONObject();
 				String bandId = band.getAttributeValue("name");
-				JSONObject bands = metadataObj.getJSONObject("bands");
-				JSONObject bandName = bands.getJSONObject(bandId);
-				String bandWavelength = bandName.getString("WAVELENGTH");
+				//JSONObject bands = metadataObj.getJSONObject("bands");
+				//JSONObject bandName = bands.getJSONObject(bandId);
+				//String bandWavelength = bandName.getString("WAVELENGTH");
 				
 				product.put("common_name", bandId);
-				product.put("center_wavelength", bandWavelength);
+				//product.put("center_wavelength", bandWavelength);
 				product.put("resolution", bandId);
 				product.put("scale", bandId);
 				product.put("offset", bandId);

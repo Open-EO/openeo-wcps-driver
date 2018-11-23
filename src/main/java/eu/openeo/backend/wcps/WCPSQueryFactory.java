@@ -236,34 +236,59 @@ public class WCPSQueryFactory {
 				String name = (String) processParent.get(keyStr);
 				log.debug("currently working on: " + name);
 				if (name.contains("filter")) {
-					createFilterFromProcess(processParent);
-				} 
+				    createFilterFromProcess(processParent);
+				}
+				else if (name.contains("get_collection")) {
+					for (Object collName : processParent.keySet()) {
+						String collNameStr = (String) collName;
+						if (collNameStr.equals("name")) {
+							for (Object collFilterName : processParent.keySet()) {
+								String collFilterNameStr = (String) collFilterName;
+								if (collFilterNameStr.equals("spatial_extent")) {
+									createBoundingBoxFilterFromArgs(processParent);
+								   }
+								if (collFilterNameStr.equals("temporal_extent")) {
+									JSONArray extentArray = (JSONArray) processParent.get(collFilterNameStr);
+									createDateRangeFilterFromArgs(extentArray);
+								   }
+								}
+							String coll = (String) processParent.get(collNameStr);
+							collectionIDs.add(new Collection(coll));
+							log.debug("found actual dataset: " + coll);
+							
+					    }
+				     }
+				  }
+								
 				/*else if (name.contains("get_collection") && (keyStr.equals("spatial_extent") || keyStr.equals("temporal_extent"))) {
 				createFilterFromGetCollection(processParent);
 			    }*/
 				else {
-					createAggregateFromProcess(processParent);
+					   createAggregateFromProcess(processParent);
 				}
-			} else if (keyStr.equals("imagery")) {
+				
+			} 
+			
+			else if (keyStr.equals("imagery")) {
 				
 				      JSONObject argsObject = (JSONObject) processParent.get(keyStr);
 				      result = parseOpenEOProcessGraph(argsObject);
 				      
 			}
 			
-			else if (keyStr.equals("name")) {
+			/*else if (keyStr.equals("name")) {
 				String name = (String) processParent.get(keyStr);
 				collectionIDs.add(new Collection(name));
 				log.debug("found actual dataset: " + name);
-			}
+				
+			}*/
 		}
 		return result;
 	}
-
+    
 	
 	private void createFilterFromGetCollection(JSONObject process) {
-		
-		
+				
 		boolean isTemporalFilter = false;
 		boolean isBoundBoxFilter = false;
 		for (Object key : process.keySet()) {
