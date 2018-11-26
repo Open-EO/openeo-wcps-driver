@@ -287,85 +287,33 @@ public class WCPSQueryFactory {
 	}
     
 	
-	private void createFilterFromGetCollection(JSONObject process) {
-				
-		boolean isTemporalFilter = false;
-		boolean isBoundBoxFilter = false;
-		for (Object key : process.keySet()) {
-			String keyStr = (String) key;
-			if (keyStr.equals("process_id")) {
-				String name = (String) process.get(keyStr);
-				log.debug("currently working on: " + name);
-				if (name.contains("date")) {
-					isTemporalFilter = true;
-				} else if (name.contains("bbox")) {
-					isBoundBoxFilter = true;
-				}
-			}
-		}
-		for (Object key : process.keySet()) {
-			String keyStr = (String) key;
-			if (process.get("process_id").toString().contains("bbox") &&  keyStr.equals("imagery")) {
-
-				JSONObject argsObject = (JSONObject) process.get(keyStr);
-
-				if (isBoundBoxFilter) {
-
-					createBoundingBoxFilterFromArgs(process);
-				}
-			}
-
-			else if (process.get("process_id").toString().contains("date") && (keyStr.equals("extent") || keyStr.equals("temporal_extent"))) {
-				JSONArray extentArray = (JSONArray) process.get(keyStr);
-
-				if (isTemporalFilter) {
-
-					createDateRangeFilterFromArgs(extentArray);
-
-				}
-			}
-		}
-	}
+	
 	/**
 	 * 
 	 * @param process
 	 */
 	private void createFilterFromProcess(JSONObject process) {
-		boolean isTemporalFilter = false;
-		boolean isBoundBoxFilter = false;
+		
 		for (Object key : process.keySet()) {
 			String keyStr = (String) key;
-			if (keyStr.equals("process_id")) {
-				String name = (String) process.get(keyStr);
-				log.debug("currently working on: " + name);
-				if (name.contains("date")) {
-					isTemporalFilter = true;
-				} else if (name.contains("bbox")) {
-					isBoundBoxFilter = true;
-				}
+			if (!keyStr.equals("extent")) {
+				
+				log.debug("Its all about Time and Place");
+			
 			}
-		}
-		for (Object key : process.keySet()) {
-			String keyStr = (String) key;
-			if (process.get("process_id").toString().contains("bbox") &&  keyStr.equals("imagery")) {
-
-				JSONObject argsObject = (JSONObject) process.get(keyStr);
-
-				if (isBoundBoxFilter) {
-
-					createBoundingBoxFilterFromArgs(process);
-				}
+			else if (keyStr.equals("extent") && process.get("process_id").toString().contains("bbox")) {
+               
+			   createBoundingBoxFilterFromArgs(process);
+			   
 			}
 
-			else if (process.get("process_id").toString().contains("date") && (keyStr.equals("extent") || keyStr.equals("temporal_extent"))) {
-				JSONArray extentArray = (JSONArray) process.get(keyStr);
+			else if (keyStr.equals("extent") && process.get("process_id").toString().contains("date")) {
+				    JSONArray extentArray = (JSONArray) process.get(keyStr);
 
-				if (isTemporalFilter) {
-
-					createDateRangeFilterFromArgs(extentArray);
-
-				}
+				    createDateRangeFilterFromArgs(extentArray);
+				    
 			}
+			
 		}
 	}
 
