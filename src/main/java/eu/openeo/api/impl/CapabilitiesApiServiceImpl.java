@@ -107,11 +107,8 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		endpointList.put(data);
 		endpointList.put(dataID);
 		//endpointList.put(execute);
-<<<<<<< HEAD
 		endpointList.put(jobs);
-=======
 		//endpointList.put(jobs);
->>>>>>> branch '0.3.0' of ssh://git@github.com/Open-EO/openeo-wcps-driver.git
 		endpointList.put(jobsID);
 		endpointList.put(processes);
 		endpointList.put(processesID);
