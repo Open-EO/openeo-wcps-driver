@@ -107,7 +107,11 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		endpointList.put(data);
 		endpointList.put(dataID);
 		//endpointList.put(execute);
+<<<<<<< HEAD
 		endpointList.put(jobs);
+=======
+		//endpointList.put(jobs);
+>>>>>>> branch '0.3.0' of ssh://git@github.com/Open-EO/openeo-wcps-driver.git
 		endpointList.put(jobsID);
 		endpointList.put(processes);
 		endpointList.put(processesID);
@@ -152,7 +156,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		} catch (IOException e) {
 			log.error("Error reading json file: " + e.getMessage());
 			return Response.serverError().entity("Error reading json file: " + e.getMessage()).build();
-		}
+		}		
 	}
 
 	@Override
