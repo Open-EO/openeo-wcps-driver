@@ -4,11 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>openEO_WCPS_Driver</groupId>
 	<artifactId>openEO_WCPS_Driver</artifactId>
-<<<<<<< HEAD
-	<version>0.3.0</version>
-=======
 	<version>0.3.1</version>
->>>>>>> branch '0.3.0' of git@github.com:Open-EO/openeo-wcps-driver.git
 	<packaging>war</packaging>
 	<name>openEO_0_3_0</name>
 

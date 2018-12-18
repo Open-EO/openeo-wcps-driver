@@ -108,7 +108,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		endpointList.put(dataID);
 		//endpointList.put(execute);
 		//endpointList.put(jobs);
-		//endpointList.put(jobsID);
+		endpointList.put(jobsID);
 		endpointList.put(processes);
 		endpointList.put(processesID);
 		
@@ -131,15 +131,9 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		
 		
 		JSONObject mainObj = new JSONObject();
-<<<<<<< HEAD
-		mainObj.put("version", "0.3.0");
-		mainObj.put("endpoints", endpointList);
-		mainObj.put("billing", billing);
-=======
 		mainObj.put("version", "0.3.1");
 		mainObj.put("endpoints", endpointList);
 		//mainObj.put("billing", billing);
->>>>>>> branch '0.3.0' of git@github.com:Open-EO/openeo-wcps-driver.git
 		
 		return Response.ok(mainObj.toString(4), MediaType.APPLICATION_JSON).build();
 	}
@@ -158,7 +152,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		} catch (IOException e) {
 			log.error("Error reading json file: " + e.getMessage());
 			return Response.serverError().entity("Error reading json file: " + e.getMessage()).build();
-		}
+		}		
 	}
 
 	@Override
