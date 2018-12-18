@@ -111,6 +111,15 @@ public class DataApiServiceImpl extends DataApiService {
 				Element coverageDescElement = rootNodeCollections.getChild("CoverageDescription", defaultNSCollections);
 				Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
 				Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
+				Element metadataElement = rootNodeCollections.getChild("CoverageDescription", defaultNSCollections).getChild("metadata", gmlNS).getChild("Extension", gmlNS);
+				
+				
+					//metadataObj = new JSONObject(metadataString1);
+					//String metadataString2 = metadataString1.replaceAll("\\n","");
+					//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
+					//metadataObj = new JSONObject(metadataString3);
+					//JSONArray slices = metadataObj.getJSONArray("slices");
+				
 				
 				String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 				String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
@@ -148,6 +157,7 @@ public class DataApiServiceImpl extends DataApiService {
 				
 				linksPerCollection.put(linkDescPerCollection);
 				linksPerCollection.put(linkLicensePerCollection);
+				
 				
 				product.put("name", coverage.getChildText("CoverageId", defaultNS));
 				product.put("title", coverage.getChildText("CoverageId", defaultNS));
