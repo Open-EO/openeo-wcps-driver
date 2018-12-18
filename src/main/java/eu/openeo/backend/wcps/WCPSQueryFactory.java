@@ -77,6 +77,13 @@ public class WCPSQueryFactory {
 		wcpsStringBuilder.append(", \"" + outputFormat + "\" )");
 	}
 
+	
+	private String filter_geometry(String collectionName) {
+		
+		    return collectionName ;
+	}
+	
+	
 	/**
 	 * Helper Method to create a string describing an arbitrary filtering as defined
 	 * from the process graph
@@ -255,27 +262,20 @@ public class WCPSQueryFactory {
 							String coll = (String) processParent.get(collNameStr);
 							collectionIDs.add(new Collection(coll));
 							log.debug("found actual dataset: " + coll);
-							
-					    }
+							}
 				     }
-				  }
-								
+				  }								
 				/*else if (name.contains("get_collection") && (keyStr.equals("spatial_extent") || keyStr.equals("temporal_extent"))) {
 				createFilterFromGetCollection(processParent);
 			    }*/
 				else {
 					   createAggregateFromProcess(processParent);
 				}
-				
-			} 
-			
-			else if (keyStr.equals("imagery")) {
-				
-				      JSONObject argsObject = (JSONObject) processParent.get(keyStr);
-				      result = parseOpenEOProcessGraph(argsObject);
-				      
 			}
-			
+			else if (keyStr.equals("imagery")) {				
+				      JSONObject argsObject = (JSONObject) processParent.get(keyStr);
+				      result = parseOpenEOProcessGraph(argsObject);			      
+			}
 			/*else if (keyStr.equals("name")) {
 				String name = (String) processParent.get(keyStr);
 				collectionIDs.add(new Collection(name));
@@ -285,9 +285,7 @@ public class WCPSQueryFactory {
 		}
 		return result;
 	}
-    
-	
-	
+    	
 	/**
 	 * 
 	 * @param process

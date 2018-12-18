@@ -4,9 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>openEO_WCPS_Driver</groupId>
 	<artifactId>openEO_WCPS_Driver</artifactId>
-	<version>0.0.2</version>
+	<version>0.3.1</version>
 	<packaging>war</packaging>
-	<name>openEO_WCPS_Driver</name>
+	<name>openEO_0_3_0</name>
 
 	<licenses>
 		<license>
@@ -19,7 +19,7 @@
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<testSourceDirectory>src/test/java</testSourceDirectory>
-		<finalName>openEO_WCPS_Driver</finalName>
+		<finalName>openEO_0_3_0</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>

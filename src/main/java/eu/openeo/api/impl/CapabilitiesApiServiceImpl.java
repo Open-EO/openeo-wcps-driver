@@ -44,7 +44,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		executeMethods.put(new String("GET"));
 		
 		JSONArray jobsMethods = new JSONArray();
-		jobsMethods.put(new String("GET"));
+		//jobsMethods.put(new String("GET"));
 		jobsMethods.put(new String("POST"));
 				
 		JSONArray jobsIDMethods = new JSONArray();
@@ -116,8 +116,8 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		
 		JSONObject plans = new JSONObject();
 		plans.put("name", "free");
-		plans.put("description", "Free plan. Calculates one tile per second and a maximum amount of 100 tiles per hour.");
-		plans.put("url", "http://openeo.org/plans/free-plan");
+		plans.put("description", "Currently the service provided is free of Charge");
+		plans.put("url", "");
 		
 		JSONArray plan = new JSONArray();
 		plan.put(plans);
@@ -131,9 +131,9 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		
 		
 		JSONObject mainObj = new JSONObject();
-		mainObj.put("version", "0.3.0");
+		mainObj.put("version", "0.3.1");
 		mainObj.put("endpoints", endpointList);
-		mainObj.put("billing", billing);
+		//mainObj.put("billing", billing);
 		
 		return Response.ok(mainObj.toString(4), MediaType.APPLICATION_JSON).build();
 	}
