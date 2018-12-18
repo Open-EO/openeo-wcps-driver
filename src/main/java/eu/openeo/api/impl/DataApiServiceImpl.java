@@ -56,7 +56,7 @@ public class DataApiServiceImpl extends DataApiService {
 			JSONArray linksCollections = new JSONArray();
 				
 				JSONObject linkDesc = new JSONObject();
-				linkDesc.put("href", "https://openeo.org/api/collections");
+				linkDesc.put("href", "http://http://saocompute.eurac.edu/rasdaman/ows");
 				linkDesc.put("rel", "self");
 				
 				JSONObject linkCsw = new JSONObject();
@@ -139,11 +139,11 @@ public class DataApiServiceImpl extends DataApiService {
 				JSONArray linksPerCollection = new JSONArray();
 				
 				JSONObject linkDescPerCollection = new JSONObject();
-				linkDescPerCollection.put("href", "https://openeo.org/api/collections/" + coverageID);
+				linkDescPerCollection.put("href", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageID);
 				linkDescPerCollection.put("rel", "self");
 				
 				JSONObject linkLicensePerCollection = new JSONObject();
-				linkLicensePerCollection.put("href", "https://openeo.org/api/collections/" + coverageID);
+				linkLicensePerCollection.put("href", "https://creativecommons.org/licenses/by/4.0/");
 				linkLicensePerCollection.put("rel", "license");
 				
 				linksPerCollection.put(linkDescPerCollection);
@@ -152,7 +152,7 @@ public class DataApiServiceImpl extends DataApiService {
 				product.put("name", coverage.getChildText("CoverageId", defaultNS));
 				product.put("title", coverage.getChildText("CoverageId", defaultNS));
 				product.put("description", coverage.getChildText("CoverageId", defaultNS));
-				product.put("license", "proprietary");
+				product.put("license", "CC By 4.0");
 				product.put("extent", extentCollection);
 				product.put("links", linksPerCollection);
 				productArray.put(product);
@@ -236,9 +236,10 @@ public class DataApiServiceImpl extends DataApiService {
 			JSONObject metadataObj = new JSONObject();
 			if(metadataElement != null) {
 				String metadataString1 = metadataElement.getChildText("covMetadata", gmlNS);
-				String metadataString2 = metadataString1.replaceAll("\\n","");
-				String metadataString3 = metadataString2.replaceAll("\"\"","\"");
-				metadataObj = new JSONObject(metadataString3);
+				//metadataObj = new JSONObject(metadataString1);
+				//String metadataString2 = metadataString1.replaceAll("\\n","");
+				//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
+				//metadataObj = new JSONObject(metadataString3);
 				//JSONArray slices = metadataObj.getJSONArray("slices");
 			}
 			
@@ -284,16 +285,16 @@ public class DataApiServiceImpl extends DataApiService {
 			JSONArray links = new JSONArray();
 			
 			JSONObject linkSelf = new JSONObject();
-			linkSelf.put("href", "https://openeo.org/api/collections/" + productId);
+			linkSelf.put("href", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + productId);
 			linkSelf.put("rel", "self");
 			
 			JSONObject linkLicense = new JSONObject();
-			linkLicense.put("href", "https://openeo.org/api/collections/" + productId);
+			linkLicense.put("href", "https://creativecommons.org/licenses/by/4.0/");
 			linkLicense.put("rel", "license");
 			
 			JSONObject linkAbout = new JSONObject();
-			linkAbout.put("href", "https://openeo.org/api/collections/" + productId);
-			linkAbout.put("title", "https://openeo.org/api/collections/" + productId);
+			linkAbout.put("href", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + productId);
+			linkAbout.put("title", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + productId);
 			linkAbout.put("rel", "about");
 			
 			links.put(linkSelf);
@@ -302,25 +303,25 @@ public class DataApiServiceImpl extends DataApiService {
 		
 			
 			JSONArray keywords = new JSONArray();
-			String keyword1 = metadataObj.getString("Project");
-			keywords.put(keyword1);
+			//String keyword1 = metadataObj.getString("Project");
+			//keywords.put(keyword1);
 			
-			String providerName = metadataObj.getString("Creator");
+			//String providerName = metadataObj.getString("Creator");
 			
 			JSONArray provider = new JSONArray();
 			JSONObject providerInfo = new JSONObject();
-			providerInfo.put("name", providerName);
+			//providerInfo.put("name", providerName);
 			providerInfo.put("url", productId);
 			provider.put(providerInfo);
 			
-			String title = metadataObj.getString("Title");
+			//String title = metadataObj.getString("Title");
 								
 			JSONObject coverage = new JSONObject();
 			
 			coverage.put("name", productId);
-			coverage.put("title", title);
+			//coverage.put("title", title);
 			coverage.put("description", productId);
-			coverage.put("license", "proprietary");
+			coverage.put("license", "CC By 4.0");
 			coverage.put("keywords", keywords);
 			coverage.put("provider", provider);
 			coverage.put("links", links);
@@ -342,22 +343,21 @@ public class DataApiServiceImpl extends DataApiService {
 				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
 				JSONObject product = new JSONObject();
 				String bandId = band.getAttributeValue("name");
-				JSONObject bands = metadataObj.getJSONObject("bands");
-				JSONObject bandName = bands.getJSONObject(bandId);
-				String bandWavelength = bandName.getString("WAVELENGTH");
+				//JSONObject bands = metadataObj.getJSONObject("bands");
+				//JSONObject bandName = bands.getJSONObject(bandId);
+				//String bandWavelength = bandName.getString("WAVELENGTH");
 				
 				product.put("common_name", bandId);
-				product.put("center_wavelength", bandWavelength);
+				//product.put("center_wavelength", bandWavelength);
 				product.put("resolution", bandId);
 				product.put("scale", bandId);
 				product.put("offset", bandId);
 				
-				//product.put("extraMetadata", metadataObj);
 				bandObject.put(bandId, product);
 			}
 			
 			coverage.put("eo:bands", bandObject);
-			coverage.put("extraMetadata", metadataObj);
+			//coverage.put("extraMetadata", metadataObj);
 			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block

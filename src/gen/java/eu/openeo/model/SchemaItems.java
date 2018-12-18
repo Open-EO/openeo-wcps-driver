@@ -13,38 +13,70 @@
 package eu.openeo.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Defines an object schema for a collection of uniquely named arguments
- * (argument set) as input to processes. The values can by any of the JSON data
- * types string, number, array, boolean or null. Additionally it can be any
- * object of type **arg_set** or **image_collection** (see models). This object
- * is part of the process graph definition. **This type is not formalized in the
- * Swagger 2.0 definition due to missing support for oneOf or anyOf schema
- * combinations.** See the process graph documentation for more information.
+ * **DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0
+ * DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**
  */
-@ApiModel(description = "Defines an object schema for a collection of uniquely named arguments (argument set) as input to processes. The values can by any of the JSON data types string, number, array, boolean or null. Additionally it can be any object of type **arg_set** or **image_collection** (see models). This object is part of the process graph definition. **This type is not formalized in the Swagger 2.0 definition due to missing support for oneOf or anyOf schema combinations.** See the process graph documentation for more information.")
+@ApiModel(description = "**DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0 DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ArgSet implements Serializable {
+public class SchemaItems implements Serializable {
+	@JsonProperty("type")
+	private String type = null;
 	
-	@JsonProperty("parameters")
-	private Map<String, Object> args = null;
+	@JsonProperty("format")
+	private String format = null;
 	
-	private static final long serialVersionUID = -2548173058530187756L;
+	
 
-	public Map<String, Object> getArgs() {
-		return args;
+	public SchemaItems type(String type) {
+		this.type = type;
+		return this;
 	}
 
-	public void setArgs(Map<String, Object> args) {
-		this.args = args;
+	/**
+	 * A short and concise description of the process argument.
+	 * 
+	 * @return description
+	 **/
+	@JsonProperty("type")
+	@ApiModelProperty(required = true, value = "A short and concise description of the process argument.")
+	@NotNull
+	public String getType() {
+		return type;
 	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+
+	public SchemaItems format(String format) {
+		this.format = format;
+		return this;
+	}
+	
+	@JsonProperty("format")
+	@ApiModelProperty(required = true, value = "Format")
+	@NotNull
+	public String getFormat() {
+		return format;
+	}
+
+	public void setFormat(String format) {
+		this.format = format;
+	}
+
 
 	@Override
 	public boolean equals(java.lang.Object o) {
@@ -54,19 +86,24 @@ public class ArgSet implements Serializable {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		return true;
+		SchemaItems schemaitems = (SchemaItems) o;
+		return Objects.equals(this.type, schemaitems.type)
+	        && Objects.equals(this.format, schemaitems.format);
+	        
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash();
+		return Objects.hash(type, format);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("class ArgSet {\n");
-
+		sb.append("class Items {\n");
+		sb.append("    type: ").append(toIndentedString(type)).append("\n");
+		sb.append("    format: ").append(toIndentedString(format)).append("\n");
+		
 		sb.append("}");
 		return sb.toString();
 	}
@@ -75,7 +112,6 @@ public class ArgSet implements Serializable {
 	 * Convert the given object to string with each line indented by 4 spaces
 	 * (except the first line).
 	 */
-	@SuppressWarnings("unused")
 	private String toIndentedString(java.lang.Object o) {
 		if (o == null) {
 			return "null";

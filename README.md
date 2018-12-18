@@ -3,7 +3,7 @@
 [![Status](https://img.shields.io/badge/Status-proof--of--concept-yellow.svg)]()
 
 ## Information
-- API version: 0.0.2
+- API version: 0.3.0
 - JAVA: 8
 
 This repository serves for the development of the openEO driver for WC(P)S backends.
@@ -26,7 +26,7 @@ This repository serves for the development of the openEO driver for WC(P)S backe
 4. Submission, status info and retrieval of processing graphs via /openeo/jobs
 5. Direct execution and result retrieval via /openeo/execute
 6. Processing of raster
-  * subsetting in srs projection space
+  * subsetting in crs projection space
   * Normalied Difference Vegetation Index
 7. Download of image as 
   * tiff

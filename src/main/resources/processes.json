@@ -1,47 +1,220 @@
 [
+
     {
-        "args": {
-            "red": {"description": "The name or identifier of band containing the red part of the spectrum"},
-            "nir": {"description": "The name or identifier of band containing the near infrared part of the spectrum"},
-            "imagery": {"description": "The raster or time series of rasters to calculate the ndvi on"}
-        },
         "name": "NDVI",
-        "description": "Computes the normalized difference vegetation index (NDVI) for all pixels and time slices of the input dataset."
-        
-    },
+        "summary": "",
+        "description": "Computes the normalized difference vegetation index (NDVI) for all pixels and time slices of the input dataset.",
+        "min_parameters": 1,
+        "parameters": {
+                       "imagery": {
+                                "description": "The raster or time series of rasters to calculate the ndvi on",
+                                "required": true,
+                                "schema": {
+                                           "type": "object",
+                                           "format": "eodata"
+                                          }
+                                },
+                       "red": {
+                                "description": "The name or identifier of band containing the red part of the spectrum",
+                                "schema": {
+                                          "type": "array",
+                                          "items": {
+                                                   "type": "string"
+                                                   }
+                                          }
+                                  },
+                       "nir": {
+                                "description": "The name or identifier of band containing the near infrared part of the spectrum",
+                                "schema": {
+                                          "type": "array",
+                                          "items": {
+                                                   "type": "string"
+                                                   }
+                                          }
+                                  }
+                         },
+         "returns": {
+                     "description": "Processed EO data.",
+                     "schema": {
+                                "type": "object",
+                                "format": "eodata"
+                               }
+                    }
+        },
+                     
     {
-        "args": {"imagery": {"description": "The time series of rasters to extract the minimum value from"}},
         "name": "min_time",
-        "description": "Finds the minimum value of a time series for every given pixel location."
-        
+        "summary": "",
+        "description": "Finds the minimum value of a time series for every given pixel location.",
+        "min_parameters": 1,
+        "parameters": {
+                       "imagery": {
+                                "description": "The time series of rasters to extract the minimum value from",
+                                "required": true,
+                                "schema": {
+                                           "type": "object",
+                                           "format": "eodata"
+                                          }
+                                }
+                         },
+         "returns": {
+                     "description": "Processed EO data.",
+                     "schema": {
+                                "type": "object",
+                                "format": "eodata"
+                               }
+                    }
     },
     {
-        "args": {"imagery": {"description": "The time series of rasters to extract the maximum value from"}},
         "name": "max_time",
-        "description": "Finds the maximum value of a time series for every given pixel location."
-        
+        "summary": "",
+        "description": "Finds the maximum value of a time series for every given pixel location.",
+        "min_parameters": 1,
+        "parameters": {
+                       "imagery": {
+                                "description": "The time series of rasters to extract the maximum value from",
+                                "required": true,
+                                "schema": {
+                                           "type": "object",
+                                           "format": "eodata"
+                                          }
+                                }
+                         },
+         "returns": {
+                     "description": "Processed EO data.",
+                     "schema": {
+                                "type": "object",
+                                "format": "eodata"
+                               }
+                    }
     },
     {
-        "args": {
-            "imagery": {"description": "The time series of rasters to filter."},
-            "from": {"description": "Inclusive start date of filter"},
-            "to": {"description": "Inclusive end date of filter"}
-        },
         "name": "filter_daterange",
-        "description": "Creates a subset in including only values inside a given data range."
-      
+        "summary": "",
+        "description": "Creates a subset in including only values inside a given data range.",
+        "min_parameters": 2,
+        "parameters": {
+                       "imagery": {
+                                "description": "The time series of rasters to filter.",
+                                "required": true,
+                                "schema": {
+                                           "type": "object",
+                                           "format": "eodata"
+                                          }
+                                },
+                       "extent": {
+                                "type": "array",
+                                "description": "Temporal extent specified by a start and an end time, each formatted as a [RFC 3339](https://www.ietf.org/rfc/rfc3339) date-time. Open date ranges are supported and can be specified by setting one of the times to null. Setting both entries to null is not allowed.",
+                                "required": true,
+                                "example": [
+                                           "2016-01-01T00:00:00Z",
+                                           "2017-10-01T00:00:00Z"
+                                           ],
+                                "items": {
+                                          "type": [
+                                                   "string",
+                                                   "null"
+                                                  ],
+                                          "format": "date-time",
+                                          "minItems": 2,
+                                          "maxItems": 2
+                                          }
+                                }
+                         },
+         "returns": {
+                     "description": "Processed EO data.",
+                     "schema": {
+                                "type": "object",
+                                "format": "eodata"
+                               }
+                    }
     },
     {
-        "args": {
-            "top": {"description": "Maxium northing of filter"},
-            "left": {"description": "Minimum easting of filter"},
-            "srs": {"description": "Coordinate reference system"},
-            "bottom": {"description": "Minium northing of filter"},
-            "imagery": {"description": "The raster or time series of rasters to filter."},
-            "right": {"description": "Maximum easting  of filter"}
-        },
         "name": "filter_bbox",
-        "description": "Creates a subset in including only values inside a given bounding box."
-        
+        "summary": "",
+        "description": "Creates a subset in including only values inside a given bounding box.",
+        "min_parameters": 2,
+        "parameters": {
+                       "imagery": {
+                                "description": "The raster or time series of rasters to filter.",
+                                "required": true,
+                                "schema": {
+                                           "type": "object",
+                                           "format": "eodata"
+                                          }
+                                },
+                       "spatial_extent": {
+                                "description": "Filter by spatial extent, may include a vertical axis (height or depth).",
+                                "required": true,
+                                "schema": {
+                                           "type": "object",
+                                           "format": "spatial_extent"
+                                          }
+
+                                },
+                       "epsg": {
+                                "description": "Coordinate reference system",
+                                "schema": {
+                                          "type": "array",
+                                          "format": "epsg"
+                                          }
+                                }                   
+                         },
+         "returns": {
+                     "description": "Processed EO data.",
+                     "schema": {
+                                "type": "object",
+                                "format": "eodata"
+                               }
+                    }
+    },
+    {
+        "name": "get_collections",
+        "summary": "Selects a collection.",
+        "description": "Filters and selects a single collection provided by the back-end. The back-end provider decides which of the potential collections is the most relevant one to be selected.",
+        "min_parameters": 1,
+        "parameters": {
+                       "name": {
+                                "description": "Filter by collection name",
+                                "required": true,
+                                "schema": {
+                                           "type": "string",
+                                           "examples": [ "Sentinel2A-L1C" ]
+                                          }
+                                },
+                       "spatial_extent": {
+                                "description": "Filter by spatial extent, may include a vertical axis (height or depth).",
+                               
+                                "schema": {
+                                           "type": "object",
+                                           "format": "spatial_extent"
+                                          }
+
+                                },
+                       "temporal_extent": {
+                                "description": "Filter by temporal extent.",
+                                
+                                "schema": {
+                                           "type": "array",
+                                           "format": "temporal_extent"
+                                          }
+                                },         
+                       "bands": {
+                                "description": "Filter by band IDs",
+                                "schema": {
+                                          "type": "array",
+                                          "items": {
+                                                     "type": "string"
+                                                    }
+                                          }
+                                }                   
+                         },
+         "returns": {
+                     "description": "Processed EO data.",
+                     "schema": {
+                                "type": "object",
+                                "format": "eodata"
+                               }
+                    }
     }
 ]

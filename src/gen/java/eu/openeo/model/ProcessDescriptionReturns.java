@@ -28,31 +28,20 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(description = "**DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0 DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ProcessDescriptionArgs implements Serializable {
+public class ProcessDescriptionReturns implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2974393311661717237L;
+	private static final long serialVersionUID = 8950925769020643959L;
 
 	@JsonProperty("description")
 	private String description = null;
 	
-	@JsonProperty("type")
-	private String type = null;
-	
-	@JsonProperty("example")
-	private String[] example = null;
-
-	@JsonProperty("required")
-	private Boolean required = true;
-	
 	@JsonProperty("schema")
 	private Schema schema =  null;
 
-	@JsonProperty("items")
-	private Items items =  null;
-	
-	public ProcessDescriptionArgs description(String description) {
+		
+	public ProcessDescriptionReturns description(String description) {
 		this.description = description;
 		return this;
 	}
@@ -73,26 +62,9 @@ public class ProcessDescriptionArgs implements Serializable {
 		this.description = description;
 	}
 	
-	@JsonProperty("type")
-	@ApiModelProperty(required = true, value = "Type of the process argument.")
-	@NotNull
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-	
-	@JsonProperty("example")
-	@ApiModelProperty(required = true, value = "Example of the process argument.")
-	@NotNull
-	public String[] getExample() {
-		return example;
-	}
-
-	public void setExample(String[] example) {
-		this.example = example;
+	public ProcessDescriptionReturns schema(Schema schema) {
+		this.schema = schema;
+		return this;
 	}
 	
 	@JsonProperty("schema")
@@ -106,38 +78,6 @@ public class ProcessDescriptionArgs implements Serializable {
 		this.schema = schema;
 	}
 	
-	
-	@JsonProperty("items")
-	@ApiModelProperty(required = true, value = "Items for input parameter")
-	@NotNull
-	public Items getItems() {
-		return items;
-	}
-	
-	public void setItems(Items items) {
-		this.items = items;
-	}
-
-	public ProcessDescriptionArgs required(Boolean required) {
-		this.required = required;
-		return this;
-	}
-
-	/**
-	 * Defines whether an argument is required or optional.
-	 * 
-	 * @return required
-	 **/
-	@JsonProperty("required")
-	@ApiModelProperty(value = "Defines whether an argument is required or optional.")
-	public Boolean isRequired() {
-		return required;
-	}
-
-	public void setRequired(Boolean required) {
-		this.required = required;
-	}
-
 	@Override
 	public boolean equals(java.lang.Object o) {
 		if (this == o) {
@@ -146,31 +86,22 @@ public class ProcessDescriptionArgs implements Serializable {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ProcessDescriptionArgs parameters = (ProcessDescriptionArgs) o;
-		return Objects.equals(this.description, parameters.description)
-				&& Objects.equals(this.type, parameters.type)
-				&& Objects.equals(this.example, parameters.example)
-				&& Objects.equals(this.schema, parameters.schema)
-				&& Objects.equals(this.items, parameters.items)
-				&& Objects.equals(this.required, parameters.required);
+		ProcessDescriptionReturns returns = (ProcessDescriptionReturns) o;
+		return Objects.equals(this.description, returns.description)
+			&& Objects.equals(this.schema, returns.schema);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(description, required, type, example, schema, items);
+		return Objects.hash(description, schema);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("class ProcessDescriptionArgs {\n");
-
+		sb.append("class ProcessDescriptionReturns {\n");
 		sb.append("    description: ").append(toIndentedString(description)).append("\n");
-		sb.append("    type: ").append(toIndentedString(type)).append("\n");
-		sb.append("    example: ").append(toIndentedString(example)).append("\n");
-		sb.append("    required: ").append(toIndentedString(required)).append("\n");
 		sb.append("    schema: ").append(toIndentedString(schema.toString())).append("\n");
-		sb.append("    items: ").append(toIndentedString(items.toString())).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}
