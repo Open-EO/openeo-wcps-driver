@@ -106,9 +106,9 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		endpointList.put(outputFormats);
 		endpointList.put(data);
 		endpointList.put(dataID);
-		endpointList.put(execute);
-		endpointList.put(jobs);
-		endpointList.put(jobsID);
+		//endpointList.put(execute);
+		//endpointList.put(jobs);
+		//endpointList.put(jobsID);
 		endpointList.put(processes);
 		endpointList.put(processesID);
 		
@@ -132,7 +132,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		
 		JSONObject mainObj = new JSONObject();
 		mainObj.put("version", "0.3.0");
-		mainObj.put("endpoint", endpointList);
+		mainObj.put("endpoints", endpointList);
 		mainObj.put("billing", billing);
 		
 		return Response.ok(mainObj.toString(4), MediaType.APPLICATION_JSON).build();
