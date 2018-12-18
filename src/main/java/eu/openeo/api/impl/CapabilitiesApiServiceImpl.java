@@ -49,8 +49,8 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 				
 		JSONArray jobsIDMethods = new JSONArray();
 		jobsIDMethods.put(new String("GET"));
-		jobsIDMethods.put(new String("DELETE"));
-		jobsIDMethods.put(new String("PATCH"));
+		//jobsIDMethods.put(new String("DELETE"));
+		//jobsIDMethods.put(new String("PATCH"));
 		
 		JSONArray jobsIDdownloadMethods = new JSONArray();
 		jobsIDdownloadMethods.put(new String("GET"));
@@ -106,7 +106,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		endpointList.put(outputFormats);
 		endpointList.put(data);
 		endpointList.put(dataID);
-		endpointList.put(execute);
+		//endpointList.put(execute);
 		endpointList.put(jobs);
 		endpointList.put(jobsID);
 		endpointList.put(processes);
