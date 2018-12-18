@@ -56,7 +56,7 @@ public class DataApiServiceImpl extends DataApiService {
 			JSONArray linksCollections = new JSONArray();
 				
 				JSONObject linkDesc = new JSONObject();
-				linkDesc.put("href", "http://http://saocompute.eurac.edu/rasdaman/ows");
+				linkDesc.put("href", "http://saocompute.eurac.edu/rasdaman/ows");
 				linkDesc.put("rel", "self");
 				
 				JSONObject linkCsw = new JSONObject();
