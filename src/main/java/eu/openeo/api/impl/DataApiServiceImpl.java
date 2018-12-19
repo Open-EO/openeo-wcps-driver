@@ -162,7 +162,7 @@ public class DataApiServiceImpl extends DataApiService {
 				product.put("name", coverage.getChildText("CoverageId", defaultNS));
 				product.put("title", coverage.getChildText("CoverageId", defaultNS));
 				product.put("description", coverage.getChildText("CoverageId", defaultNS));
-				product.put("license", "CC By 4.0");
+				product.put("license", "CC-BY-4.0");
 				product.put("extent", extentCollection);
 				product.put("links", linksPerCollection);
 				productArray.put(product);
@@ -331,7 +331,7 @@ public class DataApiServiceImpl extends DataApiService {
 			coverage.put("name", productId);
 			//coverage.put("title", title);
 			coverage.put("description", productId);
-			coverage.put("license", "CC By 4.0");
+			coverage.put("license", "CC-BY-4.0");
 			coverage.put("keywords", keywords);
 			coverage.put("provider", provider);
 			coverage.put("links", links);
