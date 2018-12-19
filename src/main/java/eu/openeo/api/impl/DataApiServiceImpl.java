@@ -23,7 +23,7 @@ import eu.openeo.api.DataApiService;
 import eu.openeo.api.NotFoundException;
 import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.api.ApiResponseMessage;
-
+import org.gdal.osr.CoordinateTransformation;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class DataApiServiceImpl extends DataApiService {
