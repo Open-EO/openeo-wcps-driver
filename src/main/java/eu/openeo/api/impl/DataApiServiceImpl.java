@@ -173,23 +173,28 @@ public class DataApiServiceImpl extends DataApiService {
 			return Response.ok(data.toString(4), MediaType.APPLICATION_JSON).build();
 			
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
+			for( StackTraceElement element: e.getStackTrace()) {
+				log.error(element.toString());
+			}
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage()))
 					.build();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
+			for( StackTraceElement element: e.getStackTrace()) {
+				log.error(element.toString());
+			}
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage()))
 					.build();
 		} catch (JDOMException e) {
 			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
+			for( StackTraceElement element: e.getStackTrace()) {
+				log.error(element.toString());
+			}
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage())).build();
@@ -373,16 +378,15 @@ public class DataApiServiceImpl extends DataApiService {
 			//coverage.put("extraMetadata", metadataObj);
 			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
+			for( StackTraceElement element: e.getStackTrace()) {
+				log.error(element.toString());
+			}
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while describing coverage from WCPS endpoint: " + e.getMessage()))
 					.build();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
@@ -390,6 +394,9 @@ public class DataApiServiceImpl extends DataApiService {
 					.build();
 		} catch (JDOMException e) {
 			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
+			for( StackTraceElement element: e.getStackTrace()) {
+				log.error(element.toString());
+			}
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage())).build();
