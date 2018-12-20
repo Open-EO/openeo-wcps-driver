@@ -30,11 +30,11 @@ public class DataApiServiceImpl extends DataApiService {
 
 	Logger log = Logger.getLogger(this.getClass());
 	
-	private SAXBuilder builder = null;
-	
-	public DataApiServiceImpl() {
-		this.builder = new SAXBuilder();
-	}
+//	private SAXBuilder builder = null;
+//	
+//	public DataApiServiceImpl() {
+//		this.builder = new SAXBuilder();
+//	}
 
 	@Override
 	public Response dataGet(String qname, String qgeom, String qstartdate, String qenddate,
@@ -47,7 +47,8 @@ public class DataApiServiceImpl extends DataApiService {
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
-			Document capabilititesDoc = (Document) this.builder.build(conn.getInputStream()); 
+			SAXBuilder builder = new SAXBuilder();
+			Document capabilititesDoc = (Document) builder.build(conn.getInputStream()); 
 			Element rootNode = capabilititesDoc.getRootElement();
 			Namespace defaultNS = rootNode.getNamespace();
 			log.debug("root node info: " + rootNode.getName());
@@ -90,7 +91,8 @@ public class DataApiServiceImpl extends DataApiService {
 				
 				HttpURLConnection connCollections = (HttpURLConnection) urlCollections.openConnection();
 				connCollections.setRequestMethod("GET");
-				Document capabilititesDocCollections = (Document) this.builder.build(connCollections.getInputStream());
+				SAXBuilder builderInt = new SAXBuilder();
+				Document capabilititesDocCollections = (Document) builderInt.build(connCollections.getInputStream());
 				List<Namespace> namespacesCollections = capabilititesDocCollections.getNamespacesIntroduced();
 				Element rootNodeCollections = capabilititesDocCollections.getRootElement();
 				Namespace defaultNSCollections = rootNodeCollections.getNamespace();
@@ -228,7 +230,8 @@ public class DataApiServiceImpl extends DataApiService {
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
-			Document capabilititesDoc = (Document) this.builder.build(conn.getInputStream());
+			SAXBuilder builder = new SAXBuilder();
+			Document capabilititesDoc = (Document) builder.build(conn.getInputStream());
 			List<Namespace> namespaces = capabilititesDoc.getNamespacesIntroduced();
 			Element rootNode = capabilititesDoc.getRootElement();
 			Namespace defaultNS = rootNode.getNamespace();
