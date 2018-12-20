@@ -175,6 +175,7 @@ public class DataApiServiceImpl extends DataApiService {
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage()))
@@ -182,11 +183,13 @@ public class DataApiServiceImpl extends DataApiService {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage()))
 					.build();
 		} catch (JDOMException e) {
+			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage())).build();
@@ -372,6 +375,7 @@ public class DataApiServiceImpl extends DataApiService {
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while describing coverage from WCPS endpoint: " + e.getMessage()))
@@ -379,11 +383,13 @@ public class DataApiServiceImpl extends DataApiService {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while describing coverage from WCPS endpoint: " + e.getMessage()))
 					.build();
 		} catch (JDOMException e) {
+			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage())).build();
