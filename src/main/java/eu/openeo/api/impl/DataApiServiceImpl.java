@@ -292,6 +292,8 @@ public class DataApiServiceImpl extends DataApiService {
 			}
 			
 			
+			
+			
 			JSONArray links = new JSONArray();
 			
 			JSONObject linkSelf = new JSONObject();
