@@ -24,6 +24,9 @@ import eu.openeo.api.NotFoundException;
 import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.api.ApiResponseMessage;
 import org.gdal.osr.CoordinateTransformation;
+import org.gdal.osr.osrJNI;
+import org.gdal.osr.SpatialReference;
+import org.gdal.osr.osr;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class DataApiServiceImpl extends DataApiService {
@@ -120,9 +123,33 @@ public class DataApiServiceImpl extends DataApiService {
 					//metadataObj = new JSONObject(metadataString3);
 					//JSONArray slices = metadataObj.getJSONArray("slices");
 				
+				String srsDescription = boundingBoxElement.getAttributeValue("srsName");
+				try {
+					srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
+					srsDescription = srsDescription.replaceAll("EPSG:","");
+					
+				}catch(StringIndexOutOfBoundsException e) {
+					srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
+					srsDescription = srsDescription.replaceAll("EPSG:","");
+								
+				}
+				
+				
+				SpatialReference src = new SpatialReference();
+				src.ImportFromEPSG(3035);
+
+				SpatialReference dst = new SpatialReference();
+				dst.ImportFromEPSG(4326);
+				
+			    CoordinateTransformation tx = new CoordinateTransformation(src, dst);
+			    
 				
 				String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 				String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
+				
+				double[] c1 = tx.TransformPoint(Double.parseDouble(minValues[0]), Double.parseDouble(minValues[1]));
+				double[] c2 = tx.TransformPoint(Double.parseDouble(maxValues[0]), Double.parseDouble(maxValues[1]));
+				
 				
 				String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
 				for(int a = 0; a < axis.length; a++) {
@@ -141,9 +168,11 @@ public class DataApiServiceImpl extends DataApiService {
 					}
 				}
 				
+				
+				
 									
 				extentCollection.put("spatial", spatialExtent);
-				extentCollection.put("temporal", temporalExtent);
+				extentCollection.put("temporal", c1);
 				
 				JSONArray linksPerCollection = new JSONArray();
 				
