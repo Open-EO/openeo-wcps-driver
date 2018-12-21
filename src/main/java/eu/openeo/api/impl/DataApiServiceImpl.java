@@ -126,40 +126,56 @@ public class DataApiServiceImpl extends DataApiService {
 					//JSONArray slices = metadataObj.getJSONArray("slices");
 				
 				String srsDescription = boundingBoxElement.getAttributeValue("srsName");
+				log.debug(srsDescription);
 				try {
 					srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
 					srsDescription = srsDescription.replaceAll("EPSG:","");
 					
 				}catch(StringIndexOutOfBoundsException e) {
 					srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
-					srsDescription = srsDescription.replaceAll("EPSG:","");
-								
+					srsDescription = srsDescription.replaceAll("EPSG:","");			
 				}
+				log.debug(srsDescription);				
 				
+				SpatialReference src = new SpatialReference();
+				src.ImportFromEPSG(Integer.parseInt(srsDescription));
+
+				SpatialReference dst = new SpatialReference();
+				dst.ImportFromEPSG(4326);
 				
+				log.debug(boundingBoxElement.getChildText("lowerCorner", gmlNS));
+			    log.debug(boundingBoxElement.getChildText("upperCorner", gmlNS));
 				String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 				String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
 				
-				
-				String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
-				for(int a = 0; a < axis.length; a++) {
-					log.debug(axis[a]);
-					if(axis[a].equals("E") || axis[a].equals("X")){
-						spatialExtent.put(Double.parseDouble(minValues[a]));
-						spatialExtent.put(Double.parseDouble(maxValues[a]));
+			    CoordinateTransformation tx = new CoordinateTransformation(src, dst);
+			    
+			    String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
+			    int xIndex = 0;
+			    int yIndex = 0;
+			    for(int a = 0; a < axis.length; a++) {
+			    	log.debug(axis[a]);
+					if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long")){
+						xIndex=a;
 					}
-					if(axis[a].equals("N") || axis[a].equals("Y")){
-						spatialExtent.put(Double.parseDouble(minValues[a]));
-						spatialExtent.put(Double.parseDouble(maxValues[a]));
+					if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
+						yIndex=a;
 					}
-					if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date")){
+					if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
 						temporalExtent.put(minValues[a].replaceAll("\"", ""));
 						temporalExtent.put(maxValues[a].replaceAll("\"", ""));
 					}
-				}
+			    }
+			    
+				double[] c1 = null;
+				double[] c2 = null;
+				c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(maxValues[yIndex]));
+				c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(minValues[yIndex]));				
 				
-				
-				
+				spatialExtent.put(c1[0]);
+				spatialExtent.put(c2[1]);
+				spatialExtent.put(c2[0]);
+				spatialExtent.put(c1[1]);			
 									
 				extentCollection.put("spatial", spatialExtent);
 				extentCollection.put("temporal", temporalExtent);
@@ -299,14 +315,8 @@ public class DataApiServiceImpl extends DataApiService {
 			JSONArray spatialExtent = new JSONArray();
 			JSONArray temporalExtent =  new JSONArray();
 			
-			
-			
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
-			
-			
-			
-			
 			
 			String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
 			for(int a = 0; a < axis.length; a++) {
@@ -407,24 +417,33 @@ public class DataApiServiceImpl extends DataApiService {
 			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
 			log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
 			for( StackTraceElement element: e.getStackTrace()) {
-				log.error(element.toString());
+				builder.append(element.toString()+"\n");
 			}
+			log.error(builder.toString());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while describing coverage from WCPS endpoint: " + e.getMessage()))
 					.build();
 		} catch (IOException e) {
 			log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while describing coverage from WCPS endpoint: " + e.getMessage()))
 					.build();
 		} catch (JDOMException e) {
 			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
 			for( StackTraceElement element: e.getStackTrace()) {
-				log.error(element.toString());
+				builder.append(element.toString()+"\n");
 			}
+			log.error(builder.toString());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
 							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage())).build();
