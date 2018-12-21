@@ -137,20 +137,8 @@ public class DataApiServiceImpl extends DataApiService {
 				}
 				
 				
-				SpatialReference src = new SpatialReference();
-				src.ImportFromEPSG(3035);
-
-				SpatialReference dst = new SpatialReference();
-				dst.ImportFromEPSG(4326);
-				
-			    CoordinateTransformation tx = new CoordinateTransformation(src, dst);
-			    
-				
 				String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 				String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
-				
-				double[] c1 = tx.TransformPoint(Double.parseDouble(minValues[0]), Double.parseDouble(minValues[1]));
-				double[] c2 = tx.TransformPoint(Double.parseDouble(maxValues[0]), Double.parseDouble(maxValues[1]));
 				
 				
 				String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
@@ -174,7 +162,7 @@ public class DataApiServiceImpl extends DataApiService {
 				
 									
 				extentCollection.put("spatial", spatialExtent);
-				extentCollection.put("temporal", c1);
+				extentCollection.put("temporal", temporalExtent);
 				
 				JSONArray linksPerCollection = new JSONArray();
 				
@@ -311,8 +299,14 @@ public class DataApiServiceImpl extends DataApiService {
 			JSONArray spatialExtent = new JSONArray();
 			JSONArray temporalExtent =  new JSONArray();
 			
+			
+			
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
+			
+			
+			
+			
 			
 			String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
 			for(int a = 0; a < axis.length; a++) {
