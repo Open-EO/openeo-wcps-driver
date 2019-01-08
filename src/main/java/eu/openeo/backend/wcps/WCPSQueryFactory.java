@@ -3,12 +3,19 @@ package eu.openeo.backend.wcps;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.gdal.osr.CoordinateTransformation;
+import org.gdal.osr.SpatialReference;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import eu.openeo.backend.wcps.domain.Aggregate;
 import eu.openeo.backend.wcps.domain.Collection;
 import eu.openeo.backend.wcps.domain.Filter;
+
+import org.gdal.osr.CoordinateTransformation;
+import org.gdal.osr.osrJNI;
+import org.gdal.osr.SpatialReference;
+import org.gdal.osr.osr;
 
 public class WCPSQueryFactory {
 
@@ -350,6 +357,23 @@ public class WCPSQueryFactory {
 						bottom = "" + extentObject.get(extentKey).toString();
 					}
 				}
+				
+				SpatialReference src = new SpatialReference();
+				src.ImportFromEPSG(4326);
+
+				SpatialReference dst = new SpatialReference();
+				dst.ImportFromEPSG(3035);
+				
+				
+				CoordinateTransformation tx = new CoordinateTransformation(src, dst);
+				
+				double[] c1 = null;
+				double[] c2 = null;
+				c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(top));
+				c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(bottom));
+				
+				
+				
 			}
 			
 		}
