@@ -27,6 +27,7 @@ import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.osrJNI;
 import org.gdal.osr.SpatialReference;
 import org.gdal.osr.osr;
+import org.gdal.gdal.gdal;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class DataApiServiceImpl extends DataApiService {
@@ -35,9 +36,10 @@ public class DataApiServiceImpl extends DataApiService {
 	
 //	private SAXBuilder builder = null;
 //	
-//	public DataApiServiceImpl() {
-//		this.builder = new SAXBuilder();
-//	}
+	public DataApiServiceImpl() {
+		//this.builder = new SAXBuilder();
+		gdal.AllRegister();
+	}
 
 	@Override
 	public Response dataGet(String qname, String qgeom, String qstartdate, String qenddate,
