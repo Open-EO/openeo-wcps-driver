@@ -145,18 +145,18 @@ public class ProcessDescription implements Serializable {
 		this.link = link;
 	}
 
-//	public ProcessDescription parameters(Map<String, ProcessDescriptionParameters> parameters) {
-//		this.parameters = parameters;
-//		return this;
-//	}
+	public ProcessDescription parameters(Map<String, ProcessDescriptionArgs> parameters) {
+		this.parameters = parameters;
+		return this;
+	}
 
-//	public ProcessDescription putParametersItem(String key, ProcessDescriptionParameters parametersItem) {
-//		if (this.parameters == null) {
-//			this.parameters = new HashMap<String, ProcessDescriptionParameters>();
-//		}
-//		this.parameters.put(key, parametersItem);
-//		return this;
-//	}
+	public ProcessDescription putParametersItem(String key, ProcessDescriptionArgs parametersItem) {
+		if (this.parameters == null) {
+			this.parameters = new HashMap<String, ProcessDescriptionArgs>();
+		}
+		this.parameters.put(key, parametersItem);
+		return this;
+	}
 
 	/**
 	 * Get args
@@ -164,7 +164,7 @@ public class ProcessDescription implements Serializable {
 	 * @return args
 	 **/
 	@JsonProperty("parameters")
-	@ApiModelProperty(value = "The format of the input Parameters required")
+	@ApiModelProperty(required = true, value = "The format of the input Parameters required")
 	public Map<String, ProcessDescriptionArgs> getParameters() {
 		return parameters;
 	}
@@ -174,10 +174,10 @@ public class ProcessDescription implements Serializable {
 	}
 		
 	
-//	public ProcessDescription returns(ProcessDescriptionReturns returns) {
-//		this.returns = returns;
-//		return this;
-//	}
+	public ProcessDescription returns(ProcessDescriptionReturns returns) {
+		this.returns = returns;
+		return this;
+	}
 
 	
 	/**
@@ -186,7 +186,8 @@ public class ProcessDescription implements Serializable {
 	 * @return returns
 	 **/
 	@JsonProperty("returns")
-	@ApiModelProperty(value = "The format of the returned output")
+	@ApiModelProperty(required = true, value = "The format of the returned output")
+	@NotNull
 	public ProcessDescriptionReturns getReturns() {
 		return returns;
 	}

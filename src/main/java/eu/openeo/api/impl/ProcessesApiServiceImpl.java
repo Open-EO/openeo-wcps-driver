@@ -62,12 +62,15 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 			JSONObject process = new JSONObject();
 						
 			ProcessDescription processDesc = this.processes.get(key);
-			process.put("name", processDesc.getProcessId());
-			process.put("summary", processDesc.getSummary());
-			process.put("description", processDesc.getDescription());
-			process.put("parameters", processDesc.getParameters());
+			process.put("name", processDesc.getProcessId());			
+			process.put("summary", processDesc.getSummary());			
+			process.put("description", processDesc.getDescription());			
+			process.put("parameters", processDesc.getParameters());			
 			process.put("min_parameters", processDesc.getMinParameters());
-			process.put("returns", processDesc.getReturns());
+			Map<String, Object> returnMap = new HashMap<String, Object>();
+			returnMap.put("description", processDesc.getReturns().getDescription());
+			returnMap.put("schema", processDesc.getReturns().getSchema());
+			process.put("returns", returnMap);
 			processArray.put(process);
 			processes.put("processes", processArray);
 			
