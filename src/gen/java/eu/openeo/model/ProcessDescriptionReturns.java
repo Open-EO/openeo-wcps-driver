@@ -41,10 +41,10 @@ public class ProcessDescriptionReturns implements Serializable {
 	private Schema schema =  null;
 
 		
-	public ProcessDescriptionReturns description(String description) {
-		this.description = description;
-		return this;
-	}
+//	public ProcessDescriptionReturns description(String description) {
+//		this.description = description;
+//		return this;
+//	}
 
 	/**
 	 * A short and concise description of the process argument.
@@ -62,10 +62,10 @@ public class ProcessDescriptionReturns implements Serializable {
 		this.description = description;
 	}
 	
-	public ProcessDescriptionReturns schema(Schema schema) {
-		this.schema = schema;
-		return this;
-	}
+//	public ProcessDescriptionReturns schema(Schema schema) {
+//		this.schema = schema;
+//		return this;
+//	}
 	
 	@JsonProperty("schema")
 	@ApiModelProperty(required = true, value = "Schema for input parameter")
@@ -101,7 +101,7 @@ public class ProcessDescriptionReturns implements Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class ProcessDescriptionReturns {\n");
 		sb.append("    description: ").append(toIndentedString(description)).append("\n");
-		sb.append("    schema: ").append(toIndentedString(schema.toString())).append("\n");
+		sb.append("    schema: ").append(toIndentedString(schema)).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}

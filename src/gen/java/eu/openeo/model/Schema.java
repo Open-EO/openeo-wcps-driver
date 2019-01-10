@@ -13,8 +13,6 @@
 package eu.openeo.model;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
@@ -31,6 +29,11 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(description = "**DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0 DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class Schema implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7911304482900804094L;
+
 	@JsonProperty("type")
 	private String type = null;
 	

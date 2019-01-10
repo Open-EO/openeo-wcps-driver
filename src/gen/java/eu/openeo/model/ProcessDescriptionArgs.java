@@ -169,8 +169,8 @@ public class ProcessDescriptionArgs implements Serializable {
 		sb.append("    type: ").append(toIndentedString(type)).append("\n");
 		sb.append("    example: ").append(toIndentedString(example)).append("\n");
 		sb.append("    required: ").append(toIndentedString(required)).append("\n");
-		sb.append("    schema: ").append(toIndentedString(schema.toString())).append("\n");
-		sb.append("    items: ").append(toIndentedString(items.toString())).append("\n");
+		sb.append("    schema: ").append(toIndentedString(schema)).append("\n");
+		sb.append("    items: ").append(toIndentedString(items)).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}
