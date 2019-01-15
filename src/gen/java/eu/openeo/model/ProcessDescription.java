@@ -53,6 +53,9 @@ public class ProcessDescription implements Serializable {
 	@JsonProperty("returns")
 	private ProcessDescriptionReturns returns = null;
 	
+	@JsonProperty("exceptions")
+	private ProcessDescriptionExceptions exceptions = null;
+	
 	@JsonProperty("min_parameters")
 	private int min_parameters = 0;
 	
@@ -196,6 +199,28 @@ public class ProcessDescription implements Serializable {
 		this.returns = returns;
 	}
 	
+	public ProcessDescription exceptions(ProcessDescriptionExceptions exceptions) {
+		this.returns = returns;
+		return this;
+	}
+	
+	
+	/**
+	 * Get exceptions
+	 * 
+	 * @return exceptions
+	 **/
+	@JsonProperty("exceptions")
+	@ApiModelProperty(required = true, value = "The format of the returned exceptions")
+	@NotNull
+	public ProcessDescriptionExceptions getExceptions() {
+		return exceptions;
+	}
+
+	public void setExceptions(ProcessDescriptionExceptions exceptions) {
+		this.exceptions = exceptions;
+	}
+	
 	
 	@Override
 	public boolean equals(java.lang.Object o) {
@@ -211,13 +236,14 @@ public class ProcessDescription implements Serializable {
 				&& Objects.equals(this.link, processDescription.link)
 				&& Objects.equals(this.parameters, processDescription.parameters)
 				&& Objects.equals(this.returns, processDescription.returns)
+				&& Objects.equals(this.exceptions, processDescription.exceptions)
 				&& Objects.equals(this.summary, processDescription.summary)
 		        && Objects.equals(this.min_parameters, processDescription.min_parameters);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(processId, description, link, parameters, returns, summary, min_parameters);
+		return Objects.hash(processId, description, link, parameters, returns, exceptions, summary, min_parameters);
 	}
 
 	@Override
@@ -230,6 +256,7 @@ public class ProcessDescription implements Serializable {
 		sb.append("    link: ").append(toIndentedString(link)).append("\n");
 		sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
 		sb.append("    returns: ").append(toIndentedString(returns)).append("\n");
+		sb.append("    exceptions: ").append(toIndentedString(exceptions)).append("\n");
 		sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
 		sb.append("    min_parameters: ").append(toIndentedString(min_parameters)).append("\n");
 		sb.append("}");

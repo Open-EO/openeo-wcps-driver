@@ -5,17 +5,38 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 
 import eu.openeo.backend.wcps.domain.Aggregate;
 import eu.openeo.backend.wcps.domain.Collection;
 import eu.openeo.backend.wcps.domain.Filter;
 
 import org.gdal.osr.CoordinateTransformation;
-import org.gdal.osr.osrJNI;
 import org.gdal.osr.SpatialReference;
+import org.gdal.gdal.gdal;
+import org.gdal.osr.osrJNI;
 import org.gdal.osr.osr;
+
+import java.net.URL;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.net.URLConnection;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+
 
 public class WCPSQueryFactory {
 
@@ -47,7 +68,7 @@ public class WCPSQueryFactory {
 	}
 
 	private void build(JSONObject openEOGraph) {
-		log.debug(openEOGraph.toJSONString());
+		log.debug(openEOGraph.toString());
 		parseOpenEOProcessGraph( openEOGraph);
 //		if (openEOGraph.containsKey(new String("process_graph"))) {
 //			parseOpenEOProcessGraph((JSONObject) openEOGraph.get(new String("process_graph")));
@@ -256,6 +277,11 @@ public class WCPSQueryFactory {
 					for (Object collName : processParent.keySet()) {
 						String collNameStr = (String) collName;
 						if (collNameStr.equals("name")) {
+							
+							String coll = (String) processParent.get(collNameStr);
+							collectionIDs.add(new Collection(coll));
+							log.debug("found actual dataset: " + coll);
+							
 							for (Object collFilterName : processParent.keySet()) {
 								String collFilterNameStr = (String) collFilterName;
 								if (collFilterNameStr.equals("spatial_extent")) {
@@ -266,9 +292,7 @@ public class WCPSQueryFactory {
 									createDateRangeFilterFromArgs(extentArray);
 								   }
 								}
-							String coll = (String) processParent.get(collNameStr);
-							collectionIDs.add(new Collection(coll));
-							log.debug("found actual dataset: " + coll);
+							
 							}
 				     }
 				  }								
@@ -299,6 +323,8 @@ public class WCPSQueryFactory {
 	 */
 	private void createFilterFromProcess(JSONObject process) {
 		
+		
+							
 		for (Object key : process.keySet()) {
 			String keyStr = (String) key;
 			if (!keyStr.equals("extent")) {
@@ -333,12 +359,73 @@ public class WCPSQueryFactory {
 			this.filters.add(new Filter("DATE", fromDate, toDate));
 	}
 
+	
+	
+	private static String readAll(Reader rd) throws IOException {
+	    StringBuilder sb = new StringBuilder();
+	    int cp;
+	    while ((cp = rd.read()) != -1) {
+	      sb.append((char) cp);
+	    }
+	    return sb.toString();
+	  }
+
+	  public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+	    InputStream is = new URL(url).openStream();
+	    try {
+	      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+	      String jsonText = readAll(rd);
+
+	      JSONObject json = new JSONObject(jsonText);
+	      return json;
+	    } finally {
+	      is.close();
+	    }
+	  }
+	
+	
 	private void createBoundingBoxFilterFromArgs(JSONObject argsObject) {
 		String left = null;
 		String right = null;
 		String top = null;
 		String bottom = null;
 		//Set argsKey = argsObject.keySet();
+		
+		int srs=(Integer) null;
+		
+		for (Object keyC : argsObject.keySet()) {
+			String keyStrC = (String) keyC;
+			if (keyStrC.equals("process_id")) {
+				String name = (String) argsObject.get(keyStrC);
+				
+				if (name.contains("get_collection")) {
+					for (Object collName : argsObject.keySet()) {
+						String collNameStr = (String) collName;
+						if (collNameStr.equals("name")) {
+							
+							String coll = (String) argsObject.get(collNameStr);
+							collectionIDs.add(new Collection(coll));
+		                    //JSONObject srsC = readJsonFromUrl("https://graph.facebook.com/19292868552");
+							
+							JSONObject jsonresp = null;
+							try {
+								jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/"+coll);
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+				            
+							
+							srs = (int) (double) jsonresp.get("eo:epsg");
+				           
+
+						}}}}}
+		
+		
+		
 		for(Object argsKey: argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
 			if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
@@ -347,14 +434,14 @@ public class WCPSQueryFactory {
 					String extentKeyStr = (String) extentKey;
 	
 					if (extentKeyStr.equals("west")) {
-						left = "" + extentObject.get(extentKey).toString();
+						left = "" + extentObject.getString(extentKeyStr);
 					} else if (extentKeyStr.equals("east")) {
-						right = "" + extentObject.get(extentKey).toString();
+						right = "" + extentObject.getString(extentKeyStr);
 					}
 					if (extentKeyStr.equals("north")) {
-						top = "" + extentObject.get(extentKey).toString();
+						top = "" + extentObject.getString(extentKeyStr);
 					} else if (extentKeyStr.equals("south")) {
-						bottom = "" + extentObject.get(extentKey).toString();
+						bottom = "" + extentObject.getString(extentKeyStr);
 					}
 				}
 				
@@ -362,7 +449,7 @@ public class WCPSQueryFactory {
 				src.ImportFromEPSG(4326);
 
 				SpatialReference dst = new SpatialReference();
-				dst.ImportFromEPSG(3035);
+				dst.ImportFromEPSG(srs);
 				
 				
 				CoordinateTransformation tx = new CoordinateTransformation(src, dst);
@@ -372,7 +459,10 @@ public class WCPSQueryFactory {
 				c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(top));
 				c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(bottom));
 				
-				
+				left = Double.toString(c1[0]);
+				top = Double.toString(c1[1]);
+				right = Double.toString(c2[0]);
+				bottom = Double.toString(c2[1]);
 				
 			}
 			
@@ -422,9 +512,9 @@ public class WCPSQueryFactory {
 		for (Object argsKey : argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
 			if (argsKeyStr.equals("red")) {
-				red = "" + argsObject.get(argsKey).toString();
+				red = "" + argsObject.getString(argsKeyStr);
 			} else if (argsKeyStr.equals("nir")) {
-				nir = "" + argsObject.get(argsKey).toString();
+				nir = "" + argsObject.getString(argsKeyStr);
 			}
 		}
 		Vector<String> params = new Vector<String>();

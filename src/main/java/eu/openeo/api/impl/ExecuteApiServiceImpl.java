@@ -11,7 +11,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 import eu.openeo.api.ExecuteApiService;
 import eu.openeo.api.NotFoundException;

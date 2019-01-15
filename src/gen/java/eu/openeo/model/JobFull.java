@@ -18,9 +18,14 @@ import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -131,16 +136,22 @@ public class JobFull implements Serializable {
 	@JsonProperty("process_graph")
 	@ApiModelProperty(required = true, value = "")
 	@NotNull
+	
+	private ObjectMapper mapper = null;
+	ObjectMapper mapper1 = new ObjectMapper();
 	public Object getProcessGraph() {
 		JSONParser parser = new JSONParser();
-		ObjectMapper mapper = new ObjectMapper();
+		
+		this.mapper = new ObjectMapper();
+		
+		String processgraph = null;
 		JSONObject processgraphLocal = null;
 		try {
-			processgraphLocal = ((JSONObject) parser.parse(mapper.writeValueAsString(this.processGraph)));
+			processgraph = mapper.writeValueAsString(this.processGraph);
+			
+			processgraphLocal = new JSONObject(processgraph.toString());
+			
 		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

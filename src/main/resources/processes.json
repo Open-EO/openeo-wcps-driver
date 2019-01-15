@@ -2,12 +2,12 @@
 
     {
         "name": "NDVI",
-        "summary": "",
+        "summary": "Calculates the Normalized Difference Vegetation Index.",
         "description": "Computes the normalized difference vegetation index (NDVI) for all pixels and time slices of the input dataset.",
         "min_parameters": 1,
         "parameters": {
                        "imagery": {
-                                "description": "The raster or time series of rasters to calculate the ndvi on",
+                                "description": "EO data to process.",
                                 "required": true,
                                 "schema": {
                                            "type": "object",
@@ -16,20 +16,16 @@
                                 },
                        "red": {
                                 "description": "The name or identifier of band containing the red part of the spectrum",
+                                "required": true,
                                 "schema": {
-                                          "type": "array",
-                                          "items": {
-                                                   "type": "string"
-                                                   }
+                                          "type": "string"
                                           }
                                   },
                        "nir": {
                                 "description": "The name or identifier of band containing the near infrared part of the spectrum",
+                                "required": true,
                                 "schema": {
-                                          "type": "array",
-                                          "items": {
-                                                   "type": "string"
-                                                   }
+                                          "type": "string"
                                           }
                                   }
                          },
@@ -39,21 +35,30 @@
                                 "type": "object",
                                 "format": "eodata"
                                }
-                    }
+                    },
+                    
+         "exceptions": {
+                        "RedBandInvalid": {
+                                           "description": "The specified red band is not available or contains invalid data."
+                                          },
+                        "NirBandInvalid": {
+                                           "description": "The specified nir band is not available or contains invalid data."
+                                          }
+                       }
         },
                      
     {
         "name": "min_time",
-        "summary": "",
-        "description": "Finds the minimum value of a time series for every given pixel location.",
+        "summary": "Calculates minimum values of time series.",
+        "description": "Finds the minimum value of a time series for every given pixel location for all bands.",
         "min_parameters": 1,
         "parameters": {
                        "imagery": {
-                                "description": "The time series of rasters to extract the minimum value from",
-                                "required": true,
-                                "schema": {
-                                           "type": "object",
-                                           "format": "eodata"
+                                   "description": "EO data to process.",
+                                   "required": true,
+                                   "schema": {
+                                              "type": "object",
+                                              "format": "eodata"
                                           }
                                 }
                          },
@@ -67,16 +72,16 @@
     },
     {
         "name": "max_time",
-        "summary": "",
-        "description": "Finds the maximum value of a time series for every given pixel location.",
+        "summary": "Calculates maximum values of time series.",
+        "description": "Finds the maximum value of a time series for every given pixel location for all bands.",
         "min_parameters": 1,
         "parameters": {
                        "imagery": {
-                                "description": "The time series of rasters to extract the maximum value from",
-                                "required": true,
-                                "schema": {
-                                           "type": "object",
-                                           "format": "eodata"
+                                   "description": "EO data to process.",
+                                   "required": true,
+                                   "schema": {
+                                              "type": "object",
+                                              "format": "eodata"
                                           }
                                 }
                          },
@@ -90,34 +95,36 @@
     },
     {
         "name": "filter_daterange",
-        "summary": "",
-        "description": "Creates a subset in including only values inside a given data range.",
+        "summary": "Filters by Temporal Extent",
+        "description": "Creates a subset of data including only the values inside a given data range.",
         "min_parameters": 2,
         "parameters": {
                        "imagery": {
-                                "description": "The time series of rasters to filter.",
-                                "required": true,
-                                "schema": {
-                                           "type": "object",
-                                           "format": "eodata"
+                                   "description": "EO data to process.",
+                                   "required": true,
+                                   "schema": {
+                                              "type": "object",
+                                              "format": "eodata"
                                           }
                                 },
                        "extent": {
-                                "type": "array",
-                                "description": "Temporal extent specified by a start and an end time, each formatted as a [RFC 3339](https://www.ietf.org/rfc/rfc3339) date-time. Open date ranges are supported and can be specified by setting one of the times to null. Setting both entries to null is not allowed.",
-                                "required": true,
-                                "example": [
-                                           "2016-01-01T00:00:00Z",
-                                           "2017-10-01T00:00:00Z"
-                                           ],
-                                "items": {
-                                          "type": [
-                                                   "string",
-                                                   "null"
-                                                  ],
-                                          "format": "date-time",
-                                          "minItems": 2,
-                                          "maxItems": 2
+                                  "description": "Temporal extent specified by a start and an end time, each formatted as a [RFC 3339](https://www.ietf.org/rfc/rfc3339) date-time. Open date ranges are supported and can be specified by setting one of the times to null. Setting both entries to null is not allowed.",
+                                  "required": true,
+                                  "schema": {
+                                             "type": "array",
+                                             "format": "temporal_extent",
+                                             "example": [
+                                                        "2016-01-01T00:00:00Z",
+                                                        "2017-10-01T00:00:00Z"
+                                                        ],
+                                          "items": {
+                                                    "type": [ "string",
+                                                              "null"                                                   
+                                                            ],
+                                                   "format": "date-time",
+                                                   "minItems": 2,
+                                                   "maxItems": 2
+                                                   }
                                           }
                                 }
                          },
@@ -131,34 +138,64 @@
     },
     {
         "name": "filter_bbox",
-        "summary": "",
+        "summary": "Filters by Spatial Extent",
         "description": "Creates a subset in including only values inside a given bounding box.",
         "min_parameters": 2,
         "parameters": {
                        "imagery": {
-                                "description": "The raster or time series of rasters to filter.",
+                                "description": "EO data to Process.",
                                 "required": true,
                                 "schema": {
                                            "type": "object",
                                            "format": "eodata"
                                           }
                                 },
-                       "spatial_extent": {
-                                "description": "Filter by spatial extent, may include a vertical axis (height or depth).",
+                       "extent": {
+                                "description": "Spatial extent, may include a vertical axis (height or depth).",
                                 "required": true,
                                 "schema": {
                                            "type": "object",
-                                           "format": "spatial_extent"
+                                           "format": "spatial_extent",
+                                           "additionalProperties": false,
+                                           "required": [
+                                                        "west",
+                                                        "south",
+                                                        "east",
+                                                        "north"
+                                                       ],
+                                           "properties": {
+                                                          "crs": {
+                                                                  "description": "Coordinate reference system. EPSG codes must be supported. In addition, proj4 strings should be supported by back-ends. Whenever possible, it is recommended to use EPSG codes instead of proj4 strings.\nDefaults to `EPSG:4326` unless the client explicitly requests a different coordinate reference system.",
+                                                                  "type": "string",
+                                                                  "default": "EPSG:4326"
+                                                                 },
+                                                          "west": {
+                                                                   "description": "West (lower left corner, coordinate axis 1).",
+                                                                   "type": "number"
+                                                                  },
+                                                          "south": {
+                                                                    "description": "South (lower left corner, coordinate axis 2).",
+                                                                    "type": "number"
+                                                                   },
+                                                          "east": {
+                                                                   "description": "East (upper right corner, coordinate axis 1).",
+                                                                   "type": "number"
+                                                                  },
+                                                          "north": {
+                                                                    "description": "North (upper right corner, coordinate axis 2).",
+                                                                    "type": "number"
+                                                                   },
+                                                          "base": {
+                                                                   "description": "Base (optional, lower left corner, coordinate axis 3).",
+                                                                   "type": "number"
+                                                                  },
+                                                          "height": {
+                                                                     "description": "Height (optional, upper right corner, coordinate axis 3).",
+                                                                     "type": "number"
+                                                                    }
+                                                         }
                                           }
-
-                                },
-                       "epsg": {
-                                "description": "Coordinate reference system",
-                                "schema": {
-                                          "type": "array",
-                                          "format": "epsg"
-                                          }
-                                }                   
+                                 }                   
                          },
          "returns": {
                      "description": "Processed EO data.",
@@ -176,7 +213,7 @@
         "parameters": {
                        "name": {
                                 "description": "Filter by collection name",
-                                "required": true,
+                                
                                 "schema": {
                                            "type": "string",
                                            "examples": [ "Sentinel2A-L1C" ]
@@ -207,7 +244,17 @@
                                                      "type": "string"
                                                     }
                                           }
-                                }                   
+                                },
+                       "license": {
+                                  "description": "Filter by license.",
+                                  "schema": {
+                                            "type": "string",
+                                            "description": "SPDX License identifier, SPDX expression, or the string proprietary if the license is not on the SPDX license list.",
+                                            "examples": [
+                                                          "Apache-2.0"
+                                                         ]
+                                            }
+                                  }                   
                          },
          "returns": {
                      "description": "Processed EO data.",

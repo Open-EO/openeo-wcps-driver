@@ -40,8 +40,14 @@ public class Schema implements Serializable {
 	@JsonProperty("format")
 	private String format = null;
 	
+	@JsonProperty("description")
+	private String description = null;
+	
 	@JsonProperty("examples")
 	private String[] examples = null;
+	
+	@JsonProperty("example")
+	private String[] example = null;
 	
 	@JsonProperty("items")
 	private SchemaItems items = null;
@@ -85,6 +91,19 @@ public class Schema implements Serializable {
 		this.examples = examples;
 	}
 	
+	
+	@JsonProperty("example")
+	@ApiModelProperty(required = true, value = "Example")
+	@NotNull
+	public String[] getExample() {
+		return example;
+	}
+
+	public void setExample(String[] example) {
+		this.example = example;
+	}
+	
+	
 	@JsonProperty("items")
 	@ApiModelProperty(required = true, value = "")
 	@NotNull
@@ -124,6 +143,18 @@ public class Schema implements Serializable {
 		this.minItems = minItems;
 	}
 
+	
+	@JsonProperty("description")
+	@ApiModelProperty(required = true, value = "A short and concise description of the process argument.")
+	@NotNull
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
 	@JsonProperty("maxItems")
 	@ApiModelProperty(required = true, value = "Maximum Items as Input")
 	@NotNull
@@ -146,7 +177,9 @@ public class Schema implements Serializable {
 		Schema schema = (Schema) o;
 		return Objects.equals(this.type, schema.type)
 	        && Objects.equals(this.format, schema.format)
+	        && Objects.equals(this.description, schema.description)
 	        && Objects.equals(this.examples, schema.examples)
+	        && Objects.equals(this.example, schema.example)
 	        && Objects.equals(this.minItems, schema.minItems)
 	        && Objects.equals(this.maxItems, schema.maxItems)
 	        && Objects.equals(this.items, schema.items);
@@ -154,7 +187,7 @@ public class Schema implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(type, format, examples, minItems, maxItems, items);
+		return Objects.hash(type, format, description, examples, example, minItems, maxItems, items);
 	}
 
 	@Override
@@ -163,7 +196,9 @@ public class Schema implements Serializable {
 		sb.append("class Schema {\n");
 		sb.append("    type: ").append(toIndentedString(type)).append("\n");
 		sb.append("    format: ").append(toIndentedString(format)).append("\n");
+		sb.append("    description: ").append(toIndentedString(description)).append("\n");
 		sb.append("    examples: ").append(toIndentedString(examples)).append("\n");
+		sb.append("    example: ").append(toIndentedString(example)).append("\n");
 		sb.append("    minItems: ").append(toIndentedString(minItems)).append("\n");
 		sb.append("    maxItems: ").append(toIndentedString(maxItems)).append("\n");
 		sb.append("    items: ").append(toIndentedString(items)).append("\n");
