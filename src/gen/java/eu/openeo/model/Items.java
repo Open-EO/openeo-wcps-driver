@@ -84,7 +84,7 @@ public class Items implements Serializable {
 	}
 	
 	@JsonProperty("minItems")
-	@ApiModelProperty(required = true, value = "Minimum Items as Input")
+	@ApiModelProperty(value = "Minimum Items as Input")
 	@NotNull
 	public int getMinItems() {
 		return minItems;
@@ -95,7 +95,7 @@ public class Items implements Serializable {
 	}
 
 	@JsonProperty("maxItems")
-	@ApiModelProperty(required = true, value = "Maximum Items as Input")
+	@ApiModelProperty(value = "Maximum Items as Input")
 	@NotNull
 	public int getMaxItems() {
 		return maxItems;

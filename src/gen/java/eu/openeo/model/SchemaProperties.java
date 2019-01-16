@@ -13,6 +13,8 @@
 package eu.openeo.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
@@ -28,56 +30,72 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(description = "**DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0 DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ProcessDescriptionExceptions implements Serializable {
+public class SchemaProperties implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8950925769020643959L;
+	private static final long serialVersionUID = 3632444320085411710L;
 
-	@JsonProperty("RedBandInvalid")
-	private ProcessDescriptionBandInvalid redband = null;
+	@JsonProperty("type")
+	private String type = null;
 	
-	@JsonProperty("NirBandInvalid")
-	private ProcessDescriptionBandInvalid nirband =  null;
+	@JsonProperty("description")
+	private String description = null;
+	
+	@JsonProperty("default")
+	private String defaultValue = null;
+	
+	
 
-		
-//	public ProcessDescriptionReturns description(String description) {
-//		this.description = description;
-//		return this;
-//	}
+	public SchemaProperties type(String type) {
+		this.type = type;
+		return this;
+	}
 
 	/**
 	 * A short and concise description of the process argument.
 	 * 
 	 * @return description
 	 **/
-	@JsonProperty("RedBandInvalid")
-	@ApiModelProperty(required = true, value = "A short and concise description of the band error.")
+	@JsonProperty("type")
+	@ApiModelProperty(required = true, value = "A short and concise description of the process argument.")
 	@NotNull
-	public ProcessDescriptionBandInvalid getRedband() {
-		return redband;
+	public String getType() {
+		return type;
 	}
 
-	public void setRedband(ProcessDescriptionBandInvalid redband) {
-		this.redband = redband;
+	public void setType(String type) {
+		this.type = type;
+	}
+
+
+	public SchemaProperties description(String description) {
+		this.description = description;
+		return this;
 	}
 	
-//	public ProcessDescriptionReturns schema(Schema schema) {
-//		this.schema = schema;
-//		return this;
-//	}
-	
-	@JsonProperty("NirBandInvalid")
-	@ApiModelProperty(required = true, value = "A short and concise description of the band error.")
+	@JsonProperty("description")
+	@ApiModelProperty(required = true, value = "description")
 	@NotNull
-	public ProcessDescriptionBandInvalid getNirband() {
-		return nirband;
+	public String getDescription() {
+		return description;
 	}
-	
-	public void setNirband(ProcessDescriptionBandInvalid nirband) {
-		this.nirband = nirband;
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
-	
+
+	@JsonProperty("default")
+	@ApiModelProperty(value = "default value")
+	@NotNull
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+
+	public void setDefaultValue(String defaultValue) {
+		this.defaultValue = defaultValue;
+	}
+
 	@Override
 	public boolean equals(java.lang.Object o) {
 		if (this == o) {
@@ -86,22 +104,24 @@ public class ProcessDescriptionExceptions implements Serializable {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ProcessDescriptionExceptions bands = (ProcessDescriptionExceptions) o;
-		return Objects.equals(this.redband, bands.redband)
-			&& Objects.equals(this.nirband, bands.nirband);
+		SchemaProperties schemaitems = (SchemaProperties) o;
+		return Objects.equals(this.type, schemaitems.type)
+	        && Objects.equals(this.description, schemaitems.description);
+	        
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(redband, nirband);
+		return Objects.hash(type, description);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("class ProcessDescriptionExceptions {\n");
-		sb.append("    RedBandInvalid: ").append(toIndentedString(redband)).append("\n");
-		sb.append("    NirBandInvalid: ").append(toIndentedString(nirband)).append("\n");
+		sb.append("class Items {\n");
+		sb.append("    type: ").append(toIndentedString(type)).append("\n");
+		sb.append("    format: ").append(toIndentedString(description)).append("\n");
+		
 		sb.append("}");
 		return sb.toString();
 	}

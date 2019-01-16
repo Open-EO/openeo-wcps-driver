@@ -35,8 +35,7 @@
                                 "type": "object",
                                 "format": "eodata"
                                }
-                    },
-                    
+                    },                    
          "exceptions": {
                         "RedBandInvalid": {
                                            "description": "The specified red band is not available or contains invalid data."

@@ -13,6 +13,8 @@
 package eu.openeo.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
@@ -40,6 +42,15 @@ public class Schema implements Serializable {
 	@JsonProperty("format")
 	private String format = null;
 	
+	@JsonProperty("properties")
+	private Map<String, SchemaProperties> properties = null;
+	
+	@JsonProperty("additionalProperties")
+	private Boolean addProp = null;
+	
+	@JsonProperty("required")
+	private String[] required = null;
+	
 	@JsonProperty("description")
 	private String description = null;
 	
@@ -50,7 +61,7 @@ public class Schema implements Serializable {
 	private String[] example = null;
 	
 	@JsonProperty("items")
-	private SchemaItems items = null;
+	private Items items = null;
 	
 	@JsonProperty("minItems")
 	private int minItems = 0;
@@ -81,7 +92,7 @@ public class Schema implements Serializable {
 	
 	
 	@JsonProperty("examples")
-	@ApiModelProperty(required = true, value = "Examples")
+	@ApiModelProperty(value = "Examples")
 	@NotNull
 	public String[] getExamples() {
 		return examples;
@@ -93,7 +104,7 @@ public class Schema implements Serializable {
 	
 	
 	@JsonProperty("example")
-	@ApiModelProperty(required = true, value = "Example")
+	@ApiModelProperty(value = "Example")
 	@NotNull
 	public String[] getExample() {
 		return example;
@@ -105,16 +116,38 @@ public class Schema implements Serializable {
 	
 	
 	@JsonProperty("items")
-	@ApiModelProperty(required = true, value = "")
+	@ApiModelProperty(value = "")
 	@NotNull
-	public SchemaItems getItems() {
+	public Items getItems() {
 		return items;
 	}
 
-	public void setItems(SchemaItems items) {
+	public void setItems(Items items) {
 		this.items = items;
 	}
 	
+	@JsonProperty("additionalProperties")
+	@ApiModelProperty(value = "")
+	@NotNull
+	public Boolean getAddProp() {
+		return addProp;
+	}
+
+	public void setAddProp(Boolean addProp) {
+		this.addProp = addProp;
+	}
+	
+	@JsonProperty("required")
+	@ApiModelProperty(value = "")
+	@NotNull
+	public String[] getRequired() {
+		return required;
+	}
+
+	public void setRequired(String[] required) {
+		this.required = required;
+	}
+
 	public Schema format(String format) {
 		this.format = format;
 		return this;
@@ -130,10 +163,28 @@ public class Schema implements Serializable {
 	public void setFormat(String format) {
 		this.format = format;
 	}
+	
+	public Schema putPropertiesItem(String key, SchemaProperties propertiesItem) {
+		if (this.properties == null) {
+			this.properties = new HashMap<String, SchemaProperties>();
+		}
+		this.properties.put(key, propertiesItem);
+		return this;
+	}
 
+	@JsonProperty("properties")
+	@ApiModelProperty(value = "Map of properties")
+	@NotNull
+	public Map<String, SchemaProperties> getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Map<String, SchemaProperties> properties) {
+		this.properties = properties;
+	}
 
 	@JsonProperty("minItems")
-	@ApiModelProperty(required = true, value = "Minimum Items as Input")
+	@ApiModelProperty(value = "Minimum Items as Input")
 	@NotNull
 	public int getMinItems() {
 		return minItems;
@@ -145,7 +196,7 @@ public class Schema implements Serializable {
 
 	
 	@JsonProperty("description")
-	@ApiModelProperty(required = true, value = "A short and concise description of the process argument.")
+	@ApiModelProperty(value = "A short and concise description of the process argument.")
 	@NotNull
 	public String getDescription() {
 		return description;
@@ -156,7 +207,7 @@ public class Schema implements Serializable {
 	}
 	
 	@JsonProperty("maxItems")
-	@ApiModelProperty(required = true, value = "Maximum Items as Input")
+	@ApiModelProperty(value = "Maximum Items as Input")
 	@NotNull
 	public int getMaxItems() {
 		return maxItems;
