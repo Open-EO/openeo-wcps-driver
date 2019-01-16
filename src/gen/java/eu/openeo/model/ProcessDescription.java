@@ -54,7 +54,7 @@ public class ProcessDescription implements Serializable {
 	private ProcessDescriptionReturns returns = null;
 	
 	@JsonProperty("exceptions")
-	private ProcessDescriptionExceptions exceptions = null;
+	private Map<String, ProcessDescriptionBandInvalid> exceptions = null;
 	
 	@JsonProperty("min_parameters")
 	private int min_parameters = 0;
@@ -175,12 +175,7 @@ public class ProcessDescription implements Serializable {
 	public void setParameters(Map<String, ProcessDescriptionArgs> parameters) {
 		this.parameters = parameters;
 	}
-		
 	
-	public ProcessDescription returns(ProcessDescriptionReturns returns) {
-		this.returns = returns;
-		return this;
-	}
 
 	
 	/**
@@ -199,8 +194,16 @@ public class ProcessDescription implements Serializable {
 		this.returns = returns;
 	}
 	
-	public ProcessDescription exceptions(ProcessDescriptionExceptions exceptions) {
-		this.returns = returns;
+	public ProcessDescription exceptions(Map<String, ProcessDescriptionBandInvalid> exceptions) {
+		this.exceptions = exceptions;
+		return this;
+	}
+
+	public ProcessDescription putExceptionsItem(String key, ProcessDescriptionBandInvalid exceptionsItem) {
+		if (this.exceptions == null) {
+			this.exceptions = new HashMap<String, ProcessDescriptionBandInvalid>();
+		}
+		this.exceptions.put(key, exceptionsItem);
 		return this;
 	}
 	
@@ -212,12 +215,11 @@ public class ProcessDescription implements Serializable {
 	 **/
 	@JsonProperty("exceptions")
 	@ApiModelProperty(required = true, value = "The format of the returned exceptions")
-	@NotNull
-	public ProcessDescriptionExceptions getExceptions() {
+	public Map<String, ProcessDescriptionBandInvalid> getExceptions() {
 		return exceptions;
 	}
 
-	public void setExceptions(ProcessDescriptionExceptions exceptions) {
+	public void setExceptions(Map<String, ProcessDescriptionBandInvalid> exceptions) {
 		this.exceptions = exceptions;
 	}
 	

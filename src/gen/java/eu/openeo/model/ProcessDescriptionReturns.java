@@ -40,11 +40,6 @@ public class ProcessDescriptionReturns implements Serializable {
 	@JsonProperty("schema")
 	private Schema schema =  null;
 
-		
-//	public ProcessDescriptionReturns description(String description) {
-//		this.description = description;
-//		return this;
-//	}
 
 	/**
 	 * A short and concise description of the process argument.
@@ -62,10 +57,6 @@ public class ProcessDescriptionReturns implements Serializable {
 		this.description = description;
 	}
 	
-//	public ProcessDescriptionReturns schema(Schema schema) {
-//		this.schema = schema;
-//		return this;
-//	}
 	
 	@JsonProperty("schema")
 	@ApiModelProperty(required = true, value = "Schema for input parameter")

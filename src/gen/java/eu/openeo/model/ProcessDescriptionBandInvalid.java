@@ -37,6 +37,11 @@ public class ProcessDescriptionBandInvalid implements Serializable {
 	@JsonProperty("description")
 	private String description = null;
 	
+	
+	public ProcessDescriptionBandInvalid type(String description) {
+		this.description = description;
+		return this;
+	}
 
 	/**
 	 * A short and concise description of the process argument.

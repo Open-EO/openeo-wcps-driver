@@ -32,20 +32,13 @@ import io.swagger.annotations.ApiModelProperty;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class Items implements Serializable {
 	@JsonProperty("type")
-	private String[] type = null;
+	private String type = null;
 	
 	@JsonProperty("format")
 	private String format = null;
 	
-	@JsonProperty("minItems")
-	private int minItems = 0;
 	
-	@JsonProperty("maxItems")
-	private int maxItems = 0;
-	
-	
-
-	public Items type(String[] type) {
+	public Items type(String type) {
 		this.type = type;
 		return this;
 	}
@@ -58,11 +51,11 @@ public class Items implements Serializable {
 	@JsonProperty("type")
 	@ApiModelProperty(required = true, value = "A short and concise description of the process argument.")
 	@NotNull
-	public String[] getType() {
+	public String getType() {
 		return type;
 	}
 
-	public void setType(String[] type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 
@@ -83,27 +76,6 @@ public class Items implements Serializable {
 		this.format = format;
 	}
 	
-	@JsonProperty("minItems")
-	@ApiModelProperty(value = "Minimum Items as Input")
-	@NotNull
-	public int getMinItems() {
-		return minItems;
-	}
-
-	public void setMinItems(int minItems) {
-		this.minItems = minItems;
-	}
-
-	@JsonProperty("maxItems")
-	@ApiModelProperty(value = "Maximum Items as Input")
-	@NotNull
-	public int getMaxItems() {
-		return maxItems;
-	}
-
-	public void setMaxItems(int maxItems) {
-		this.maxItems = maxItems;
-	}
 
 	@Override
 	public boolean equals(java.lang.Object o) {
@@ -115,15 +87,13 @@ public class Items implements Serializable {
 		}
 		Items items = (Items) o;
 		return Objects.equals(this.type, items.type)
-	        && Objects.equals(this.format, items.format)
-	        && Objects.equals(this.minItems, items.minItems)
-	        && Objects.equals(this.maxItems, items.maxItems);
+	        && Objects.equals(this.format, items.format);
 	        
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(type, format, minItems, maxItems);
+		return Objects.hash(type, format);
 	}
 
 	@Override
@@ -132,8 +102,6 @@ public class Items implements Serializable {
 		sb.append("class Items {\n");
 		sb.append("    type: ").append(toIndentedString(type)).append("\n");
 		sb.append("    format: ").append(toIndentedString(format)).append("\n");
-		sb.append("    maxItems: ").append(toIndentedString(minItems)).append("\n");
-		sb.append("    minItems: ").append(toIndentedString(maxItems)).append("\n");
 		
 		sb.append("}");
 		return sb.toString();

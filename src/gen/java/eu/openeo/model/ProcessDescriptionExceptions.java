@@ -40,11 +40,6 @@ public class ProcessDescriptionExceptions implements Serializable {
 	@JsonProperty("NirBandInvalid")
 	private ProcessDescriptionBandInvalid nirband =  null;
 
-		
-//	public ProcessDescriptionReturns description(String description) {
-//		this.description = description;
-//		return this;
-//	}
 
 	/**
 	 * A short and concise description of the process argument.
@@ -62,10 +57,6 @@ public class ProcessDescriptionExceptions implements Serializable {
 		this.redband = redband;
 	}
 	
-//	public ProcessDescriptionReturns schema(Schema schema) {
-//		this.schema = schema;
-//		return this;
-//	}
 	
 	@JsonProperty("NirBandInvalid")
 	@ApiModelProperty(required = true, value = "A short and concise description of the band error.")

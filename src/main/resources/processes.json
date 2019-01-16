@@ -4,7 +4,7 @@
         "name": "NDVI",
         "summary": "Calculates the Normalized Difference Vegetation Index.",
         "description": "Computes the normalized difference vegetation index (NDVI) for all pixels and time slices of the input dataset.",
-        "min_parameters": 1,
+        
         "parameters": {
                        "imagery": {
                                 "description": "EO data to process.",
@@ -50,7 +50,7 @@
         "name": "min_time",
         "summary": "Calculates minimum values of time series.",
         "description": "Finds the minimum value of a time series for every given pixel location for all bands.",
-        "min_parameters": 1,
+        
         "parameters": {
                        "imagery": {
                                    "description": "EO data to process.",
@@ -73,7 +73,7 @@
         "name": "max_time",
         "summary": "Calculates maximum values of time series.",
         "description": "Finds the maximum value of a time series for every given pixel location for all bands.",
-        "min_parameters": 1,
+        
         "parameters": {
                        "imagery": {
                                    "description": "EO data to process.",
@@ -96,7 +96,7 @@
         "name": "filter_daterange",
         "summary": "Filters by Temporal Extent",
         "description": "Creates a subset of data including only the values inside a given data range.",
-        "min_parameters": 2,
+        
         "parameters": {
                        "imagery": {
                                    "description": "EO data to process.",
@@ -116,13 +116,11 @@
                                                         "2016-01-01T00:00:00Z",
                                                         "2017-10-01T00:00:00Z"
                                                         ],
-                                          "items": {
-                                                    "type": [ "string",
-                                                              "null"                                                   
-                                                            ],
-                                                   "format": "date-time",
-                                                   "minItems": 2,
-                                                   "maxItems": 2
+                                             "minItems": 2,
+                                             "maxItems": 2,
+                                             "items": {
+                                                    "type": [ "string", "null" ],
+                                                    "format": "date-time"
                                                    }
                                           }
                                 }
@@ -139,7 +137,7 @@
         "name": "filter_bbox",
         "summary": "Filters by Spatial Extent",
         "description": "Creates a subset in including only values inside a given bounding box.",
-        "min_parameters": 2,
+        
         "parameters": {
                        "imagery": {
                                 "description": "EO data to Process.",

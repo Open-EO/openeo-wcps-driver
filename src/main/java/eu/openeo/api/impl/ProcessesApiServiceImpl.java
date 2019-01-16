@@ -68,11 +68,11 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 			process.put("parameters", processDesc.getParameters());			
 			process.put("min_parameters", processDesc.getMinParameters());
 			Map<String, Object> returnMap = new HashMap<String, Object>();
-			Map<String, Object> exceptionMap = new HashMap<String, Object>();
 			returnMap.put("description", processDesc.getReturns().getDescription());
 			returnMap.put("schema", processDesc.getReturns().getSchema());
+			
 			process.put("returns", returnMap);
-			process.put("exceptions", exceptionMap);
+			process.put("exceptions", processDesc.getExceptions());
 			processArray.put(process);
 			processes.put("processes", processArray);
 			
