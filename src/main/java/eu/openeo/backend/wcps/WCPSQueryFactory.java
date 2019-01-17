@@ -282,10 +282,25 @@ public class WCPSQueryFactory {
 							collectionIDs.add(new Collection(coll));
 							log.debug("found actual dataset: " + coll);
 							
+							JSONObject jsonresp = null;
+							try {
+								jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/"+coll);
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+				            
+							int srs = 0;
+							srs = jsonresp.getInt("eo:epsg");
+							log.debug("srs is: " + srs);
+							
 							for (Object collFilterName : processParent.keySet()) {
 								String collFilterNameStr = (String) collFilterName;
 								if (collFilterNameStr.equals("spatial_extent")) {
-									createBoundingBoxFilterFromArgs(processParent);
+									createBoundingBoxFilterFromArgs(processParent, srs);
 								   }
 								if (collFilterNameStr.equals("temporal_extent")) {
 									JSONArray extentArray = (JSONArray) processParent.get(collFilterNameStr);
@@ -334,8 +349,39 @@ public class WCPSQueryFactory {
 			}
 			else if (keyStr.equals("extent") && process.get("process_id").toString().contains("bbox")) {
                
-			   createBoundingBoxFilterFromArgs(process);
-			   
+				
+				for (Object akeyC : process.keySet()) {
+					String keyStrC = (String) akeyC;
+					if (keyStrC.equals("process_id")) {
+						String name = (String) process.get(keyStrC);
+						
+						if (name.contains("get_collection")) {
+							for (Object collName : process.keySet()) {
+								String collNameStr = (String) collName;
+								if (collNameStr.equals("name")) {
+									
+									String coll = (String) process.get(collNameStr);
+									
+				                  
+									
+									JSONObject jsonresp = null;
+									try {
+										jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/"+coll);
+									} catch (JSONException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+						            
+									int srs = 0;
+									srs = jsonresp.getInt("eo:epsg");
+									log.debug("srs is: " + srs);
+									createBoundingBoxFilterFromArgs(process, srs);
+									
+								}}}}}
+				
 			}
 
 			else if (keyStr.equals("extent") && process.get("process_id").toString().contains("date")) {
@@ -384,46 +430,12 @@ public class WCPSQueryFactory {
 	  }
 	
 	
-	private void createBoundingBoxFilterFromArgs(JSONObject argsObject) {
+	private void createBoundingBoxFilterFromArgs(JSONObject argsObject, int srs) {
 		String left = null;
 		String right = null;
 		String top = null;
 		String bottom = null;
 		//Set argsKey = argsObject.keySet();
-		
-		int srs=(Integer) null;
-		
-		for (Object keyC : argsObject.keySet()) {
-			String keyStrC = (String) keyC;
-			if (keyStrC.equals("process_id")) {
-				String name = (String) argsObject.get(keyStrC);
-				
-				if (name.contains("get_collection")) {
-					for (Object collName : argsObject.keySet()) {
-						String collNameStr = (String) collName;
-						if (collNameStr.equals("name")) {
-							
-							String coll = (String) argsObject.get(collNameStr);
-							collectionIDs.add(new Collection(coll));
-		                    //JSONObject srsC = readJsonFromUrl("https://graph.facebook.com/19292868552");
-							
-							JSONObject jsonresp = null;
-							try {
-								jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/"+coll);
-							} catch (JSONException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-				            
-							
-							srs = (int) (double) jsonresp.get("eo:epsg");
-				           
-
-						}}}}}
-		
 		
 		
 		for(Object argsKey: argsObject.keySet()) {
@@ -431,23 +443,25 @@ public class WCPSQueryFactory {
 			if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
 				JSONObject extentObject = (JSONObject) argsObject.get(argsKeyStr);
 				for (Object extentKey : extentObject.keySet()) {
-					String extentKeyStr = (String) extentKey;
+					String extentKeyStr = extentKey.toString();
 	
 					if (extentKeyStr.equals("west")) {
-						left = "" + extentObject.getString(extentKeyStr);
+						left = "" + extentObject.get(extentKeyStr);
 					} else if (extentKeyStr.equals("east")) {
-						right = "" + extentObject.getString(extentKeyStr);
+						right = "" + extentObject.get(extentKeyStr);
 					}
-					if (extentKeyStr.equals("north")) {
-						top = "" + extentObject.getString(extentKeyStr);
+					  else if (extentKeyStr.equals("north")) {
+						top = "" + extentObject.get(extentKeyStr);
 					} else if (extentKeyStr.equals("south")) {
-						bottom = "" + extentObject.getString(extentKeyStr);
+						bottom = "" + extentObject.get(extentKeyStr);
 					}
 				}
 				
 				SpatialReference src = new SpatialReference();
 				src.ImportFromEPSG(4326);
 
+				
+				
 				SpatialReference dst = new SpatialReference();
 				dst.ImportFromEPSG(srs);
 				

@@ -184,7 +184,7 @@ public class Schema implements Serializable {
 	}
 
 	@JsonProperty("minItems")
-	@ApiModelProperty(value = "Minimum Items as Input")
+	@ApiModelProperty(value = "Minimum Items as Input") 
 	@NotNull
 	public int getMinItems() {
 		return minItems;
