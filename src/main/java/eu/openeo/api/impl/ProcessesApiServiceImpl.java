@@ -13,13 +13,19 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import eu.openeo.api.NotFoundException;
 import eu.openeo.api.ProcessesApiService;
+import eu.openeo.dao.ItemsDeserializer;
+import eu.openeo.model.Items;
 import eu.openeo.model.ProcessDescription;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
@@ -34,6 +40,9 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream stream = classLoader.getResourceAsStream("processes.json");
 		this.mapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule("ItemsDeserializer", new Version(1, 0, 0, null, null, null));
+		module.addDeserializer(Items.class, new ItemsDeserializer());
+		mapper.registerModule(module);
 		this.processes = new HashMap<String, ProcessDescription>();
 		try {
 			ProcessDescription[] processArray = this.mapper.readValue(stream, ProcessDescription[].class);
@@ -83,6 +92,16 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 		links.put("title", "HTML version of the processes");
 		linksArray.put(links);
 		processes.put("links", linksArray);
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+			mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+			mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
+			mapper.setSerializationInclusion(Include.NON_NULL);
+			log.debug("from object mapper: " + mapper.writeValueAsString(this.processes));
+		} catch (JsonProcessingException e) {
+			log.error("did not manage to serialize process map to json: " + e.getMessage());
+		}
 		return Response.ok(processes.toString(4), MediaType.APPLICATION_JSON).build();
 	}
 
@@ -109,7 +128,7 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 		ProcessDescription process = this.processes.get(processId);
 		if(process != null) {
 			try {
-				return Response.ok(this.mapper.writeValueAsString(process)).build();
+				return Response.ok(this.mapper.writerWithDefaultPrettyPrinter().writeValueAsString(process)).build();
 			} catch (JsonProcessingException e) {
 				log.error("Error parsing json: " + e.getMessage());
 				return Response.serverError().entity("Error parsing json: " + e.getMessage()).build();

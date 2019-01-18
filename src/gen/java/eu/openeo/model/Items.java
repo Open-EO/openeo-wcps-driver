@@ -13,14 +13,14 @@
 package eu.openeo.model;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import eu.openeo.dao.TypeArraySerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -31,32 +31,48 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(description = "**DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0 DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class Items implements Serializable {
-	@JsonProperty("type")
-	private String type = null;
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8843392924864367870L;
+
+	@JsonSerialize(using = TypeArraySerializer.class)
+	private String[] type = null;
 	
 	@JsonProperty("format")
 	private String format = null;
 	
 	
-	public Items type(String type) {
+	public Items type(String[] type) {
 		this.type = type;
 		return this;
 	}
+	
+//	public Items type(String type) {
+//		this.type = new String[] {type};
+//		return this;
+//	}
 
 	/**
 	 * A short and concise description of the process argument.
 	 * 
 	 * @return description
 	 **/
-	@JsonProperty("type")
-	@ApiModelProperty(required = true, value = "A short and concise description of the process argument.")
-	@NotNull
-	public String getType() {
+//	@JsonSerialize(using = TypeArraySerializer.class)
+//	@ApiModelProperty(required = true, value = "A short and concise description of the process argument.")
+//	@NotNull
+	public String[] getType() {
 		return type;
 	}
+	
 
-	public void setType(String type) {
+	public void setType(String[] type) {
 		this.type = type;
+	}
+	
+	public void setType(String type) {
+		this.type = new String[] {type};
 	}
 
 
@@ -101,8 +117,7 @@ public class Items implements Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class Items {\n");
 		sb.append("    type: ").append(toIndentedString(type)).append("\n");
-		sb.append("    format: ").append(toIndentedString(format)).append("\n");
-		
+		sb.append("    format: ").append(toIndentedString(format)).append("\n");		
 		sb.append("}");
 		return sb.toString();
 	}
