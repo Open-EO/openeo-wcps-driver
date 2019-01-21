@@ -138,7 +138,7 @@ public class JobFull implements Serializable {
 	@NotNull
 	
 	private ObjectMapper mapper = null;
-	ObjectMapper mapper1 = new ObjectMapper();
+	
 	public Object getProcessGraph() {
 		JSONParser parser = new JSONParser();
 		
@@ -147,11 +147,15 @@ public class JobFull implements Serializable {
 		String processgraph = null;
 		JSONObject processgraphLocal = null;
 		try {
-			processgraph = mapper.writeValueAsString(this.processGraph);
 			
-			processgraphLocal = new JSONObject(processgraph.toString());
+			
+			processgraphLocal = ((JSONObject) parser.parse(mapper.writeValueAsString(this.processGraph)));
 			
 		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
