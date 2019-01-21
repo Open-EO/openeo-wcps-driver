@@ -119,10 +119,14 @@
                                              "minItems": 2,
                                              "maxItems": 2,
                                              "items": {
+<<<<<<< HEAD
                                                     "type": [
                                                     		"string",
                                                     		"null"
                                                     		],
+=======
+                                                    "type":  [ "string", "null" ],
+>>>>>>> branch '0.3.0' of git@github.com:Open-EO/openeo-wcps-driver.git
                                                     "format": "date-time"
                                                    }
                                           }

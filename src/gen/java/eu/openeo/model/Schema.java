@@ -214,8 +214,8 @@ public class Schema implements Serializable {
 	}
 	
 	@JsonProperty("maxItems")
-//	@JsonSerialize(using = ZeroIntSerializer.class)
 	@ApiModelProperty(value = "Maximum Items as Input")
+	@NotNull
 	public Integer getMaxItems() {
 		return maxItems;
 	}
