@@ -20,7 +20,10 @@ import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import eu.openeo.dao.ItemsSerializer;
+import eu.openeo.dao.ZeroIntSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -46,7 +49,7 @@ public class Schema implements Serializable {
 	private Map<String, SchemaProperties> properties = null;
 	
 	@JsonProperty("additionalProperties")
-	private Boolean addProp = null;
+	private Boolean additionalProperties = null;
 	
 	@JsonProperty("required")
 	private String[] required = null;
@@ -60,14 +63,17 @@ public class Schema implements Serializable {
 	@JsonProperty("example")
 	private String[] example = null;
 	
-	@JsonProperty("items")
+//	@JsonProperty("items")
+	@JsonSerialize(using = ItemsSerializer.class)
 	private Items items = null;
 	
 	@JsonProperty("minItems")
-	private int minItems = 0;
+	//@JsonSerialize(using = ZeroIntSerializer.class)
+	private Integer minItems = null;
 	
 	@JsonProperty("maxItems")
-	private int maxItems = 0;
+	//@JsonSerialize(using = ZeroIntSerializer.class)
+	private Integer maxItems = null;
 
 	public Schema type(String type) {
 		this.type = type;
@@ -115,9 +121,10 @@ public class Schema implements Serializable {
 	}
 	
 	
-	@JsonProperty("items")
-	@ApiModelProperty(value = "")
-	@NotNull
+	//@JsonProperty("items")
+//	@JsonSerialize(using = ItemsSerializer.class)
+//	@ApiModelProperty(value = "")
+//	@NotNull
 	public Items getItems() {
 		return items;
 	}
@@ -129,12 +136,12 @@ public class Schema implements Serializable {
 	@JsonProperty("additionalProperties")
 	@ApiModelProperty(value = "")
 	@NotNull
-	public Boolean getAddProp() {
-		return addProp;
+	public Boolean getAdditionalProperties() {
+		return additionalProperties;
 	}
 
-	public void setAddProp(Boolean addProp) {
-		this.addProp = addProp;
+	public void setAdditionalProperties(Boolean additionalProperties) {
+		this.additionalProperties = additionalProperties;
 	}
 	
 	@JsonProperty("required")
@@ -184,9 +191,9 @@ public class Schema implements Serializable {
 	}
 
 	@JsonProperty("minItems")
-	@ApiModelProperty(value = "Minimum Items as Input") 
-	@NotNull
-	public int getMinItems() {
+//	@JsonSerialize(using = ZeroIntSerializer.class)
+	@ApiModelProperty(value = "Minimum Items as Input")
+	public Integer getMinItems() {
 		return minItems;
 	}
 
@@ -209,11 +216,11 @@ public class Schema implements Serializable {
 	@JsonProperty("maxItems")
 	@ApiModelProperty(value = "Maximum Items as Input")
 	@NotNull
-	public int getMaxItems() {
+	public Integer getMaxItems() {
 		return maxItems;
 	}
 
-	public void setMaxItems(int maxItems) {
+	public void setMaxItems(Integer maxItems) {
 		this.maxItems = maxItems;
 	}
 	
