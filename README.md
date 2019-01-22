@@ -59,6 +59,6 @@ The current git project is setup as a runnable web archive maven project in ecli
 
 ### Migration Plan for v0.3.0
 
-- [X] Remove exceptions field where not defined in API
-- [X] 
-- [X] 
+- [ ] Remove exceptions and required fields where not defined in API
+- [ ] Replace jobs download endpoint with "results" instead of "download"
+- [ ] 

@@ -37,6 +37,9 @@ public class ProcessDescriptionBandInvalid implements Serializable {
 	@JsonProperty("description")
 	private String description = null;
 	
+	@JsonProperty("code")
+	private Integer code = null;
+	
 	
 	public ProcessDescriptionBandInvalid type(String description) {
 		this.description = description;
@@ -60,6 +63,18 @@ public class ProcessDescriptionBandInvalid implements Serializable {
 	}
 	
 	
+	@JsonProperty("code")
+	@ApiModelProperty(required = true, value = "Error Code")
+	
+	public Integer getCode() {
+		return code;
+	}
+
+	public void setcode(int code) {
+		this.code = code;
+	}
+	
+	
 	
 	@Override
 	public boolean equals(java.lang.Object o) {
@@ -70,12 +85,13 @@ public class ProcessDescriptionBandInvalid implements Serializable {
 			return false;
 		}
 		ProcessDescriptionBandInvalid bands = (ProcessDescriptionBandInvalid) o;
-		return Objects.equals(this.description, bands.description);
+		return Objects.equals(this.description, bands.description)
+	        && Objects.equals(this.code, bands.code);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(description);
+		return Objects.hash(description, code);
 	}
 
 	@Override
@@ -83,6 +99,7 @@ public class ProcessDescriptionBandInvalid implements Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class ProcessDescriptionBandInvalid {\n");
 		sb.append("    description: ").append(toIndentedString(description)).append("\n");
+		sb.append("    code: ").append(toIndentedString(code)).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}
