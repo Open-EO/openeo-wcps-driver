@@ -161,7 +161,12 @@ public class JobsApiServiceImpl extends JobsApiService {
 					.build();
 		}
 		try {
-			return Response.ok().entity(mapper.writeValueAsString(job)).build();
+			ObjectMapper mapper = new ObjectMapper();
+			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
+			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
+			mapper.registerModule(module);
+			return Response.status(201).entity(mapper.writeValueAsString(job)).build();
+//			return Response.ok().entity(mapper.writeValueAsString(job)).build();
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage());
 			return Response.serverError().entity("An error occured while serializing job to json: " + e.getMessage())
@@ -258,7 +263,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
 			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
 			mapper.registerModule(module);
-			return Response.ok().entity(mapper.writeValueAsString(job)).build();
+			return Response.status(201).entity(mapper.writeValueAsString(job)).build();
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage());
 			return Response.serverError().entity("An error occured while serializing job to json: " + e.getMessage())
