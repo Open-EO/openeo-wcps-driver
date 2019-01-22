@@ -57,7 +57,7 @@ public class ProcessDescription implements Serializable {
 	private Map<String, ProcessDescriptionBandInvalid> exceptions = null;
 	
 	@JsonProperty("min_parameters")
-	private int min_parameters = 0;
+	private Integer min_parameters = null;
 	
 	
 
@@ -122,8 +122,8 @@ public class ProcessDescription implements Serializable {
 	
 	@JsonProperty("min_parameters")
 	@ApiModelProperty(required = true, value = "Minimum number of parameters required as input")
-	@NotNull
-	public int getMinParameters() {
+	
+	public Integer getMinParameters() {
 		return min_parameters;
 	}
 
