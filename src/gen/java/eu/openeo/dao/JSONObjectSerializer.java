@@ -32,8 +32,7 @@ public class JSONObjectSerializer extends StdSerializer<JSONObject> {
 		} catch (IOException e) {
 			log.error("Error while serializing integer to json: " + e.getMessage());
 			e.printStackTrace();
-		}
-        
+		}        
     }
 
 }

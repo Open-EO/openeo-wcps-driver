@@ -6,9 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,8 +21,6 @@ public class JSONObjectPersister extends StringType {
 	private static final JSONObjectPersister singleTon = new JSONObjectPersister();
 	
 	private static final ObjectMapper mapper = new ObjectMapper();
-	
-	private static final JSONParser parser = new JSONParser();
 	
 	Logger log = Logger.getLogger(this.getClass());
 
@@ -41,11 +37,8 @@ public class JSONObjectPersister extends StringType {
 	@Override
 	public Object javaToSqlArg(FieldType fieldType, Object javaObject) {
 		try {
-			return ((JSONObject) parser.parse(mapper.writeValueAsString(javaObject))).toJSONString();
+			return new JSONObject(mapper.writeValueAsString(javaObject));
 		} catch (JsonProcessingException e) {
-			log.error("Error javaToSqlArg: " + e.getMessage());
-			log.error(javaObject.toString());
-		} catch (ParseException e) {
 			log.error("Error javaToSqlArg: " + e.getMessage());
 			log.error(javaObject.toString());
 		}

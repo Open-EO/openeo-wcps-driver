@@ -18,9 +18,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -252,7 +254,8 @@ public class JobsApiServiceImpl extends JobsApiService {
 		log.debug("WCPS query: " + wcpsFactory.getWCPSString());
 
 		try {
-			jobDao.create(job);			
+			jobDao.create(job);
+			log.debug("job saved to database: " + job.getJobId());
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
@@ -263,6 +266,10 @@ public class JobsApiServiceImpl extends JobsApiService {
 			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
 			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
 			mapper.registerModule(module);
+			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+			mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+			mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
+			mapper.setSerializationInclusion(Include.NON_NULL);
 			return Response.status(201).entity(mapper.writeValueAsString(job)).build();
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage());
