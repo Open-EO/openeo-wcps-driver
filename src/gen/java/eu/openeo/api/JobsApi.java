@@ -94,7 +94,7 @@ public class JobsApi {
 	}
 
 	@GET
-	@Path("/{job_id}/download")
+	@Path("/{job_id}/results")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json", "application/metalink+xml" })
 	@io.swagger.annotations.ApiOperation(value = "Request download links for results of batch jobs.", notes = "This request will provide links to download results of batch jobs. Depending on the Content-Type header, the response is either a simple JSON array with URLs as strings or a metalink XML document.", response = Void.class, authorizations = {
@@ -121,7 +121,7 @@ public class JobsApi {
 	}
 
 	@OPTIONS
-	@Path("/{job_id}/download")
+	@Path("/{job_id}/results")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
