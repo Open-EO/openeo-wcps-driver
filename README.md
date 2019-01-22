@@ -61,4 +61,4 @@ The current git project is setup as a runnable web archive maven project in ecli
 
 - [ ] Remove exceptions and required fields where not defined in API
 - [ ] Replace jobs download endpoint with "results" instead of "download"
-- [ ] 
+- [ ] Update the format of jobs info output to version 0.3.1
