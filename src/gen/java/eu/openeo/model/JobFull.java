@@ -146,19 +146,19 @@ public class JobFull implements Serializable {
 		
 		String processgraph = null;
 		JSONObject processgraphLocal = null;
-		try {
+		try {		
 			
-			
-			processgraphLocal = ((JSONObject) parser.parse(mapper.writeValueAsString(this.processGraph)));
+//			processgraphLocal = ((JSONObject) parser.parse(mapper.writeValueAsString(this.processGraph)));
+			processgraphLocal = new JSONObject(mapper.writeValueAsString(this.processGraph));
 			
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		catch (ParseException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		return processgraphLocal;
 	}
 

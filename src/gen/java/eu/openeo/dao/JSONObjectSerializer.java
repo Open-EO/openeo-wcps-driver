@@ -26,9 +26,9 @@ public class JSONObjectSerializer extends StdSerializer<JSONObject> {
     public void serialize(JSONObject jsonObject, JsonGenerator jsonGenerator, SerializerProvider serializer) {
 		log.debug("serializing jsonobject to json!");
         try {
-//        	jsonGenerator.writeStartObject();
+        	log.debug("JSONObject as string: " + jsonObject.toString());
+			//jsonGenerator.writeEmbeddedObject(jsonObject.toString());
 			jsonGenerator.writeString(jsonObject.toString());
-//			jsonGenerator.writeEndObject();
 		} catch (IOException e) {
 			log.error("Error while serializing integer to json: " + e.getMessage());
 			e.printStackTrace();
