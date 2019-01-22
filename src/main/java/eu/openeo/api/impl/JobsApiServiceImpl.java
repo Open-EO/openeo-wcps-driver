@@ -19,7 +19,9 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -30,6 +32,7 @@ import eu.openeo.api.JobsApiService;
 import eu.openeo.api.NotFoundException;
 import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.backend.wcps.WCPSQueryFactory;
+import eu.openeo.dao.JSONObjectSerializer;
 import eu.openeo.model.JobFull;
 import eu.openeo.model.JobStatus;
 
@@ -251,6 +254,10 @@ public class JobsApiServiceImpl extends JobsApiService {
 					.build();
 		}
 		try {
+			ObjectMapper mapper = new ObjectMapper();
+			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
+			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
+			mapper.registerModule(module);
 			return Response.ok().entity(mapper.writeValueAsString(job)).build();
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage());
