@@ -97,9 +97,9 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		processes.put("path", "/processes");
 		processes.put("methods", processesMethods);
 		
-		JSONObject processesID = new JSONObject();
-		processesID.put("path", "/processes/{process_id}");
-		processesID.put("methods", processesIDMethods);
+		//JSONObject processesID = new JSONObject();
+		//processesID.put("path", "/processes/{process_id}");
+		//processesID.put("methods", processesIDMethods);
 		
 		JSONArray endpointList = new JSONArray();
 		endpointList.put(getCapabilities);
@@ -111,7 +111,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		//endpointList.put(jobs);
 		endpointList.put(jobsID);
 		endpointList.put(processes);
-		endpointList.put(processesID);
+		//endpointList.put(processesID);
 		
 		
 		

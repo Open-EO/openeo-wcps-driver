@@ -27,6 +27,7 @@ import eu.openeo.api.ProcessesApiService;
 import eu.openeo.dao.ItemsDeserializer;
 import eu.openeo.model.Items;
 import eu.openeo.model.ProcessDescription;
+import eu.openeo.model.LinksDesc;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class ProcessesApiServiceImpl extends ProcessesApiService {
@@ -34,20 +35,32 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 	Logger log = Logger.getLogger(this.getClass());
 	
 	private Map<String, ProcessDescription> processes = null;
+	private Map<String, LinksDesc> links = null;
 	private ObjectMapper mapper = null;
 	
 	public ProcessesApiServiceImpl() {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream stream = classLoader.getResourceAsStream("processes.json");
+		InputStream linkstream = classLoader.getResourceAsStream("links.json");
 		this.mapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule("ItemsDeserializer", new Version(1, 0, 0, null, null, null));
 		module.addDeserializer(Items.class, new ItemsDeserializer());
 		mapper.registerModule(module);
 		this.processes = new HashMap<String, ProcessDescription>();
+		this.links = new HashMap<String, LinksDesc>();
 		try {
 			ProcessDescription[] processArray = this.mapper.readValue(stream, ProcessDescription[].class);
+			LinksDesc[] linksArray = this.mapper.readValue(linkstream, LinksDesc[].class);
+			
+			for(int p = 0; p < linksArray.length; p++) {
+				this.links.put(linksArray[p].getRel(), linksArray[p]);
+				
+				log.debug("Found and stored process: " + linksArray[p].getRel());
+			}
+			
 			for(int p = 0; p < processArray.length; p++) {
 				this.processes.put(processArray[p].getProcessId(), processArray[p]);
+				
 				log.debug("Found and stored process: " + processArray[p].getProcessId());
 			}
 		} catch (JsonParseException e) {
@@ -66,7 +79,7 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 		JSONObject processes = new JSONObject();
 		JSONArray processArray = new JSONArray();
 		JSONArray linksArray = new JSONArray();
-		JSONObject links = new JSONObject();
+		
 		for(String key : this.processes.keySet()){
 			JSONObject process = new JSONObject();
 						
@@ -86,12 +99,23 @@ public class ProcessesApiServiceImpl extends ProcessesApiService {
 			processes.put("processes", processArray);
 			
 		}
-		links.put("rel", "alternate");
-		links.put("href", "https://openeo.org/processes");
-		links.put("type", "text/html");
-		links.put("title", "HTML version of the processes");
-		linksArray.put(links);
-		processes.put("links", linksArray);
+		
+		
+		for(String key : this.links.keySet()){
+			JSONObject links = new JSONObject();
+						
+			LinksDesc linkDesc = this.links.get(key);
+			
+			links.put("rel", linkDesc.getRel());
+			links.put("href", linkDesc.getHref());
+			links.put("type", linkDesc.getType());
+			links.put("title", linkDesc.getTitle());
+			linksArray.put(links);
+			processes.put("links", linksArray);
+			
+		}
+		
+		
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
