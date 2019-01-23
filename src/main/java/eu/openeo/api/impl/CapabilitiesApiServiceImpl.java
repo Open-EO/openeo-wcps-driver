@@ -46,6 +46,9 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		JSONArray jobsMethods = new JSONArray();
 		//jobsMethods.put(new String("GET"));
 		jobsMethods.put(new String("POST"));
+		
+		JSONArray jobspreviewMethods = new JSONArray();
+		jobspreviewMethods.put(new String("POST"));
 				
 		JSONArray jobsIDMethods = new JSONArray();
 		jobsIDMethods.put(new String("GET"));
@@ -85,12 +88,18 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		jobs.put("path", "/jobs");
 		jobs.put("methods", jobsMethods);
 		
+		JSONObject jobspreview = new JSONObject();
+		jobspreview.put("path", "/jobs/preview");
+		jobspreview.put("methods", jobspreviewMethods);
+		
 		JSONObject jobsID = new JSONObject();
 		jobsID.put("path", "/jobs/{job_id}");
 		jobsID.put("methods", jobsIDMethods);
 		
+		
+		
 		JSONObject jobsIDdownload = new JSONObject();
-		jobsIDdownload.put("path", "/jobs/{job_id}/download");
+		jobsIDdownload.put("path", "/jobs/{job_id}/results");
 		jobsIDdownload.put("methods", jobsIDdownloadMethods);
 		
 		JSONObject processes = new JSONObject();
@@ -108,10 +117,10 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		endpointList.put(dataID);
 		//endpointList.put(execute);
 		endpointList.put(jobs);
-		//endpointList.put(jobs);
+		endpointList.put(jobspreview);
 		endpointList.put(jobsID);
+		endpointList.put(jobsIDdownload);
 		endpointList.put(processes);
-		//endpointList.put(processesID);
 		
 		
 		
