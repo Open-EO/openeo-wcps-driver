@@ -80,10 +80,6 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		dataID.put("path", "/collections/{name}");
 		dataID.put("methods", dataIDMethods);
 		
-		JSONObject execute = new JSONObject();
-		execute.put("path", "/execute");
-		execute.put("methods", executeMethods);
-		
 		JSONObject jobs = new JSONObject();
 		jobs.put("path", "/jobs");
 		jobs.put("methods", jobsMethods);
@@ -106,16 +102,11 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		processes.put("path", "/processes");
 		processes.put("methods", processesMethods);
 		
-		//JSONObject processesID = new JSONObject();
-		//processesID.put("path", "/processes/{process_id}");
-		//processesID.put("methods", processesIDMethods);
-		
 		JSONArray endpointList = new JSONArray();
 		endpointList.put(getCapabilities);
 		endpointList.put(outputFormats);
 		endpointList.put(data);
 		endpointList.put(dataID);
-		//endpointList.put(execute);
 		endpointList.put(jobs);
 		endpointList.put(preview);
 		endpointList.put(jobsID);
