@@ -47,8 +47,8 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		//jobsMethods.put(new String("GET"));
 		jobsMethods.put(new String("POST"));
 		
-		JSONArray jobspreviewMethods = new JSONArray();
-		jobspreviewMethods.put(new String("POST"));
+		JSONArray previewMethods = new JSONArray();
+		previewMethods.put(new String("POST"));
 				
 		JSONArray jobsIDMethods = new JSONArray();
 		jobsIDMethods.put(new String("GET"));
@@ -88,9 +88,9 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		jobs.put("path", "/jobs");
 		jobs.put("methods", jobsMethods);
 		
-		JSONObject jobspreview = new JSONObject();
-		jobspreview.put("path", "/jobs/preview");
-		jobspreview.put("methods", jobspreviewMethods);
+		JSONObject preview = new JSONObject();
+		preview.put("path", "/preview");
+		preview.put("methods", previewMethods);
 		
 		JSONObject jobsID = new JSONObject();
 		jobsID.put("path", "/jobs/{job_id}");
@@ -117,7 +117,7 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 		endpointList.put(dataID);
 		//endpointList.put(execute);
 		endpointList.put(jobs);
-		endpointList.put(jobspreview);
+		endpointList.put(preview);
 		endpointList.put(jobsID);
 		endpointList.put(jobsIDdownload);
 		endpointList.put(processes);
