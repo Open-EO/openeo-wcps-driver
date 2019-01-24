@@ -51,4 +51,8 @@ public abstract class JobsApiService {
 	public abstract Response jobsOptions(SecurityContext securityContext) throws NotFoundException;
 
 	public abstract Response jobsPost(JobFull job, SecurityContext securityContext) throws NotFoundException;
+	
+	public abstract Response jobsPreviewOptions(SecurityContext securityContext) throws NotFoundException;
+
+	public abstract Response jobsPreviewPost(JobFull job, SecurityContext securityContext) throws NotFoundException;
 }

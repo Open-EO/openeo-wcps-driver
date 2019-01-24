@@ -361,7 +361,6 @@ public class JobsApi {
 	}
 
 	@POST
-
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Submits a new job to the back-end.", notes = "Creates a new job from one or more (chained) processes at the back-end. Jobs are initially always lazy jobs and will not run the computations until on demand  requests or separately queueing it. Queueing it converts a lazy job to a batch job.", response = JobMeta.class, authorizations = {
@@ -382,5 +381,45 @@ public class JobsApi {
 			@ApiParam(value = "Specifies the job details, e.g. the process graph and _optionally_ the output format. The output format might be also specified later during download and is not necessary for web services at all.") JobFull job,
 			@Context SecurityContext securityContext) throws NotFoundException {
 		return delegate.jobsPost(job, securityContext);
+	}
+	
+	@OPTIONS
+	@Path("/preview")
+	@Consumes({ "application/json" })
+	@Produces({ "application/json" })
+	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
+			"CORS", })
+	@io.swagger.annotations.ApiResponses(value = {
+			@io.swagger.annotations.ApiResponse(code = 200, message = "Gives internet browsers the permission to access the requested resource.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 405, message = "The requested HTTP method is not supported or allowed to be requested.", response = Void.class) })
+	public Response jobsPreviewOptions(@Context SecurityContext securityContext) throws NotFoundException {
+		return delegate.jobsPreviewOptions(securityContext);
+	}
+
+	@POST
+	@Path("/preview")
+	@Consumes({ "application/json" })
+	@Produces({ "*/*" })
+	@io.swagger.annotations.ApiOperation(value = "Execute a process graph synchronously.", notes = "Process graphs will be executed directly and the result will be downloaded in the specified format. The process graph must be specified either directy in the request body or by its URI as query parameter", response = Void.class, authorizations = {
+			@io.swagger.annotations.Authorization(value = "Bearer") }, tags = { "Result Access", "Job Management", })
+	@io.swagger.annotations.ApiResponses(value = {
+			@io.swagger.annotations.ApiResponse(code = 200, message = "Result data in the specified output format", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 401, message = "The back-end requires clients to authenticate in order to process this request.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 403, message = "Authorization failed, access to the requested resource has been denied.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 406, message = "The server is not capable to deliver the requested format.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 501, message = "This API feature is not supported by the back-end.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
+	public Response jobsPreviewPost(
+			@ApiParam(value = "Specifies the job details, e.g. the process graph and the output format.", required = true) JobFull job,
+			@Context SecurityContext securityContext) throws NotFoundException {
+		return delegate.jobsPreviewPost(job, securityContext);
 	}
 }
