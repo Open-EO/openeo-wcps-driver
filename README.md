@@ -20,10 +20,10 @@ This repository serves for the development of the openEO driver for WC(P)S backe
 ## Usage of the service
 
 ### Currently implemented features
-1. Listing implemented endpoints through: [/openeo/](http://saocompute.eurac.edu/openEO_0_3_0/openeo/)
-2. Listing implemented processes through: [/openeo/processes](http://saocompute.eurac.edu/openEO_0_3_0/openeo/processes)
-3. Listing available datasets through:    [/openeo/collections](http://saocompute.eurac.edu/openEO_0_3_0/openeo/collections)
-4. Submission of processing graphs via /openeo/jobs
+1. Listing implemented endpoints through: [/](http://saocompute.eurac.edu/openEO_0_3_0/openeo/)
+2. Listing implemented processes through: [/processes](http://saocompute.eurac.edu/openEO_0_3_0/openeo/processes)
+3. Listing available datasets through:    [/collections](http://saocompute.eurac.edu/openEO_0_3_0/openeo/collections)
+4. Submission of processing graphs via /jobs
 5. Direct execution and result retrieval via /preview
 6. Processing of raster
   * subsetting in crs projection space
