@@ -24,7 +24,7 @@ This repository serves for the development of the openEO driver for WC(P)S backe
 2. Listing implemented processes through: [/openeo/processes](http://saocompute.eurac.edu/openEO_0_3_0/openeo/processes)
 3. Listing available datasets through:    [/openeo/collections](http://saocompute.eurac.edu/openEO_0_3_0/openeo/collections)
 4. Submission of processing graphs via /openeo/jobs
-5. Direct execution and result retrieval via /openeo/execute
+5. Direct execution and result retrieval via /preview
 6. Processing of raster
   * subsetting in crs projection space
   * Normalied Difference Vegetation Index
@@ -47,7 +47,7 @@ A note on download activities. In this domain the service is not fully compliant
 
 ### Operating environment dependencies
 - Web server capable of hosting a war archive (e.g. apache tomcat).
-- WCPS compliant web service (e.g. rasdaman 9.5)
+- WCPS compliant web service (e.g. rasdaman 9.7)
 
 ### Configuration
 Configuration of the running service is done in the *config.properties* file, which should be in the class path of the war file.
