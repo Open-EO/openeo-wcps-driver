@@ -3,12 +3,40 @@ package eu.openeo.backend.wcps;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.gdal.osr.CoordinateTransformation;
+import org.gdal.osr.SpatialReference;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 
 import eu.openeo.backend.wcps.domain.Aggregate;
 import eu.openeo.backend.wcps.domain.Collection;
 import eu.openeo.backend.wcps.domain.Filter;
+
+import org.gdal.osr.CoordinateTransformation;
+import org.gdal.osr.SpatialReference;
+import org.gdal.gdal.gdal;
+import org.gdal.osr.osrJNI;
+import org.gdal.osr.osr;
+
+import java.net.URL;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.net.URLConnection;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+
 
 public class WCPSQueryFactory {
 
@@ -40,7 +68,7 @@ public class WCPSQueryFactory {
 	}
 
 	private void build(JSONObject openEOGraph) {
-		log.debug(openEOGraph.toJSONString());
+		log.debug(openEOGraph.toString());
 		parseOpenEOProcessGraph( openEOGraph);
 //		if (openEOGraph.containsKey(new String("process_graph"))) {
 //			parseOpenEOProcessGraph((JSONObject) openEOGraph.get(new String("process_graph")));
@@ -61,7 +89,8 @@ public class WCPSQueryFactory {
 			wcpsStringBuilder.append(collectionIDs.get(c - 1).getName() + " ");
 		}
 		wcpsStringBuilder.append(") return encode ( ");
-		for (int a = aggregates.size() - 1; a >= 0; a--) {
+//		for (int a = aggregates.size() - 1; a >= 0; a--) {
+		for (int a = 0; a < aggregates.size(); a++) {
 			if (aggregates.get(a).getAxis().equals("DATE")) {
 				wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
 			}
@@ -76,6 +105,13 @@ public class WCPSQueryFactory {
 		wcpsStringBuilder.append(", \"" + outputFormat + "\" )");
 	}
 
+	
+	private String filter_geometry(String collectionName) {
+		
+		    return collectionName ;
+	}
+	
+	
 	/**
 	 * Helper Method to create a string describing an arbitrary filtering as defined
 	 * from the process graph
@@ -127,8 +163,9 @@ public class WCPSQueryFactory {
 	 * @return
 	 */
 	private String createFilteredCollectionString(String collectionName, Filter filter) {
+		try {
 		StringBuilder stringBuilder = new StringBuilder(collectionName);
-		stringBuilder.append("[");
+		stringBuilder.append("[");		
 		String axis = filter.getAxis();
 		String low = filter.getLowerBound();
 		String high = filter.getUpperBound();
@@ -154,6 +191,10 @@ public class WCPSQueryFactory {
 		stringBuilder.append(")");
 		stringBuilder.append("]");
 		return stringBuilder.toString();
+		}catch(NullPointerException e) {
+			e.printStackTrace();
+			return "";
+		}
 	}
 
 	private String createNDVIWCPSString(String collectionName, Aggregate ndviAggregate) {
@@ -169,6 +210,7 @@ public class WCPSQueryFactory {
 		stringBuilder.append(nir + " + " + red);
 		stringBuilder.append(")");
 		filters.removeAllElements();
+		
 		return stringBuilder.toString();
 	}
 
@@ -181,13 +223,22 @@ public class WCPSQueryFactory {
 				tempFilter = filter;
 			}
 		}
-		StringBuilder stringBuilder = new StringBuilder("condense ");
-		stringBuilder.append(operator + " over $pm t (imageCrsDomain(");
-		stringBuilder.append(createFilteredCollectionString(collectionName, tempFilter) + ",");
-		stringBuilder.append(axis + ")) using ");
-		this.filters.remove(tempFilter);
-		this.filters.add(new Filter(axis, "$pm"));
-		return stringBuilder.toString();
+		if(tempFilter != null) {
+			StringBuilder stringBuilder = new StringBuilder("condense ");
+			stringBuilder.append(operator + " over $pm t (imageCrsDomain(");
+			stringBuilder.append(createFilteredCollectionString(collectionName, tempFilter) + ",");
+			stringBuilder.append(axis + ")) using ");
+			this.filters.remove(tempFilter);
+			this.filters.add(new Filter(axis, "$pm"));
+			return stringBuilder.toString();
+		}else {
+			for (Filter filter : this.filters) {
+				System.err.println(filter.getAxis());				
+			}
+			//TODO this error needs to be communicated to end user 
+			//meaning no appropriate filter found for running the condense operator in temporal axis.
+			return "";
+		}
 	}
 
 	private String createBandSubsetString(String collectionName, String bandName, String subsetString) {
@@ -220,113 +271,219 @@ public class WCPSQueryFactory {
 				String name = (String) processParent.get(keyStr);
 				log.debug("currently working on: " + name);
 				if (name.contains("filter")) {
-					createFilterFromProcess(processParent);
-				} else {
-					createAggregateFromProcess(processParent);
+				    createFilterFromProcess(processParent);
 				}
-			} else if (keyStr.equals("args")) {
-				JSONObject argsObject = (JSONObject) processParent.get(keyStr);
-				for (Object argsKey : argsObject.keySet()) {
-					String argsKeyStr = (String) argsKey;
-					if (argsKeyStr.equals("collections") || argsKeyStr.equals("imagery")) {
-						try {
-							JSONArray collections = (JSONArray) argsObject.get(argsKey);
-							result = parseOpenEOProcessGraph((JSONObject) collections.get(0));
-							if (result == null) {
-								result = (JSONObject) collections.get(0);
-								break;
+				else if (name.contains("get_collection")) {
+					for (Object collName : processParent.keySet()) {
+						String collNameStr = (String) collName;
+						if (collNameStr.equals("name")) {
+							
+							String coll = (String) processParent.get(collNameStr);
+							collectionIDs.add(new Collection(coll));
+							log.debug("found actual dataset: " + coll);
+							
+							JSONObject jsonresp = null;
+							try {
+								jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/"+coll);
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
-						}catch(java.lang.ClassCastException e) {
-							JSONObject collections = (JSONObject) argsObject.get(argsKey);
-							result = parseOpenEOProcessGraph(collections);
-							if (result == null) {
-								result = collections;
-								break;
+				            
+							int srs = 0;
+							srs = jsonresp.getInt("eo:epsg");
+							log.debug("srs is: " + srs);
+							
+							for (Object collFilterName : processParent.keySet()) {
+								String collFilterNameStr = (String) collFilterName;
+								if (collFilterNameStr.equals("spatial_extent")) {
+									createBoundingBoxFilterFromArgs(processParent, srs);
+								   }
+								if (collFilterNameStr.equals("temporal_extent")) {
+									JSONArray extentArray = (JSONArray) processParent.get(collFilterNameStr);
+									createDateRangeFilterFromArgs(extentArray);
+								   }
+								}
+							
 							}
-						}
-						
-					}
+				     }
+				  }								
+				/*else if (name.contains("get_collection") && (keyStr.equals("spatial_extent") || keyStr.equals("temporal_extent"))) {
+				createFilterFromGetCollection(processParent);
+			    }*/
+				else {
+					   createAggregateFromProcess(processParent);
 				}
-			} else if (keyStr.equals("collection_id") || keyStr.equals("product_id")) {
+			}
+			else if (keyStr.equals("imagery")) {				
+				      JSONObject argsObject = (JSONObject) processParent.get(keyStr);
+				      result = parseOpenEOProcessGraph(argsObject);			      
+			}
+			/*else if (keyStr.equals("name")) {
 				String name = (String) processParent.get(keyStr);
 				collectionIDs.add(new Collection(name));
 				log.debug("found actual dataset: " + name);
-			}
+				
+			}*/
 		}
 		return result;
 	}
-
+    	
 	/**
 	 * 
 	 * @param process
 	 */
 	private void createFilterFromProcess(JSONObject process) {
-		boolean isTemporalFilter = false;
-		boolean isBoundBoxFilter = false;
+		
+		
+							
 		for (Object key : process.keySet()) {
 			String keyStr = (String) key;
-			if (keyStr.equals("process_id")) {
-				String name = (String) process.get(keyStr);
-				log.debug("currently working on: " + name);
-				if (name.contains("date")) {
-					isTemporalFilter = true;
-				} else if (name.contains("bbox")) {
-					isBoundBoxFilter = true;
-				}
+			if (!keyStr.equals("extent")) {
+				
+				log.debug("Its all about Time and Place");
+			
 			}
-		}
-		for (Object key : process.keySet()) {
-			String keyStr = (String) key;
-			if (keyStr.equals("args")) {
-				JSONObject argsObject = (JSONObject) process.get(keyStr);
-				if (isTemporalFilter) {
-					createDateRangeFilterFromArgs(argsObject);
-				}
-				if (isBoundBoxFilter) {
-					createBoundingBoxFilterFromArgs(argsObject);
-				}
+			else if (keyStr.equals("extent") && process.get("process_id").toString().contains("bbox")) {
+               
+				
+				for (Object akeyC : process.keySet()) {
+					String keyStrC = (String) akeyC;
+					if (keyStrC.equals("process_id")) {
+						String name = (String) process.get(keyStrC);
+						
+						if (name.contains("get_collection")) {
+							for (Object collName : process.keySet()) {
+								String collNameStr = (String) collName;
+								if (collNameStr.equals("name")) {
+									
+									String coll = (String) process.get(collNameStr);
+									
+				                  
+									
+									JSONObject jsonresp = null;
+									try {
+										jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/"+coll);
+									} catch (JSONException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+						            
+									int srs = 0;
+									srs = jsonresp.getInt("eo:epsg");
+									log.debug("srs is: " + srs);
+									createBoundingBoxFilterFromArgs(process, srs);
+									
+								}}}}}
+				
+			}
 
+			else if (keyStr.equals("extent") && process.get("process_id").toString().contains("date")) {
+				    JSONArray extentArray = (JSONArray) process.get(keyStr);
+
+				    createDateRangeFilterFromArgs(extentArray);
+				    
 			}
+			
 		}
 	}
 
-	private void createDateRangeFilterFromArgs(JSONObject argsObject) {
+	private void createDateRangeFilterFromArgs(JSONArray extentArray) {
 		String fromDate = null;
 		String toDate = null;
-		for (Object argsKey : argsObject.keySet()) {
-			String argsKeyStr = (String) argsKey;
-			if (argsKeyStr.equals("from")) {
-				fromDate = (String) argsObject.get(argsKey);
-			} else if (argsKeyStr.equals("to")) {
-				toDate = (String) argsObject.get(argsKey);
-			}
-		}
+		
+		fromDate = extentArray.get(0).toString();
+		toDate   = extentArray.get(1).toString(); 
+		
 		if (fromDate != null && toDate != null)
 			this.filters.add(new Filter("DATE", fromDate, toDate));
 	}
 
-	private void createBoundingBoxFilterFromArgs(JSONObject argsObject) {
+	
+	
+	private static String readAll(Reader rd) throws IOException {
+	    StringBuilder sb = new StringBuilder();
+	    int cp;
+	    while ((cp = rd.read()) != -1) {
+	      sb.append((char) cp);
+	    }
+	    return sb.toString();
+	  }
+
+	  public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+	    InputStream is = new URL(url).openStream();
+	    try {
+	      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+	      String jsonText = readAll(rd);
+
+	      JSONObject json = new JSONObject(jsonText);
+	      return json;
+	    } finally {
+	      is.close();
+	    }
+	  }
+	
+	
+	private void createBoundingBoxFilterFromArgs(JSONObject argsObject, int srs) {
 		String left = null;
 		String right = null;
 		String top = null;
 		String bottom = null;
-		for (Object argsKey : argsObject.keySet()) {
+		//Set argsKey = argsObject.keySet();
+		
+		
+		for(Object argsKey: argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
-			if (argsKeyStr.equals("left")) {
-				left = "" + argsObject.get(argsKey).toString();
-			} else if (argsKeyStr.equals("right")) {
-				right = "" + argsObject.get(argsKey).toString();
+			if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
+				JSONObject extentObject = (JSONObject) argsObject.get(argsKeyStr);
+				for (Object extentKey : extentObject.keySet()) {
+					String extentKeyStr = extentKey.toString();
+	
+					if (extentKeyStr.equals("west")) {
+						left = "" + extentObject.get(extentKeyStr);
+					} else if (extentKeyStr.equals("east")) {
+						right = "" + extentObject.get(extentKeyStr);
+					}
+					  else if (extentKeyStr.equals("north")) {
+						top = "" + extentObject.get(extentKeyStr);
+					} else if (extentKeyStr.equals("south")) {
+						bottom = "" + extentObject.get(extentKeyStr);
+					}
+				}
+				
+				SpatialReference src = new SpatialReference();
+				src.ImportFromEPSG(4326);
+
+				
+				
+				SpatialReference dst = new SpatialReference();
+				dst.ImportFromEPSG(srs);
+				
+				
+				CoordinateTransformation tx = new CoordinateTransformation(src, dst);
+				
+				double[] c1 = null;
+				double[] c2 = null;
+				c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(top));
+				c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(bottom));
+				
+				left = Double.toString(c1[0]);
+				top = Double.toString(c1[1]);
+				right = Double.toString(c2[0]);
+				bottom = Double.toString(c2[1]);
+				
 			}
-			if (argsKeyStr.equals("top")) {
-				top = "" + argsObject.get(argsKey).toString();
-			} else if (argsKeyStr.equals("bottom")) {
-				bottom = "" + argsObject.get(argsKey).toString();
-			}
+			
 		}
 		this.filters.add(new Filter("E", left, right));
 		this.filters.add(new Filter("N", top, bottom));
 	}
-
 	/**
 	 * 
 	 * @param process
@@ -342,23 +499,11 @@ public class WCPSQueryFactory {
 				log.debug("currently working on: " + processName);
 				if (processName.contains("date") || processName.contains("time")) {
 					isTemporalAggregate = true;
+					createTemporalAggregate(processName);
 				} else if (processName.contains("NDVI")) {
 					isNDVIAggregate = true;
+					createNDVIAggregateFromProcess(process);
 				}
-				break;
-			}
-		}
-		for (Object key : process.keySet()) {
-			String keyStr = (String) key;
-			if (keyStr.equals("args")) {
-				JSONObject argsObject = (JSONObject) process.get(keyStr);
-				if (isTemporalAggregate) {
-					createTemporalAggregate(processName);
-				}
-				if (isNDVIAggregate) {
-					createNDVIAggregateFromProcess(argsObject);
-				}
-
 			}
 		}
 	}
@@ -381,9 +526,9 @@ public class WCPSQueryFactory {
 		for (Object argsKey : argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
 			if (argsKeyStr.equals("red")) {
-				red = "" + argsObject.get(argsKey).toString();
+				red = "" + argsObject.getString(argsKeyStr);
 			} else if (argsKeyStr.equals("nir")) {
-				nir = "" + argsObject.get(argsKey).toString();
+				nir = "" + argsObject.getString(argsKeyStr);
 			}
 		}
 		Vector<String> params = new Vector<String>();

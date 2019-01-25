@@ -13,7 +13,7 @@ import javax.ws.rs.core.SecurityContext;
 import eu.openeo.api.factories.CapabilitiesApiServiceFactory;
 import eu.openeo.model.InlineResponse200;
 
-@Path("/capabilities")
+@Path("/")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the capabilities API")

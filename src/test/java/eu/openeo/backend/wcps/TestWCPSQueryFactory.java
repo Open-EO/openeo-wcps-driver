@@ -2,20 +2,20 @@ package eu.openeo.backend.wcps;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.FileReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
 public class TestWCPSQueryFactory {
 
 	@Test
 	void justAnExample() {
-		JSONParser parser = new JSONParser();
 		try {
-			JSONObject openEOGraph = (JSONObject) parser
-					.parse(new FileReader("src/test/resources/use_case_1_test.json"));
+			byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/use_case_1_test.json"));
+			JSONObject openEOGraph = new JSONObject(new String(encoded, StandardCharsets.UTF_8));
 			WCPSQueryFactory wcpsQueryFactory = new WCPSQueryFactory(openEOGraph);
 			System.out.println(wcpsQueryFactory.getWCPSString());
 		} catch (Exception e) {

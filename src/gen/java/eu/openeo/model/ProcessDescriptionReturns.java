@@ -28,34 +28,21 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(description = "**DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0 DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ProcessDescriptionArgs implements Serializable {
+public class ProcessDescriptionReturns implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2974393311661717237L;
+	private static final long serialVersionUID = 8950925769020643959L;
 
 	@JsonProperty("description")
 	private String description = null;
 	
-	@JsonProperty("dependencies")
-	private String dependencies = null;
-	
-	@JsonProperty("deprecated")
-	private String[] deprecated = null;
-
-	@JsonProperty("required")
-	private Boolean required = true;
-	
 	@JsonProperty("schema")
 	private Schema schema =  null;
-
+	
 	@JsonProperty("mime_type")
 	private String mimetype =  null;
-	
-	public ProcessDescriptionArgs description(String description) {
-		this.description = description;
-		return this;
-	}
+
 
 	/**
 	 * A short and concise description of the process argument.
@@ -73,27 +60,6 @@ public class ProcessDescriptionArgs implements Serializable {
 		this.description = description;
 	}
 	
-	@JsonProperty("dependencies")
-	@ApiModelProperty(required = false, value = "A list of parameters that influence this parameter or this parameter depends on.")
-	@NotNull
-	public String getDependencies() {
-		return dependencies;
-	}
-
-	public void setDependencies(String dependencies) {
-		this.dependencies = dependencies;
-	}
-	
-	@JsonProperty("deprecated")
-	@ApiModelProperty(required = false, value = "Specifies that a parameter is deprecated and SHOULD be transitioned out of usage.")
-	@NotNull
-	public String[] getDeprecated() {
-		return deprecated;
-	}
-
-	public void setDeprecated(String[] deprecated) {
-		this.deprecated = deprecated;
-	}
 	
 	@JsonProperty("schema")
 	@ApiModelProperty(required = true, value = "A schema object according to the specification of JSON Schema draft-07. Additional values for format are defined centrally in the API documentation, e.g. bbox or crs")
@@ -108,7 +74,7 @@ public class ProcessDescriptionArgs implements Serializable {
 	
 	
 	@JsonProperty("mime_type")
-	@ApiModelProperty(required = true, value = "The mime type that the parameter is formatted with")
+	@ApiModelProperty(required = true, value = "The mime type that the returned data is formatted with.")
 	@NotNull
 	public String getMimetype() {
 		return mimetype;
@@ -117,27 +83,8 @@ public class ProcessDescriptionArgs implements Serializable {
 	public void setMimetype(String mimetype) {
 		this.mimetype = mimetype;
 	}
-
-	public ProcessDescriptionArgs required(Boolean required) {
-		this.required = required;
-		return this;
-	}
-
-	/**
-	 * Defines whether an argument is required or optional.
-	 * 
-	 * @return required
-	 **/
-	@JsonProperty("required")
-	@ApiModelProperty(value = "Defines whether an argument is required or optional.")
-	public Boolean isRequired() {
-		return required;
-	}
-
-	public void setRequired(Boolean required) {
-		this.required = required;
-	}
-
+	
+	
 	@Override
 	public boolean equals(java.lang.Object o) {
 		if (this == o) {
@@ -146,31 +93,24 @@ public class ProcessDescriptionArgs implements Serializable {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ProcessDescriptionArgs parameters = (ProcessDescriptionArgs) o;
-		return Objects.equals(this.description, parameters.description)
-				&& Objects.equals(this.dependencies, parameters.dependencies)
-				&& Objects.equals(this.deprecated, parameters.deprecated)
-				&& Objects.equals(this.schema, parameters.schema)
-				&& Objects.equals(this.mimetype, parameters.mimetype)
-				&& Objects.equals(this.required, parameters.required);
+		ProcessDescriptionReturns returns = (ProcessDescriptionReturns) o;
+		return Objects.equals(this.description, returns.description)
+			&& Objects.equals(this.schema, returns.schema)
+			&& Objects.equals(this.mimetype, returns.mimetype);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(description, required, dependencies, deprecated, schema, mimetype);
+		return Objects.hash(description, schema);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("class ProcessDescriptionArgs {\n");
-
+		sb.append("class ProcessDescriptionReturns {\n");
 		sb.append("    description: ").append(toIndentedString(description)).append("\n");
-		sb.append("    dependencies: ").append(toIndentedString(dependencies)).append("\n");
-		sb.append("    deprecated: ").append(toIndentedString(deprecated)).append("\n");
-		sb.append("    required: ").append(toIndentedString(required)).append("\n");
 		sb.append("    schema: ").append(toIndentedString(schema)).append("\n");
-		sb.append("    mime_type: ").append(toIndentedString(mimetype)).append("\n");
+		sb.append("    mimetype: ").append(toIndentedString(mimetype)).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}

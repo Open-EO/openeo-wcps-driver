@@ -18,17 +18,19 @@ import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import eu.openeo.dao.JSONObjectPersister;
+import eu.openeo.dao.JSONObjectSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -39,10 +41,10 @@ import io.swagger.annotations.ApiModelProperty;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 @DatabaseTable(tableName = "jobs")
 public class JobFull implements Serializable {
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 8518285065901989576L;
+	
+	Logger log = Logger.getLogger(this.getClass());
 
 	@JsonProperty("job_id")
 	@DatabaseField(id = true)
@@ -130,18 +132,14 @@ public class JobFull implements Serializable {
 	 **/
 	@JsonProperty("process_graph")
 	@ApiModelProperty(required = true, value = "")
-	@NotNull
-	public Object getProcessGraph() {
-		JSONParser parser = new JSONParser();
+	@NotNull	
+	public Object getProcessGraph() {		
 		ObjectMapper mapper = new ObjectMapper();
 		JSONObject processgraphLocal = null;
-		try {
-			processgraphLocal = ((JSONObject) parser.parse(mapper.writeValueAsString(this.processGraph)));
+		try {		
+			processgraphLocal = new JSONObject(mapper.writeValueAsString(this.processGraph));
+			
 		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return processgraphLocal;
@@ -164,20 +162,21 @@ public class JobFull implements Serializable {
 	@JsonProperty("output")
 	@ApiModelProperty(value = "")
 	public Object getOutput() {
-//		return output;
-		JSONParser parser = new JSONParser();
-		ObjectMapper mapper = new ObjectMapper();
-		JSONObject outputLocal = null;
-		try {
-			outputLocal = ((JSONObject) parser.parse(mapper.writeValueAsString(this.output)));
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return outputLocal;
+		if(this.output != null) {
+			ObjectMapper mapper = new ObjectMapper();
+			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
+			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
+			mapper.registerModule(module);
+			JSONObject outputLocal = null;
+			try {
+				log.debug("output = " + mapper.writeValueAsString(this.output));
+				outputLocal = new JSONObject(mapper.writeValueAsString(this.output));
+			} catch (JsonProcessingException e) {
+				log.error("error in parsing output object for job: " + e.getMessage());
+				e.printStackTrace();				
+			}
+			return outputLocal;
+		}else return null;
 	}
 
 	public void setOutput(Object output) {

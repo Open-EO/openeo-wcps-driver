@@ -13,39 +13,69 @@
 package eu.openeo.model;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Objects;
+
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Defines an object schema for a collection of uniquely named arguments
- * (argument set) as input to processes. The values can by any of the JSON data
- * types string, number, array, boolean or null. Additionally it can be any
- * object of type **arg_set** or **image_collection** (see models). This object
- * is part of the process graph definition. **This type is not formalized in the
- * Swagger 2.0 definition due to missing support for oneOf or anyOf schema
- * combinations.** See the process graph documentation for more information.
+ * **DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0
+ * DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**
  */
-@ApiModel(description = "Defines an object schema for a collection of uniquely named arguments (argument set) as input to processes. The values can by any of the JSON data types string, number, array, boolean or null. Additionally it can be any object of type **arg_set** or **image_collection** (see models). This object is part of the process graph definition. **This type is not formalized in the Swagger 2.0 definition due to missing support for oneOf or anyOf schema combinations.** See the process graph documentation for more information.")
+@ApiModel(description = "**DEFAULT VALUES FOR ARGUMENTS ARE NOT FORMALIZED IN THE SWAGGER 2.0 DEFINITION DUE TO MISSING SUPPORT FOR oneOf OR anyOf SCHEMA COMBINATIONS.**")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ArgSet implements Serializable {
-	
-	@JsonProperty("parameters")
-	private Map<String, Object> args = null;
-	
-	private static final long serialVersionUID = -2548173058530187756L;
+public class ProcessDescriptionBandInvalid implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8950925769020643959L;
 
-	public Map<String, Object> getArgs() {
-		return args;
+	@JsonProperty("description")
+	private String description = null;
+	
+	@JsonProperty("code")
+	private Integer code = null;
+	
+	
+	public ProcessDescriptionBandInvalid type(String description) {
+		this.description = description;
+		return this;
 	}
 
-	public void setArgs(Map<String, Object> args) {
-		this.args = args;
+	/**
+	 * A short and concise description of the process argument.
+	 * 
+	 * @return description
+	 **/
+	@JsonProperty("description")
+	@ApiModelProperty(required = true, value = "A short and concise description of the band error.")
+	@NotNull
+	public String getDescription() {
+		return description;
 	}
 
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
+	
+	@JsonProperty("code")
+	@ApiModelProperty(required = true, value = "Error Code")
+	
+	public Integer getCode() {
+		return code;
+	}
+
+	public void setcode(int code) {
+		this.code = code;
+	}
+	
+	
+	
 	@Override
 	public boolean equals(java.lang.Object o) {
 		if (this == o) {
@@ -54,19 +84,22 @@ public class ArgSet implements Serializable {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		return true;
+		ProcessDescriptionBandInvalid bands = (ProcessDescriptionBandInvalid) o;
+		return Objects.equals(this.description, bands.description)
+	        && Objects.equals(this.code, bands.code);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash();
+		return Objects.hash(description, code);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("class ArgSet {\n");
-
+		sb.append("class ProcessDescriptionBandInvalid {\n");
+		sb.append("    description: ").append(toIndentedString(description)).append("\n");
+		sb.append("    code: ").append(toIndentedString(code)).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}
@@ -75,7 +108,6 @@ public class ArgSet implements Serializable {
 	 * Convert the given object to string with each line indented by 4 spaces
 	 * (except the first line).
 	 */
-	@SuppressWarnings("unused")
 	private String toIndentedString(java.lang.Object o) {
 		if (o == null) {
 			return "null";

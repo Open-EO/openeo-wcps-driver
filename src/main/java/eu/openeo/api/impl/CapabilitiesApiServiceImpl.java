@@ -17,6 +17,8 @@ import org.json.JSONObject;
 import eu.openeo.api.CapabilitiesApiService;
 import eu.openeo.api.NotFoundException;
 
+
+
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 	
@@ -24,18 +26,117 @@ public class CapabilitiesApiServiceImpl extends CapabilitiesApiService {
 	
 	@Override
 	public Response capabilitiesGet(SecurityContext securityContext) throws NotFoundException {
+		
+		
+		JSONArray getCapabilitiesMethods = new JSONArray();
+		getCapabilitiesMethods.put(new String("GET"));
+				
+		JSONArray outputFormatsMethods = new JSONArray();
+		outputFormatsMethods.put(new String("GET"));
+		
+		JSONArray dataMethods = new JSONArray();
+		dataMethods.put(new String("GET"));
+		
+		JSONArray dataIDMethods = new JSONArray();
+		dataIDMethods.put(new String("GET"));
+		
+		JSONArray executeMethods = new JSONArray();
+		executeMethods.put(new String("GET"));
+		
+		JSONArray jobsMethods = new JSONArray();
+		//jobsMethods.put(new String("GET"));
+		jobsMethods.put(new String("POST"));
+		
+		JSONArray previewMethods = new JSONArray();
+		previewMethods.put(new String("POST"));
+				
+		JSONArray jobsIDMethods = new JSONArray();
+		jobsIDMethods.put(new String("GET"));
+		//jobsIDMethods.put(new String("DELETE"));
+		//jobsIDMethods.put(new String("PATCH"));
+		
+		JSONArray jobsIDdownloadMethods = new JSONArray();
+		jobsIDdownloadMethods.put(new String("GET"));
+		
+		JSONArray processesMethods = new JSONArray();
+		processesMethods.put(new String("GET"));
+		
+		JSONArray processesIDMethods = new JSONArray();
+		processesIDMethods.put(new String("GET"));
+		
+		JSONObject getCapabilities = new JSONObject();
+		getCapabilities.put("path", "/");
+		getCapabilities.put("methods", getCapabilitiesMethods);
+		
+		JSONObject outputFormats = new JSONObject();
+		outputFormats.put("path", "/output_formats");
+		outputFormats.put("methods", outputFormatsMethods);
+		
+		JSONObject data = new JSONObject();
+		data.put("path", "/collections");
+		data.put("methods", dataMethods);
+		
+		JSONObject dataID = new JSONObject();
+		dataID.put("path", "/collections/{name}");
+		dataID.put("methods", dataIDMethods);
+		
+		JSONObject jobs = new JSONObject();
+		jobs.put("path", "/jobs");
+		jobs.put("methods", jobsMethods);
+		
+		JSONObject preview = new JSONObject();
+		preview.put("path", "/preview");
+		preview.put("methods", previewMethods);
+		
+		JSONObject jobsID = new JSONObject();
+		jobsID.put("path", "/jobs/{job_id}");
+		jobsID.put("methods", jobsIDMethods);
+		
+		
+		
+		JSONObject jobsIDdownload = new JSONObject();
+		jobsIDdownload.put("path", "/jobs/{job_id}/results");
+		jobsIDdownload.put("methods", jobsIDdownloadMethods);
+		
+		JSONObject processes = new JSONObject();
+		processes.put("path", "/processes");
+		processes.put("methods", processesMethods);
+		
 		JSONArray endpointList = new JSONArray();
-		endpointList.put(new String("/capabilities"));
-		endpointList.put(new String("/capabilities/output_formats"));
-		endpointList.put(new String("/data"));
-		endpointList.put(new String("/data/{product_id}"));
-		endpointList.put(new String("/execute"));
-		endpointList.put(new String("/jobs"));
-		endpointList.put(new String("/jobs/{job_id}"));
-		endpointList.put(new String("/jobs/{job_id}/download"));
-		endpointList.put(new String("/processes"));
-		endpointList.put(new String("/processes/{process_id}"));
-		return Response.ok(endpointList.toString(4), MediaType.APPLICATION_JSON).build();
+		endpointList.put(getCapabilities);
+		endpointList.put(outputFormats);
+		endpointList.put(data);
+		endpointList.put(dataID);
+		endpointList.put(jobs);
+		endpointList.put(preview);
+		endpointList.put(jobsID);
+		endpointList.put(jobsIDdownload);
+		endpointList.put(processes);
+		
+		
+		
+		JSONObject plans = new JSONObject();
+		plans.put("name", "free");
+		plans.put("description", "Currently the service provided is free of Charge");
+		plans.put("url", "");
+		
+		JSONArray plan = new JSONArray();
+		plan.put(plans);
+		
+		
+		
+		JSONObject billing = new JSONObject();
+		billing.put("currency", "EUR");
+		billing.put("plans", plan);
+		
+		
+		
+		JSONObject mainObj = new JSONObject();
+		mainObj.put("version", "0.3.1");
+		mainObj.put("endpoints", endpointList);
+		//mainObj.put("billing", billing);
+		
+		return Response.ok(mainObj.toString(4), MediaType.APPLICATION_JSON).build();
 	}
 
 	@Override

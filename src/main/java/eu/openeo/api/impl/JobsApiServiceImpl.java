@@ -16,10 +16,14 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -30,6 +34,7 @@ import eu.openeo.api.JobsApiService;
 import eu.openeo.api.NotFoundException;
 import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.backend.wcps.WCPSQueryFactory;
+import eu.openeo.dao.JSONObjectSerializer;
 import eu.openeo.model.JobFull;
 import eu.openeo.model.JobStatus;
 
@@ -80,7 +85,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			throws NotFoundException {
 		JobFull job = null;
 		WCPSQueryFactory wcpsFactory = null;
-		String outputFormat = "json";
+		String outputFormat = "JSON";
 		try {
 			job = jobDao.queryForId(jobId);
 			if(job == null) {
@@ -158,7 +163,12 @@ public class JobsApiServiceImpl extends JobsApiService {
 					.build();
 		}
 		try {
-			return Response.ok().entity(mapper.writeValueAsString(job)).build();
+			ObjectMapper mapper = new ObjectMapper();
+			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
+			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
+			mapper.registerModule(module);
+			return Response.status(201).entity(mapper.writeValueAsString(job)).build();
+//			return Response.ok().entity(mapper.writeValueAsString(job)).build();
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage());
 			return Response.serverError().entity("An error occured while serializing job to json: " + e.getMessage())
@@ -244,18 +254,28 @@ public class JobsApiServiceImpl extends JobsApiService {
 		log.debug("WCPS query: " + wcpsFactory.getWCPSString());
 
 		try {
-			jobDao.create(job);			
+			jobDao.create(job);
+			log.debug("job saved to database: " + job.getJobId());
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
 					.build();
 		}
 		try {
-			return Response.ok().entity(mapper.writeValueAsString(job)).build();
+			ObjectMapper mapper = new ObjectMapper();
+			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
+			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
+			mapper.registerModule(module);
+			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+			mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+			mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
+			mapper.setSerializationInclusion(Include.NON_NULL);
+			return Response.status(201).entity(mapper.writeValueAsString(job)).build();
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage());
 			return Response.serverError().entity("An error occured while serializing job to json: " + e.getMessage())
 					.build();
 		}
 	}
+
 }
