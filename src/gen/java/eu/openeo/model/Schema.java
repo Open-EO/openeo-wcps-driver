@@ -86,7 +86,7 @@ public class Schema implements Serializable {
 	 * @return description
 	 **/
 	@JsonProperty("type")
-	@ApiModelProperty(required = true, value = "A short and concise description of the process argument.")
+	@ApiModelProperty(required = true, value = "Type of the process argument.")
 	@NotNull
 	public String getType() {
 		return type;
@@ -203,7 +203,7 @@ public class Schema implements Serializable {
 
 	
 	@JsonProperty("description")
-	@ApiModelProperty(value = "A short and concise description of the process argument.")
+	@ApiModelProperty(value = "Detailed description of the process argument.")
 	@NotNull
 	public String getDescription() {
 		return description;

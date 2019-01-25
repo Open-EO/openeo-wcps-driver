@@ -39,6 +39,9 @@ public class ProcessDescriptionReturns implements Serializable {
 	
 	@JsonProperty("schema")
 	private Schema schema =  null;
+	
+	@JsonProperty("mime_type")
+	private String mimetype =  null;
 
 
 	/**
@@ -47,7 +50,7 @@ public class ProcessDescriptionReturns implements Serializable {
 	 * @return description
 	 **/
 	@JsonProperty("description")
-	@ApiModelProperty(required = true, value = "A short and concise description of the process argument.")
+	@ApiModelProperty(required = true, value = "Detailed description of the process argument.")
 	@NotNull
 	public String getDescription() {
 		return description;
@@ -59,7 +62,7 @@ public class ProcessDescriptionReturns implements Serializable {
 	
 	
 	@JsonProperty("schema")
-	@ApiModelProperty(required = true, value = "Schema for input parameter")
+	@ApiModelProperty(required = true, value = "A schema object according to the specification of JSON Schema draft-07. Additional values for format are defined centrally in the API documentation, e.g. bbox or crs")
 	@NotNull
 	public Schema getSchema() {
 		return schema;
@@ -68,6 +71,19 @@ public class ProcessDescriptionReturns implements Serializable {
 	public void setSchema(Schema schema) {
 		this.schema = schema;
 	}
+	
+	
+	@JsonProperty("mime_type")
+	@ApiModelProperty(required = true, value = "The mime type that the returned data is formatted with.")
+	@NotNull
+	public String getMimetype() {
+		return mimetype;
+	}
+	
+	public void setMimetype(String mimetype) {
+		this.mimetype = mimetype;
+	}
+	
 	
 	@Override
 	public boolean equals(java.lang.Object o) {
@@ -79,7 +95,8 @@ public class ProcessDescriptionReturns implements Serializable {
 		}
 		ProcessDescriptionReturns returns = (ProcessDescriptionReturns) o;
 		return Objects.equals(this.description, returns.description)
-			&& Objects.equals(this.schema, returns.schema);
+			&& Objects.equals(this.schema, returns.schema)
+			&& Objects.equals(this.mimetype, returns.mimetype);
 	}
 
 	@Override
@@ -93,6 +110,7 @@ public class ProcessDescriptionReturns implements Serializable {
 		sb.append("class ProcessDescriptionReturns {\n");
 		sb.append("    description: ").append(toIndentedString(description)).append("\n");
 		sb.append("    schema: ").append(toIndentedString(schema)).append("\n");
+		sb.append("    mimetype: ").append(toIndentedString(mimetype)).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}

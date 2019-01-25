@@ -27,7 +27,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * Defines and describes a process including it&#39;s expected input arguments.
  */
-@ApiModel(description = "Links for Process Description.")
+@ApiModel(description = "Links related to the list of Processes.")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class LinksDesc implements Serializable {
 	/**

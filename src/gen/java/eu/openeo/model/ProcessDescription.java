@@ -41,10 +41,16 @@ public class ProcessDescription implements Serializable {
 	@JsonProperty("description")
 	private String description = null;
 	
+	@JsonProperty("deprecated")
+	private String deprecated = null;
+	
+	@JsonProperty("examples")
+	private String examples = null;
+	
 	@JsonProperty("summary")
 	private String summary = null;
 
-	@JsonProperty("link")
+	@JsonProperty("links")
 	private String link = null;
 
 	@JsonProperty("parameters")
@@ -94,7 +100,7 @@ public class ProcessDescription implements Serializable {
 	 * @return description
 	 **/
 	@JsonProperty("description")
-	@ApiModelProperty(required = true, value = "A short and concise description of what the process does and how the output looks like.")
+	@ApiModelProperty(required = true, value = "Detailed description of what the process does.")
 	@NotNull
 	public String getDescription() {
 		return description;
@@ -104,8 +110,34 @@ public class ProcessDescription implements Serializable {
 		this.description = description;
 	}
 	
+
+	@JsonProperty("deprecated")
+	@ApiModelProperty(required = true, value = "Declares this process to be deprecated. Consumers SHOULD refrain from usage of the declared process")
+	@NotNull
+	public String getDeprecated() {
+		return deprecated;
+	}
+
+	public void setDeprecated(String deprecated) {
+		this.deprecated = deprecated;
+	}
+	
+	
+
+	@JsonProperty("examples")
+	@ApiModelProperty(required = true, value = "If parameters or return values are referencing a schema which contains an example, the examples value SHALL override the example provided by the schema")
+	@NotNull
+	public String getExamples() {
+		return examples;
+	}
+
+	public void setExamples(String examples) {
+		this.examples = examples;
+	}
+	
+	
 	@JsonProperty("summary")
-	@ApiModelProperty(required = true, value = "A short line for the process")
+	@ApiModelProperty(required = true, value = "A short summary about the process")
 	@NotNull
 	public String getSummary() {
 		return summary;
@@ -114,14 +146,9 @@ public class ProcessDescription implements Serializable {
 	public void setSummary(String summary) {
 		this.summary = summary;
 	}
-
-	public ProcessDescription link(String link) {
-		this.link = link;
-		return this;
-	}
 	
 	@JsonProperty("min_parameters")
-	@ApiModelProperty(required = true, value = "Minimum number of parameters required as input")
+	@ApiModelProperty(required = true, value = "Minimum number of parameters required as input for the process, including required parameters")
 	
 	public Integer getMinParameters() {
 		return min_parameters;
@@ -131,6 +158,11 @@ public class ProcessDescription implements Serializable {
 		this.min_parameters = min_parameters;
 	}
 
+	
+	public ProcessDescription link(String link) {
+		this.link = link;
+		return this;
+	}
 
 	/**
 	 * Reference to an external process definition if the process has been defined
@@ -138,8 +170,8 @@ public class ProcessDescription implements Serializable {
 	 * 
 	 * @return link
 	 **/
-	@JsonProperty("link")
-	@ApiModelProperty(value = "Reference to an external process definition if the process has been defined over different back ends within OpenEO")
+	@JsonProperty("links")
+	@ApiModelProperty(value = "related links to the process")
 	public String getLink() {
 		return link;
 	}
@@ -167,7 +199,7 @@ public class ProcessDescription implements Serializable {
 	 * @return args
 	 **/
 	@JsonProperty("parameters")
-	@ApiModelProperty(required = true, value = "The format of the input Parameters required")
+	@ApiModelProperty(required = true, value = "A list of parameters that are applicable for this process. The key of the map is the name of the parameter")
 	public Map<String, ProcessDescriptionArgs> getParameters() {
 		return parameters;
 	}
@@ -176,7 +208,6 @@ public class ProcessDescription implements Serializable {
 		this.parameters = parameters;
 	}
 	
-
 	
 	/**
 	 * Get returns
@@ -184,7 +215,7 @@ public class ProcessDescription implements Serializable {
 	 * @return returns
 	 **/
 	@JsonProperty("returns")
-	@ApiModelProperty(required = true, value = "The format of the returned output")
+	@ApiModelProperty(required = true, value = "The data that is returned from this process. If not specified the process does not return anything")
 	@NotNull
 	public ProcessDescriptionReturns getReturns() {
 		return returns;
@@ -214,7 +245,7 @@ public class ProcessDescription implements Serializable {
 	 * @return exceptions
 	 **/
 	@JsonProperty("exceptions")
-	@ApiModelProperty(required = true, value = "The format of the returned exceptions")
+	@ApiModelProperty(required = true, value = "Declares any exceptions (errors) that might occur during execution of this process. MUST be used only for exceptions that stop the execution of a process and are therefore not to be used for warnings, or notices or debugging messages. The keys can be used as identifier")
 	public Map<String, ProcessDescriptionBandInvalid> getExceptions() {
 		return exceptions;
 	}
@@ -239,13 +270,15 @@ public class ProcessDescription implements Serializable {
 				&& Objects.equals(this.parameters, processDescription.parameters)
 				&& Objects.equals(this.returns, processDescription.returns)
 				&& Objects.equals(this.exceptions, processDescription.exceptions)
+				&& Objects.equals(this.deprecated, processDescription.deprecated)
+				&& Objects.equals(this.examples, processDescription.examples)
 				&& Objects.equals(this.summary, processDescription.summary)
 		        && Objects.equals(this.min_parameters, processDescription.min_parameters);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(processId, description, link, parameters, returns, exceptions, summary, min_parameters);
+		return Objects.hash(processId, description, link, parameters, returns, exceptions, deprecated, examples, summary, min_parameters);
 	}
 
 	@Override
@@ -255,10 +288,12 @@ public class ProcessDescription implements Serializable {
 
 		sb.append("    processId: ").append(toIndentedString(processId)).append("\n");
 		sb.append("    description: ").append(toIndentedString(description)).append("\n");
-		sb.append("    link: ").append(toIndentedString(link)).append("\n");
+		sb.append("    links: ").append(toIndentedString(link)).append("\n");
 		sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
 		sb.append("    returns: ").append(toIndentedString(returns)).append("\n");
 		sb.append("    exceptions: ").append(toIndentedString(exceptions)).append("\n");
+		sb.append("    deprecated: ").append(toIndentedString(deprecated)).append("\n");
+		sb.append("    examples: ").append(toIndentedString(examples)).append("\n");
 		sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
 		sb.append("    min_parameters: ").append(toIndentedString(min_parameters)).append("\n");
 		sb.append("}");
