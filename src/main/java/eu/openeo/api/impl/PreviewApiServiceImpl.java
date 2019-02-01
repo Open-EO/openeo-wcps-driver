@@ -58,6 +58,7 @@ public class PreviewApiServiceImpl extends PreviewApiService {
 			log.info("assigning standard output type: json");
 		}
 		WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON, outputFormat);
+		log.debug("WCPS: " + wcpsFactory.getWCPSString());
 		URL url;
 		try {
 			job.setStatus(JobStatus.RUNNING);

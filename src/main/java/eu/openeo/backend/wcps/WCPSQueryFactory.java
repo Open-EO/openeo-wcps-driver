@@ -336,59 +336,56 @@ public class WCPSQueryFactory {
 	 * 
 	 * @param process
 	 */
-	private void createFilterFromProcess(JSONObject process) {
-		
-		
-							
+	private void createFilterFromProcess(JSONObject process) {							
 		for (Object key : process.keySet()) {
 			String keyStr = (String) key;
-			if (!keyStr.equals("extent")) {
-				
-				log.debug("Its all about Time and Place");
-			
+			log.debug("" + keyStr);
+			if (!keyStr.contains("extent")) {				
+				log.debug("no spatial or temporal extent defined in filter");			
 			}
-			else if (keyStr.equals("extent") && process.get("process_id").toString().contains("bbox")) {
-               
-				
-				for (Object akeyC : process.keySet()) {
-					String keyStrC = (String) akeyC;
-					if (keyStrC.equals("process_id")) {
-						String name = (String) process.get(keyStrC);
-						
-						if (name.contains("get_collection")) {
-							for (Object collName : process.keySet()) {
-								String collNameStr = (String) collName;
-								if (collNameStr.equals("name")) {
-									
-									String coll = (String) process.get(collNameStr);
-									
-				                  
-									
-									JSONObject jsonresp = null;
-									try {
-										jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/"+coll);
-									} catch (JSONException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									} catch (IOException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-						            
-									int srs = 0;
-									srs = jsonresp.getInt("eo:epsg");
-									log.debug("srs is: " + srs);
-									createBoundingBoxFilterFromArgs(process, srs);
-									
-								}}}}}
-				
+			// check if filter contains spatial information
+			else if (process.get("process_id").toString().contains("bbox")) {
+				log.debug("spatial extent defined in filter");
+				int srs = 0;
+				String coll = null;
+				try {
+					coll = process.getJSONObject("imagery").getString("name").toString();
+				}catch(Exception e ) {
+					log.error("An error occured while searching for collection anem: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				}
+				JSONObject jsonresp = null;
+				try {
+					jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/"+coll);
+				} catch (JSONException e) {
+					log.error("An error occured: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				} catch (IOException e) {
+					log.error("An error occured: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				}
+				srs = jsonresp.getInt("eo:epsg");
+				log.debug("srs is: " + srs);
+				if(srs > 0)
+				createBoundingBoxFilterFromArgs(process, srs);
 			}
-
-			else if (keyStr.equals("extent") && process.get("process_id").toString().contains("date")) {
-				    JSONArray extentArray = (JSONArray) process.get(keyStr);
-
-				    createDateRangeFilterFromArgs(extentArray);
-				    
+			//check if filter contains temporal information
+			else if (process.get("process_id").toString().contains("date")) {
+				log.debug("temporal extent defined in filter");
+			    JSONArray extentArray = (JSONArray) process.get(keyStr);
+			    createDateRangeFilterFromArgs(extentArray);
 			}
 			
 		}
@@ -435,9 +432,7 @@ public class WCPSQueryFactory {
 		String right = null;
 		String top = null;
 		String bottom = null;
-		//Set argsKey = argsObject.keySet();
-		
-		
+		log.debug("creating spatial extent filter from process");		
 		for(Object argsKey: argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
 			if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
@@ -456,33 +451,27 @@ public class WCPSQueryFactory {
 						bottom = "" + extentObject.get(extentKeyStr);
 					}
 				}
-				
 				SpatialReference src = new SpatialReference();
 				src.ImportFromEPSG(4326);
-
-				
-				
 				SpatialReference dst = new SpatialReference();
 				dst.ImportFromEPSG(srs);
-				
-				
 				CoordinateTransformation tx = new CoordinateTransformation(src, dst);
-				
 				double[] c1 = null;
 				double[] c2 = null;
 				c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(top));
 				c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(bottom));
-				
 				left = Double.toString(c1[0]);
 				top = Double.toString(c1[1]);
 				right = Double.toString(c2[0]);
 				bottom = Double.toString(c2[1]);
-				
 			}
-			
 		}
-		this.filters.add(new Filter("E", left, right));
-		this.filters.add(new Filter("N", top, bottom));
+		if(left != null && right!= null && top != null && bottom != null) {
+			this.filters.add(new Filter("E", left, right));
+			this.filters.add(new Filter("N", top, bottom));
+		}else {
+			log.error("no spatial information could be found in process!");
+		}
 	}
 	/**
 	 * 
