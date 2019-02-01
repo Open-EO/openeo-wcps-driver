@@ -35,5 +35,16 @@ public class ConvenienceHelper {
 		}
 		return MediaType.WILDCARD;		
 	}
+	
+	public static String getRasdamanNameFromOutput(String output) throws IOException, JSONException{
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		InputStream stream = classLoader.getResourceAsStream("output_formats.json");
+		JSONObject outputFormats = new JSONObject(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
+		JSONObject currentFormat = outputFormats.getJSONObject("formats").getJSONObject(output);
+		if(currentFormat != null) {
+			return currentFormat.getString("rasdaman_name");
+		}
+		return MediaType.WILDCARD;		
+	}
 
 }

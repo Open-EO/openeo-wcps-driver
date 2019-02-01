@@ -63,7 +63,23 @@ public class WCPSQueryFactory {
 
 	public WCPSQueryFactory(JSONObject openEOGraph, String outputFormat) {
 		this(openEOGraph);
-		this.outputFormat = outputFormat;
+		try {
+			this.outputFormat = ConvenienceHelper.getRasdamanNameFromOutput(outputFormat);
+		} catch (JSONException e) {
+			log.error("An error occured while parsing output: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
+		} catch (IOException e) {
+			log.error("An error occured while parsing output: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
+		}
 		this.build(openEOGraph);
 	}
 
