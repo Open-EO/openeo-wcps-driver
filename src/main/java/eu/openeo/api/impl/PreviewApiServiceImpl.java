@@ -42,7 +42,7 @@ public class PreviewApiServiceImpl extends PreviewApiService {
 
 	@Override
 	public Response previewOptions(SecurityContext securityContext) throws NotFoundException {
-		return Response.ok().build();
+		return Response.ok().header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class PreviewApiServiceImpl extends PreviewApiService {
 			job.setStatus(JobStatus.FINISHED);
 			job.setUpdated(new Date().toGMTString());
 //			jobDao.update(job);
-			return Response.ok(response, ConvenienceHelper.getMimeTypeFromOutput(outputFormat)).build();
+			return Response.ok(response, ConvenienceHelper.getMimeTypeFromOutput(outputFormat)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 		} catch (MalformedURLException e) {
 			log.error("An error occured when creating URL from job preview query: " + e.getMessage());
 			return Response.serverError().entity("An error occured when creating URL from job query: " + e.getMessage())

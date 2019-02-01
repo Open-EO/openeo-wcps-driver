@@ -249,31 +249,27 @@
                     }
     },
     {
-        "name": "get_collections",
+        "name": "get_collection",
         "summary": "Selects a collection.",
         "description": "Filters and selects a single collection provided by the back-end. The back-end provider decides which of the potential collections is the most relevant one to be selected.",
         "min_parameters": 1,
         "parameters": {
                        "name": {
-                                "description": "Filter by collection name",
-                                
+                                "description": "Filter by collection name",                                
                                 "schema": {
                                            "type": "string",
                                            "examples": [ "Sentinel2A-L1C" ]
                                           }
                                 },
                        "spatial_extent": {
-                                "description": "Filter by spatial extent, may include a vertical axis (height or depth).",
-                               
+                                "description": "Filter by spatial extent, may include a vertical axis (height or depth).",                               
                                 "schema": {
                                            "type": "object",
                                            "format": "spatial_extent"
                                           }
-
                                 },
                        "temporal_extent": {
-                                "description": "Filter by temporal extent.",
-                                
+                                "description": "Filter by temporal extent.",                                
                                 "schema": {
                                            "type": "array",
                                            "format": "temporal_extent"
