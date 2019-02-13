@@ -59,9 +59,9 @@ The current git project is setup as a runnable web archive maven project in ecli
 
 ## Migration Plan for v0.4.0
 
-- [ ] 
-- [ ] 
-- [ ] 
+- porting existing functionality of v0.3.1 as described in this document
+- implementation of batch jobs 
+- implmentatin of user file management
 
 ## Note on Code Generation:
 ```
