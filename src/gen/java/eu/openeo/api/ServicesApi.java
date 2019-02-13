@@ -1,181 +1,152 @@
 package eu.openeo.api;
 
+import eu.openeo.model.*;
+import eu.openeo.api.ServicesApiService;
+import eu.openeo.api.factories.ServicesApiServiceFactory;
+
+import io.swagger.annotations.ApiParam;
+import io.swagger.jaxrs.*;
+
+import eu.openeo.model.Error;
+import eu.openeo.model.InlineObject4;
+import eu.openeo.model.InlineObject5;
+import eu.openeo.model.InlineResponse20010;
+import eu.openeo.model.InlineResponse2009;
+
+import java.util.Map;
+import java.util.List;
+import eu.openeo.api.NotFoundException;
+
+import java.io.InputStream;
+
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
 import javax.servlet.ServletConfig;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import eu.openeo.api.factories.ServicesApiServiceFactory;
-import eu.openeo.model.Service;
-import eu.openeo.model.Service1;
-import eu.openeo.model.Service2;
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.PATCH;
+import javax.ws.rs.*;
+import javax.validation.constraints.*;
+import javax.validation.Valid;
 
 @Path("/services")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 @io.swagger.annotations.Api(description = "the services API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
-public class ServicesApi {
-	private final ServicesApiService delegate;
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-02-12T13:52:55.621+01:00[Europe/Rome]")
+public class ServicesApi  {
+   private final ServicesApiService delegate;
 
-	public ServicesApi(@Context ServletConfig servletContext) {
-		ServicesApiService delegate = null;
+   public ServicesApi(@Context ServletConfig servletContext) {
+      ServicesApiService delegate = null;
 
-		if (servletContext != null) {
-			String implClass = servletContext.getInitParameter("ServicesApi.implementation");
-			if (implClass != null && !"".equals(implClass.trim())) {
-				try {
-					delegate = (ServicesApiService) Class.forName(implClass).newInstance();
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
+      if (servletContext != null) {
+         String implClass = servletContext.getInitParameter("ServicesApi.implementation");
+         if (implClass != null && !"".equals(implClass.trim())) {
+            try {
+               delegate = (ServicesApiService) Class.forName(implClass).newInstance();
+            } catch (Exception e) {
+               throw new RuntimeException(e);
+            }
+         } 
+      }
 
-		if (delegate == null) {
-			delegate = ServicesApiServiceFactory.getServicesApi();
-		}
+      if (delegate == null) {
+         delegate = ServicesApiServiceFactory.getServicesApi();
+      }
 
-		this.delegate = delegate;
-	}
+      this.delegate = delegate;
+   }
 
-	@OPTIONS
-
-	@Consumes({ "application/json" })
-	@Produces({ "application/json" })
-	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
-			"CORS", })
-	@io.swagger.annotations.ApiResponses(value = {
-			@io.swagger.annotations.ApiResponse(code = 200, message = "Gives internet browsers the permission to access the requested resource.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 405, message = "The requested HTTP method is not supported or allowed to be requested.", response = Void.class) })
-	public Response servicesOptions(@Context SecurityContext securityContext) throws NotFoundException {
-		return delegate.servicesOptions(securityContext);
-	}
-
-	@POST
-
-	@Consumes({ "application/json" })
-	@Produces({ "application/json" })
-	@io.swagger.annotations.ApiOperation(value = "Publish an interactive web service.", notes = "Calling this endpoint will enable to access results of a job as a web service such as WMTS, TMS or WCS. Depending on the specified job the service bases on pre-computed data (batch job) or needs to compute them on demand (lazy job). For lazy jobs the evaluation should pe performed in the sense that it is only evaluated for the requested spatial / temporal extent and resolution.", response = Service.class, authorizations = {
-			@io.swagger.annotations.Authorization(value = "Bearer") }, tags = { "Services", "Job Management", })
-	@io.swagger.annotations.ApiResponses(value = {
-			@io.swagger.annotations.ApiResponse(code = 200, message = "Details of the created service", response = Service.class),
-
-			@io.swagger.annotations.ApiResponse(code = 401, message = "The back-end requires clients to authenticate in order to process this request.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 403, message = "Authorization failed, access to the requested resource has been denied.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 501, message = "This API feature is not supported by the back-end.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
-	public Response servicesPost(@ApiParam(value = "The base data for the service to create") Service1 service,
-			@Context SecurityContext securityContext) throws NotFoundException {
-		return delegate.servicesPost(service, securityContext);
-	}
-
-	@DELETE
-	@Path("/{service_id}")
-	@Consumes({ "application/json" })
-	@Produces({ "application/json" })
-	@io.swagger.annotations.ApiOperation(value = "Stop a given service by id", notes = "Calling this endpoint will stop a given web service to access result data.", response = Void.class, authorizations = {
-			@io.swagger.annotations.Authorization(value = "Bearer") }, tags = { "Services", })
-	@io.swagger.annotations.ApiResponses(value = {
-			@io.swagger.annotations.ApiResponse(code = 200, message = "The service has been successfully deleted.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 401, message = "The back-end requires clients to authenticate in order to process this request.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 403, message = "Authorization failed, access to the requested resource has been denied.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 404, message = "A service with given id is not available", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 501, message = "This API feature is not supported by the back-end.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
-	public Response servicesServiceIdDelete(
-			@ApiParam(value = "Service identifier string", required = true) @PathParam("service_id") String serviceId,
-			@Context SecurityContext securityContext) throws NotFoundException {
-		return delegate.servicesServiceIdDelete(serviceId, securityContext);
-	}
-
-	@GET
-	@Path("/{service_id}")
-	@Consumes({ "application/json" })
-	@Produces({ "application/json" })
-	@io.swagger.annotations.ApiOperation(value = "Get service information by id.", notes = "Requests to this endpoint will return JSON description of the service.", response = Service.class, authorizations = {
-			@io.swagger.annotations.Authorization(value = "Bearer") }, tags = { "Services", "Result Access", })
-	@io.swagger.annotations.ApiResponses(value = {
-			@io.swagger.annotations.ApiResponse(code = 200, message = "Details of the created service", response = Service.class),
-
-			@io.swagger.annotations.ApiResponse(code = 401, message = "The back-end requires clients to authenticate in order to process this request.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 403, message = "Authorization failed, access to the requested resource has been denied.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 404, message = "A service with the given id is not available.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 501, message = "This API feature is not supported by the back-end.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
-	public Response servicesServiceIdGet(
-			@ApiParam(value = "Service identifier string", required = true) @PathParam("service_id") String serviceId,
-			@Context SecurityContext securityContext) throws NotFoundException {
-		return delegate.servicesServiceIdGet(serviceId, securityContext);
-	}
-
-	@OPTIONS
-	@Path("/{service_id}")
-	@Consumes({ "application/json" })
-	@Produces({ "application/json" })
-	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
-			"CORS", })
-	@io.swagger.annotations.ApiResponses(value = {
-			@io.swagger.annotations.ApiResponse(code = 200, message = "Gives internet browsers the permission to access the requested resource.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 405, message = "The requested HTTP method is not supported or allowed to be requested.", response = Void.class) })
-	public Response servicesServiceIdOptions(
-			@ApiParam(value = "Service identifier string", required = true) @PathParam("service_id") String serviceId,
-			@Context SecurityContext securityContext) throws NotFoundException {
-		return delegate.servicesServiceIdOptions(serviceId, securityContext);
-	}
-
-	@PATCH
-	@Path("/{service_id}")
-	@Consumes({ "application/json" })
-	@Produces({ "application/json" })
-	@io.swagger.annotations.ApiOperation(value = "Modifies a web service.", notes = "***Reserved for later use.** A protocol to modify a service is to be defined.* Calling this endpoint will change the specified web service, but maintain its identifier.", response = Void.class, authorizations = {
-			@io.swagger.annotations.Authorization(value = "Bearer") }, tags = { "Services", })
-	@io.swagger.annotations.ApiResponses(value = {
-			@io.swagger.annotations.ApiResponse(code = 200, message = "Changes to the service applied successfully.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 401, message = "The back-end requires clients to authenticate in order to process this request.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 403, message = "Authorization failed, access to the requested resource has been denied.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 404, message = "A service with the given id is not available.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 501, message = "This API feature is not supported by the back-end.", response = Void.class),
-
-			@io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
-	public Response servicesServiceIdPatch(
-			@ApiParam(value = "Service identifier string", required = true) @PathParam("service_id") String serviceId,
-			@ApiParam(value = "The data to change for the spcified service") Service2 service,
-			@Context SecurityContext securityContext) throws NotFoundException {
-		return delegate.servicesServiceIdPatch(serviceId, service, securityContext);
-	}
+    @GET
+    
+    
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "List all web services", notes = "Requests to this endpoint will list all running secondary web services submitted by a user with given id.", response = InlineResponse2009.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Bearer")
+    }, tags={ "Secondary Services Management", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Array of service descriptions", response = InlineResponse2009.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
+    public Response servicesGet(@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.servicesGet(securityContext);
+    }
+    @POST
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Publish a new service", notes = "Calling this endpoint will create a secondary web service such as WMTS, TMS or WCS. The underlying data is processes on-demand, but a process graph may simply access results from a batch job. Computations should be performed in the sense that it is only evaluated for the requested spatial / temporal extent and resolution.  **Note:** Costs incured by shared secondary web services are usually paid by the owner, but this depends on the service type and whether it supports charging fees or not.", response = Void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Bearer")
+    }, tags={ "Secondary Services Management", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 201, message = "The resource has been created successfully and the location of the newly created resource is advertized by the back-end.  Examples: * `POST /services` redirects to `GET /services/{service_id}` * `POST /jobs` redirects to `GET /jobs/{job_id}`", response = Void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
+    public Response servicesPost(@ApiParam(value = "" ) @Valid InlineObject4 inlineObject4
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.servicesPost(inlineObject4,securityContext);
+    }
+    @DELETE
+    @Path("/{service_id}")
+    
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Delete a service", notes = "Calling this endpoint will stop a given secondary web service to access result data.", response = Void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Bearer")
+    }, tags={ "Secondary Services Management", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 204, message = "The service has been successfully deleted.", response = Void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
+    public Response servicesServiceIdDelete(@ApiParam(value = "Unique secondary web service identifier.",required=true, defaultValue="null") @PathParam("service_id") String serviceId
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.servicesServiceIdDelete(serviceId,securityContext);
+    }
+    @GET
+    @Path("/{service_id}")
+    
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Full metadata for a service", notes = "Requests to this endpoint will return JSON description of the secondary web service.", response = InlineResponse20010.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Bearer")
+    }, tags={ "Secondary Services Management", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Details of the created service", response = InlineResponse20010.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
+    public Response servicesServiceIdGet(@ApiParam(value = "Unique secondary web service identifier.",required=true, defaultValue="null") @PathParam("service_id") String serviceId
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.servicesServiceIdGet(serviceId,securityContext);
+    }
+    @PATCH
+    @Path("/{service_id}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Modify a service", notes = "Calling this endpoint will change the specified secondary web service, but maintain its identifier. Changes can be grouped in a single request. To change the service type create a new service.", response = Void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Bearer")
+    }, tags={ "Secondary Services Management", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 204, message = "Changes to the service were applied successfully.", response = Void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
+    public Response servicesServiceIdPatch(@ApiParam(value = "Unique secondary web service identifier.",required=true, defaultValue="null") @PathParam("service_id") String serviceId
+,@ApiParam(value = "" ) @Valid InlineObject5 inlineObject5
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.servicesServiceIdPatch(serviceId,inlineObject5,securityContext);
+    }
 }

@@ -1,22 +1,22 @@
 package eu.openeo.api;
 
+import eu.openeo.api.*;
+import eu.openeo.model.*;
+
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+
+import eu.openeo.model.Error;
+import eu.openeo.model.InlineResponse2004;
+
+import java.util.List;
+import eu.openeo.api.NotFoundException;
+
+import java.io.InputStream;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
+import javax.validation.constraints.*;
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-02-12T13:52:55.621+01:00[Europe/Rome]")
 public abstract class ProcessesApiService {
-	public abstract Response processesGet(String qname, SecurityContext securityContext) throws NotFoundException;
-
-	public abstract Response processesOpensearchGet(String q, Integer start, Integer rows,
-			SecurityContext securityContext) throws NotFoundException;
-
-	public abstract Response processesOpensearchOptions(SecurityContext securityContext) throws NotFoundException;
-
-	public abstract Response processesOptions(SecurityContext securityContext) throws NotFoundException;
-
-	public abstract Response processesProcessIdGet(String processId, SecurityContext securityContext)
-			throws NotFoundException;
-
-	public abstract Response processesProcessIdOptions(String processId, SecurityContext securityContext)
-			throws NotFoundException;
+    public abstract Response processesGet(SecurityContext securityContext) throws NotFoundException;
 }

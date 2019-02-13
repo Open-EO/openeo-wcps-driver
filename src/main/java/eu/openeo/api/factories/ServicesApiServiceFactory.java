@@ -3,11 +3,11 @@ package eu.openeo.api.factories;
 import eu.openeo.api.ServicesApiService;
 import eu.openeo.api.impl.ServicesApiServiceImpl;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-02-12T13:52:55.621+01:00[Europe/Rome]")
 public class ServicesApiServiceFactory {
-	private final static ServicesApiService service = new ServicesApiServiceImpl();
+    private final static ServicesApiService service = new ServicesApiServiceImpl();
 
-	public static ServicesApiService getServicesApi() {
-		return service;
-	}
+    public static ServicesApiService getServicesApi() {
+        return service;
+    }
 }

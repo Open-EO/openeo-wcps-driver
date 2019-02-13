@@ -1,56 +1,35 @@
 package eu.openeo.api;
 
-import java.math.BigDecimal;
+import eu.openeo.api.*;
+import eu.openeo.model.*;
+
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+
+import eu.openeo.model.Error;
+import eu.openeo.model.InlineObject6;
+import eu.openeo.model.InlineObject7;
+import eu.openeo.model.InlineResponse20011;
+import eu.openeo.model.InlineResponse20012;
+import eu.openeo.model.InlineResponse20013;
+import eu.openeo.model.InlineResponse20014;
+
+import java.util.List;
+import eu.openeo.api.NotFoundException;
+
+import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import eu.openeo.model.JobFull;
-
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
+import javax.validation.constraints.*;
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-02-12T13:52:55.621+01:00[Europe/Rome]")
 public abstract class JobsApiService {
-	
-	public abstract Response jobsJobIdCancelOptions(String jobId, SecurityContext securityContext)
-			throws NotFoundException;
-
-	public abstract Response jobsJobIdCancelPatch(String jobId, SecurityContext securityContext)
-			throws NotFoundException;
-
-	public abstract Response jobsJobIdDownloadGet(String jobId, String format, SecurityContext securityContext)
-			throws NotFoundException;
-
-	public abstract Response jobsJobIdDownloadOptions(String jobId, String format, SecurityContext securityContext)
-			throws NotFoundException;
-
-	public abstract Response jobsJobIdGet(String jobId, SecurityContext securityContext) throws NotFoundException;
-
-	public abstract Response jobsJobIdOptions(String jobId, SecurityContext securityContext) throws NotFoundException;
-
-	public abstract Response jobsJobIdPatch(String jobId, JobFull job, SecurityContext securityContext)
-			throws NotFoundException;
-
-	public abstract Response jobsJobIdPauseOptions(String jobId, SecurityContext securityContext)
-			throws NotFoundException;
-
-	public abstract Response jobsJobIdPausePatch(String jobId, SecurityContext securityContext)
-			throws NotFoundException;
-
-	public abstract Response jobsJobIdQueueOptions(String jobId, SecurityContext securityContext)
-			throws NotFoundException;
-
-	public abstract Response jobsJobIdQueuePatch(String jobId, SecurityContext securityContext)
-			throws NotFoundException;
-
-	public abstract Response jobsJobIdSubscribeGet(String jobId, String upgrade, String connection,
-			String secWebSocketKey, String secWebSocketProtocol, BigDecimal secWebSocketVersion,
-			SecurityContext securityContext) throws NotFoundException;
-
-	public abstract Response jobsJobIdSubscribeOptions(String jobId, SecurityContext securityContext)
-			throws NotFoundException;
-
-	public abstract Response jobsOptions(SecurityContext securityContext) throws NotFoundException;
-
-	public abstract Response jobsPost(JobFull job, SecurityContext securityContext) throws NotFoundException;
-	
-	
+    public abstract Response jobsGet(SecurityContext securityContext) throws NotFoundException;
+    public abstract Response jobsJobIdDelete(String jobId,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response jobsJobIdEstimateGet(String jobId,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response jobsJobIdGet(String jobId,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response jobsJobIdPatch(String jobId,InlineObject7 inlineObject7,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response jobsJobIdResultsDelete(String jobId,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response jobsJobIdResultsGet(String jobId,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response jobsJobIdResultsPost(String jobId,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response jobsPost(InlineObject6 inlineObject6,SecurityContext securityContext) throws NotFoundException;
 }

@@ -1,37 +1,26 @@
 package eu.openeo.api.impl;
 
+import eu.openeo.api.*;
+import eu.openeo.model.*;
+
+import eu.openeo.model.Error;
+import java.util.Map;
+
+import java.util.List;
+import eu.openeo.api.NotFoundException;
+
+import java.io.InputStream;
+
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import eu.openeo.api.ApiResponseMessage;
-import eu.openeo.api.NotFoundException;
-import eu.openeo.api.UdfRuntimesApiService;
-
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
+import javax.validation.constraints.*;
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-02-12T13:52:55.621+01:00[Europe/Rome]")
 public class UdfRuntimesApiServiceImpl extends UdfRuntimesApiService {
-	@Override
-	public Response udfRuntimesGet(SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
-	}
-
-	@Override
-	public Response udfRuntimesLangUdfTypeGet(String lang, String udfType, SecurityContext securityContext)
-			throws NotFoundException {
-		// do some magic!
-		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
-	}
-
-	@Override
-	public Response udfRuntimesLangUdfTypeOptions(String lang, String udfType, SecurityContext securityContext)
-			throws NotFoundException {
-		// do some magic!
-		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
-	}
-
-	@Override
-	public Response udfRuntimesOptions(SecurityContext securityContext) throws NotFoundException {
-		// do some magic!
-		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
-	}
+    @Override
+    public Response udfRuntimesGet(SecurityContext securityContext) throws NotFoundException {
+        // do some magic!
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    }
 }
