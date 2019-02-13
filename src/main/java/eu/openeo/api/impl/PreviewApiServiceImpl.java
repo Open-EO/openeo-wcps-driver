@@ -5,7 +5,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.sql.SQLException;
 import java.util.Date;
 
 import javax.ws.rs.core.Response;

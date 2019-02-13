@@ -13,27 +13,13 @@ import eu.openeo.backend.wcps.domain.Aggregate;
 import eu.openeo.backend.wcps.domain.Collection;
 import eu.openeo.backend.wcps.domain.Filter;
 
-import org.gdal.osr.CoordinateTransformation;
-import org.gdal.osr.SpatialReference;
-import org.gdal.gdal.gdal;
-import org.gdal.osr.osrJNI;
-import org.gdal.osr.osr;
-
 import java.net.URL;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.net.URLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import com.google.gson.Gson;
 
 import org.json.JSONException;
 
@@ -105,13 +91,6 @@ public class WCPSQueryFactory {
 		wcpsStringBuilder.append(", \"" + outputFormat + "\" )");
 	}
 
-	
-	private String filter_geometry(String collectionName) {
-		
-		    return collectionName ;
-	}
-	
-	
 	/**
 	 * Helper Method to create a string describing an arbitrary filtering as defined
 	 * from the process graph
@@ -489,8 +468,6 @@ public class WCPSQueryFactory {
 	 * @param process
 	 */
 	private void createAggregateFromProcess(JSONObject process) {
-		boolean isTemporalAggregate = false;
-		boolean isNDVIAggregate = false;
 		String processName = null;
 		for (Object key : process.keySet()) {
 			String keyStr = (String) key;
@@ -498,10 +475,8 @@ public class WCPSQueryFactory {
 				processName = (String) process.get(keyStr);
 				log.debug("currently working on: " + processName);
 				if (processName.contains("date") || processName.contains("time")) {
-					isTemporalAggregate = true;
 					createTemporalAggregate(processName);
 				} else if (processName.contains("NDVI")) {
-					isNDVIAggregate = true;
 					createNDVIAggregateFromProcess(process);
 				}
 			}
