@@ -18,6 +18,9 @@ public abstract class JobsApiService {
 
 	public abstract Response jobsJobIdDownloadGet(String jobId, String format, SecurityContext securityContext)
 			throws NotFoundException;
+	
+	public abstract Response jobsJobIdDownloadPost(String jobId, SecurityContext securityContext)
+			throws NotFoundException;
 
 	public abstract Response jobsJobIdDownloadOptions(String jobId, String format, SecurityContext securityContext)
 			throws NotFoundException;
