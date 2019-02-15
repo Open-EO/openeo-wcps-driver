@@ -119,6 +119,32 @@ public class JobsApi {
 			@Context SecurityContext securityContext) throws NotFoundException {
 		return delegate.jobsJobIdDownloadGet(jobId, format, securityContext);
 	}
+	
+	@POST
+	@Path("/{job_id}/results")
+	@Consumes({ "application/json" })
+	@Produces({ "application/json", "application/metalink+xml" })
+	@io.swagger.annotations.ApiOperation(value = "Request download links for results of batch jobs.", notes = "This request will provide links to download results of batch jobs. Depending on the Content-Type header, the response is either a simple JSON array with URLs as strings or a metalink XML document.", response = Void.class, authorizations = {
+			@io.swagger.annotations.Authorization(value = "Bearer") }, tags = { "Result Access", })
+	@io.swagger.annotations.ApiResponses(value = {
+			@io.swagger.annotations.ApiResponse(code = 200, message = "Valid download links have been returned. The download links doesn't necessarily need to be located under the API base url.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 401, message = "The back-end requires clients to authenticate in order to process this request.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 403, message = "Authorization failed, access to the requested resource has been denied.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 404, message = "A job with the specified identifier is not available.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 410, message = "Job with specified identifier has been canceled.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 501, message = "This API feature is not supported by the back-end.", response = Void.class),
+
+			@io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
+	public Response jobsJobIdDownloadPost(
+			@ApiParam(value = "Job identifier string", required = true) @PathParam("job_id") String jobId,			
+			@Context SecurityContext securityContext) throws NotFoundException {
+		return delegate.jobsJobIdDownloadPost(jobId, securityContext);
+	}
 
 	@OPTIONS
 	@Path("/{job_id}/results")
