@@ -44,7 +44,7 @@ public class ProcessDescriptionArgs implements Serializable {
 	private String[] deprecated = null;
 
 	@JsonProperty("required")
-	private Boolean required = true;
+	private Boolean required = false;
 	
 	@JsonProperty("schema")
 	private Schema schema =  null;

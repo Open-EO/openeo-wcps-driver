@@ -22,7 +22,7 @@ import eu.openeo.model.JobMeta;
 import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.PATCH;
 
-//@Path("/jobs")
+@Path("/jobs")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the jobs API")
@@ -52,7 +52,7 @@ public class JobsApi {
 	}
 
 	@OPTIONS
-	@Path("/jobs/{job_id}/cancel")
+	@Path("/{job_id}/cancel")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
@@ -68,7 +68,7 @@ public class JobsApi {
 	}
 
 	@PATCH
-	@Path("/jobs/{job_id}/cancel")
+	@Path("/{job_id}/cancel")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Cancels any back-end computations of a job", notes = "For batch jobs this request cancels all related computations at the back-end. Lazy jobs will not respond to any further on demand requests, e.g. download calls or service requests. This job won't generate additional costs for processing unless started again using `GET /jobs/{job_id}/queue` (for batch jobs) or updated using `PATCH /jobs`. Results of batch jobs might be discarded and deleted by the back-end. Any service associated with this job might be deleted from the back-end.", response = Void.class, authorizations = {
@@ -94,7 +94,7 @@ public class JobsApi {
 	}
 
 	@GET
-	@Path("/jobs/{job_id}/results")
+	@Path("/{job_id}/results")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json", "application/metalink+xml" })
 	@io.swagger.annotations.ApiOperation(value = "Request download links for results of batch jobs.", notes = "This request will provide links to download results of batch jobs. Depending on the Content-Type header, the response is either a simple JSON array with URLs as strings or a metalink XML document.", response = Void.class, authorizations = {
@@ -121,7 +121,7 @@ public class JobsApi {
 	}
 
 	@OPTIONS
-	@Path("/jobs/{job_id}/results")
+	@Path("/{job_id}/results")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
@@ -140,7 +140,7 @@ public class JobsApi {
 	}
 
 	@GET
-	@Path("/jobs/{job_id}")
+	@Path("/{job_id}")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Returns information about a submitted job.", notes = "Returns detailed information about a submitted job including its current status and the underlying process graph", response = JobFull.class, authorizations = {
@@ -164,7 +164,7 @@ public class JobsApi {
 	}
 
 	@OPTIONS
-	@Path("/jobs/{job_id}")
+	@Path("/{job_id}")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
@@ -180,7 +180,7 @@ public class JobsApi {
 	}
 
 	@PATCH
-	@Path("/jobs/{job_id}")
+	@Path("/{job_id}")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Modifies a job at the back-end.", notes = "***Reserved for later use.** A protocol to modify a job is to be defined.* Modifies an existing job at the back-end but maintains the identifier. All running calculations are stopped if possible.", response = Void.class, authorizations = {
@@ -209,7 +209,7 @@ public class JobsApi {
 	}
 
 	@OPTIONS
-	@Path("/jobs/{job_id}/pause")
+	@Path("/{job_id}/pause")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
@@ -225,7 +225,7 @@ public class JobsApi {
 	}
 
 	@PATCH
-	@Path("/jobs/{job_id}/pause")
+	@Path("/{job_id}/pause")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Pausing a batch job.", notes = "This request pauses a batch job. Execution is stopped, but might be resumed later by queueing it again. Intermediate results are stored for resuming. This job won't generate additional costs for processing.", response = Void.class, authorizations = {
@@ -253,7 +253,7 @@ public class JobsApi {
 	}
 
 	@OPTIONS
-	@Path("/jobs/{job_id}/queue")
+	@Path("/{job_id}/queue")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
@@ -271,7 +271,7 @@ public class JobsApi {
 	}
 
 	@PATCH
-	@Path("/jobs/{job_id}/queue")
+	@Path("/{job_id}/queue")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Running a job in batch mode.", notes = "This request converts a job into a batch job and queues it for execution. A paused job can be resumed with this request.", response = Void.class, authorizations = {
@@ -299,7 +299,7 @@ public class JobsApi {
 	}
 
 	@GET
-	@Path("/jobs/{job_id}/subscribe")
+	@Path("/{job_id}/subscribe")
 	@Consumes({ "application/json" })
 	@Produces({ "" })
 	@io.swagger.annotations.ApiOperation(value = "Subscribes to job execution updates that are communicated over WebSockets.", notes = "***Reserved for later use.** The WebSocket-based protocol communicating the job updates is to be defined.*", response = Void.class, authorizations = {
@@ -331,7 +331,7 @@ public class JobsApi {
 	}
 
 	@OPTIONS
-	@Path("/jobs/{job_id}/subscribe")
+	@Path("/{job_id}/subscribe")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
@@ -347,7 +347,6 @@ public class JobsApi {
 	}
 
 	@OPTIONS
-	@Path("/jobs")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Response to allow Cross-Origin Resource Sharing.", notes = "Response for the preflight requests made by some clients due to Cross-Origin Resource Sharing restrictions. It sends the appropriate headers for this endpoint as defined in the section \"Responses\". See https://www.w3.org/TR/cors/ for more information.", response = Void.class, tags = {
@@ -361,7 +360,6 @@ public class JobsApi {
 	}
 
 	@POST
-	@Path("/jobs")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Submits a new job to the back-end.", notes = "Creates a new job from one or more (chained) processes at the back-end. Jobs are initially always lazy jobs and will not run the computations until on demand  requests or separately queueing it. Queueing it converts a lazy job to a batch job.", response = JobMeta.class, authorizations = {

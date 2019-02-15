@@ -29,6 +29,10 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(description = "Output format to be used. Supported formats and options can be retrieved using the `GET /output_formats` endpoint.")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class OutputFormatBody implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	@JsonProperty("format")
 	private String format = null;
 

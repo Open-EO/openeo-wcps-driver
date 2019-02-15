@@ -124,7 +124,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			job.setStatus(JobStatus.FINISHED);
 			job.setUpdated(new Date().toGMTString());
 			jobDao.update(job);
-			return Response.ok(response, ConvenienceHelper.getMimeTypeFromOutput(outputFormat)).build();
+			return Response.ok(response, ConvenienceHelper.getMimeTypeFromOutput(outputFormat)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 		} catch (MalformedURLException e) {
 			log.error("An error occured when creating URL from job query: " + e.getMessage());
 			return Response.serverError().entity("An error occured when creating URL from job query: " + e.getMessage())
@@ -167,7 +167,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
 			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
 			mapper.registerModule(module);
-			return Response.status(201).entity(mapper.writeValueAsString(job)).build();
+			return Response.status(201).entity(mapper.writeValueAsString(job)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 //			return Response.ok().entity(mapper.writeValueAsString(job)).build();
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage());
@@ -228,7 +228,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 
 	@Override
 	public Response jobsOptions(SecurityContext securityContext) throws NotFoundException {
-		return Response.ok().build();
+		return Response.ok().header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 	}
 
 	@Override
@@ -270,7 +270,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
 			mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
 			mapper.setSerializationInclusion(Include.NON_NULL);
-			return Response.status(201).entity(mapper.writeValueAsString(job)).build();
+			return Response.status(201).entity(mapper.writeValueAsString(job)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").header("OpenEO-Identifier", job.getJobId()).build();
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage());
 			return Response.serverError().entity("An error occured while serializing job to json: " + e.getMessage())
