@@ -168,11 +168,15 @@ public class JobsApiServiceImpl extends JobsApiService {
 					.build();
 		}
 		try {
+			job.setStatus(JobStatus.QUEUED);
+			job.setUpdated(new Date().toGMTString());
+			jobDao.update(job);
+			//TODO add job to execute queue
+			return Response.status(202).entity(new String("The creation of the resource has been queued successfully.")).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
+			/*
 			job.setStatus(JobStatus.RUNNING);
 			job.setUpdated(new Date().toGMTString());
 			jobDao.update(job);
-			return Response.status(202).entity(new String("The creation of the resource has been queued successfully.")).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
-			/*
 			Url url = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1"
 					+ "&REQUEST=ProcessCoverages" + "&QUERY="
 					+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
