@@ -484,7 +484,7 @@ public class WCPSQueryFactory {
 		}
 		if(left != null && right!= null && top != null && bottom != null) {
 			this.filters.add(new Filter("E", left, right));
-			this.filters.add(new Filter("N", top, bottom));
+			this.filters.add(new Filter("N", bottom, top));
 		}else {
 			log.error("no spatial information could be found in process!");
 		}
