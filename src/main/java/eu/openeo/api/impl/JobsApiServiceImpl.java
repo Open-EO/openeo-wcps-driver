@@ -81,7 +81,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
-	public Response jobsJobIdDownloadGet(String jobId, String format, SecurityContext securityContext)
+	public Response jobsJobIdResultsGet(String jobId, String format, SecurityContext securityContext)
 			throws NotFoundException {
 		JobFull job = null;
 		WCPSQueryFactory wcpsFactory = null;
@@ -142,7 +142,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 	
 	@Override
-	public Response jobsJobIdDownloadPost(String jobId, SecurityContext securityContext)
+	public Response jobsJobIdResultsPost(String jobId, SecurityContext securityContext)
 			throws NotFoundException {
 		JobFull job = null;
 		WCPSQueryFactory wcpsFactory = null;
@@ -202,7 +202,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 
 
 	@Override
-	public Response jobsJobIdDownloadOptions(String jobId, String format, SecurityContext securityContext)
+	public Response jobsJobIdResultsOptions(String jobId, String format, SecurityContext securityContext)
 			throws NotFoundException {
 		// do some magic!
 		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();

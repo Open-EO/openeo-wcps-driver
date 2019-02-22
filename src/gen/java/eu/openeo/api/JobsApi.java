@@ -117,7 +117,7 @@ public class JobsApi {
 			@ApiParam(value = "Job identifier string", required = true) @PathParam("job_id") String jobId,
 			@ApiParam(value = "Output format to be used. Supported formats and options can be retrieved using the `GET /capabilities/output_formats` endpoint. If no output format has been specified here or for the job in general, the back-end falls back to its default format, which is  specified in the `GET /capabilities/output_formats` endpoint. **Note:** The options available to the specified output format can be added as individual query parameters to the request.") @QueryParam("format") String format,
 			@Context SecurityContext securityContext) throws NotFoundException {
-		return delegate.jobsJobIdDownloadGet(jobId, format, securityContext);
+		return delegate.jobsJobIdResultsGet(jobId, format, securityContext);
 	}
 	
 	@POST
@@ -143,7 +143,7 @@ public class JobsApi {
 	public Response jobsJobIdDownloadPost(
 			@ApiParam(value = "Job identifier string", required = true) @PathParam("job_id") String jobId,			
 			@Context SecurityContext securityContext) throws NotFoundException {
-		return delegate.jobsJobIdDownloadPost(jobId, securityContext);
+		return delegate.jobsJobIdResultsPost(jobId, securityContext);
 	}
 
 	@OPTIONS
@@ -162,7 +162,7 @@ public class JobsApi {
 			@ApiParam(value = "Job identifier string", required = true) @PathParam("job_id") String jobId,
 			@ApiParam(value = "Output format to be used. Supported formats and options can be retrieved using the `GET /capabilities/output_formats` endpoint. If no output format has been specified here or for the job in general, the back-end falls back to its default format, which is  specified in the `GET /capabilities/output_formats` endpoint. **Note:** The options available to the specified output format can be added as individual query parameters to the request.") @QueryParam("format") String format,
 			@Context SecurityContext securityContext) throws NotFoundException {
-		return delegate.jobsJobIdDownloadOptions(jobId, format, securityContext);
+		return delegate.jobsJobIdResultsOptions(jobId, format, securityContext);
 	}
 
 	@GET
