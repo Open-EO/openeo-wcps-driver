@@ -169,13 +169,13 @@ public class DataApiServiceImpl extends DataApiService {
 			    
 				double[] c1 = null;
 				double[] c2 = null;
-				c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(maxValues[yIndex]));
-				c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(minValues[yIndex]));				
+				c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
+				c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));				
 				
 				spatialExtent.put(c1[0]);
-				spatialExtent.put(c2[1]);
+				spatialExtent.put(c1[1]);
 				spatialExtent.put(c2[0]);
-				spatialExtent.put(c1[1]);			
+				spatialExtent.put(c2[1]);			
 									
 				extentCollection.put("spatial", spatialExtent);
 				extentCollection.put("temporal", temporalExtent);
@@ -320,11 +320,12 @@ public class DataApiServiceImpl extends DataApiService {
 			src.ImportFromEPSG(Integer.parseInt(srsDescription));
 
 			SpatialReference dst = new SpatialReference();
-			dst.ImportFromEPSG(4326);
+			dst.SetWellKnownGeogCS("WGS84");
 			
 			
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
+			
 			
 			CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 		    
@@ -345,18 +346,17 @@ public class DataApiServiceImpl extends DataApiService {
 				}
 		    }
 		    
+			log.debug(srsDescription);
+			
 			double[] c1 = null;
 			double[] c2 = null;
-			c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(maxValues[yIndex]));
-			c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(minValues[yIndex]));				
+			c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
+			c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));				
 			
 			spatialExtent.put(c1[0]);
-			spatialExtent.put(c2[1]);
+			spatialExtent.put(c1[1]);
 			spatialExtent.put(c2[0]);
-			spatialExtent.put(c1[1]);	
-			
-			
-			
+			spatialExtent.put(c2[1]);	
 			
 			JSONArray links = new JSONArray();
 			

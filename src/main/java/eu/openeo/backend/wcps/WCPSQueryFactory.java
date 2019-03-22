@@ -13,8 +13,7 @@ import eu.openeo.backend.wcps.domain.Aggregate;
 import eu.openeo.backend.wcps.domain.Collection;
 import eu.openeo.backend.wcps.domain.Filter;
 
-import org.gdal.osr.CoordinateTransformation;
-import org.gdal.osr.SpatialReference;
+
 import org.gdal.gdal.gdal;
 import org.gdal.osr.osrJNI;
 import org.gdal.osr.osr;
@@ -33,7 +32,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import com.google.gson.Gson;
+
 
 import org.json.JSONException;
 
@@ -471,15 +470,18 @@ public class WCPSQueryFactory {
 				src.ImportFromEPSG(4326);
 				SpatialReference dst = new SpatialReference();
 				dst.ImportFromEPSG(srs);
+				
+				log.debug(srs);
+				
 				CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 				double[] c1 = null;
 				double[] c2 = null;
-				c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(top));
-				c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(bottom));
+				c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(bottom));
+				c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(top));
 				left = Double.toString(c1[0]);
-				top = Double.toString(c1[1]);
+				top = Double.toString(c2[1]);
 				right = Double.toString(c2[0]);
-				bottom = Double.toString(c2[1]);
+				bottom = Double.toString(c1[1]);
 			}
 		}
 		if(left != null && right!= null && top != null && bottom != null) {
