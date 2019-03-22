@@ -38,23 +38,6 @@ import eu.openeo.dao.JSONObjectSerializer;
 import eu.openeo.model.JobFull;
 import eu.openeo.model.JobStatus;
 
-import org.apache.flink.api.common.functions.FoldFunction;
-import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.functions.ReduceFunction;
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.core.fs.FileSystem.WriteMode;
-import org.apache.flink.util.Collector;
-import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.java.DataSet;
-import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.api.java.tuple.Tuple2;
-
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-02-26T14:26:50.688+01:00")
 public class JobsApiServiceImpl extends JobsApiService {
 
@@ -95,30 +78,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 	public Response jobsJobIdCancelPatch(String jobId, SecurityContext securityContext) throws NotFoundException {
 		// do some magic!
 		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
-	}
-
-	
-	//Flink Batch Processing function
-	public static final class Tokenizer implements FlatMapFunction<String, Tuple2<String, Integer>> {
-
-		@Override
-		public void flatMap(String value, Collector<Tuple2<String, Integer>> out) {
-			// normalize and split the line
-			String[] tokens = value.split(",");
-            
-			for (String token : tokens) {
-				if (token.length() > 0) {
-					out.collect(new Tuple2<>(token, 1));
-				}
-			}
-			
-			 //emit the pairs
-			for (String token : tokens) {
-				if (token.length() > 0) {
-					out.collect(new Tuple2<>(token, 1));
-				}
-			}
-		}
 	}
 	
 	@Override
@@ -162,35 +121,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			byte[] response = IOUtils.toByteArray(conn.getInputStream());
-			
-			//TODO pipe code start here
-			String r = new String(response, "UTF-8");
-			final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-			DataSet<String> text = env.fromElements(r);
-			
-			//DataSet<Tuple2<String, Integer>> counts =
-					// split up the lines in pairs (2-tuples) containing: (word,1)
-					//text.flatMap(new Tokenizer()).sum(1);
-					// group by the tuple field "0" and sum up tuple field "1"
-					
-					
-			//counts.writeAsCsv("file:///csveo1.csv", "\n", " ");
-			text.writeAsText("file:///csveo1", WriteMode.OVERWRITE);
-			
-			//try {
-				//text.print();
-			//} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				//e1.printStackTrace();
-			//}
-			
-			try {
-				env.execute("Example Job");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			//TODO pipe code ends here
 			
 			job.setStatus(JobStatus.FINISHED);
 			job.setUpdated(new Date().toGMTString());
