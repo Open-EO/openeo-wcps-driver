@@ -98,6 +98,17 @@ public class JobsApiServiceImpl extends JobsApiService {
 			}else {
 				try {
 					outputFormat = (String)(((JSONObject) job.getOutput()).get(new String("format")));
+					
+					outputFormat = outputFormat.toUpperCase();
+					
+					if (outputFormat.equals("NETCDF"))
+					{
+						outputFormat="netCDF";
+					}
+					if (outputFormat.equals("GTIFF"))
+					{
+						outputFormat="GTiff";
+					}
 				}catch(Exception e) {
 					log.error("An error occured while parsing output type: " + e.getMessage());
 					log.info("assigning standard output type: json");
@@ -157,6 +168,17 @@ public class JobsApiServiceImpl extends JobsApiService {
 			JSONObject processGraphJSON;			
 			try {
 				outputFormat = (String)(((JSONObject) job.getOutput()).get(new String("format")));
+				
+				outputFormat = outputFormat.toUpperCase();
+				
+				if (outputFormat.equals("NETCDF"))
+				{
+					outputFormat="netCDF";
+				}
+				if (outputFormat.equals("GTIFF"))
+				{
+					outputFormat="GTiff";
+				}
 			}catch(Exception e) {
 				log.error("An error occured while parsing output type: " + e.getMessage());
 				log.info("assigning standard output type: json");
