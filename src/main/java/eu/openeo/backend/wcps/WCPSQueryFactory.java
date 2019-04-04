@@ -111,19 +111,19 @@ public class WCPSQueryFactory {
 				log.debug("currently working on: " + name);
 				if (name.contains("stretch_colors")) {
 
-					int min = 0;
-					int max = 0;
+					double min = 0;
+					double max = 0;
 
 					for (Object Val : openEOGraph.keySet()) {
 						String ValStr = (String) Val;
 
 						if (ValStr.equals("min")) {
 
-							min = (int) openEOGraph.get(ValStr);
+							min = (double) openEOGraph.get(ValStr);
 						}
 						if (ValStr.equals("max")) {
 
-							max = (int) openEOGraph.get(ValStr);
+							max = (double) openEOGraph.get(ValStr);
 
 						}
 					}
