@@ -46,7 +46,7 @@ public class WCPSQueryFactory {
 	private String outputFormat = "json";
 
 	Logger log = Logger.getLogger(this.getClass());
-
+	
 	/**
 	 * Creates WCPS query from openEO process Graph
 	 * 
@@ -82,7 +82,7 @@ public class WCPSQueryFactory {
 		this.build(openEOGraph);
 	}
 
-	private void build(JSONObject openEOGraph) {
+	private void build(JSONObject openEOGraph) { 
 		log.debug(openEOGraph.toString());
 		parseOpenEOProcessGraph( openEOGraph);
 //		if (openEOGraph.containsKey(new String("process_graph"))) {
@@ -105,6 +105,60 @@ public class WCPSQueryFactory {
 		}
 		wcpsStringBuilder.append(") return encode ( ");
 //		for (int a = aggregates.size() - 1; a >= 0; a--) {
+		
+		
+		for (Object key : openEOGraph.keySet()) {
+			String keyStr = (String) key;
+			if (keyStr.equals("process_id")) {
+				String name = (String) openEOGraph.get(keyStr);
+				log.debug("currently working on: " + name);
+				if (name.contains("stretch")) {
+				    
+					int min = 0;
+					int max = 0;
+					
+					for (Object Val : openEOGraph.keySet()) {
+						String ValStr = (String) Val;
+						
+						if (ValStr.equals("min")) {
+							
+							min = (int) openEOGraph.get(ValStr);
+						}
+                        if (ValStr.equals("max")) {
+							
+							max = (int) openEOGraph.get(ValStr);
+							
+						}
+						}
+					
+				StringBuilder stretchBuilder = new StringBuilder("(");	
+				
+					for (int a = 0; a < aggregates.size(); a++) {
+						if (aggregates.get(a).getAxis().equals("DATE")) {
+							stretchBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
+						}
+						if (aggregates.get(a).getOperator().equals("NDVI")) {
+							stretchBuilder.append(createNDVIWCPSString("$c1", aggregates.get(a)));
+						}
+					}
+					stretchBuilder.append(")");
+					String stretchString = stretchBuilder.toString();
+					
+					String stretch1 = stretchString.replace("$pm", "$pm1");
+					String stretch2 = stretchString.replace("$pm", "$pm2");
+					String stretch3 = stretchString.replace("$pm", "$pm3");
+					String stretch4 = stretchString.replace("$pm", "$pm4");
+					
+					StringBuilder stretchBuilderExtend = new StringBuilder("(");
+					
+					stretchBuilderExtend.append(stretch1+" - "+"min"+stretch2+")*(("+max+"-"+min+")"+"/(max"+stretch3+"-min"+stretch4+")) + 0");
+					
+					String stretchExtendString = stretchBuilderExtend.toString();
+					
+					wcpsStringBuilder.append(stretchExtendString);
+					
+				}  
+			else {
 		for (int a = 0; a < aggregates.size(); a++) {
 			if (aggregates.get(a).getAxis().equals("DATE")) {
 				wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
@@ -113,6 +167,10 @@ public class WCPSQueryFactory {
 				wcpsStringBuilder.append(createNDVIWCPSString("$c1", aggregates.get(a)));
 			}
 		}
+		
+	}}}
+		
+		
 		if (filters.size() > 0) {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
 		}
@@ -125,6 +183,8 @@ public class WCPSQueryFactory {
 		
 		    return collectionName ;
 	}
+	
+	
 	
 	
 	/**
@@ -256,6 +316,9 @@ public class WCPSQueryFactory {
 		}
 	}
 
+	
+	
+	
 	private String createBandSubsetString(String collectionName, String bandName, String subsetString) {
 		StringBuilder stringBuilder = new StringBuilder(collectionName);
 		stringBuilder.append(".");

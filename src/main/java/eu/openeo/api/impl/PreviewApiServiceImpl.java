@@ -53,6 +53,17 @@ public class PreviewApiServiceImpl extends PreviewApiService {
 		processGraphJSON = (JSONObject) job.getProcessGraph();
 		try {
 			outputFormat = (String)(((JSONObject) job.getOutput()).get(new String("format")));
+			
+            outputFormat = outputFormat.toUpperCase();
+			
+			if (outputFormat.equals("NETCDF"))
+			{
+				outputFormat="netCDF";
+			}
+			if (outputFormat.equals("GTIFF"))
+			{
+				outputFormat="GTiff";
+			}
 		}catch(Exception e) {
 			log.error("An error occured while parsing preview output type: " + e.getMessage());
 			log.info("assigning standard output type: json");
