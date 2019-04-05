@@ -118,12 +118,11 @@ public class WCPSQueryFactory {
 						String ValStr = (String) Val;
 
 						if (ValStr.equals("min")) {
-
-							min = (double) openEOGraph.get(ValStr);
+							min = openEOGraph.getDouble(ValStr);
 						}
 						if (ValStr.equals("max")) {
 
-							max = (double) openEOGraph.get(ValStr);
+							max = openEOGraph.getDouble(ValStr);
 
 						}
 					}
