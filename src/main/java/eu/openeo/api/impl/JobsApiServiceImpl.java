@@ -109,6 +109,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 					{
 						outputFormat="GTiff";
 					}
+					log.info("assigning output type: " + outputFormat);
 				}catch(Exception e) {
 					log.error("An error occured while parsing output type: " + e.getMessage());
 					log.info("assigning standard output type: json");

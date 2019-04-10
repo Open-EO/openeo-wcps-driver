@@ -75,10 +75,10 @@ public class WCPSQueryFactory {
 			}
 			log.error(builder.toString());
 		}
-		this.build(openEOGraph, outputFormat);
+		this.build(openEOGraph);
 	}
 
-	private void build(JSONObject openEOGraph, String outputFormat) {
+	private void build(JSONObject openEOGraph) {
 		log.debug(openEOGraph.toString());
 		parseOpenEOProcessGraph(openEOGraph);
 		// if (openEOGraph.containsKey(new String("process_graph"))) {
@@ -215,7 +215,7 @@ public class WCPSQueryFactory {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
 		}
 		// TODO define return type from process tree
-		wcpsStringBuilder.append(", \"" + outputFormat + "\" )");
+		wcpsStringBuilder.append(", \"" + this.outputFormat + "\" )");
 	}
 
 	private String filter_geometry(String collectionName) {
