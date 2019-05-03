@@ -145,7 +145,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			
 //			byte[] response = IOUtils.toByteArray(linkProcessGraph.toString().getBytes("UTF-8"));			
 			
-			return Response.ok(linkProcessGraph.toString().getBytes("UTF-8"), ConvenienceHelper.getMimeTypeFromOutput(outputFormat)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
+			return Response.ok(linkProcessGraph.toString().getBytes("UTF-8"), "application/json").header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 		} catch (MalformedURLException e) {
 			log.error("An error occured when creating URL from job query: " + e.getMessage());
 			return Response.serverError().entity("An error occured when creating URL from job query: " + e.getMessage())
