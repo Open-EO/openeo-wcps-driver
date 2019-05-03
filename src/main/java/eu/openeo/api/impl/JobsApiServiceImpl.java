@@ -124,20 +124,28 @@ public class JobsApiServiceImpl extends JobsApiService {
 		}
 		URL url;
 		try {
-			job.setStatus(JobStatus.RUNNING);
 			job.setUpdated(new Date().toGMTString());
 			jobDao.update(job);
+
 			url = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1"
 					+ "&REQUEST=ProcessCoverages" + "&QUERY="
 					+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestMethod("GET");
-			byte[] response = IOUtils.toByteArray(conn.getInputStream());
 			
-			job.setStatus(JobStatus.FINISHED);
-			job.setUpdated(new Date().toGMTString());
-			jobDao.update(job);
-			return Response.ok(response, ConvenienceHelper.getMimeTypeFromOutput(outputFormat)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
+			JSONObject linkProcessGraph = new JSONObject();
+			linkProcessGraph.put("job_id", job.getJobId());
+//			linkProcessGraph.put("title", "NDVI Test"); //Nullable
+//			linkProcessGraph.put("description","Deriving minimum ndvi measurements over pixel time series of sentinel 2 imagery."); //Nullable
+			linkProcessGraph.put("updated", job.getUpdated());
+			
+			JSONObject link = new JSONObject();
+			link.put("href", url);
+			link.put("type", "json");
+			
+			linkProcessGraph.put("links", link);
+			
+//			byte[] response = IOUtils.toByteArray(linkProcessGraph.toString().getBytes("UTF-8"));			
+			
+			return Response.ok(linkProcessGraph.toString().getBytes("UTF-8"), ConvenienceHelper.getMimeTypeFromOutput(outputFormat)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 		} catch (MalformedURLException e) {
 			log.error("An error occured when creating URL from job query: " + e.getMessage());
 			return Response.serverError().entity("An error occured when creating URL from job query: " + e.getMessage())
