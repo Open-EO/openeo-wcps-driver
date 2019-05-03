@@ -139,7 +139,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			
 			JSONObject link = new JSONObject();
 			link.put("href", url);
-			link.put("type", "json");
+			link.put("type", ConvenienceHelper.getMimeTypeFromOutput(outputFormat));
 			
 			linkProcessGraph.put("links", link);
 			
