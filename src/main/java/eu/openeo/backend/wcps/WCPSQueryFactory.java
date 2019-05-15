@@ -28,9 +28,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-
+import java.text.ParseException;
 import org.json.JSONException;
 
 public class WCPSQueryFactory {
@@ -217,12 +220,7 @@ public class WCPSQueryFactory {
 		// TODO define return type from process tree
 		wcpsStringBuilder.append(", \"" + this.outputFormat + "\" )");
 	}
-
-	private String filter_geometry(String collectionName) {
-
-		return collectionName;
-	}
-
+	
 	/**
 	 * Helper Method to create a string describing an arbitrary filtering as defined
 	 * from the process graph
@@ -412,11 +410,11 @@ public class WCPSQueryFactory {
 							for (Object collFilterName : processParent.keySet()) {
 								String collFilterNameStr = (String) collFilterName;
 								if (collFilterNameStr.equals("spatial_extent")) {
-									createBoundingBoxFilterFromArgs(processParent, srs);
+									createBoundingBoxFilterFromArgs(processParent, srs, coll);
 								}
 								if (collFilterNameStr.equals("temporal_extent")) {
 									JSONArray extentArray = (JSONArray) processParent.get(collFilterNameStr);
-									createDateRangeFilterFromArgs(extentArray);
+									createDateRangeFilterFromArgs(extentArray, coll);
 								}
 							}
 
@@ -446,32 +444,58 @@ public class WCPSQueryFactory {
 		return result;
 	}
 
+	private String filter_geometry(String collectionName) {
+
+		return collectionName;
+	}
+
+	private String collectionName(JSONObject processParent) {
+
+	String coll = null;
+	
+	for (Object key : processParent.keySet()) {
+		String keyStr = (String) key;
+		if (keyStr.equals("process_id")) {
+			String name = (String) processParent.get(keyStr);
+			
+			if (name.contains("get_collection")) {
+				for (Object collName : processParent.keySet()) {
+					String collNameStr = (String) collName;
+					if (collNameStr.equals("name")) {
+
+						coll = (String) processParent.get(collNameStr);
+						break;
+						
+					}}break;} }
+		else if (keyStr.equals("imagery")) {
+			JSONObject argsObject = (JSONObject) processParent.get(keyStr);
+			coll = collectionName(argsObject);
+		}}
+	    
+		return coll;
+		
+	}
+	
 	/**
 	 * 
 	 * @param process
 	 */
 	private void createFilterFromProcess(JSONObject process) {
+		
+		String coll = collectionName(process);
+		
 		for (Object key : process.keySet()) {
 			String keyStr = (String) key;
 			log.debug("" + keyStr);
 			if (!keyStr.contains("extent")) {
 				log.debug("no spatial or temporal extent defined in filter");
 			}
+			
 			// check if filter contains spatial information
 			else if (process.get("process_id").toString().contains("bbox")) {
 				log.debug("spatial extent defined in filter");
 				int srs = 0;
-				String coll = null;
-				try {
-					coll = process.getJSONObject("imagery").getString("name").toString();
-				} catch (Exception e) {
-					log.error("An error occured while searching for collection anem: " + e.getMessage());
-					StringBuilder builder = new StringBuilder();
-					for (StackTraceElement element : e.getStackTrace()) {
-						builder.append(element.toString() + "\n");
-					}
-					log.error(builder.toString());
-				}
+				
 				JSONObject jsonresp = null;
 				try {
 					jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/" + coll);
@@ -492,26 +516,67 @@ public class WCPSQueryFactory {
 				}
 				srs = jsonresp.getInt("eo:epsg");
 				log.debug("srs is: " + srs);
-				if (srs > 0)
-					createBoundingBoxFilterFromArgs(process, srs);
+				if (srs > 0) {
+					createBoundingBoxFilterFromArgs(process, srs, coll);
+				}
 			}
 			// check if filter contains temporal information
 			else if (process.get("process_id").toString().contains("date")) {
 				log.debug("temporal extent defined in filter");
+				
 				JSONArray extentArray = (JSONArray) process.get(keyStr);
-				createDateRangeFilterFromArgs(extentArray);
+				createDateRangeFilterFromArgs(extentArray, coll);
 			}
-
 		}
 	}
 
-	private void createDateRangeFilterFromArgs(JSONArray extentArray) {
+	private void createDateRangeFilterFromArgs(JSONArray extentArray, String coll) {
 		String fromDate = null;
 		String toDate = null;
 
-		fromDate = extentArray.get(0).toString();
-		toDate = extentArray.get(1).toString();
+		JSONObject extent;
+		String extentlower = extentArray.get(0).toString();
+		String extentupper = extentArray.get(1).toString();
 
+		JSONObject jsonresp = null;
+		try {
+			jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/" + coll);
+		} catch (JSONException e) {
+			log.error("An error occured: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		} catch (IOException e) {
+			log.error("An error occured: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		}
+		
+		extent = jsonresp.getJSONObject("extent");
+		JSONArray temporal = extent.getJSONArray("temporal");
+		String templower = temporal.get(0).toString();
+		String tempupper = temporal.get(1).toString();
+				
+		log.debug("temporal extent is: " + temporal);
+		if (extentlower.compareTo(templower) < 0) {
+			fromDate = temporal.get(0).toString();
+		}
+		else {
+			fromDate = extentArray.get(0).toString();
+		}
+        if (extentupper.compareTo(tempupper) > 0) {
+        	toDate = temporal.get(1).toString();
+		}
+        else {
+        	toDate = extentArray.get(1).toString();
+		}
+		//fromDate = extentArray.get(0).toString();
+		//toDate = extentArray.get(1).toString();
 		if (fromDate != null && toDate != null)
 			this.filters.add(new Filter("DATE", fromDate, toDate));
 	}
@@ -538,7 +603,7 @@ public class WCPSQueryFactory {
 		}
 	}
 
-	private void createBoundingBoxFilterFromArgs(JSONObject argsObject, int srs) {
+	private void createBoundingBoxFilterFromArgs(JSONObject argsObject, int srs, String coll) {
 		String left = null;
 		String right = null;
 		String top = null;
@@ -547,18 +612,76 @@ public class WCPSQueryFactory {
 		for (Object argsKey : argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
 			if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
+				
 				JSONObject extentObject = (JSONObject) argsObject.get(argsKeyStr);
+				
 				for (Object extentKey : extentObject.keySet()) {
 					String extentKeyStr = extentKey.toString();
 
+					JSONObject extent;
+					JSONObject jsonresp = null;
+					try {
+						jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/" + coll);
+					} catch (JSONException e) {
+						log.error("An error occured: " + e.getMessage());
+						StringBuilder builder = new StringBuilder();
+						for (StackTraceElement element : e.getStackTrace()) {
+							builder.append(element.toString() + "\n");
+						}
+						log.error(builder.toString());
+					} catch (IOException e) {
+						log.error("An error occured: " + e.getMessage());
+						StringBuilder builder = new StringBuilder();
+						for (StackTraceElement element : e.getStackTrace()) {
+							builder.append(element.toString() + "\n");
+						}
+						log.error(builder.toString());
+					}
+					extent = jsonresp.getJSONObject("extent");
+					JSONArray spatial = extent.getJSONArray("spatial");
+					double westlower = spatial.getDouble(0);
+					double eastupper = spatial.getDouble(2);
+					
+					double southlower = spatial.getDouble(1);
+					double northupper = spatial.getDouble(3);
+					
+					log.debug("spatial extent is: " + spatial);
+					double leftlower = 0;
+					double rightupper = 0;
+					double topupper = 0;
+					double bottomlower = 0;
+					
 					if (extentKeyStr.equals("west")) {
-						left = "" + extentObject.get(extentKeyStr);
+						left = "" + extentObject.get(extentKeyStr).toString();
+						leftlower = Double.parseDouble(left);
+						if (leftlower < westlower) {
+							
+							left = Double.toString(westlower);
+						}
+						
 					} else if (extentKeyStr.equals("east")) {
-						right = "" + extentObject.get(extentKeyStr);
+						right = "" + extentObject.get(extentKeyStr).toString();
+						rightupper = Double.parseDouble(right);
+						if (rightupper > eastupper) {
+							
+							right = Double.toString(eastupper);
+						}
+						
 					} else if (extentKeyStr.equals("north")) {
-						top = "" + extentObject.get(extentKeyStr);
+						top = "" + extentObject.get(extentKeyStr).toString();
+						topupper = Double.parseDouble(top);
+						if (topupper > northupper) {
+							
+				        	top = Double.toString(northupper);
+						}
+						
 					} else if (extentKeyStr.equals("south")) {
 						bottom = "" + extentObject.get(extentKeyStr);
+						bottomlower = Double.parseDouble(bottom);
+						if (bottomlower < southlower) {
+							
+				        	bottom = Double.toString(southlower).toString();
+						}
 					}
 				}
 				SpatialReference src = new SpatialReference();
@@ -574,9 +697,9 @@ public class WCPSQueryFactory {
 				c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(bottom));
 				c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(top));
 				left = Double.toString(c1[0]);
-				top = Double.toString(c2[1]);
-				right = Double.toString(c2[0]);
 				bottom = Double.toString(c1[1]);
+				right = Double.toString(c2[0]);
+				top = Double.toString(c2[1]);
 			}
 		}
 		if (left != null && right != null && top != null && bottom != null) {

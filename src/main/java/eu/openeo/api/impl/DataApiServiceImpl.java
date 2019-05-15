@@ -320,7 +320,7 @@ public class DataApiServiceImpl extends DataApiService {
 			src.ImportFromEPSG(Integer.parseInt(srsDescription));
 
 			SpatialReference dst = new SpatialReference();
-			dst.SetWellKnownGeogCS("WGS84");
+			dst.ImportFromEPSG(4326);
 			
 			
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
