@@ -3,13 +3,17 @@ package eu.openeo.api.impl;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -32,10 +36,7 @@ public class CollectionApiServiceImpl extends CollectionApiService {
 
 	Logger log = Logger.getLogger(this.getClass());
 	
-//	private SAXBuilder builder = null;
-//	
 	public CollectionApiServiceImpl() {
-		//this.builder = new SAXBuilder();
 		gdal.AllRegister();
 	}
 
@@ -391,200 +392,9 @@ public class CollectionApiServiceImpl extends CollectionApiService {
 	}
 
 	@Override
-	public Response collectionProductIdCoveragesGet(String productId, SecurityContext securityContext)
+	public Response collectionProductIdCoveragesGet(String collectionId, SecurityContext securityContext)
 			throws NotFoundException {
-		try {
-			
-			URL url;
-			url = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
-					+ "?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCapabilities");
-
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestMethod("GET");
-			SAXBuilder builder = new SAXBuilder();
-			Document capabilititesDoc = (Document) builder.build(conn.getInputStream()); 
-			Element rootNode = capabilititesDoc.getRootElement();
-			Namespace defaultNS = rootNode.getNamespace();
-			log.debug("root node info: " + rootNode.getName());
-			List<Element> coverageList = rootNode.getChildren("Contents", defaultNS).get(0).getChildren("CoverageSummary", defaultNS);
-			JSONObject data = new JSONObject ();
-			JSONArray linksCollections = new JSONArray();
-				
-				JSONObject linkDesc = new JSONObject();
-				linkDesc.put("href", "http://saocompute.eurac.edu/rasdaman/ows");
-				linkDesc.put("rel", "self");
-				
-				JSONObject linkCsw = new JSONObject();
-				linkCsw.put("href", "https://openeo.org/api/csw");
-				linkCsw.put("rel", "alternate");
-				linkCsw.put("title", "openEO catalog (OGC Catalogue Services 3.0)");
-				
-				linksCollections.put(linkDesc);
-				linksCollections.put(linkCsw);
-			
-								
-			JSONArray productArray = new JSONArray();
-			log.debug("number of coverages found: " + coverageList.size());
-			
-						
-			for(int c = 0; c < coverageList.size(); c++) {
-				Element coverage = coverageList.get(c);
-				log.debug("root node info: " + coverage.getName() + ":" + coverage.getChildText("CoverageId", defaultNS));		
-				
-				JSONObject product = new JSONObject();
-				
-                JSONObject extentCollection = new JSONObject();
-				
-				JSONArray spatialExtent = new JSONArray();
-				JSONArray temporalExtent =  new JSONArray();
-				
-				String coverageID = coverage.getChildText("CoverageId", defaultNS);
-				
-				URL urlCollections = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
-						+ "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageID);
-				
-				HttpURLConnection connCollections = (HttpURLConnection) urlCollections.openConnection();
-				connCollections.setRequestMethod("GET");
-				SAXBuilder builderInt = new SAXBuilder();
-				Document capabilititesDocCollections = (Document) builderInt.build(connCollections.getInputStream());
-				List<Namespace> namespacesCollections = capabilititesDocCollections.getNamespacesIntroduced();
-				Element rootNodeCollections = capabilititesDocCollections.getRootElement();
-				Namespace defaultNSCollections = rootNodeCollections.getNamespace();
-				Namespace gmlNS = null;
-				Namespace sweNS = null;
-				for (int n = 0; n < namespacesCollections.size(); n++) {
-					Namespace current = namespacesCollections.get(n);
-					if(current.getPrefix().equals("swe")) {
-						sweNS = current;
-					}
-					if(current.getPrefix().equals("gmlcov")) {
-						gmlNS = current;
-					}
-				}
-				
-				log.debug("root node info: " + rootNodeCollections.getName());		
-				
-				Element coverageDescElement = rootNodeCollections.getChild("CoverageDescription", defaultNSCollections);
-				Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
-				Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
-				Element metadataElement = rootNodeCollections.getChild("CoverageDescription", defaultNSCollections).getChild("metadata", gmlNS).getChild("Extension", gmlNS);
-				
-				
-					//metadataObj = new JSONObject(metadataString1);
-					//String metadataString2 = metadataString1.replaceAll("\\n","");
-					//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
-					//metadataObj = new JSONObject(metadataString3);
-					//JSONArray slices = metadataObj.getJSONArray("slices");
-				
-				String srsDescription = boundingBoxElement.getAttributeValue("srsName");
-				log.debug(srsDescription);
-				try {
-					srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
-					srsDescription = srsDescription.replaceAll("EPSG:","");
-					
-				}catch(StringIndexOutOfBoundsException e) {
-					srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
-					srsDescription = srsDescription.replaceAll("EPSG:","");			
-				}
-				log.debug(srsDescription);				
-				
-				SpatialReference src = new SpatialReference();
-				src.ImportFromEPSG(Integer.parseInt(srsDescription));
-
-				SpatialReference dst = new SpatialReference();
-				dst.ImportFromEPSG(4326);
-				
-				log.debug(boundingBoxElement.getChildText("lowerCorner", gmlNS));
-			    log.debug(boundingBoxElement.getChildText("upperCorner", gmlNS));
-				String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
-				String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
-				
-			    CoordinateTransformation tx = new CoordinateTransformation(src, dst);
-			    
-			    String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
-			    int xIndex = 0;
-			    int yIndex = 0;
-			    for(int a = 0; a < axis.length; a++) {
-			    	log.debug(axis[a]);
-					if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long")){
-						xIndex=a;
-					}
-					if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
-						yIndex=a;
-					}
-					if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
-						temporalExtent.put(minValues[a].replaceAll("\"", ""));
-						temporalExtent.put(maxValues[a].replaceAll("\"", ""));
-					}
-			    }
-			    
-				double[] c1 = null;
-				double[] c2 = null;
-				c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
-				c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));				
-				
-				spatialExtent.put(c1[0]);
-				spatialExtent.put(c1[1]);
-				spatialExtent.put(c2[0]);
-				spatialExtent.put(c2[1]);			
-									
-				extentCollection.put("spatial", spatialExtent);
-				extentCollection.put("temporal", temporalExtent);
-				
-				JSONArray linksPerCollection = new JSONArray();
-				
-				JSONObject linkDescPerCollection = new JSONObject();
-				linkDescPerCollection.put("href", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageID);
-				linkDescPerCollection.put("rel", "self");
-				
-				JSONObject linkLicensePerCollection = new JSONObject();
-				linkLicensePerCollection.put("href", "https://creativecommons.org/licenses/by/4.0/");
-				linkLicensePerCollection.put("rel", "license");
-				
-				linksPerCollection.put(linkDescPerCollection);
-				linksPerCollection.put(linkLicensePerCollection);
-				
-				
-				product.put("id", coverage.getChildText("CoverageId", defaultNS));
-				product.put("title", coverage.getChildText("CoverageId", defaultNS));
-				product.put("description", coverage.getChildText("CoverageId", defaultNS));
-				product.put("license", "CC-BY-4.0");
-				product.put("extent", extentCollection);
-				product.put("links", linksPerCollection);
-				productArray.put(product);
-			}
-			
-			data.put("coverages", productArray);
-			data.put("links", linksCollections);
-			return Response.ok(data.toString(4), MediaType.APPLICATION_JSON).build();
-			
-		} catch (MalformedURLException e) {
-			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
-			for( StackTraceElement element: e.getStackTrace()) {
-				log.error(element.toString());
-			}
-			return Response.serverError()
-					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
-							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage()))
-					.build();
-		} catch (IOException e) {
-			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
-			for( StackTraceElement element: e.getStackTrace()) {
-				log.error(element.toString());
-			}
-			return Response.serverError()
-					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
-							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage()))
-					.build();
-		} catch (JDOMException e) {
-			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
-			for( StackTraceElement element: e.getStackTrace()) {
-				log.error(element.toString());
-			}
-			return Response.serverError()
-					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
-							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage())).build();
-		}
+		return this.collectionProductIdGet(collectionId, securityContext);
 	}
 
 	@Override
@@ -593,7 +403,7 @@ public class CollectionApiServiceImpl extends CollectionApiService {
 		URL url;
 		try {
 			url = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
-					+ "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageId);
+					+ "?SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageId);
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
@@ -624,13 +434,7 @@ public class CollectionApiServiceImpl extends CollectionApiService {
 			JSONObject metadataObj = new JSONObject();
 			if(metadataElement != null) {
 				String metadataString1 = metadataElement.getChildText("covMetadata", gmlNS);
-				//metadataObj = new JSONObject(metadataString1);
-				//String metadataString2 = metadataString1.replaceAll("\\n","");
-				//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
-				//metadataObj = new JSONObject(metadataString3);
-				//JSONArray slices = metadataObj.getJSONArray("slices");
-			}
-			
+			}			
 			
 			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
 			try {
@@ -639,27 +443,22 @@ public class CollectionApiServiceImpl extends CollectionApiService {
 				
 			}catch(StringIndexOutOfBoundsException e) {
 				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
-				srsDescription = srsDescription.replaceAll("EPSG:","");
-							
-			}
-			
+				srsDescription = srsDescription.replaceAll("EPSG:","");							
+			}			
 			
             JSONObject extentCollection = new JSONObject();
 			
 			JSONArray spatialExtent = new JSONArray();
-			JSONArray temporalExtent =  new JSONArray();
-			
+			JSONArray temporalExtent =  new JSONArray();			
 			
 			SpatialReference src = new SpatialReference();
 			src.ImportFromEPSG(Integer.parseInt(srsDescription));
 
 			SpatialReference dst = new SpatialReference();
-			dst.ImportFromEPSG(4326);
-			
+			dst.ImportFromEPSG(4326);			
 			
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
-			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
-			
+			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");			
 			
 			CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 		    
@@ -805,187 +604,48 @@ public class CollectionApiServiceImpl extends CollectionApiService {
 	}
 
 	@Override
-	public Response coveragesCoverageIdGet(String coverageId, SecurityContext securityContext)
+	public Response coveragesCoverageIdGet(String coverageId, String format, List<String> subset, SecurityContext securityContext)
 			throws NotFoundException {
 		URL url;
+		HttpURLConnection conn = null;
 		try {
-			url = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
-					+ "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageId);
-
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setRequestMethod("GET");
-			SAXBuilder builder = new SAXBuilder();
-			Document capabilititesDoc = (Document) builder.build(conn.getInputStream());
-			List<Namespace> namespaces = capabilititesDoc.getNamespacesIntroduced();
-			Element rootNode = capabilititesDoc.getRootElement();
-			Namespace defaultNS = rootNode.getNamespace();
-			Namespace gmlNS = null;
-			Namespace sweNS = null;
-			for (int n = 0; n < namespaces.size(); n++) {
-				Namespace current = namespaces.get(n);
-				if(current.getPrefix().equals("swe")) {
-					sweNS = current;
-				}
-				if(current.getPrefix().equals("gmlcov")) {
-					gmlNS = current;
+			String[] parts = coverageId.split("&");
+			for(String part: parts) {
+				if(part.contains("format=")) {
+					format=part.replace("format=", "");
+				}else if(part.contains("subset=")) {
+					subset.add(part.replace("subset=", ""));
 				}
 			}
-			
-			log.debug("root node info: " + rootNode.getName());		
-			List<Element> bandList = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
-			
-			Element coverageDescElement = rootNode.getChild("CoverageDescription", defaultNS);
-			Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
-			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
-			Element metadataElement = rootNode.getChild("CoverageDescription", defaultNS).getChild("metadata", gmlNS).getChild("Extension", gmlNS);
-			JSONObject metadataObj = new JSONObject();
-			if(metadataElement != null) {
-				String metadataString1 = metadataElement.getChildText("covMetadata", gmlNS);
-				//metadataObj = new JSONObject(metadataString1);
-				//String metadataString2 = metadataString1.replaceAll("\\n","");
-				//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
-				//metadataObj = new JSONObject(metadataString3);
-				//JSONArray slices = metadataObj.getJSONArray("slices");
+			StringBuilder urlString = new StringBuilder(ConvenienceHelper.readProperties("wcps-endpoint")
+					+ "?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=" + parts[0]);
+			StringBuilder queryString = new StringBuilder();
+			if(format!=null) {
+				queryString.append("&format="+format);
 			}
-			
-			
-			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
-			try {
-				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
-				srsDescription = srsDescription.replaceAll("EPSG:","");
-				
-			}catch(StringIndexOutOfBoundsException e) {
-				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
-				srsDescription = srsDescription.replaceAll("EPSG:","");
-							
+			log.debug(coverageId);
+			log.debug(format);
+			log.debug("subset is null:"  + subset==null);
+			log.debug("subset size is:"  + subset.size());
+			if(subset != null && subset.size() > 0) {
+				for(String subsetString: subset) {
+					log.debug(subsetString);
+					queryString.append("&subset="+subsetString.replace("\"", "%22"));
+				}
 			}
+			log.debug(urlString.toString() + queryString.toString());
+			String test = "http://saocompute.eurac.edu/rasdaman/ows?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=openEO_S2_32632_60m_L2A&format=image/png&subset=E(399960,419960)&subset=N(5090220,5100220)&subset=DATE(%222018-06-04%22)";
+			URI uri= new URI(urlString.toString() + queryString.toString());
+			log.debug(uri.toString());
+			//uri = new URI(test);
+			//url = new URL(urlString.toString() + URLEncoder.encode(queryString.toString(),"UTF-8").replace("+", "%20").replace(" ", "%20"));
+			url = uri.toURL();
+			conn = (HttpURLConnection) url.openConnection();
+			//conn.setRequestMethod("GET");
+			byte[] response = IOUtils.toByteArray(conn.getInputStream());
 			
+			return Response.ok(response, MediaType.WILDCARD).build();
 			
-            JSONObject extentCollection = new JSONObject();
-			
-			JSONArray spatialExtent = new JSONArray();
-			JSONArray temporalExtent =  new JSONArray();
-			
-			
-			SpatialReference src = new SpatialReference();
-			src.ImportFromEPSG(Integer.parseInt(srsDescription));
-
-			SpatialReference dst = new SpatialReference();
-			dst.ImportFromEPSG(4326);
-			
-			
-			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
-			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
-			
-			
-			CoordinateTransformation tx = new CoordinateTransformation(src, dst);
-		    
-		    String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
-		    int xIndex = 0;
-		    int yIndex = 0;
-		    for(int a = 0; a < axis.length; a++) {
-		    	log.debug(axis[a]);
-				if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long")){
-					xIndex=a;
-				}
-				if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
-					yIndex=a;
-				}
-				if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
-					temporalExtent.put(minValues[a].replaceAll("\"", ""));
-					temporalExtent.put(maxValues[a].replaceAll("\"", ""));
-				}
-		    }
-		    
-			log.debug(srsDescription);
-			
-			double[] c1 = null;
-			double[] c2 = null;
-			c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
-			c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));				
-			
-			spatialExtent.put(c1[0]);
-			spatialExtent.put(c1[1]);
-			spatialExtent.put(c2[0]);
-			spatialExtent.put(c2[1]);	
-			
-			JSONArray links = new JSONArray();
-			
-			JSONObject linkSelf = new JSONObject();
-			linkSelf.put("href", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageId);
-			linkSelf.put("rel", "self");
-			
-			JSONObject linkLicense = new JSONObject();
-			linkLicense.put("href", "https://creativecommons.org/licenses/by/4.0/");
-			linkLicense.put("rel", "license");
-			
-			JSONObject linkAbout = new JSONObject();
-			linkAbout.put("href", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageId);
-			linkAbout.put("title", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageId);
-			linkAbout.put("rel", "about");
-			
-			links.put(linkSelf);
-			links.put(linkLicense);
-			links.put(linkAbout);
-		
-			
-			JSONArray keywords = new JSONArray();
-			//String keyword1 = metadataObj.getString("Project");
-			//keywords.put(keyword1);
-			
-			//String providerName = metadataObj.getString("Creator");
-			
-			JSONArray provider = new JSONArray();
-			JSONObject providerInfo = new JSONObject();
-			//providerInfo.put("name", providerName);
-			providerInfo.put("url", coverageId);
-			provider.put(providerInfo);
-			
-			//String title = metadataObj.getString("Title");
-								
-			JSONObject coverage = new JSONObject();
-			
-			coverage.put("id", coverageId);
-			//coverage.put("title", title);
-			coverage.put("description", coverageId);
-			coverage.put("license", "CC-BY-4.0");
-			coverage.put("keywords", keywords);
-			coverage.put("provider", provider);
-			coverage.put("links", links);
-			extentCollection.put("spatial", spatialExtent);
-			extentCollection.put("temporal", temporalExtent);
-			
-			coverage.put("extent", extentCollection);
-			coverage.put("eo:epsg", Double.parseDouble(srsDescription));
-			coverage.put("sci:citation", coverageId);
-			coverage.put("eo:platform", coverageId);
-			coverage.put("eo:constellation", "Sentinel");
-			
-			
-			JSONObject bandObject = new JSONObject();
-			log.debug("number of bands found: " + bandList.size());
-			
-			for(int c = 0; c < bandList.size(); c++) {
-				Element band = bandList.get(c);
-				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
-				JSONObject product = new JSONObject();
-				String bandId = band.getAttributeValue("name");
-				//JSONObject bands = metadataObj.getJSONObject("bands");
-				//JSONObject bandName = bands.getJSONObject(bandId);
-				//String bandWavelength = bandName.getString("WAVELENGTH");
-				
-				product.put("common_name", bandId);
-				//product.put("center_wavelength", bandWavelength);
-				product.put("resolution", bandId);
-				product.put("scale", bandId);
-				product.put("offset", bandId);
-				
-				bandObject.put(bandId, product);
-			}
-			
-			coverage.put("eo:bands", bandObject);
-			//coverage.put("extraMetadata", metadataObj);
-			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
 			log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
@@ -998,7 +658,7 @@ public class CollectionApiServiceImpl extends CollectionApiService {
 							"An error occured while describing coverage from WCPS endpoint: " + e.getMessage()))
 					.build();
 		} catch (IOException e) {
-			log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
+			log.error("IO Ex: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
 			for( StackTraceElement element: e.getStackTrace()) {
 				builder.append(element.toString()+"\n");
@@ -1006,10 +666,10 @@ public class CollectionApiServiceImpl extends CollectionApiService {
 			log.error(builder.toString());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
-							"An error occured while describing coverage from WCPS endpoint: " + e.getMessage()))
+							"IO Ex: " + e.getMessage()))
 					.build();
-		} catch (JDOMException e) {
-			log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
+		} catch (URISyntaxException e) {
+			log.error("An error occured while creating uri: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
 			for( StackTraceElement element: e.getStackTrace()) {
 				builder.append(element.toString()+"\n");
@@ -1017,7 +677,8 @@ public class CollectionApiServiceImpl extends CollectionApiService {
 			log.error(builder.toString());
 			return Response.serverError()
 					.entity(new ApiResponseMessage(ApiResponseMessage.ERROR,
-							"An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage())).build();
+							"An error occured while creating uri: " + e.getMessage()))
+					.build();
 		}
 	}
 

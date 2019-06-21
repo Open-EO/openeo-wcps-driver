@@ -1,5 +1,7 @@
 package eu.openeo.api;
 
+import java.util.List;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -27,7 +29,7 @@ public abstract class CollectionApiService {
 	public abstract Response collectionProductIdOptions(String productId, SecurityContext securityContext)
 			throws NotFoundException;
 	
-	public abstract Response coveragesCoverageIdGet(String coverageID, SecurityContext securityContext)
+	public abstract Response coveragesCoverageIdGet(String coverageID, String format, List<String> subset, SecurityContext securityContext)
 			throws NotFoundException;
 	
 	public abstract Response coveragesGet(String qname, String qgeom, String qstartdate, String qenddate, SecurityContext securityContext)

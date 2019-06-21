@@ -1,5 +1,7 @@
 package eu.openeo.api;
 
+import java.util.List;
+
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -238,7 +240,7 @@ public class CollectionApi {
 	}
 	
 	@GET
-	@Path("/coverages/{coverage_id}")
+	@Path("/coverages/{coverageid}/")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
 	@io.swagger.annotations.ApiOperation(value = "Returns further information on a given EO product available at the back-end.", notes = "The request will ask the back-end for further details about a product specified by the identifier `name`", response = InlineResponse2002.class, authorizations = {
@@ -256,8 +258,10 @@ public class CollectionApi {
 
 			@io.swagger.annotations.ApiResponse(code = 503, message = "The service is currently unavailable.", response = Void.class) })
 	public Response coveragesCoverageIdGet(
-			@ApiParam(value = "product identifier string such as `MOD18Q1`", required = true) @PathParam("coverage_id") String productId,
+			@ApiParam(value = "Output format to be used. Supported formats and options can be retrieved using the `GET /capabilities/output_formats` endpoint. If no output format has been specified here or for the job in general, the back-end falls back to its default format, which is  specified in the `GET /capabilities/output_formats` endpoint. **Note:** The options available to the specified output format can be added as individual query parameters to the request.") @QueryParam("format") String format,
+			@ApiParam(value = "Subset ") @QueryParam("subset") List<String> subset,
+			@ApiParam(value = "product identifier string such as `MOD18Q1`", required = true) @PathParam("coverageid") String productId,
 			@Context SecurityContext securityContext) throws NotFoundException {
-		return delegate.coveragesCoverageIdGet(productId, securityContext);
+		return delegate.coveragesCoverageIdGet(productId, format, subset, securityContext);
 	}
 }
