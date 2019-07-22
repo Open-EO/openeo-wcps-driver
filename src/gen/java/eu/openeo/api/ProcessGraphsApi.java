@@ -8,10 +8,10 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
 import eu.openeo.model.Error;
-import eu.openeo.model.InlineObject2;
-import eu.openeo.model.InlineObject3;
-import eu.openeo.model.InlineResponse2007;
-import eu.openeo.model.InlineResponse2008;
+import eu.openeo.model.StoreProcessGraphRequest;
+import eu.openeo.model.StoredProcessGraphListResponse;
+import eu.openeo.model.StoredProcessGraphResponse;
+import eu.openeo.model.UpdateStoredProcessGraphRequest;
 
 import java.util.Map;
 import java.util.List;
@@ -34,7 +34,7 @@ import javax.validation.Valid;
 
 
 @io.swagger.annotations.Api(description = "the process_graphs API")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-02-12T13:52:55.621+01:00[Europe/Rome]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class ProcessGraphsApi  {
    private final ProcessGraphsApiService delegate;
 
@@ -63,15 +63,15 @@ public class ProcessGraphsApi  {
     
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "List all stored process graphs", notes = "This service lists all process graphs of the authenticated user that are stored at the back-end.", response = InlineResponse2007.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "List all stored process graphs", notes = "This service lists all process graphs of the authenticated user that are stored at the back-end.", response = StoredProcessGraphListResponse.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "Bearer")
     }, tags={ "Process Graph Management", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "JSON array with stored process graph meta data", response = InlineResponse2007.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "JSON array with stored process graph meta data", response = StoredProcessGraphListResponse.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
+        @io.swagger.annotations.ApiResponse(code = 4XX, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
         
-        @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
+        @io.swagger.annotations.ApiResponse(code = 5XX, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
     public Response processGraphsGet(@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.processGraphsGet(securityContext);
@@ -86,13 +86,13 @@ public class ProcessGraphsApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "The resource has been created successfully and the location of the newly created resource is advertized by the back-end.  Examples: * `POST /services` redirects to `GET /services/{service_id}` * `POST /jobs` redirects to `GET /jobs/{job_id}`", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
+        @io.swagger.annotations.ApiResponse(code = 4XX, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
         
-        @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
-    public Response processGraphsPost(@ApiParam(value = "" ) @Valid InlineObject2 inlineObject2
+        @io.swagger.annotations.ApiResponse(code = 5XX, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
+    public Response processGraphsPost(@ApiParam(value = "" ) @Valid StoreProcessGraphRequest storeProcessGraphRequest
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.processGraphsPost(inlineObject2,securityContext);
+        return delegate.processGraphsPost(storeProcessGraphRequest, securityContext);
     }
     @DELETE
     @Path("/{process_graph_id}")
@@ -104,31 +104,31 @@ public class ProcessGraphsApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 204, message = "The process graph has been successfully deleted", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
+        @io.swagger.annotations.ApiResponse(code = 4XX, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
         
-        @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
-    public Response processGraphsProcessGraphIdDelete(@ApiParam(value = "Unique process graph identifier.",required=true, defaultValue="null") @PathParam("process_graph_id") String processGraphId
+        @io.swagger.annotations.ApiResponse(code = 5XX, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
+    public Response processGraphsProcessGraphIdDelete(@ApiParam(value = "Unique process graph identifier.",required=true) @PathParam("process_graph_id") String processGraphId
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.processGraphsProcessGraphIdDelete(processGraphId,securityContext);
+        return delegate.processGraphsProcessGraphIdDelete(processGraphId, securityContext);
     }
     @GET
     @Path("/{process_graph_id}")
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Full metadata for a stored process graph", notes = "Returns all information about a process graph.", response = InlineResponse2008.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Full metadata for a stored process graph", notes = "Returns all information about a process graph.", response = StoredProcessGraphResponse.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "Bearer")
     }, tags={ "Process Graph Management", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "JSON object with process graph", response = InlineResponse2008.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "JSON object with process graph", response = StoredProcessGraphResponse.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
+        @io.swagger.annotations.ApiResponse(code = 4XX, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
         
-        @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
-    public Response processGraphsProcessGraphIdGet(@ApiParam(value = "Unique process graph identifier.",required=true, defaultValue="null") @PathParam("process_graph_id") String processGraphId
+        @io.swagger.annotations.ApiResponse(code = 5XX, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
+    public Response processGraphsProcessGraphIdGet(@ApiParam(value = "Unique process graph identifier.",required=true) @PathParam("process_graph_id") String processGraphId
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.processGraphsProcessGraphIdGet(processGraphId,securityContext);
+        return delegate.processGraphsProcessGraphIdGet(processGraphId, securityContext);
     }
     @PATCH
     @Path("/{process_graph_id}")
@@ -140,13 +140,13 @@ public class ProcessGraphsApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 204, message = "The process graph data has been updated successfully.", response = Void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
+        @io.swagger.annotations.ApiResponse(code = 4XX, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
         
-        @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
-    public Response processGraphsProcessGraphIdPatch(@ApiParam(value = "Unique process graph identifier.",required=true, defaultValue="null") @PathParam("process_graph_id") String processGraphId
-,@ApiParam(value = "" ) @Valid InlineObject3 inlineObject3
+        @io.swagger.annotations.ApiResponse(code = 5XX, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
+    public Response processGraphsProcessGraphIdPatch(@ApiParam(value = "Unique process graph identifier.",required=true) @PathParam("process_graph_id") String processGraphId
+,@ApiParam(value = "" ) @Valid UpdateStoredProcessGraphRequest updateStoredProcessGraphRequest
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.processGraphsProcessGraphIdPatch(processGraphId,inlineObject3,securityContext);
+        return delegate.processGraphsProcessGraphIdPatch(processGraphId, updateStoredProcessGraphRequest, securityContext);
     }
 }
