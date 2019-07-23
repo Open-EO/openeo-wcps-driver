@@ -3,7 +3,7 @@
 [![Status](https://img.shields.io/badge/Status-proof--of--concept-yellow.svg)]()
 
 ## Information
-- API version: 0.3.1
+- API version: 0.4.2
 - JAVA: 8
 
 This repository serves for the development of the openEO driver for WC(P)S backends.
@@ -15,16 +15,16 @@ This repository serves for the development of the openEO driver for WC(P)S backe
 ### OpenEO core API definition
 [openEO core API](https://open-eo.github.io/openeo-api/)
 ### Public testing endpoint (hosted @ [Eurac Research](http://www.eurac.edu))
-[http://saocompute.eurac.edu/openEO_0_3_0/openeo/](http://saocompute.eurac.edu/openEO_0_3_0/openeo/)
+[https://openeo.eurac.edu](https://openeo.eurac.edu)
 
 ## Usage of the service
 
 ### Currently implemented features
-1. Listing implemented endpoints through: [/](http://saocompute.eurac.edu/openEO_0_3_0/openeo/)
-2. Listing implemented processes through: [/processes](http://saocompute.eurac.edu/openEO_0_3_0/openeo/processes)
-3. Listing available datasets through:    [/collections](http://saocompute.eurac.edu/openEO_0_3_0/openeo/collections)
-4. Submission of processing graphs via /jobs
-5. Direct execution and result retrieval via /preview
+1. Listing implemented endpoints through: [/ (GET)](https://openeo.eurac.edu/)
+2. Listing implemented processes through: [/processes (GET)](https://openeo.eurac.edu/processes)
+3. Listing available datasets through:    [/collections (GET)](https://openeo.eurac.edu/collections)
+4. Submission of processing graphs via [/jobs (POST)](https://openeo.eurac.edu/jobs)
+5. Direct execution and result retrieval via [/results (POST)](https://openeo.eurac.edu/results)
 6. Processing of raster
   * subsetting in crs projection space
   * Normalied Difference Vegetation Index
@@ -47,7 +47,7 @@ A note on download activities. In this domain the service is not fully compliant
 
 ### Operating environment dependencies
 - Web server capable of hosting a war archive (e.g. apache tomcat).
-- WCPS compliant web service (e.g. rasdaman 9.7)
+- WCPS compliant web service (e.g. rasdaman 9.8)
 
 ### Configuration
 Configuration of the running service is done in the *config.properties* file, which should be in the class path of the war file.
@@ -57,7 +57,7 @@ Configuration of the running service is done in the *config.properties* file, wh
 ### Compiling the WAR-archive
 The current git project is setup as a runnable web archive maven project in eclipse. In order to compile the source simple run maven clean install. The project is configured to pack all necessary dependencies into the WAR so no extra libraries need to be installed on the host machine running the web server instance and one simply needs to copy the war archive into the e.g. the webapps folder of a tomcat installation. 
 
-### Migration Plan for v0.4.0
+### Migration Plan for v0.4
 
 - [ ] 
 - [ ] 
