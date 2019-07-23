@@ -1,33 +1,18 @@
 package eu.openeo.api;
 
-import eu.openeo.model.*;
-import eu.openeo.api.DefaultApiService;
-import eu.openeo.api.factories.DefaultApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
-import eu.openeo.model.CapabilitiesResponse;
-import eu.openeo.model.Error;
-
-import java.util.Map;
-import java.util.List;
-import eu.openeo.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
 import javax.servlet.ServletConfig;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.*;
-import javax.validation.constraints.*;
-import javax.validation.Valid;
 
-@Path("/default")
+import eu.openeo.api.factories.DefaultApiServiceFactory;
+import eu.openeo.model.CapabilitiesResponse;
+import eu.openeo.model.Error;
+
+@Path("/")
 
 
 @io.swagger.annotations.Api(description = "the default API")
