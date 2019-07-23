@@ -160,41 +160,28 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			links.put(linkLicense);
 			links.put(linkAbout);
 		
-			
 			JSONArray keywords = new JSONArray();
 			//String keyword1 = metadataObj.getString("Project");
 			//keywords.put(keyword1);
 			
 			//String providerName = metadataObj.getString("Creator");
 			
-			JSONArray provider = new JSONArray();
-			JSONObject providerInfo = new JSONObject();
-			//providerInfo.put("name", providerName);
-			providerInfo.put("url", collectionId);
-			provider.put(providerInfo);
+			JSONArray roles1 = new JSONArray();
+			//String role1 = metadataObj.getString("Roles");
+			//keywords.put(role1);
 			
-			//String title = metadataObj.getString("Title");
-								
-			JSONObject coverage = new JSONObject();
-			
-			coverage.put("name", collectionId);
-			//coverage.put("title", title);
-			coverage.put("description", collectionId);
-			coverage.put("license", "CC-BY-4.0");
-			coverage.put("keywords", keywords);
-			coverage.put("provider", provider);
-			coverage.put("links", links);
-			extentCollection.put("spatial", spatialExtent);
-			extentCollection.put("temporal", temporalExtent);
-			
-			coverage.put("extent", extentCollection);
-			coverage.put("eo:epsg", Double.parseDouble(srsDescription));
-			coverage.put("sci:citation", collectionId);
-			coverage.put("eo:platform", collectionId);
-			coverage.put("eo:constellation", "Sentinel");
+			JSONArray provider1 = new JSONArray();
+			JSONObject provider1Info = new JSONObject();
+			provider1Info.put("name", "European Space Agency");
+			provider1Info.put("roles", roles1);
+			provider1Info.put("url", collectionId);
+			provider1.put(provider1Info);
 			
 			
-			JSONObject bandObject = new JSONObject();
+			JSONObject properties = new JSONObject();
+			JSONObject other_properties = new JSONObject();
+			
+			JSONArray bandArray = new JSONArray();
 			log.debug("number of bands found: " + bandList.size());
 			
 			for(int c = 0; c < bandList.size(); c++) {
@@ -208,15 +195,60 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				
 				product.put("common_name", bandId);
 				//product.put("center_wavelength", bandWavelength);
-				product.put("resolution", bandId);
-				product.put("scale", bandId);
-				product.put("offset", bandId);
+				product.put("name", bandId);
+				product.put("center_wavelength", bandId);
+				product.put("gsd", bandId);
 				
-				bandObject.put(bandId, product);
+				
+				bandArray.put(product);
 			}
 			
-			coverage.put("eo:bands", bandObject);
+			JSONArray epsg_values = new JSONArray();
+			JSONObject epsgvalues = new JSONObject();
+			epsgvalues.put("values", epsg_values);
+			
+			JSONArray platform_values = new JSONArray();
+			JSONObject pltfrmvalues = new JSONObject();
+			pltfrmvalues.put("values", platform_values);
+			
+			JSONArray cloud_cover = new JSONArray();
+			JSONObject cloud_cover_extent = new JSONObject();
+			cloud_cover_extent.put("extent", cloud_cover);
+			
+			JSONObject cube_dimensions = new JSONObject();
+			
+			
+			properties.put("cube:dimensions", cube_dimensions);
+			properties.put("eo:epsg", Double.parseDouble(srsDescription));
+			properties.put("sci:citation", collectionId);
+			properties.put("eo:constellation", "Sentinel-2");
+			properties.put("eo:instrument", "MSI");
+			properties.put("eo:bands", bandArray);
+			
+			other_properties.put("eo:platform", pltfrmvalues);
+			other_properties.put("eo:epsg", epsgvalues);
+			other_properties.put("eo:cloud_cover", cloud_cover_extent);
+			
+			//String title = metadataObj.getString("Title");
+								
+			JSONObject coverage = new JSONObject();
+			
 			//coverage.put("extraMetadata", metadataObj);
+			coverage.put("stac_version", "0.6.2");
+			coverage.put("id", collectionId);
+			coverage.put("title", collectionId);
+			coverage.put("description", collectionId);
+			coverage.put("license", "CC-BY-4.0");
+			coverage.put("keywords", keywords);
+			coverage.put("providers", provider1);
+			coverage.put("links", links);
+			extentCollection.put("spatial", spatialExtent);
+			extentCollection.put("temporal", temporalExtent);
+			coverage.put("extent", extentCollection);
+			coverage.put("properties", properties);
+			coverage.put("other_properties", other_properties);
+			
+
 			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
 			log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
@@ -254,7 +286,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
     }
     @Override
     public Response collectionsGet(SecurityContext securityContext) throws NotFoundException {
-    	try {			
+    	try {
 			URL url;
 			url = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
 					+ "?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCapabilities");
@@ -405,11 +437,34 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				linksPerCollection.put(linkLicensePerCollection);
 				
 				
-				product.put("name", coverage.getChildText("CoverageId", defaultNS));
+				JSONArray keywords = new JSONArray();
+				//String keyword1 = metadataObj.getString("Keywords");
+				//keywords.put(keyword1);
+				
+				//String providerName1 = metadataObj.getString("Creator");
+				
+				JSONArray roles1 = new JSONArray();
+				//String role1 = metadataObj.getString("Roles");
+				//keywords.put(role1);
+				
+				JSONArray provider1 = new JSONArray();
+				JSONObject provider1Info = new JSONObject();
+				provider1Info.put("name", "European Space Agency");
+				provider1Info.put("roles", roles1);
+				provider1Info.put("url", "SciHub");
+				provider1.put(provider1Info);
+				
+				//String title = metadataObj.getString("Title");
+				//String desc = metadataObj.getString("Description");
+				
+				product.put("stac_version", "0.6.2");
+				product.put("id", coverage.getChildText("CoverageId", defaultNS));
 				product.put("title", coverage.getChildText("CoverageId", defaultNS));
 				product.put("description", coverage.getChildText("CoverageId", defaultNS));
 				product.put("license", "CC-BY-4.0");
 				product.put("extent", extentCollection);
+				product.put("keywords", keywords);
+				product.put("providers", provider1);
 				product.put("links", linksPerCollection);
 				productArray.put(product);
 			}

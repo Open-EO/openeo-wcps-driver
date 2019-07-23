@@ -18,7 +18,7 @@ public class DefaultApiServiceImpl extends DefaultApiService {
     @Override
     public Response rootGet(SecurityContext securityContext) throws NotFoundException {
 
-		JSONArray getCapabilitiesMethods = new JSONArray();
+    	JSONArray getCapabilitiesMethods = new JSONArray();
 		getCapabilitiesMethods.put(new String("GET"));
 				
 		JSONArray outputFormatsMethods = new JSONArray();
@@ -67,7 +67,7 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		data.put("methods", dataMethods);
 		
 		JSONObject dataID = new JSONObject();
-		dataID.put("path", "/collections/{name}");
+		dataID.put("path", "/collections/{collection_id}");
 		dataID.put("methods", dataIDMethods);
 		
 		JSONObject jobs = new JSONObject();
@@ -109,22 +109,36 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		plans.put("name", "free");
 		plans.put("description", "Currently the service provided is free of Charge");
 		plans.put("url", "");
+		plans.put("paid", false);
 		
 		JSONArray plan = new JSONArray();
 		plan.put(plans);
 		
+		JSONObject link1 = new JSONObject();
+		link1.put("href", "http://saocompute.eurac.edu/rasdaman/ows");
+		link1.put("rel", "Sentinel Alpine Observatory");
+		link1.put("type", "text/html");
+		link1.put("title", "Homepage of the service provider");
+		
+		JSONArray link = new JSONArray();
+		link.put(link1);
 		
 		
 		JSONObject billing = new JSONObject();
 		billing.put("currency", "EUR");
+		billing.put("default_plan", "free");
 		billing.put("plans", plan);
 		
 		
 		
 		JSONObject mainObj = new JSONObject();
-		mainObj.put("version", "0.3.1");
+		mainObj.put("api_version", "0.4.2");
+		mainObj.put("backend_version", "0.4.2");
+		mainObj.put("title", "EURAC Backend");
+		mainObj.put("description", "EURAC backend provides Sentinel 2 Data available for processing through WCPS powered by Rasdaman");
 		mainObj.put("endpoints", endpointList);
 		//mainObj.put("billing", billing);
+		mainObj.put("links", link);
 		
 		return Response.ok(mainObj.toString(4), MediaType.APPLICATION_JSON).build();
     }
