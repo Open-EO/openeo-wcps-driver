@@ -13,22 +13,20 @@
 
 package eu.openeo.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import eu.openeo.model.AnyOfmapcollectionEocollectionSarcollectionSci;
-import eu.openeo.model.CollectionExtent;
-import eu.openeo.model.Link;
-import eu.openeo.model.STACCollectionOtherProperties;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.io.Serializable;
-import javax.validation.constraints.*;
+import java.util.Objects;
+
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * STACCollection
@@ -69,7 +67,7 @@ public class STACCollection  implements Serializable {
   private Map<String, STACCollectionOtherProperties> otherProperties = new HashMap<String, STACCollectionOtherProperties>();
 
   @JsonProperty("properties")
-  private AnyOfmapcollectionEocollectionSarcollectionSci properties = null;
+  private STACCollectionProperties properties = null;
 
   public STACCollection stacVersion(String stacVersion) {
     this.stacVersion = stacVersion;
@@ -317,7 +315,7 @@ public class STACCollection  implements Serializable {
     this.otherProperties = otherProperties;
   }
 
-  public STACCollection properties(AnyOfmapcollectionEocollectionSarcollectionSci properties) {
+  public STACCollection properties(STACCollectionProperties properties) {
     this.properties = properties;
     return this;
   }
@@ -329,11 +327,11 @@ public class STACCollection  implements Serializable {
   @JsonProperty("properties")
   @ApiModelProperty(required = true, value = "A list of all metadata properties, which are common across the whole collection.")
   @NotNull @Valid 
-  public AnyOfmapcollectionEocollectionSarcollectionSci getProperties() {
+  public STACCollectionProperties getProperties() {
     return properties;
   }
 
-  public void setProperties(AnyOfmapcollectionEocollectionSarcollectionSci properties) {
+  public void setProperties(STACCollectionProperties properties) {
     this.properties = properties;
   }
 

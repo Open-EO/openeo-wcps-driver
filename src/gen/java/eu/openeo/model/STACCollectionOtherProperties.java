@@ -13,38 +13,44 @@
 
 package eu.openeo.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import eu.openeo.model.AnyOfnumberDateTime;
-import eu.openeo.model.AnyOfnumberstringDateTimeboolean;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * STACCollectionOtherProperties
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
-public class STACCollectionOtherProperties  implements Serializable {
-  @JsonProperty("extent")
-  private List<AnyOfnumberDateTime> extent = null;
+public class STACCollectionOtherProperties extends STACCollectionProperties implements Serializable {
+	
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4294923250550575527L;
+
+@JsonProperty("extent")
+  private List<Date> extent = null;
 
   @JsonProperty("values")
-  private List<AnyOfnumberstringDateTimeboolean> values = null;
+  private List<Date> values = null;
 
-  public STACCollectionOtherProperties extent(List<AnyOfnumberDateTime> extent) {
+  public STACCollectionOtherProperties extent(List<Date> extent) {
     this.extent = extent;
     return this;
   }
 
-  public STACCollectionOtherProperties addExtentItem(AnyOfnumberDateTime extentItem) {
+  public STACCollectionOtherProperties addExtentItem(Date extentItem) {
     if (this.extent == null) {
-      this.extent = new ArrayList<AnyOfnumberDateTime>();
+      this.extent = new ArrayList<Date>();
     }
     this.extent.add(extentItem);
     return this;
@@ -57,22 +63,22 @@ public class STACCollectionOtherProperties  implements Serializable {
   @JsonProperty("extent")
   @ApiModelProperty(value = "If the dimension consists of [ordinal](https://en.wikipedia.org/wiki/Level_of_measurement#Ordinal_scale) values, the extent (lower and upper bounds) of the values as two-dimensional array. Strings are only allowed for temporal extents, which are formatted according to [RFC 3339, section 5.6](https://tools.ietf.org/html/rfc3339#section-5.6). Use `null` for open intervals.")
   @Valid  @Size(min=2,max=2)
-  public List<AnyOfnumberDateTime> getExtent() {
+  public List<Date> getExtent() {
     return extent;
   }
 
-  public void setExtent(List<AnyOfnumberDateTime> extent) {
+  public void setExtent(List<Date> extent) {
     this.extent = extent;
   }
 
-  public STACCollectionOtherProperties values(List<AnyOfnumberstringDateTimeboolean> values) {
+  public STACCollectionOtherProperties values(List<Date> values) {
     this.values = values;
     return this;
   }
 
-  public STACCollectionOtherProperties addValuesItem(AnyOfnumberstringDateTimeboolean valuesItem) {
+  public STACCollectionOtherProperties addValuesItem(Date valuesItem) {
     if (this.values == null) {
-      this.values = new ArrayList<AnyOfnumberstringDateTimeboolean>();
+      this.values = new ArrayList<Date>();
     }
     this.values.add(valuesItem);
     return this;
@@ -85,11 +91,11 @@ public class STACCollectionOtherProperties  implements Serializable {
   @JsonProperty("values")
   @ApiModelProperty(value = "If the property consists of [nominal](https://en.wikipedia.org/wiki/Level_of_measurement#Nominal_level), a set of all potential values can be specified. Only primitive data types allowed.")
   @Valid 
-  public List<AnyOfnumberstringDateTimeboolean> getValues() {
+  public List<Date> getValues() {
     return values;
   }
 
-  public void setValues(List<AnyOfnumberstringDateTimeboolean> values) {
+  public void setValues(List<Date> values) {
     this.values = values;
   }
 

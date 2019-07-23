@@ -13,22 +13,23 @@
 
 package eu.openeo.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import eu.openeo.model.OneOfstringjobError;
-import eu.openeo.model.ProcessNode;
-import eu.openeo.model.Status;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.io.Serializable;
-import javax.validation.constraints.*;
+import java.util.Objects;
+
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Defines full metadata of batch jobs that have been submitted by users.
@@ -36,7 +37,12 @@ import javax.validation.Valid;
 @ApiModel(description = "Defines full metadata of batch jobs that have been submitted by users.")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class BatchJobResponse  implements Serializable {
-  @JsonProperty("id")
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -4573513901285415858L;
+
+@JsonProperty("id")
   private String id;
 
   @JsonProperty("title")
@@ -55,7 +61,7 @@ public class BatchJobResponse  implements Serializable {
   private BigDecimal progress;
 
   @JsonProperty("error")
-  private OneOfstringjobError error = null;
+  private Error error = null;
 
   @JsonProperty("submitted")
   private Date submitted;
@@ -199,7 +205,7 @@ public class BatchJobResponse  implements Serializable {
     this.progress = progress;
   }
 
-  public BatchJobResponse error(OneOfstringjobError error) {
+  public BatchJobResponse error(Error error) {
     this.error = error;
     return this;
   }
@@ -211,11 +217,11 @@ public class BatchJobResponse  implements Serializable {
   @JsonProperty("error")
   @ApiModelProperty(value = "")
   @Valid 
-  public OneOfstringjobError getError() {
+  public Error getError() {
     return error;
   }
 
-  public void setError(OneOfstringjobError error) {
+  public void setError(Error error) {
     this.error = error;
   }
 

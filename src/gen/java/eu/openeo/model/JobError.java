@@ -30,8 +30,13 @@ import javax.validation.Valid;
  */
 @ApiModel(description = "An error message that describes the problem during the batch job execution. May only be available if the `status` is `error`. The error MUST be cleared if the job is started again (i.e. the status changes to `queue`).")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
-public class JobError  implements Serializable {
-  @JsonProperty("id")
+public class JobError  extends Error implements Serializable {
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 626638610214804455L;
+
+@JsonProperty("id")
   private String id;
 
   @JsonProperty("code")

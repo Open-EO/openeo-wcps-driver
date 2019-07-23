@@ -1,31 +1,15 @@
 package eu.openeo.api;
 
-import eu.openeo.model.*;
-import eu.openeo.api.UdfRuntimesApiService;
-import eu.openeo.api.factories.UdfRuntimesApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
-import eu.openeo.model.Error;
-import eu.openeo.model.OneOfobjectobject;
-
-import java.util.Map;
-import java.util.List;
-import eu.openeo.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
 import javax.servlet.ServletConfig;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.*;
-import javax.validation.constraints.*;
-import javax.validation.Valid;
+
+import eu.openeo.api.factories.UdfRuntimesApiServiceFactory;
+import eu.openeo.model.Error;
 
 @Path("/udf_runtimes")
 
@@ -60,11 +44,11 @@ public class UdfRuntimesApi  {
     
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Supported UDF runtimes", notes = "Returns a list of supported runtimes for user-defined functions (UDFs), which includes either the programming languages including version numbers and available libraries including version numbers or docker containers.", response = OneOfobjectobject.class, responseContainer = "Map", authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Supported UDF runtimes", notes = "Returns a list of supported runtimes for user-defined functions (UDFs), which includes either the programming languages including version numbers and available libraries including version numbers or docker containers.", response = Object.class, responseContainer = "Map", authorizations = {
         @io.swagger.annotations.Authorization(value = "Bearer")
     }, tags={ "Capabilities", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Description of UDF runtime support", response = OneOfobjectobject.class, responseContainer = "Map"),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Description of UDF runtime support", response = Object.class, responseContainer = "Map"),
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
         

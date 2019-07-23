@@ -17,7 +17,6 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import eu.openeo.model.AnyOfobjectstringnumberarraybooleanmap;
 import eu.openeo.model.Callback;
 import eu.openeo.model.CallbackParameter;
 import eu.openeo.model.ProcessNode;
@@ -87,7 +86,7 @@ public class ProcessArgumentValue  implements Serializable {
   private String description;
 
   @JsonProperty("default")
-  private AnyOfobjectstringnumberarraybooleanmap _default = null;
+  private Object _default = null;
 
   @JsonProperty("from_node")
   private String fromNode;
@@ -158,7 +157,7 @@ public class ProcessArgumentValue  implements Serializable {
     this.description = description;
   }
 
-  public ProcessArgumentValue _default(AnyOfobjectstringnumberarraybooleanmap _default) {
+  public ProcessArgumentValue _default(Map<String, Object> _default) {
     this._default = _default;
     return this;
   }
@@ -170,11 +169,11 @@ public class ProcessArgumentValue  implements Serializable {
   @JsonProperty("default")
   @ApiModelProperty(value = "Whenever no value for the variable is defined, the default value is used.")
   @Valid 
-  public AnyOfobjectstringnumberarraybooleanmap getDefault() {
+  public Object getDefault() {
     return _default;
   }
 
-  public void setDefault(AnyOfobjectstringnumberarraybooleanmap _default) {
+  public void setDefault(Object _default) {
     this._default = _default;
   }
 

@@ -13,23 +13,20 @@
 
 package eu.openeo.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import eu.openeo.model.Link;
-import eu.openeo.model.OneOfobjectobject;
-import eu.openeo.model.ProcessException;
-import eu.openeo.model.ProcessParameter;
-import eu.openeo.model.ProcessReturnValue;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.io.Serializable;
-import javax.validation.constraints.*;
+import java.util.Objects;
+
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Process
@@ -67,7 +64,7 @@ public class Process  implements Serializable {
   private Map<String, ProcessException> exceptions = null;
 
   @JsonProperty("examples")
-  private List<OneOfobjectobject> examples = null;
+  private List<ProcessExample> examples = null;
 
   @JsonProperty("links")
   private List<Link> links = null;
@@ -301,14 +298,14 @@ public class Process  implements Serializable {
     this.exceptions = exceptions;
   }
 
-  public Process examples(List<OneOfobjectobject> examples) {
+  public Process examples(List<ProcessExample> examples) {
     this.examples = examples;
     return this;
   }
 
-  public Process addExamplesItem(OneOfobjectobject examplesItem) {
+  public Process addExamplesItem(ProcessExample examplesItem) {
     if (this.examples == null) {
-      this.examples = new ArrayList<OneOfobjectobject>();
+      this.examples = new ArrayList<ProcessExample>();
     }
     this.examples.add(examplesItem);
     return this;
@@ -321,11 +318,11 @@ public class Process  implements Serializable {
   @JsonProperty("examples")
   @ApiModelProperty(value = "Examples, may be used for tests. Either `process_graph` or `arguments` must be set, never both.")
   @Valid 
-  public List<OneOfobjectobject> getExamples() {
+  public List<ProcessExample> getExamples() {
     return examples;
   }
 
-  public void setExamples(List<OneOfobjectobject> examples) {
+  public void setExamples(List<ProcessExample> examples) {
     this.examples = examples;
   }
 

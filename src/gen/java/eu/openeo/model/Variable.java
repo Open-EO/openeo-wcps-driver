@@ -13,16 +13,18 @@
 
 package eu.openeo.model;
 
+import java.io.Serializable;
 import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import eu.openeo.model.AnyOfobjectstringnumberarraybooleanmap;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.io.Serializable;
-import javax.validation.constraints.*;
-import javax.validation.Valid;
 
 /**
  * Process graphs can hold a variable, which can be filled in later. For shared process graphs this can be useful to make them more portable, e.g in case a back-end specific product name would be stored with the process graph.  If a process graph with a variable is about to be executed and neither a value nor a default value is specified, the back-end MUST reject the request with an error of type &#x60;VariableValueMissing&#x60;. The values are usually defined when loading the process graph with the &#x60;run_process_graph&#x60; process.  Invalid variable types MUST be rejected with error &#x60;VariableTypeInvalid&#x60;. If the default value is not compatible to the specified type an &#x60;VariableDefaultValueTypeInvalid&#x60; error MUST be sent. Invalid variable ids MUST be rejected with error &#x60;VariableIdInvalid&#x60;. 
@@ -30,7 +32,12 @@ import javax.validation.Valid;
 @ApiModel(description = "Process graphs can hold a variable, which can be filled in later. For shared process graphs this can be useful to make them more portable, e.g in case a back-end specific product name would be stored with the process graph.  If a process graph with a variable is about to be executed and neither a value nor a default value is specified, the back-end MUST reject the request with an error of type `VariableValueMissing`. The values are usually defined when loading the process graph with the `run_process_graph` process.  Invalid variable types MUST be rejected with error `VariableTypeInvalid`. If the default value is not compatible to the specified type an `VariableDefaultValueTypeInvalid` error MUST be sent. Invalid variable ids MUST be rejected with error `VariableIdInvalid`. ")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class Variable  implements Serializable {
-  @JsonProperty("variable_id")
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2929804199707147993L;
+
+@JsonProperty("variable_id")
   private String variableId;
 
   /**
@@ -79,7 +86,7 @@ public class Variable  implements Serializable {
   private String description;
 
   @JsonProperty("default")
-  private AnyOfobjectstringnumberarraybooleanmap _default = null;
+  private Object _default = null;
 
   public Variable variableId(String variableId) {
     this.variableId = variableId;
@@ -141,7 +148,7 @@ public class Variable  implements Serializable {
     this.description = description;
   }
 
-  public Variable _default(AnyOfobjectstringnumberarraybooleanmap _default) {
+  public Variable _default(Object _default) {
     this._default = _default;
     return this;
   }
@@ -153,11 +160,11 @@ public class Variable  implements Serializable {
   @JsonProperty("default")
   @ApiModelProperty(value = "Whenever no value for the variable is defined, the default value is used.")
   @Valid 
-  public AnyOfobjectstringnumberarraybooleanmap getDefault() {
+  public Object getDefault() {
     return _default;
   }
 
-  public void setDefault(AnyOfobjectstringnumberarraybooleanmap _default) {
+  public void setDefault(Object _default) {
     this._default = _default;
   }
 
