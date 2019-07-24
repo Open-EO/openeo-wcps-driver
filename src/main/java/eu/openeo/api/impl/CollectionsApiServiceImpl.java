@@ -144,19 +144,24 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			JSONArray links = new JSONArray();
 			
 			JSONObject linkSelf = new JSONObject();
-			linkSelf.put("href", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
+			linkSelf.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collectionId);
 			linkSelf.put("rel", "self");
+			
+			JSONObject linkAlternate = new JSONObject();
+			linkAlternate.put("href", ConvenienceHelper.readProperties("wcps-endpoint") + "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
+			linkAlternate.put("rel", "alternate");
 			
 			JSONObject linkLicense = new JSONObject();
 			linkLicense.put("href", "https://creativecommons.org/licenses/by/4.0/");
 			linkLicense.put("rel", "license");
 			
 			JSONObject linkAbout = new JSONObject();
-			linkAbout.put("href", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
-			linkAbout.put("title", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
+			linkAbout.put("href", ConvenienceHelper.readProperties("wcps-endpoint") + "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
+			linkAbout.put("title", ConvenienceHelper.readProperties("wcps-endpoint") + "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
 			linkAbout.put("rel", "about");
 			
 			links.put(linkSelf);
+			links.put(linkAlternate);
 			links.put(linkLicense);
 			links.put(linkAbout);
 		
@@ -172,9 +177,9 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			
 			JSONArray provider1 = new JSONArray();
 			JSONObject provider1Info = new JSONObject();
-			provider1Info.put("name", "European Space Agency");
+			provider1Info.put("name", "Eurac Research - Institute for Earth Observation");
 			provider1Info.put("roles", roles1);
-			provider1Info.put("url", collectionId);
+			provider1Info.put("url", "http://www.eurac.edu");
 			provider1.put(provider1Info);
 			
 			
@@ -303,11 +308,11 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			JSONArray linksCollections = new JSONArray();
 				
 				JSONObject linkDesc = new JSONObject();
-				linkDesc.put("href", ConvenienceHelper.readProperties("wcps-endpoint"));
+				linkDesc.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/collections");
 				linkDesc.put("rel", "self");
 				
 				JSONObject linkCsw = new JSONObject();
-				linkCsw.put("href", "https://openeo.org/api/csw");
+				linkCsw.put("href", ConvenienceHelper.readProperties("wcps-endpoint"));
 				linkCsw.put("rel", "alternate");
 				linkCsw.put("title", "openEO catalog (OGC Catalogue Services 3.0)");
 				
