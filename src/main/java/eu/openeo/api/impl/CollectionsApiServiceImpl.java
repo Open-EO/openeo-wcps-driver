@@ -431,7 +431,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				JSONArray linksPerCollection = new JSONArray();
 				
 				JSONObject linkDescPerCollection = new JSONObject();
-				linkDescPerCollection.put("href", "http://saocompute.eurac.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageID);
+				linkDescPerCollection.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coverageID);
 				linkDescPerCollection.put("rel", "self");
 				
 				JSONObject linkLicensePerCollection = new JSONObject();
@@ -454,9 +454,9 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				
 				JSONArray provider1 = new JSONArray();
 				JSONObject provider1Info = new JSONObject();
-				provider1Info.put("name", "European Space Agency");
+				provider1Info.put("name", ConvenienceHelper.readProperties("provider-name"));
 				provider1Info.put("roles", roles1);
-				provider1Info.put("url", "SciHub");
+				provider1Info.put("url", ConvenienceHelper.readProperties("provider-url"));
 				provider1.put(provider1Info);
 				
 				//String title = metadataObj.getString("Title");
