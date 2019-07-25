@@ -409,7 +409,7 @@ public class WCPSQueryFactory {
 				JSONObject jsonresp = null;
 				try {
 					jsonresp = readJsonFromUrl(
-							"http://localhost:8080/openEO_0_3_0/openeo/collections/" + coll);
+							"http://localhost:8080/collections/" + coll);
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -501,7 +501,7 @@ public class WCPSQueryFactory {
 							JSONObject jsonresp = null;
 							try {
 								jsonresp = readJsonFromUrl(
-										"http://localhost:8080/openEO_0_3_0/openeo/collections/" + coll);
+										"http://localhost:8080/collections/" + coll);
 							} catch (JSONException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -604,7 +604,7 @@ private void createFilterFromProcessNew(JSONObject processFilter, JSONObject pro
 				
 				JSONObject jsonresp = null;
 				try {
-					jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/" + coll);
+					jsonresp = readJsonFromUrl("http://localhost:8080/collections/" + coll);
 				} catch (JSONException e) {
 					log.error("An error occured: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
@@ -654,7 +654,7 @@ private void createFilterFromProcessNew(JSONObject processFilter, JSONObject pro
 				
 				JSONObject jsonresp = null;
 				try {
-					jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/" + coll);
+					jsonresp = readJsonFromUrl("http://localhost:8080/collections/" + coll);
 				} catch (JSONException e) {
 					log.error("An error occured: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
@@ -697,7 +697,7 @@ private void createFilterFromProcessNew(JSONObject processFilter, JSONObject pro
 
 		JSONObject jsonresp = null;
 		try {
-			jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/" + coll);
+			jsonresp = readJsonFromUrl("http://localhost:8080/collections/" + coll);
 		} catch (JSONException e) {
 			log.error("An error occured: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
@@ -778,7 +778,7 @@ private void createFilterFromProcessNew(JSONObject processFilter, JSONObject pro
 					JSONObject extent;
 					JSONObject jsonresp = null;
 					try {
-						jsonresp = readJsonFromUrl("http://localhost:8080/openEO_0_3_0/openeo/collections/" + coll);
+						jsonresp = readJsonFromUrl("http://localhost:8080/collections/" + coll);
 					} catch (JSONException e) {
 						log.error("An error occured: " + e.getMessage());
 						StringBuilder builder = new StringBuilder();
