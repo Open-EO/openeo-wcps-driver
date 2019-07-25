@@ -67,16 +67,6 @@
         "type": "object",
         "format": "eodata"
       }
-    },
-    "exceptions": {
-      "NotFound": {
-        "code": 101,
-        "description": "Data set doesn't exist."
-      },
-      "FileFormatNotSupported": {
-        "code": 102,
-        "description": "The file format of the specified data set is not supported to be read by the back-end."
-      }
     }
 },
 
