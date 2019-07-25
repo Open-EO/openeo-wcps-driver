@@ -94,16 +94,14 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		
 		JSONArray endpointList = new JSONArray();
 		endpointList.put(getCapabilities);
-		endpointList.put(outputFormats);
+		//endpointList.put(outputFormats);
 		endpointList.put(data);
 		endpointList.put(dataID);
-		endpointList.put(jobs);
-		endpointList.put(results);
-		endpointList.put(jobsID);
-		endpointList.put(jobsIDdownload);
-		endpointList.put(processes);
-		
-		
+		//endpointList.put(jobs);
+		//endpointList.put(results);
+		//endpointList.put(jobsID);
+		//endpointList.put(jobsIDdownload);
+		//endpointList.put(processes);		
 		
 		JSONObject plans = new JSONObject();
 		plans.put("name", "free");
@@ -115,7 +113,7 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		plan.put(plans);
 		
 		JSONObject link1 = new JSONObject();
-		link1.put("href", "http://saocompute.eurac.edu/rasdaman/ows");
+		link1.put("href", "http://sao.eurac.edu");
 		link1.put("rel", "Sentinel Alpine Observatory");
 		link1.put("type", "text/html");
 		link1.put("title", "Homepage of the service provider");
@@ -133,9 +131,9 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		
 		JSONObject mainObj = new JSONObject();
 		mainObj.put("api_version", "0.4.2");
-		mainObj.put("backend_version", "0.4.2");
-		mainObj.put("title", "EURAC Backend");
-		mainObj.put("description", "EURAC backend provides Sentinel 2 Data available for processing through WCPS powered by Rasdaman");
+		mainObj.put("backend_version", "0.0.4");
+		mainObj.put("title", "Eurac Research - openEO - backend");
+		mainObj.put("description", "The Eurac Research backend provides EO data available for processing using OGC WC(P)S");
 		mainObj.put("endpoints", endpointList);
 		//mainObj.put("billing", billing);
 		mainObj.put("links", link);
