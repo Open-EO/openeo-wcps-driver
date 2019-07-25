@@ -185,10 +185,11 @@ public class JobsApi  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
-    public Response jobsJobIdResultsGet(@ApiParam(value = "Unique job identifier.",required=true) @PathParam("job_id") String jobId
-,@Context SecurityContext securityContext)
+    public Response jobsJobIdResultsGet(@ApiParam(value = "Unique job identifier.",required=true) @PathParam("job_id") String jobId,
+    @ApiParam(value = "Output format to be used. Supported formats and options can be retrieved using the `GET /capabilities/output_formats` endpoint. If no output format has been specified here or for the job in general, the back-end falls back to its default format, which is  specified in the `GET /capabilities/output_formats` endpoint. **Note:** The options available to the specified output format can be added as individual query parameters to the request.") @QueryParam("format") String format, @Context SecurityContext securityContext)
+    
     throws NotFoundException {
-        return delegate.jobsJobIdResultsGet(jobId, securityContext);
+        return delegate.jobsJobIdResultsGet(jobId, format, securityContext);
     }
     @POST
     @Path("/{job_id}/results")
@@ -221,7 +222,7 @@ public class JobsApi  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "The request can't be fulfilled due to an error on client-side, i.e. the request is invalid. The client should not repeat the request without modifications. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6). This request MUST respond with HTTP status codes 401 if authorization is required or 403 if the authorization failed or access is forbidden in general to the authenticated user. HTTP status code 404 should be used if the value of a path parameter is invalid.", response = Error.class),
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
-    public Response jobsPost(@ApiParam(value = "" ) @Valid StoreBatchJobRequest storeBatchJobRequest
+    public Response jobsPost(@ApiParam(value = "" ) @Valid BatchJobResponse storeBatchJobRequest
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.jobsPost(storeBatchJobRequest, securityContext);

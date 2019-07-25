@@ -30,7 +30,7 @@ public abstract class JobsApiService {
     public abstract Response jobsJobIdGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId,SecurityContext securityContext) throws NotFoundException;
     public abstract Response jobsJobIdPatch( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId,UpdateBatchJobRequest updateBatchJobRequest,SecurityContext securityContext) throws NotFoundException;
     public abstract Response jobsJobIdResultsDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId,SecurityContext securityContext) throws NotFoundException;
-    public abstract Response jobsJobIdResultsGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response jobsJobIdResultsGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId,String format,SecurityContext securityContext) throws NotFoundException;
     public abstract Response jobsJobIdResultsPost( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId,SecurityContext securityContext) throws NotFoundException;
-    public abstract Response jobsPost(StoreBatchJobRequest storeBatchJobRequest,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response jobsPost(BatchJobResponse storeBatchJobRequest,SecurityContext securityContext) throws NotFoundException;
 }
