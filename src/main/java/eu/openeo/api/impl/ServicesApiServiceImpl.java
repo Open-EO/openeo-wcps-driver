@@ -24,26 +24,26 @@ public class ServicesApiServiceImpl extends ServicesApiService {
     @Override
     public Response servicesGet(SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response servicesPost(StoreSecondaryWebServiceRequest storeSecondaryWebServiceRequest, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response servicesServiceIdDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String serviceId, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response servicesServiceIdGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String serviceId, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response servicesServiceIdPatch( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String serviceId, UpdateSecondaryWebServiceRequest updateSecondaryWebServiceRequest, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
 }

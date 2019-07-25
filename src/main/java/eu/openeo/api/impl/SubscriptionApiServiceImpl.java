@@ -21,6 +21,6 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
     @Override
     public Response subscriptionGet( @NotNull String connection,  @NotNull String upgrade,  @NotNull String secWebSocketProtocol,  @NotNull BigDecimal secWebSocketVersion, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
 }

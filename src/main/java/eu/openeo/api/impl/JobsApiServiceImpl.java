@@ -27,46 +27,46 @@ public class JobsApiServiceImpl extends JobsApiService {
     @Override
     public Response jobsGet(SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response jobsJobIdDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response jobsJobIdEstimateGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response jobsJobIdGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response jobsJobIdPatch( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, UpdateBatchJobRequest updateBatchJobRequest, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response jobsJobIdResultsDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response jobsJobIdResultsGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response jobsJobIdResultsPost( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response jobsPost(StoreBatchJobRequest storeBatchJobRequest, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
 }

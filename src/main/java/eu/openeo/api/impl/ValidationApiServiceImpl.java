@@ -22,6 +22,6 @@ public class ValidationApiServiceImpl extends ValidationApiService {
     @Override
     public Response validationPost(ValidationRequest validationRequest, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
 }

@@ -74,9 +74,9 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		jobs.put("path", "/jobs");
 		jobs.put("methods", jobsMethods);
 		
-		JSONObject preview = new JSONObject();
-		preview.put("path", "/preview");
-		preview.put("methods", previewMethods);
+		JSONObject results = new JSONObject();
+		results.put("path", "/preview");
+		results.put("methods", previewMethods);
 		
 		JSONObject jobsID = new JSONObject();
 		jobsID.put("path", "/jobs/{job_id}");
@@ -98,7 +98,7 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		endpointList.put(data);
 		endpointList.put(dataID);
 		endpointList.put(jobs);
-		endpointList.put(preview);
+		endpointList.put(results);
 		endpointList.put(jobsID);
 		endpointList.put(jobsIDdownload);
 		endpointList.put(processes);

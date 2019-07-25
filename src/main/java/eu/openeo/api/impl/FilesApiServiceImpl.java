@@ -22,21 +22,21 @@ public class FilesApiServiceImpl extends FilesApiService {
     @Override
     public Response filesUserIdGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String userId, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response filesUserIdPathDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String userId, String path, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response filesUserIdPathGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String userId, String path, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response filesUserIdPathPut( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String userId, String path, File body, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
 }
