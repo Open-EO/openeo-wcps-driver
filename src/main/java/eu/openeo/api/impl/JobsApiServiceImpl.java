@@ -87,24 +87,19 @@ Logger log = Logger.getLogger(this.getClass());
 	
     @Override
     public Response jobsGet(SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
         return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response jobsJobIdDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
         return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response jobsJobIdEstimateGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
         return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response jobsJobIdGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        
-    	BatchJobResponse job = null;
+        BatchJobResponse job = null;
 		try {
 			job = jobDao.queryForId(jobId);
 			if(job == null) {

@@ -10,168 +10,176 @@
  * Do not edit the class manually.
  */
 
-
 package eu.openeo.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import eu.openeo.model.ProcessArgumentValue;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * ProcessNode
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
-public class ProcessNode  implements Serializable {
-  @JsonProperty("process_id")
-  private String processId;
+public class ProcessNode implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8078914123921779322L;
 
-  @JsonProperty("result")
-  private Boolean result = false;
+	@JsonProperty("process_id")
+	private String processId;
 
-  @JsonProperty("description")
-  private String description;
+	@JsonProperty("result")
+	private Boolean result = false;
 
-  @JsonProperty("arguments")
-  private Map<String, ProcessArgumentValue> arguments = new HashMap<String, ProcessArgumentValue>();
+	@JsonProperty("description")
+	private String description;
 
-  public ProcessNode processId(String processId) {
-    this.processId = processId;
-    return this;
-  }
+	@JsonProperty("arguments")
+	private Map<String, ProcessArgumentValue> arguments = new HashMap<String, ProcessArgumentValue>();
 
-  /**
-   * Unique identifier of the process.
-   * @return processId
-   **/
-  @JsonProperty("process_id")
-  @ApiModelProperty(example = "ndvi", required = true, value = "Unique identifier of the process.")
-  @NotNull  @Pattern(regexp="^[A-Za-z0-9_]+$")
-  public String getProcessId() {
-    return processId;
-  }
+	public ProcessNode processId(String processId) {
+		this.processId = processId;
+		return this;
+	}
 
-  public void setProcessId(String processId) {
-    this.processId = processId;
-  }
+	/**
+	 * Unique identifier of the process.
+	 * 
+	 * @return processId
+	 **/
+	@JsonProperty("process_id")
+	@ApiModelProperty(example = "ndvi", required = true, value = "Unique identifier of the process.")
+	@NotNull
+	@Pattern(regexp = "^[A-Za-z0-9_]+$")
+	public String getProcessId() {
+		return processId;
+	}
 
-  public ProcessNode result(Boolean result) {
-    this.result = result;
-    return this;
-  }
+	public void setProcessId(String processId) {
+		this.processId = processId;
+	}
 
-  /**
-   * Used to specify which node is the last in the chain and returns the result to return to the requesting context. This flag MUST only be set once in each list of process nodes.
-   * @return result
-   **/
-  @JsonProperty("result")
-  @ApiModelProperty(value = "Used to specify which node is the last in the chain and returns the result to return to the requesting context. This flag MUST only be set once in each list of process nodes.")
-  
-  public Boolean getResult() {
-    return result;
-  }
+	public ProcessNode result(Boolean result) {
+		this.result = result;
+		return this;
+	}
 
-  public void setResult(Boolean result) {
-    this.result = result;
-  }
+	/**
+	 * Used to specify which node is the last in the chain and returns the result to
+	 * return to the requesting context. This flag MUST only be set once in each
+	 * list of process nodes.
+	 * 
+	 * @return result
+	 **/
+	@JsonProperty("result")
+	@ApiModelProperty(value = "Used to specify which node is the last in the chain and returns the result to return to the requesting context. This flag MUST only be set once in each list of process nodes.")
 
-  public ProcessNode description(String description) {
-    this.description = description;
-    return this;
-  }
+	public Boolean getResult() {
+		return result;
+	}
 
-  /**
-   * Optional description about the process and its arguments.
-   * @return description
-   **/
-  @JsonProperty("description")
-  @ApiModelProperty(value = "Optional description about the process and its arguments.")
-  
-  public String getDescription() {
-    return description;
-  }
+	public void setResult(Boolean result) {
+		this.result = result;
+	}
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+	public ProcessNode description(String description) {
+		this.description = description;
+		return this;
+	}
 
-  public ProcessNode arguments(Map<String, ProcessArgumentValue> arguments) {
-    this.arguments = arguments;
-    return this;
-  }
+	/**
+	 * Optional description about the process and its arguments.
+	 * 
+	 * @return description
+	 **/
+	@JsonProperty("description")
+	@ApiModelProperty(value = "Optional description about the process and its arguments.")
 
-  public ProcessNode putArgumentsItem(String key, ProcessArgumentValue argumentsItem) {
-    this.arguments.put(key, argumentsItem);
-    return this;
-  }
+	public String getDescription() {
+		return description;
+	}
 
-  /**
-   * Get arguments
-   * @return arguments
-   **/
-  @JsonProperty("arguments")
-  @ApiModelProperty(required = true, value = "")
-  @NotNull @Valid 
-  public Map<String, ProcessArgumentValue> getArguments() {
-    return arguments;
-  }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-  public void setArguments(Map<String, ProcessArgumentValue> arguments) {
-    this.arguments = arguments;
-  }
+	public ProcessNode arguments(Map<String, ProcessArgumentValue> arguments) {
+		this.arguments = arguments;
+		return this;
+	}
 
+	public ProcessNode putArgumentsItem(String key, ProcessArgumentValue argumentsItem) {
+		this.arguments.put(key, argumentsItem);
+		return this;
+	}
 
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    ProcessNode processNode = (ProcessNode) o;
-    return Objects.equals(this.processId, processNode.processId) &&
-        Objects.equals(this.result, processNode.result) &&
-        Objects.equals(this.description, processNode.description) &&
-        Objects.equals(this.arguments, processNode.arguments);
-  }
+	/**
+	 * Get arguments
+	 * 
+	 * @return arguments
+	 **/
+	@JsonProperty("arguments")
+	@ApiModelProperty(required = true, value = "")
+	@NotNull
+	@Valid
+	public Map<String, ProcessArgumentValue> getArguments() {
+		return arguments;
+	}
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(processId, result, description, arguments);
-  }
+	public void setArguments(Map<String, ProcessArgumentValue> arguments) {
+		this.arguments = arguments;
+	}
 
+	@Override
+	public boolean equals(java.lang.Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ProcessNode processNode = (ProcessNode) o;
+		return Objects.equals(this.processId, processNode.processId) && Objects.equals(this.result, processNode.result)
+				&& Objects.equals(this.description, processNode.description)
+				&& Objects.equals(this.arguments, processNode.arguments);
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ProcessNode {\n");
-    
-    sb.append("    processId: ").append(toIndentedString(processId)).append("\n");
-    sb.append("    result: ").append(toIndentedString(result)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    arguments: ").append(toIndentedString(arguments)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(processId, result, description, arguments);
+	}
 
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("class ProcessNode {\n");
+
+		sb.append("    processId: ").append(toIndentedString(processId)).append("\n");
+		sb.append("    result: ").append(toIndentedString(result)).append("\n");
+		sb.append("    description: ").append(toIndentedString(description)).append("\n");
+		sb.append("    arguments: ").append(toIndentedString(arguments)).append("\n");
+		sb.append("}");
+		return sb.toString();
+	}
+
+	/**
+	 * Convert the given object to string with each line indented by 4 spaces
+	 * (except the first line).
+	 */
+	private String toIndentedString(java.lang.Object o) {
+		if (o == null) {
+			return "null";
+		}
+		return o.toString().replace("\n", "\n    ");
+	}
 }
-
