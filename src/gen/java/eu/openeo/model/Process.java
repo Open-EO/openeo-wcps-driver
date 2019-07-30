@@ -354,7 +354,7 @@ public class Process implements Serializable {
 	 **/
 	@JsonProperty("examples")
 	@ApiModelProperty(value = "Examples, may be used for tests. Either `process_graph` or `arguments` must be set, never both.")
-	@Valid
+   	@Valid
 	public List<ProcessExample> getExamples() {
 		return examples;
 	}

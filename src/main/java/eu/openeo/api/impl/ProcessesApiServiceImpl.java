@@ -92,8 +92,10 @@ Logger log = Logger.getLogger(this.getClass());
 			process.put("id", processDesc.getId());			
 			process.put("summary", processDesc.getSummary());			
 			process.put("description", processDesc.getDescription());			
-			process.put("parameters", processDesc.getParameters());			
-			
+			process.put("parameters", processDesc.getParameters());		
+			process.put("parameter_order", processDesc.getParameterOrder());
+			process.put("categories", processDesc.getCategories());
+			process.put("links", processDesc.getLinks());
 			Map<String, Object> returnMap = new HashMap<String, Object>();
 			returnMap.put("description", processDesc.getReturns().getDescription());
 			returnMap.put("schema", processDesc.getReturns().getSchema());
