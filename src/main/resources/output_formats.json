@@ -1,7 +1,5 @@
 {
-    "default": "JSON",
-    "formats": {
-        "netCDF": {
+    "netCDF": {
             "gis_data_types": [ "raster" ],
             "mime-type": "application/netcdf",
             "rasdaman_name": "netcdf"
@@ -36,5 +34,4 @@
             "mime-type": "image/jpeg",
             "rasdaman_name": "jpeg"
         }
-    }
 }
