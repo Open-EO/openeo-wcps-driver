@@ -66,6 +66,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			log.debug("root node info: " + rootNode.getName());		
 			List<Element> bandList = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
 			
+			
 			Element coverageDescElement = rootNode.getChild("CoverageDescription", defaultNS);
 			Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
 			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
@@ -191,6 +192,9 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			
 			for(int c = 0; c < bandList.size(); c++) {
 				Element band = bandList.get(c);
+				String bandWave = band.getChild("Quantity", sweNS).getChildText("description", sweNS);
+				String bandgsd = "";
+				
 				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
 				JSONObject product = new JSONObject();
 				String bandId = band.getAttributeValue("name");
@@ -199,10 +203,10 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				//String bandWavelength = bandName.getString("WAVELENGTH");
 				
 				product.put("common_name", bandId);
-				//product.put("center_wavelength", bandWavelength);
+				
 				product.put("name", bandId);
-				product.put("center_wavelength", bandId);
-				product.put("gsd", bandId);
+				product.put("center_wavelength", bandWave);
+				product.put("gsd", bandgsd);
 				
 				
 				bandArray.put(product);
