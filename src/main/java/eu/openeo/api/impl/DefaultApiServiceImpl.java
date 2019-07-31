@@ -18,27 +18,28 @@ public class DefaultApiServiceImpl extends DefaultApiService {
     @Override
     public Response rootGet(SecurityContext securityContext) throws NotFoundException {
 
-    	JSONArray getCapabilitiesMethods = new JSONArray();
-		getCapabilitiesMethods.put(new String("GET"));
+    	JSONArray defaultMethods = new JSONArray();
+		defaultMethods.put(new String("GET"));
+		
+		JSONArray wellKnownMethods = new JSONArray();
+		wellKnownMethods.put(new String("GET"));
 				
 		JSONArray outputFormatsMethods = new JSONArray();
 		outputFormatsMethods.put(new String("GET"));
 		
-		JSONArray dataMethods = new JSONArray();
-		dataMethods.put(new String("GET"));
+		JSONArray collectionsMethods = new JSONArray();
+		collectionsMethods.put(new String("GET"));
 		
-		JSONArray dataIDMethods = new JSONArray();
-		dataIDMethods.put(new String("GET"));
+		JSONArray collectionIdMethods = new JSONArray();
+		collectionIdMethods.put(new String("GET"));
 		
-		JSONArray executeMethods = new JSONArray();
-		executeMethods.put(new String("GET"));
+		JSONArray resultMethods = new JSONArray();
+		resultMethods.put(new String("GET"));
+		resultMethods.put(new String("POST"));
 		
 		JSONArray jobsMethods = new JSONArray();
 		//jobsMethods.put(new String("GET"));
 		jobsMethods.put(new String("POST"));
-		
-		JSONArray previewMethods = new JSONArray();
-		previewMethods.put(new String("POST"));
 				
 		JSONArray jobsIDMethods = new JSONArray();
 		jobsIDMethods.put(new String("GET"));
@@ -54,54 +55,59 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		JSONArray processesIDMethods = new JSONArray();
 		processesIDMethods.put(new String("GET"));
 		
-		JSONObject getCapabilities = new JSONObject();
-		getCapabilities.put("path", "/");
-		getCapabilities.put("methods", getCapabilitiesMethods);
+		JSONObject defaultEndpoint = new JSONObject();
+		defaultEndpoint.put("path", "/");
+		defaultEndpoint.put("methods", defaultMethods);
 		
-		JSONObject outputFormats = new JSONObject();
-		outputFormats.put("path", "/output_formats");
-		outputFormats.put("methods", outputFormatsMethods);
+		JSONObject wellKnownEndpoint = new JSONObject();
+		wellKnownEndpoint.put("path", "/.well-known/openeo");
+		wellKnownEndpoint.put("methods", wellKnownMethods);
 		
-		JSONObject data = new JSONObject();
-		data.put("path", "/collections");
-		data.put("methods", dataMethods);
+		JSONObject outputFormatsEndpoint = new JSONObject();
+		outputFormatsEndpoint.put("path", "/output_formats");
+		outputFormatsEndpoint.put("methods", outputFormatsMethods);
 		
-		JSONObject dataID = new JSONObject();
-		dataID.put("path", "/collections/{collection_id}");
-		dataID.put("methods", dataIDMethods);
+		JSONObject collectionsEndpoint = new JSONObject();
+		collectionsEndpoint.put("path", "/collections");
+		collectionsEndpoint.put("methods", collectionsMethods);
 		
-		JSONObject jobs = new JSONObject();
-		jobs.put("path", "/jobs");
-		jobs.put("methods", jobsMethods);
+		JSONObject collectionIdEndpoint = new JSONObject();
+		collectionIdEndpoint.put("path", "/collections/{collection_id}");
+		collectionIdEndpoint.put("methods", collectionIdMethods);
 		
-		JSONObject results = new JSONObject();
-		results.put("path", "/preview");
-		results.put("methods", previewMethods);
+		JSONObject jobsEndpoint = new JSONObject();
+		jobsEndpoint.put("path", "/jobs");
+		jobsEndpoint.put("methods", jobsMethods);
 		
-		JSONObject jobsID = new JSONObject();
-		jobsID.put("path", "/jobs/{job_id}");
-		jobsID.put("methods", jobsIDMethods);
+		JSONObject resultsEndpoint = new JSONObject();
+		resultsEndpoint.put("path", "/results");
+		resultsEndpoint.put("methods", resultMethods);
+		
+		JSONObject jobsIdEndpoint = new JSONObject();
+		jobsIdEndpoint.put("path", "/jobs/{job_id}");
+		jobsIdEndpoint.put("methods", jobsIDMethods);
 		
 		
 		
-		JSONObject jobsIDdownload = new JSONObject();
-		jobsIDdownload.put("path", "/jobs/{job_id}/results");
-		jobsIDdownload.put("methods", jobsIDdownloadMethods);
+		JSONObject jobsIdDownloadEndpoint = new JSONObject();
+		jobsIdDownloadEndpoint.put("path", "/jobs/{job_id}/results");
+		jobsIdDownloadEndpoint.put("methods", jobsIDdownloadMethods);
 		
-		JSONObject processes = new JSONObject();
-		processes.put("path", "/processes");
-		processes.put("methods", processesMethods);
+		JSONObject processesEndpoint = new JSONObject();
+		processesEndpoint.put("path", "/processes");
+		processesEndpoint.put("methods", processesMethods);
 		
 		JSONArray endpointList = new JSONArray();
-		endpointList.put(getCapabilities);
-		//endpointList.put(outputFormats);
-		endpointList.put(data);
-		endpointList.put(dataID);
+		endpointList.put(defaultEndpoint);
+		endpointList.put(wellKnownEndpoint);
+		endpointList.put(outputFormatsEndpoint);
+		endpointList.put(collectionsEndpoint);
+		endpointList.put(collectionIdEndpoint);
+		endpointList.put(processesEndpoint);
 		//endpointList.put(jobs);
 		//endpointList.put(results);
 		//endpointList.put(jobsID);
 		//endpointList.put(jobsIDdownload);
-		//endpointList.put(processes);		
 		
 		JSONObject plans = new JSONObject();
 		plans.put("name", "free");
@@ -131,7 +137,7 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		
 		JSONObject mainObj = new JSONObject();
 		mainObj.put("api_version", "0.4.2");
-		mainObj.put("backend_version", "0.0.4");
+		mainObj.put("backend_version", "0.4.0");
 		mainObj.put("title", "Eurac Research - openEO - backend");
 		mainObj.put("description", "The Eurac Research backend provides EO data available for processing using OGC WC(P)S");
 		mainObj.put("endpoints", endpointList);
