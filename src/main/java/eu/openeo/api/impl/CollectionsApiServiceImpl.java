@@ -53,13 +53,21 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			Namespace defaultNS = rootNode.getNamespace();
 			Namespace gmlNS = null;
 			Namespace sweNS = null;
+			Namespace gmlCovNS =  null;
+			Namespace gmlrgridNS = null;
 			for (int n = 0; n < namespaces.size(); n++) {
 				Namespace current = namespaces.get(n);
 				if(current.getPrefix().equals("swe")) {
 					sweNS = current;
 				}
 				if(current.getPrefix().equals("gmlcov")) {
+					gmlCovNS = current;
+				}
+				if(current.getPrefix().equals("gml")) {
 					gmlNS = current;
+				}
+				if(current.getPrefix().equals("gmlrgrid")) {
+					gmlrgridNS = current;
 				}
 			}
 			
@@ -116,17 +124,31 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 		    String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
 		    int xIndex = 0;
 		    int yIndex = 0;
+		    JSONObject[] dimObjects = new JSONObject[axis.length+1];
 		    for(int a = 0; a < axis.length; a++) {
 		    	log.debug(axis[a]);
 				if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long")){
 					xIndex=a;
+					dimObjects[0] = new JSONObject();
+					dimObjects[0].put("axis", "x");
+					dimObjects[0].put("type", "spatial");
+					dimObjects[0].put("reference_system", Long.parseLong(srsDescription));
 				}
 				if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
 					yIndex=a;
+					dimObjects[1] = new JSONObject();
+					dimObjects[1].put("axis", "y");
+					dimObjects[1].put("type", "spatial");
+					dimObjects[1].put("reference_system", Long.parseLong(srsDescription));
 				}
 				if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
 					temporalExtent.put(minValues[a].replaceAll("\"", ""));
 					temporalExtent.put(maxValues[a].replaceAll("\"", ""));
+					dimObjects[2] = new JSONObject();
+					dimObjects[2].put("axis", "temporal");
+					dimObjects[2].put("type", "temporal");
+					dimObjects[2].put("extent", temporalExtent);
+					dimObjects[2].put("step", JSONObject.NULL);
 				}
 		    }
 		    
@@ -140,7 +162,16 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			spatialExtent.put(c1[0]);
 			spatialExtent.put(c1[1]);
 			spatialExtent.put(c2[0]);
-			spatialExtent.put(c2[1]);	
+			spatialExtent.put(c2[1]);
+			
+			JSONArray xExtent = new JSONArray();
+			xExtent.put(c1[0]);
+			xExtent.put(c2[0]);
+			dimObjects[0].put("extent", xExtent);
+			JSONArray yExtent = new JSONArray();
+			yExtent.put(c1[1]);
+			yExtent.put(c2[1]);
+			dimObjects[1].put("extent", yExtent);			
 			
 			JSONArray links = new JSONArray();
 			
@@ -185,35 +216,38 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			
 			
 			JSONObject properties = new JSONObject();
-			JSONObject other_properties = new JSONObject();
 			
 			JSONArray bandArray = new JSONArray();
 			log.debug("number of bands found: " + bandList.size());
 			
+			dimObjects[3] = new JSONObject();
+			dimObjects[3].put("type", "bands");
+			dimObjects[3].put("axis", "spectral");
+			JSONArray bandValues = new JSONArray();
+			
 			for(int c = 0; c < bandList.size(); c++) {
 				Element band = bandList.get(c);
-				String bandWave = band.getChild("Quantity", sweNS).getChildText("description", sweNS);
-				String bandgsd = "";
+				Double bandWave = Double.parseDouble(band.getChild("Quantity", sweNS).getChildText("description", sweNS).split(" ")[3])/1000d;
 				
 				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
 				JSONObject product = new JSONObject();
 				String bandId = band.getAttributeValue("name");
-				//JSONObject bands = metadataObj.getJSONObject("bands");
-				//JSONObject bandName = bands.getJSONObject(bandId);
-				//String bandWavelength = bandName.getString("WAVELENGTH");
 				
 				product.put("common_name", bandId);
 				
 				product.put("name", bandId);
+				bandValues.put(bandId);
 				product.put("center_wavelength", bandWave);
-				product.put("gsd", bandgsd);
-				
+				product.put("gsd", Double.parseDouble(collectionId.split("_")[3].substring(0, collectionId.split("_")[3].length()-1)));				
 				
 				bandArray.put(product);
 			}
 			
+			dimObjects[3].put("values", bandValues);
+			
 			JSONArray epsg_values = new JSONArray();
 			JSONObject epsgvalues = new JSONObject();
+			
 			epsgvalues.put("values", epsg_values);
 			
 			JSONArray platform_values = new JSONArray();
@@ -225,18 +259,20 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			cloud_cover_extent.put("extent", cloud_cover);
 			
 			JSONObject cube_dimensions = new JSONObject();
-			
+			for(JSONObject dim: dimObjects) {
+				cube_dimensions.put(dim.getString("axis"), dim);
+			}			
 			
 			properties.put("cube:dimensions", cube_dimensions);
 			properties.put("eo:epsg", Double.parseDouble(srsDescription));
-			properties.put("sci:citation", collectionId);
+			properties.put("sci:citation", "Copernicus Sentinel data 2019");
 			properties.put("eo:constellation", "Sentinel-2");
 			properties.put("eo:instrument", "MSI");
 			properties.put("eo:bands", bandArray);
 			
-			other_properties.put("eo:platform", pltfrmvalues);
-			other_properties.put("eo:epsg", epsgvalues);
-			other_properties.put("eo:cloud_cover", cloud_cover_extent);
+			//other_properties.put("eo:platform", pltfrmvalues);
+			//other_properties.put("eo:epsg", epsgvalues);
+			//other_properties.put("eo:cloud_cover", cloud_cover_extent);
 			
 			//String title = metadataObj.getString("Title");
 								
@@ -255,7 +291,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			extentCollection.put("temporal", temporalExtent);
 			coverage.put("extent", extentCollection);
 			coverage.put("properties", properties);
-			coverage.put("other_properties", other_properties);
+			//coverage.put("other_properties", other_properties);
 			
 
 			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
