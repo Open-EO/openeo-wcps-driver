@@ -104,10 +104,10 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		endpointList.put(collectionsEndpoint);
 		endpointList.put(collectionIdEndpoint);
 		endpointList.put(processesEndpoint);
-		//endpointList.put(jobs);
-		//endpointList.put(results);
-		//endpointList.put(jobsID);
-		//endpointList.put(jobsIDdownload);
+		endpointList.put(jobsEndpoint);
+		endpointList.put(resultsEndpoint);
+		endpointList.put(jobsIdEndpoint);
+		endpointList.put(jobsIdDownloadEndpoint);
 		
 		JSONObject plans = new JSONObject();
 		plans.put("name", "free");

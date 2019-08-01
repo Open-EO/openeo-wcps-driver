@@ -13,23 +13,20 @@
 
 package eu.openeo.model;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import eu.openeo.model.Callback;
-import eu.openeo.model.CallbackParameter;
-import eu.openeo.model.ProcessNode;
-import eu.openeo.model.Result;
-import eu.openeo.model.Variable;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.io.Serializable;
-import javax.validation.constraints.*;
-import javax.validation.Valid;
 
 /**
  * Arguments for a process. See the API documentation for more information.
@@ -37,7 +34,12 @@ import javax.validation.Valid;
 @ApiModel(description = "Arguments for a process. See the API documentation for more information.")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class ProcessArgumentValue  implements Serializable {
-  @JsonProperty("variable_id")
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8849636346668477630L;
+
+@JsonProperty("variable_id")
   private String variableId;
 
   /**
