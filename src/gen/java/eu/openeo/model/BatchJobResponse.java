@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import javax.validation.Valid;
@@ -33,6 +34,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -218,15 +221,26 @@ public class BatchJobResponse implements Serializable {
 	@ApiModelProperty(required = true, value = "")
 	@NotNull	
 	public Object getProcessGraph() {		
-		ObjectMapper mapper = new ObjectMapper();
-		JSONObject processgraphLocal = null;
-		try {		
-			processgraphLocal = new JSONObject(mapper.writeValueAsString(this.processGraph));
-			
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		return processgraphLocal;
+//		ObjectMapper mapper = new ObjectMapper();
+//		SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
+//		module.addSerializer(JSONObject.class, new JSONObjectSerializer());
+//		mapper.registerModule(module);
+//		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+//		mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+//		mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
+//		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+//		mapper.setSerializationInclusion(Include.NON_NULL);
+//		JSONObject processgraphLocal = null;
+//		try {		
+//			processgraphLocal = new JSONObject(mapper.writeValueAsString(this.processGraph));
+//			
+//		} catch (JsonProcessingException e) {
+//			e.printStackTrace();
+//		}
+//		return processgraphLocal;
+		log.debug("process graph object:" + this.processGraph.getClass());
+		log.debug(this.processGraph.toString());
+		return new JSONObject((Map<String, Object>) this.processGraph);
 	}
 
 //	public void setProcessGraph(Map<String, ProcessNode> processGraph) {
@@ -336,15 +350,19 @@ public class BatchJobResponse implements Serializable {
 	@ApiModelProperty(value = "")
 	@Valid
 	public Object getError() {
-		ObjectMapper mapper = new ObjectMapper();
-		JSONObject errorLocal = null;
-		try {		
-			errorLocal = new JSONObject(mapper.writeValueAsString(this.error));
-			
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+		if(this.error != null) {
+			ObjectMapper mapper = new ObjectMapper();
+			JSONObject errorLocal = null;
+			try {		
+				errorLocal = new JSONObject(mapper.writeValueAsString(this.error));
+				
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+			return errorLocal;
+		}else {
+			return JSONObject.NULL;
 		}
-		return errorLocal;
 	}
 
 	public void setError(Error error) {
@@ -501,26 +519,50 @@ public class BatchJobResponse implements Serializable {
 	}
 
 	@Override
+	@JsonValue
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class BatchJobResponse {\n");
 
-		sb.append("    id: ").append(toIndentedString(id)).append("\n");
-		sb.append("    title: ").append(toIndentedString(title)).append("\n");
-		sb.append("    description: ").append(toIndentedString(description)).append("\n");
-		sb.append("    processGraph: ").append(toIndentedString(processGraph)).append("\n");
-		sb.append("    output: ").append(toIndentedString(output)).append("\n");
-		sb.append("    status: ").append(toIndentedString(status)).append("\n");
-		sb.append("    progress: ").append(toIndentedString(progress)).append("\n");
-		sb.append("    error: ").append(toIndentedString(error)).append("\n");
-		sb.append("    submitted: ").append(toIndentedString(submitted)).append("\n");
-		sb.append("    updated: ").append(toIndentedString(updated)).append("\n");
-		sb.append("    plan: ").append(toIndentedString(plan)).append("\n");
-		sb.append("    costs: ").append(toIndentedString(costs)).append("\n");
-		sb.append("    budget: ").append(toIndentedString(budget)).append("\n");
+		sb.append("\"id\": ").append(toIndentedString(id)).append("\n");
+		sb.append("\"title\": ").append(toIndentedString(title)).append("\n");
+		sb.append("\"description\": ").append(toIndentedString(description)).append("\n");
+		sb.append("\"processGraph\": ").append(((JSONObject)this.getProcessGraph()).toString(4)).append("\n");
+		sb.append("\"output\": ").append(toIndentedString(output)).append("\n");
+		sb.append("\"status\": ").append(toIndentedString(status)).append("\n");
+		sb.append("\"progress\": ").append(toIndentedString(progress)).append("\n");
+		sb.append("\"error\": ").append(toIndentedString(error)).append("\n");
+		sb.append("\"submitted\": ").append(toIndentedString(submitted)).append("\n");
+		sb.append("\"updated\": ").append(toIndentedString(updated)).append("\n");
+		sb.append("\"plan\": ").append(toIndentedString(plan)).append("\n");
+		sb.append("\"costs\": ").append(costs).append("\n");
+		sb.append("\"budget\": ").append(budget).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}
+	
+//	@Override
+//	@JsonValue
+//	public String toString() {
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("class BatchJobResponse {\n");
+//
+//		sb.append("    id: ").append(toIndentedString(id)).append("\n");
+//		sb.append("    title: ").append(toIndentedString(title)).append("\n");
+//		sb.append("    description: ").append(toIndentedString(description)).append("\n");
+//		sb.append("    processGraph: ").append(toIndentedString(processGraph)).append("\n");
+//		sb.append("    output: ").append(toIndentedString(output)).append("\n");
+//		sb.append("    status: ").append(toIndentedString(status)).append("\n");
+//		sb.append("    progress: ").append(toIndentedString(progress)).append("\n");
+//		sb.append("    error: ").append(toIndentedString(error)).append("\n");
+//		sb.append("    submitted: ").append(toIndentedString(submitted)).append("\n");
+//		sb.append("    updated: ").append(toIndentedString(updated)).append("\n");
+//		sb.append("    plan: ").append(toIndentedString(plan)).append("\n");
+//		sb.append("    costs: ").append(toIndentedString(costs)).append("\n");
+//		sb.append("    budget: ").append(toIndentedString(budget)).append("\n");
+//		sb.append("}");
+//		return sb.toString();
+//	}
 
 	/**
 	 * Convert the given object to string with each line indented by 4 spaces
@@ -530,6 +572,6 @@ public class BatchJobResponse implements Serializable {
 		if (o == null) {
 			return "null";
 		}
-		return o.toString().replace("\n", "\n    ");
+		return "\"" + o.toString().replace("\n", "\n    ") + "\"";
 	}
 }

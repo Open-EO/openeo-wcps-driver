@@ -43,8 +43,8 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 				
 		JSONArray jobsIDMethods = new JSONArray();
 		jobsIDMethods.put(new String("GET"));
-		//jobsIDMethods.put(new String("DELETE"));
-		//jobsIDMethods.put(new String("PATCH"));
+		jobsIDMethods.put(new String("DELETE"));
+		jobsIDMethods.put(new String("PATCH"));
 		
 		JSONArray jobsIDdownloadMethods = new JSONArray();
 		jobsIDdownloadMethods.put(new String("GET"));
@@ -85,13 +85,11 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		
 		JSONObject jobsIdEndpoint = new JSONObject();
 		jobsIdEndpoint.put("path", "/jobs/{job_id}");
-		jobsIdEndpoint.put("methods", jobsIDMethods);
+		jobsIdEndpoint.put("methods", jobsIDMethods);		
 		
-		
-		
-		JSONObject jobsIdDownloadEndpoint = new JSONObject();
-		jobsIdDownloadEndpoint.put("path", "/jobs/{job_id}/results");
-		jobsIdDownloadEndpoint.put("methods", jobsIDdownloadMethods);
+		JSONObject jobsIdResultsEndpoint = new JSONObject();
+		jobsIdResultsEndpoint.put("path", "/jobs/{job_id}/results");
+		jobsIdResultsEndpoint.put("methods", jobsIDdownloadMethods);
 		
 		JSONObject processesEndpoint = new JSONObject();
 		processesEndpoint.put("path", "/processes");
@@ -107,7 +105,7 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		endpointList.put(jobsEndpoint);
 		endpointList.put(resultsEndpoint);
 		endpointList.put(jobsIdEndpoint);
-		endpointList.put(jobsIdDownloadEndpoint);
+		endpointList.put(jobsIdResultsEndpoint);
 		
 		JSONObject plans = new JSONObject();
 		plans.put("name", "free");

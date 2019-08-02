@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.field.types.StringType;
@@ -37,6 +38,8 @@ public class JSONObjectPersister extends StringType {
 	@Override
 	public Object javaToSqlArg(FieldType fieldType, Object javaObject) {
 		try {
+			log.debug("java object converted to sqlarg: ");
+			log.debug(mapper.writeValueAsString(javaObject));
 			return new JSONObject(mapper.writeValueAsString(javaObject));
 		} catch (JsonProcessingException e) {
 			log.error("Error javaToSqlArg: " + e.getMessage());
@@ -49,6 +52,8 @@ public class JSONObjectPersister extends StringType {
 	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
 		Map<String, Object> returnObject = new LinkedHashMap<String, Object>();
 		try {
+			log.debug("string received from db:");
+			log.debug((String)results.getObject(columnPos));
 			returnObject =  mapper.readValue((String) results.getObject(columnPos), new TypeReference<Map<String, Object>>(){});
 			return returnObject; 
 		} catch (JsonProcessingException e) {
@@ -63,9 +68,33 @@ public class JSONObjectPersister extends StringType {
 			return null;
 		}
 	}
+	
+//	@Override
+//	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
+//		JSONObject returnObject = null;
+//		try {
+//			log.debug("string received from db:");
+//			log.debug((String)results.getObject(columnPos));
+//			returnObject =  new JSONObject((Map<String, Object>) mapper.readValue((String) results.getObject(columnPos), new TypeReference<Map<String, Object>>(){}));
+//			log.debug("json object:");
+//			log.debug(returnObject.toString(4));
+//			return returnObject; 
+//		} catch (JsonProcessingException e) {
+//			log.error("Error resultToSqlArg: " + e.getMessage());
+//			log.error(results.getObject(columnPos).toString());
+//			return returnObject;
+//		} catch (IOException e) {
+//			log.error("Error resultToSqlArg: " + e.getMessage());
+//			log.error(results.getObject(columnPos).toString());
+//			return returnObject;
+//		} catch(NullPointerException e) {
+//			return null;
+//		}
+//	}
 
 	@Override
 	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) {
+		
 		return sqlArg;
 	}
 

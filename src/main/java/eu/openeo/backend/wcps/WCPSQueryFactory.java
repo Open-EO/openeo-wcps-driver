@@ -1,26 +1,5 @@
 package eu.openeo.backend.wcps;
 
-import java.util.Vector;
-
-import org.apache.log4j.Logger;
-import org.gdal.osr.CoordinateTransformation;
-import org.gdal.osr.SpatialReference;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import eu.openeo.backend.wcps.domain.Aggregate;
-import eu.openeo.backend.wcps.domain.Collection;
-import eu.openeo.backend.wcps.domain.Filter;
-
-import org.gdal.gdal.gdal;
-import org.gdal.osr.osrJNI;
-import org.gdal.osr.osr;
-
-import java.net.URL;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.net.URLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,13 +7,18 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.text.ParseException;
+import java.util.Vector;
+
+import org.apache.log4j.Logger;
+import org.gdal.osr.CoordinateTransformation;
+import org.gdal.osr.SpatialReference;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import eu.openeo.backend.wcps.domain.Aggregate;
+import eu.openeo.backend.wcps.domain.Collection;
+import eu.openeo.backend.wcps.domain.Filter;
 
 public class WCPSQueryFactory {
 

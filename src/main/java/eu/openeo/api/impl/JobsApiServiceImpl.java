@@ -91,7 +91,19 @@ Logger log = Logger.getLogger(this.getClass());
     }
     @Override
     public Response jobsJobIdDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
-        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+    	BatchJobResponse storedBatchJob = null;
+		try {
+			storedBatchJob = jobDao.queryForId(jobId);
+			if(storedBatchJob == null) {
+				return Response.status(404).entity(new String("A job with the specified identifier is not available.")).build();
+			}
+			jobDao.deleteById(jobId);
+			log.debug("The following job was deleted: \n" + storedBatchJob.toString());
+			return Response.status(204).entity("The job has been successfully deleted.").header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").header("OpenEO-Identifier", storedBatchJob.getId()).build();
+		} catch (SQLException sqle) {
+			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
+			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage()).build();
+		}
     }
     @Override
     public Response jobsJobIdEstimateGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
@@ -99,27 +111,45 @@ Logger log = Logger.getLogger(this.getClass());
     }
     @Override
     public Response jobsJobIdGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
-        BatchJobResponse job = null;
+        BatchJobResponse storedBatchJob = null;
 		try {
-			job = jobDao.queryForId(jobId);
-			if(job == null) {
+			storedBatchJob = jobDao.queryForId(jobId);
+			if(storedBatchJob == null) {
 				return Response.status(404).entity(new String("A job with the specified identifier is not available.")).build();
 			}
-			log.debug("The following job was retrieved: \n" + job.toString());
+			log.debug("The following job was retrieved: \n" + storedBatchJob.toString());			
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
 					.build();
 		}
 		try {
+//			ObjectMapper mapper = new ObjectMapper();
+//			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
+//			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
+//			mapper.registerModule(module);
+//			return Response.status(201).entity(mapper.writeValueAsString(job)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 			ObjectMapper mapper = new ObjectMapper();
-			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
+			/*SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
 			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
-			mapper.registerModule(module);
-			return Response.status(201).entity(mapper.writeValueAsString(job)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
-//			return Response.ok().entity(mapper.writeValueAsString(job)).build();
+			mapper.registerModule(module);*/
+			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+			mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+			mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
+			mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+			mapper.setSerializationInclusion(Include.NON_NULL);
+			log.debug("Java object to string looks like this:");
+			log.debug(storedBatchJob.toString());
+			log.debug("Serialized json looks like this:");
+			log.debug(mapper.writeValueAsString(storedBatchJob));			
+			return Response.status(201).entity(mapper.writeValueAsString(storedBatchJob)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").header("OpenEO-Identifier", storedBatchJob.getId()).build();
 		} catch (JsonProcessingException e) {
-			log.error(e.getMessage());
+			log.error("An error occured while serializing job to json: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
 			return Response.serverError().entity("An error occured while serializing job to json: " + e.getMessage())
 					.build();
 		}
@@ -127,8 +157,35 @@ Logger log = Logger.getLogger(this.getClass());
     }
     @Override
     public Response jobsJobIdPatch( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, UpdateBatchJobRequest updateBatchJobRequest, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+    	BatchJobResponse storedBatchJob = null;
+		try {
+			storedBatchJob = jobDao.queryForId(jobId);
+			if(storedBatchJob == null) {
+				return Response.status(404).entity(new String("A job with the specified identifier is not available.")).build();
+			}
+			log.debug("The following job was retrieved: \n" + storedBatchJob.toString());			
+		} catch (SQLException sqle) {
+			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
+			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
+					.build();
+		}
+		if(updateBatchJobRequest.getTitle() != null) storedBatchJob.setTitle(updateBatchJobRequest.getTitle());
+		if(updateBatchJobRequest.getDescription() != null) storedBatchJob.setDescription(updateBatchJobRequest.getDescription());
+		if(updateBatchJobRequest.getProcessGraph() != null) storedBatchJob.setProcessGraph(updateBatchJobRequest.getProcessGraph());
+		if(updateBatchJobRequest.getPlan() != null) storedBatchJob.setPlan(updateBatchJobRequest.getPlan());
+		if(updateBatchJobRequest.getBudget() != null) storedBatchJob.setBudget(updateBatchJobRequest.getBudget());
+		try {
+			jobDao.update(storedBatchJob);
+			log.debug("job updated in database: " + storedBatchJob.getId());
+			return Response.status(204).entity("Changes to the job applied successfully.")
+					                   .header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs")
+					                   .header("OpenEO-Identifier", storedBatchJob.getId())
+					                   .build();
+		} catch (SQLException sqle) {
+			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
+			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
+					.build();
+		}		
     }
     @Override
     public Response jobsJobIdResultsDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
@@ -304,7 +361,7 @@ Logger log = Logger.getLogger(this.getClass());
 		JSONObject processGraphJSON;
 		String outputFormat = "json";
 		log.debug("The following job was submitted: \n" + storeBatchJobRequest.toString());
-		processGraphJSON = (JSONObject) storeBatchJobRequest.getProcessGraph();
+		processGraphJSON = (JSONObject)storeBatchJobRequest.getProcessGraph();
 		try {
 			outputFormat = (String)(((JSONObject) storeBatchJobRequest.getOutput()).get(new String("format")));
 			
@@ -337,16 +394,26 @@ Logger log = Logger.getLogger(this.getClass());
 		}
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
+			/*SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
 			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
-			mapper.registerModule(module);
+			mapper.registerModule(module);*/
 			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 			mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
 			mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
+			mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 			mapper.setSerializationInclusion(Include.NON_NULL);
+			log.debug("Java object to string looks like this:");
+			log.debug(storeBatchJobRequest.toString());
+			log.debug("Serialized json looks like this:");
+			log.debug(mapper.writeValueAsString(storeBatchJobRequest));			
 			return Response.status(201).entity(mapper.writeValueAsString(storeBatchJobRequest)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").header("OpenEO-Identifier", storeBatchJobRequest.getId()).build();
 		} catch (JsonProcessingException e) {
-			log.error(e.getMessage());
+			log.error("An error occured while serializing job to json: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
 			return Response.serverError().entity("An error occured while serializing job to json: " + e.getMessage())
 					.build();
 		}
