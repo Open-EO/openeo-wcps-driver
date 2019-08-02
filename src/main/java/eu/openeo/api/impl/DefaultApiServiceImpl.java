@@ -80,9 +80,9 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		jobsEndpoint.put("path", "/jobs");
 		jobsEndpoint.put("methods", jobsMethods);
 		
-		JSONObject resultsEndpoint = new JSONObject();
-		resultsEndpoint.put("path", "/results");
-		resultsEndpoint.put("methods", resultMethods);
+		JSONObject resultEndpoint = new JSONObject();
+		resultEndpoint.put("path", "/result");
+		resultEndpoint.put("methods", resultMethods);
 		
 		JSONObject jobsIdEndpoint = new JSONObject();
 		jobsIdEndpoint.put("path", "/jobs/{job_id}");
@@ -104,7 +104,7 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		endpointList.put(collectionIdEndpoint);
 		endpointList.put(processesEndpoint);
 		endpointList.put(jobsEndpoint);
-		endpointList.put(resultsEndpoint);
+		endpointList.put(resultEndpoint);
 		endpointList.put(jobsIdEndpoint);
 		endpointList.put(jobsIdResultsEndpoint);
 		
