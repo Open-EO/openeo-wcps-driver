@@ -33,6 +33,7 @@ import java.net.URLEncoder;
 import java.sql.SQLException;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,6 +52,7 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.validation.constraints.*;
@@ -89,8 +91,45 @@ Logger log = Logger.getLogger(this.getClass());
 	
     @Override
     public Response jobsGet(SecurityContext securityContext) throws NotFoundException {
-        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+    	List<BatchJobResponse> storedBatchJobs = null;
+    	JSONObject jobSummary = new JSONObject();
+    	JSONArray jobs = new JSONArray();
+    	JSONArray links = new JSONArray();
+		try {
+			storedBatchJobs = jobDao.queryForAll();
+			for(BatchJobResponse storedBatchJob: storedBatchJobs) {
+				jobs.put(new JSONObject((String)storedBatchJob.toString()));
+			}
+			JSONObject linkSelf = new JSONObject();
+			linkSelf.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/jobs/");
+			linkSelf.put("rel", "self");
+			linkSelf.put("title", "Stored Jobs");
+			links.put(linkSelf);
+			jobSummary.put("jobs", jobs);
+			jobSummary.put("links", links);
+			return Response.ok(jobSummary.toString(4), MediaType.APPLICATION_JSON).build();
+		} catch (SQLException e) {
+			log.error("An error occured while performing an SQL-query: " + e.getMessage());
+			return Response.serverError().entity("An error occured while performing an SQL-query: " + e.getMessage()).build();
+		} catch (JSONException e) {
+			log.error("An error occured while serializing job to json: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
+			return Response.serverError().entity("An error occured while serializing job to json: " + e.getMessage()).build();
+		} catch (IOException e) {
+			log.error("An error occured while accessing properties file: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
+			return Response.serverError().entity("An error occured while accessing properties file: " + e.getMessage()).build();
+		}
     }
+    
     @Override
     public Response jobsJobIdDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
     	BatchJobResponse storedBatchJob = null;
@@ -286,7 +325,6 @@ Logger log = Logger.getLogger(this.getClass());
     }
     @Override
     public Response jobsJobIdResultsPost( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
     	BatchJobResponse job = null;
 		WCPSQueryFactory wcpsFactory = null;
 		String outputFormat = "JSON";
