@@ -376,63 +376,68 @@ public class WCPSQueryFactory {
 	private JSONObject parseOpenEOProcessGraph(JSONObject processParent) {
 		JSONObject result = null;
 		String coll = null;
-		for (Object keydc : processParent.keySet()) {
+		for (String processNodeKey : processParent.keySet()) {
 			
-			String keyStrdc = (String) keydc;
-			log.debug("Keys found are: " + keyStrdc);
+			log.debug("Keys found are: " + processNodeKey);
 			
-			JSONObject processNode1 = processParent.getJSONObject(keyStrdc);
-			String processName1 = processNode1.getString("process_id");
+			JSONObject processNode = processParent.getJSONObject(processNodeKey);
+			String processID = processNode.getString("process_id");
 			
-            if (processName1.contains("filter")) {
+            if (processID.contains("filter")) {
 				
-				String keyStrFilter = keyStrdc;
-				
-				JSONObject processFilter = processParent.getJSONObject(keyStrFilter);
+				JSONObject processFilter = processParent.getJSONObject(processNodeKey);
 				JSONObject processFilterArguments = processFilter.getJSONObject("arguments");
 				
+				//TODO look for arguments data from_node to find name of collection or define global argument in parser method
 				coll = collectionName(processParent);
 				
 				createFilterFromProcessNew(processFilter, processFilterArguments, coll);
 			}
 			
-            else if (processName1.equals("load_collection")) {
+            else if (processID.equals("load_collection")) {
 				
-				String loadCollNode = keyStrdc;
-				JSONObject processDatacube = processParent.getJSONObject(keyStrdc);
-				JSONObject processDatacubeArguments = processDatacube.getJSONObject("arguments");
+				JSONObject loadCollectionNode = processParent.getJSONObject(processNodeKey);
+				JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");
 				
-				coll = (String) processDatacubeArguments.get("id");
+				coll = (String) loadCollectionNodeArguments.get("id");
 				collectionIDs.add(new Collection(coll));
 				log.debug("found actual dataset: " + coll);
 				
-				JSONObject jsonresp = null;
+				JSONObject collectionSTACMetdata = null;
 				try {
-					jsonresp = readJsonFromUrl(
+					collectionSTACMetdata = readJsonFromUrl(
 							"http://localhost:8080/collections/" + coll);
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
 				}
 
 				int srs = 0;
 				
-				srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");
+				srs = ((JSONObject) collectionSTACMetdata.get("properties")).getInt("eo:epsg");
 				log.debug("srs is: " + srs);
 				
-				for (Object collFilterName : processDatacubeArguments.keySet()) {
-					String collFilterNameStr = (String) collFilterName;
-					if (collFilterNameStr.equals("spatial_extent")) {
-						JSONObject processDatacubeSpatExt = processDatacubeArguments.getJSONObject("spatial_extent");
-						log.debug("currently working on spatial extent: " + processDatacubeSpatExt);
-						createBoundingBoxFilterFromArgs(processDatacubeArguments, srs, coll);
+				for (String argumentKey : loadCollectionNodeArguments.keySet()) {
+
+					if (!loadCollectionNodeArguments.isNull(argumentKey) && argumentKey.equals("spatial_extent")) {
+						JSONObject spatialExtentNode = loadCollectionNodeArguments.getJSONObject("spatial_extent");
+						log.debug("currently working on spatial extent: " + spatialExtentNode.toString(4));
+						createBoundingBoxFilterFromArgs(loadCollectionNodeArguments, srs, coll);
 					}
-					if (collFilterNameStr.equals("temporal_extent")) {
-						JSONArray processDatacubeTempExt = (JSONArray) processDatacubeArguments.get("temporal_extent");
-						log.debug("currently working on temporal extent: " + processDatacubeTempExt);
+					if (!loadCollectionNodeArguments.isNull(argumentKey) && argumentKey.equals("temporal_extent")) {
+						JSONArray processDatacubeTempExt = (JSONArray) loadCollectionNodeArguments.get("temporal_extent");
+						log.debug("currently working on temporal extent: " + processDatacubeTempExt.toString(4));
 						createDateRangeFilterFromArgs(processDatacubeTempExt, coll);
 					}
 				}
@@ -470,9 +475,9 @@ public class WCPSQueryFactory {
 				
 			}
 			
-			else if (processName1.equals("NDVI") || processName1.contains("time")) {
+			else if (processID.equals("NDVI") || processID.contains("time")) {
 				
-				String keyStrAggregate = keyStrdc;
+				String keyStrAggregate = processNodeKey;
 				JSONObject processAggregate = processParent.getJSONObject(keyStrAggregate);
 				JSONObject processAggregateArguements = processAggregate.getJSONObject("arguments");
 				JSONObject processAggregateArguementsData = processAggregateArguements.getJSONObject("data");
