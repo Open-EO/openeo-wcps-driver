@@ -107,10 +107,12 @@ Logger log = Logger.getLogger(this.getClass());
 			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage()).build();
 		}
     }
+    
     @Override
     public Response jobsJobIdEstimateGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
         return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
+    
     @Override
     public Response jobsJobIdGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId, SecurityContext securityContext) throws NotFoundException {
         BatchJobResponse storedBatchJob = null;
@@ -144,7 +146,8 @@ Logger log = Logger.getLogger(this.getClass());
 			log.debug(storedBatchJob.toString());
 			log.debug("Serialized json looks like this:");
 			log.debug(mapper.writeValueAsString(storedBatchJob));			
-			return Response.status(201).entity(mapper.writeValueAsString(storedBatchJob)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").header("OpenEO-Identifier", storedBatchJob.getId()).build();
+//			return Response.status(201).entity(mapper.writeValueAsString(storedBatchJob)).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").header("OpenEO-Identifier", storedBatchJob.getId()).build();
+			return Response.status(201).entity(storedBatchJob.toString()).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").header("OpenEO-Identifier", storedBatchJob.getId()).build();
 		} catch (JsonProcessingException e) {
 			log.error("An error occured while serializing job to json: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();

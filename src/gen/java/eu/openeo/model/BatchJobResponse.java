@@ -14,6 +14,11 @@ package eu.openeo.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -522,20 +527,25 @@ public class BatchJobResponse implements Serializable {
 	@JsonValue
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("class BatchJobResponse {\n");
-
-		sb.append("\"id\": ").append(toIndentedString(id)).append("\n");
-		sb.append("\"title\": ").append(toIndentedString(title)).append("\n");
-		sb.append("\"description\": ").append(toIndentedString(description)).append("\n");
-		sb.append("\"processGraph\": ").append(((JSONObject)this.getProcessGraph()).toString(4)).append("\n");
-		sb.append("\"output\": ").append(toIndentedString(output)).append("\n");
-		sb.append("\"status\": ").append(toIndentedString(status)).append("\n");
-		sb.append("\"progress\": ").append(toIndentedString(progress)).append("\n");
-		sb.append("\"error\": ").append(toIndentedString(error)).append("\n");
-		sb.append("\"submitted\": ").append(toIndentedString(submitted)).append("\n");
-		sb.append("\"updated\": ").append(toIndentedString(updated)).append("\n");
-		sb.append("\"plan\": ").append(toIndentedString(plan)).append("\n");
-		sb.append("\"costs\": ").append(costs).append("\n");
+		sb.append("{\n");
+		sb.append("\"id\": ").append(toIndentedString(id)).append(",\n");
+		sb.append("\"title\": ").append(toIndentedString(title)).append(",\n");
+		sb.append("\"description\": ").append(toIndentedString(description)).append(",\n");
+		sb.append("\"processGraph\": ").append(((JSONObject)this.getProcessGraph()).toString(4)).append(",\n");
+		sb.append("\"output\": ").append(toIndentedString(output)).append(",\n");
+		sb.append("\"status\": ").append(toIndentedString(status)).append(",\n");
+		sb.append("\"progress\": ").append(toIndentedString(progress)).append(",\n");
+		sb.append("\"error\": ").append(toIndentedString(error)).append(",\n");
+		ZonedDateTime submittedLocal = ZonedDateTime.ofInstant(submitted.toInstant(), ZoneId.systemDefault());
+		sb.append("\"submitted\": ").append(toIndentedString(submittedLocal.format(DateTimeFormatter.ISO_INSTANT))).append(",\n");
+		if(updated != null) {
+			ZonedDateTime updatedLocal = ZonedDateTime.ofInstant(updated.toInstant(), ZoneId.systemDefault());
+			sb.append("\"updated\": ").append(toIndentedString(updatedLocal.format(DateTimeFormatter.ISO_INSTANT))).append(",\n");
+		}else {
+			sb.append("\"updated\": ").append(toIndentedString(updated)).append(",\n");
+		}
+		sb.append("\"plan\": ").append(toIndentedString(plan)).append(",\n");
+		sb.append("\"costs\": ").append(costs).append(",\n");
 		sb.append("\"budget\": ").append(budget).append("\n");
 		sb.append("}");
 		return sb.toString();
