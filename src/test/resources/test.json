@@ -1,0 +1,30 @@
+{
+	"1": {
+		"process_id": "load_collection",
+		"arguments": {
+			"temporal_extent": null,
+			"spatial_extent": {
+				"east": 11.389729,
+				"south": 46.466714,
+				"north": 46.513988,
+				"west": 11.286732
+			},
+			"id": "openEO_S2_32632_20m_L2A",
+			"bands": null,
+			"properties": null
+		}
+	},
+	"2": {
+		"result": "true",
+		"process_id": "save_result",
+		"arguments": {
+			"data": {
+				"from_node": "1"
+			},
+			"format": "NETCDF",
+			"options": {
+				
+		}
+	}
+}
+}

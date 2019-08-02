@@ -29,7 +29,7 @@ public class ConvenienceHelper {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream stream = classLoader.getResourceAsStream("output_formats.json");
 		JSONObject outputFormats = new JSONObject(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
-		JSONObject currentFormat = outputFormats.getJSONObject("formats").getJSONObject(output);
+		JSONObject currentFormat = outputFormats.getJSONObject(output);
 		if(currentFormat != null) {
 			return currentFormat.getString("mime-type");
 		}

@@ -31,6 +31,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.SQLException;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -250,11 +252,14 @@ Logger log = Logger.getLogger(this.getClass());
 //			linkProcessGraph.put("description","Deriving minimum ndvi measurements over pixel time series of sentinel 2 imagery."); //Nullable
 			linkProcessGraph.put("updated", job.getUpdated());
 			
+			JSONArray links = new JSONArray();
 			JSONObject link = new JSONObject();
 			link.put("href", url);
 			link.put("type", ConvenienceHelper.getMimeTypeFromOutput(outputFormat));
 			
-			linkProcessGraph.put("links", link);
+			links.put(link);
+			
+			linkProcessGraph.put("links", links);
 			
 //			byte[] response = IOUtils.toByteArray(linkProcessGraph.toString().getBytes("UTF-8"));			
 			
