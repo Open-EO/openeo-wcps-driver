@@ -1,63 +1,45 @@
 package eu.openeo.api.impl;
 
-import eu.openeo.api.*;
-import eu.openeo.model.*;
-
-import eu.openeo.model.BatchJobEstimateResponse;
-import eu.openeo.model.BatchJobListResponse;
-import eu.openeo.model.BatchJobResponse;
-import eu.openeo.model.BatchJobResultsResponse;
-import eu.openeo.model.Error;
-import eu.openeo.model.JobError;
-import eu.openeo.model.StoreBatchJobRequest;
-import eu.openeo.model.UpdateBatchJobRequest;
-import eu.openeo.model.Status;
-
-import java.util.Date;
-import java.util.UUID;
-
-import java.util.List;
-import eu.openeo.api.NotFoundException;
-import org.apache.log4j.Logger;
-
-import java.io.InputStream;
-import eu.openeo.backend.wcps.ConvenienceHelper;
-import eu.openeo.backend.wcps.WCPSQueryFactory;
-
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
+import javax.swing.event.EventListenerList;
+import javax.validation.constraints.Pattern;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.Version;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.validation.constraints.*;
-
-import eu.openeo.dao.JSONObjectSerializer;
+import eu.openeo.api.JobsApiService;
+import eu.openeo.api.NotFoundException;
+import eu.openeo.backend.wcps.ConvenienceHelper;
+import eu.openeo.backend.wcps.JobScheduler;
+import eu.openeo.backend.wcps.WCPSQueryFactory;
+import eu.openeo.backend.wcps.events.JobEvent;
+import eu.openeo.backend.wcps.events.JobEventListener;
+import eu.openeo.model.BatchJobResponse;
+import eu.openeo.model.Status;
+import eu.openeo.model.UpdateBatchJobRequest;
 
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class JobsApiServiceImpl extends JobsApiService {
@@ -67,8 +49,8 @@ Logger log = Logger.getLogger(this.getClass());
 	private ConnectionSource connection = null;
 	private Dao<BatchJobResponse,String> jobDao = null;
 	private String wcpsEndpoint = null;
-	
-	private ObjectMapper mapper = null;
+	private EventListenerList listenerList = new EventListenerList();
+	private JobScheduler jobScheduler = null;
 	
 	public JobsApiServiceImpl() {
 		try {
@@ -81,7 +63,8 @@ Logger log = Logger.getLogger(this.getClass());
 				log.debug("Create Table failed, probably exists already: " + sqle.getMessage());
 			}
 			jobDao = DaoManager.createDao(connection, BatchJobResponse.class);
-			 mapper = new ObjectMapper();
+			this.jobScheduler = new JobScheduler();
+			this.addJobListener(jobScheduler);
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 		} catch (IOException ioe) {
@@ -363,6 +346,7 @@ Logger log = Logger.getLogger(this.getClass());
 			job.setStatus(Status.QUEUED);
 			job.setUpdated(new Date());
 			jobDao.update(job);
+			this.fireJobQueuedEvent(job.getId());
 			//TODO add job to execute queue
 			return Response.status(202).entity(new String("The creation of the resource has been queued successfully.")).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 			/*
@@ -464,4 +448,29 @@ Logger log = Logger.getLogger(this.getClass());
 					.build();
 		}
     }
+    
+    public void addJobListener(JobEventListener listener) {
+		try {
+			listenerList.add(JobEventListener.class, listener);
+			log.debug("JobEventListener successfully added to listenerList!");
+		} catch (Exception e) {			
+			log.error("No Event available: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
+		}
+	}
+    
+    private void fireJobQueuedEvent(String jobId) {
+		Object[] listeners = listenerList.getListenerList();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == JobEventListener.class) {
+				JobEvent jobEvent = new JobEvent(this, jobId );
+				((JobEventListener) listeners[i + 1]).jobQueued(jobEvent);
+			}
+		}
+		log.debug("Job Queue Event fired for job: " + jobId);
+	}
 }
