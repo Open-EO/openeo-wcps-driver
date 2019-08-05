@@ -466,6 +466,14 @@ public class WCPSQueryFactory {
 				JSONObject processAggregateArguements = processAggregate.getJSONObject("arguments");
 				JSONObject processAggregateArguementsData = processAggregateArguements.getJSONObject("data");
 				createAggregateFromProcessNew(processAggregate, processAggregateArguementsData);
+			} else if (processID.equals("save_result")) {
+				String format = getFormatFromSaveResultNode(processNode);
+				try {
+					this.outputFormat = ConvenienceHelper.getMimeTypeFromOutput(format);
+				} catch (JSONException | IOException e) {
+					log.error("Error while parsing outputformat from process graph: " + e.getMessage());
+				}
+				
 			}
 			
 		}
@@ -538,6 +546,12 @@ public class WCPSQueryFactory {
 			 */
 		}
 		return result;
+	}
+	
+	private String getFormatFromSaveResultNode(JSONObject saveResultNode) {
+		JSONObject saveResultArguments = saveResultNode.getJSONObject("arguments");
+		String format = saveResultArguments.getString("format");
+		return format;
 	}
 
 	private String filter_geometry(String collectionName) {
