@@ -42,7 +42,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
     	URL url;
 		try {
 			url = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
-					+ "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
+					+ "?SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
@@ -180,7 +180,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			linkSelf.put("rel", "self");
 			
 			JSONObject linkAlternate = new JSONObject();
-			linkAlternate.put("href", ConvenienceHelper.readProperties("wcps-endpoint") + "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
+			linkAlternate.put("href", ConvenienceHelper.readProperties("wcps-endpoint") + "?SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
 			linkAlternate.put("rel", "alternate");
 			
 			JSONObject linkLicense = new JSONObject();
@@ -188,8 +188,8 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			linkLicense.put("rel", "license");
 			
 			JSONObject linkAbout = new JSONObject();
-			linkAbout.put("href", ConvenienceHelper.readProperties("wcps-endpoint") + "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
-			linkAbout.put("title", ConvenienceHelper.readProperties("wcps-endpoint") + "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
+			linkAbout.put("href", ConvenienceHelper.readProperties("wcps-endpoint") + "?SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
+			linkAbout.put("title", ConvenienceHelper.readProperties("wcps-endpoint") + "?SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionId);
 			linkAbout.put("rel", "about");
 			
 			links.put(linkSelf);
@@ -227,7 +227,12 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			
 			for(int c = 0; c < bandList.size(); c++) {
 				Element band = bandList.get(c);
-				Double bandWave = Double.parseDouble(band.getChild("Quantity", sweNS).getChildText("description", sweNS).split(" ")[3])/1000d;
+				Double bandWave = null;
+				try {
+					bandWave = Double.parseDouble(band.getChild("Quantity", sweNS).getChildText("description", sweNS).split(" ")[3])/1000d;
+				}catch(Exception e) {
+					log.error("Error in parsing band wave-lenght:" + e.getMessage());
+				}
 				
 				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
 				JSONObject product = new JSONObject();
@@ -378,7 +383,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				String coverageID = coverage.getChildText("CoverageId", defaultNS);
 				
 				URL urlCollections = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
-						+ "?&SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageID);
+						+ "?SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + coverageID);
 				
 				HttpURLConnection connCollections = (HttpURLConnection) urlCollections.openConnection();
 				connCollections.setRequestMethod("GET");
