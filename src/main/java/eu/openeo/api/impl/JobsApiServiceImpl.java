@@ -297,7 +297,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 	public Response jobsJobIdResultsPost(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 		BatchJobResponse job = null;
-		WCPSQueryFactory wcpsFactory = null;
 		try {
 			job = jobDao.queryForId(jobId);
 			if (job == null) {
@@ -305,8 +304,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 						.build();
 			}
 			log.debug("The following job was retrieved: \n" + job.toString());
-			JSONObject processGraphJSON = (JSONObject) job.getProcessGraph();
-			wcpsFactory = new WCPSQueryFactory(processGraphJSON);
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
