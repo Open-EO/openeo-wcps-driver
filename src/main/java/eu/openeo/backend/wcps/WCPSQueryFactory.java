@@ -357,7 +357,7 @@ public class WCPSQueryFactory {
 				JSONObject collectionSTACMetdata = null;
 				try {
 					collectionSTACMetdata = readJsonFromUrl(
-							"http://localhost:8080/collections/" + coll);
+							ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
 				} catch (JSONException e) {
 					log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
@@ -471,7 +471,7 @@ public class WCPSQueryFactory {
 							JSONObject jsonresp = null;
 							try {
 								jsonresp = readJsonFromUrl(
-										"http://localhost:8080/collections/" + coll);
+										ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
 							} catch (JSONException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -580,7 +580,7 @@ private void createFilterFromProcessNew(JSONObject processFilter, JSONObject pro
 				
 				JSONObject jsonresp = null;
 				try {
-					jsonresp = readJsonFromUrl("http://localhost:8080/collections/" + coll);
+					jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
 				} catch (JSONException e) {
 					log.error("An error occured: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
@@ -630,7 +630,7 @@ private void createFilterFromProcessNew(JSONObject processFilter, JSONObject pro
 				
 				JSONObject jsonresp = null;
 				try {
-					jsonresp = readJsonFromUrl("http://localhost:8080/collections/" + coll);
+					jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
 				} catch (JSONException e) {
 					log.error("An error occured: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
@@ -673,7 +673,7 @@ private void createFilterFromProcessNew(JSONObject processFilter, JSONObject pro
 
 		JSONObject jsonresp = null;
 		try {
-			jsonresp = readJsonFromUrl("http://localhost:8080/collections/" + coll);
+			jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
 		} catch (JSONException e) {
 			log.error("An error occured: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
@@ -754,7 +754,7 @@ private void createFilterFromProcessNew(JSONObject processFilter, JSONObject pro
 					JSONObject extent;
 					JSONObject jsonresp = null;
 					try {
-						jsonresp = readJsonFromUrl("http://localhost:8080/collections/" + coll);
+						jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
 					} catch (JSONException e) {
 						log.error("An error occured: " + e.getMessage());
 						StringBuilder builder = new StringBuilder();
