@@ -41,6 +41,10 @@ public class WCPSQueryFactory {
 		filters = new Vector<Filter>();
 		wcpsStringBuilder = new StringBuilder("for ");
 		this.build(openEOGraph);
+	}	
+
+	public String getOutputFormat() {
+		return outputFormat;
 	}
 
 	private void build(JSONObject openEOGraph) {
