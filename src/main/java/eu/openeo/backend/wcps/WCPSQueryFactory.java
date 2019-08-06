@@ -320,6 +320,8 @@ public class WCPSQueryFactory {
 	 * @return String WCPS query
 	 */
 	public String getWCPSString() {
+		log.debug("The following WCPS query was requested: ");
+		log.debug(wcpsStringBuilder.toString());
 		return wcpsStringBuilder.toString();
 	}
 
