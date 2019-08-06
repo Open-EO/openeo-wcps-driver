@@ -14,7 +14,7 @@ public class TestWCPSQueryFactory {
 	@Test
 	void justAnExample() {
 		try {
-			byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/use_case_1_test.json"));
+			byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/test.json"));
 			JSONObject openEOGraph = new JSONObject(new String(encoded, StandardCharsets.UTF_8));
 			WCPSQueryFactory wcpsQueryFactory = new WCPSQueryFactory(openEOGraph);
 			System.out.println(wcpsQueryFactory.getWCPSString());
