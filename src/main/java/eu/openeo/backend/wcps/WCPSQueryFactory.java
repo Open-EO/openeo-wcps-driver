@@ -40,44 +40,12 @@ public class WCPSQueryFactory {
 		aggregates = new Vector<Aggregate>();
 		filters = new Vector<Filter>();
 		wcpsStringBuilder = new StringBuilder("for ");
-		// this.build(openEOGraph);
-	}
-
-	public WCPSQueryFactory(JSONObject openEOGraph, String outputFormat) {
-		this(openEOGraph);
-		try {
-			this.outputFormat = ConvenienceHelper.getMimeTypeFromOutput(outputFormat);
-		} catch (JSONException e) {
-			log.error("An error occured while parsing output: " + e.getMessage());
-			StringBuilder builder = new StringBuilder();
-			for (StackTraceElement element : e.getStackTrace()) {
-				builder.append(element.toString() + "\n");
-			}
-			log.error(builder.toString());
-		} catch (IOException e) {
-			log.error("An error occured while parsing output: " + e.getMessage());
-			StringBuilder builder = new StringBuilder();
-			for (StackTraceElement element : e.getStackTrace()) {
-				builder.append(element.toString() + "\n");
-			}
-			log.error(builder.toString());
-		}
 		this.build(openEOGraph);
 	}
 
 	private void build(JSONObject openEOGraph) {
 		log.debug(openEOGraph.toString());
 		parseOpenEOProcessGraph(openEOGraph);
-		// if (openEOGraph.containsKey(new String("process_graph"))) {
-		// parseOpenEOProcessGraph((JSONObject) openEOGraph.get(new
-		// String("process_graph")));
-		//
-		// }
-		// if (openEOGraph.containsKey(new String("output"))) {
-		// this.outputFormat = (String) ((JSONObject) openEOGraph.get(new
-		// String("output"))).get(new String("format"));
-		// log.debug("the following output format was found: " + this.outputFormat);
-		// }
 		for (int c = 1; c <= collectionIDs.size(); c++) {
 			wcpsStringBuilder.append("$c" + c);
 			if (c > 1) {
@@ -89,7 +57,6 @@ public class WCPSQueryFactory {
 			wcpsStringBuilder.append(collectionIDs.get(c - 1).getName() + " ");
 		}
 		wcpsStringBuilder.append(") return encode ( ");
-		// for (int a = aggregates.size() - 1; a >= 0; a--) {
 
 		for (Object key : openEOGraph.keySet()) {
 			String keyStr = (String) key;
@@ -228,7 +195,7 @@ public class WCPSQueryFactory {
 			if (axis.contains("DATE") && !low.contains("$")) {
 				stringBuilder.append("\"");
 			}
-			if (high != null) {
+			if (high != null && !(high.equals(low))) {
 				stringBuilder.append(":");
 				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
@@ -467,11 +434,17 @@ public class WCPSQueryFactory {
 				JSONObject processAggregateArguementsData = processAggregateArguements.getJSONObject("data");
 				createAggregateFromProcessNew(processAggregate, processAggregateArguementsData);
 			} else if (processID.equals("save_result")) {
+				log.debug("Found save result node: " + processNode.getString("process_id"));
 				String format = getFormatFromSaveResultNode(processNode);
-				try {
+				try {					
 					this.outputFormat = ConvenienceHelper.getMimeTypeFromOutput(format);
 				} catch (JSONException | IOException e) {
 					log.error("Error while parsing outputformat from process graph: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
 				}
 				
 			}

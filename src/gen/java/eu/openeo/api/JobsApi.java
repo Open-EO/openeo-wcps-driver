@@ -1,37 +1,28 @@
 package eu.openeo.api;
 
-import eu.openeo.model.*;
-import eu.openeo.api.JobsApiService;
+import javax.servlet.ServletConfig;
+import javax.validation.Valid;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import eu.openeo.api.factories.JobsApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
 import eu.openeo.model.BatchJobEstimateResponse;
 import eu.openeo.model.BatchJobListResponse;
 import eu.openeo.model.BatchJobResponse;
 import eu.openeo.model.BatchJobResultsResponse;
 import eu.openeo.model.Error;
 import eu.openeo.model.JobError;
-import eu.openeo.model.StoreBatchJobRequest;
 import eu.openeo.model.UpdateBatchJobRequest;
-
-import java.util.Map;
-import java.util.List;
-import eu.openeo.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
-import javax.servlet.ServletConfig;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.*;
-import javax.validation.constraints.*;
-import javax.validation.Valid;
+import io.swagger.annotations.ApiParam;
+import io.swagger.jaxrs.PATCH;
 
 @Path("/jobs")
 
@@ -186,10 +177,10 @@ public class JobsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "The request can't be fulfilled due to an error at the back-end. The error is never the client’s fault and therefore it is reasonable for the client to retry the exact same request that triggered this response. The response body SHOULD contain a JSON error object. MUST be any HTTP status code specified in [RFC 7231](https://tools.ietf.org/html/rfc7231#section-6.6).", response = Error.class) })
     public Response jobsJobIdResultsGet(@ApiParam(value = "Unique job identifier.",required=true) @PathParam("job_id") String jobId,
-    @ApiParam(value = "Output format to be used. Supported formats and options can be retrieved using the `GET /capabilities/output_formats` endpoint. If no output format has been specified here or for the job in general, the back-end falls back to its default format, which is  specified in the `GET /capabilities/output_formats` endpoint. **Note:** The options available to the specified output format can be added as individual query parameters to the request.") @QueryParam("format") String format, @Context SecurityContext securityContext)
+    @Context SecurityContext securityContext)
     
     throws NotFoundException {
-        return delegate.jobsJobIdResultsGet(jobId, format, securityContext);
+        return delegate.jobsJobIdResultsGet(jobId, securityContext);
     }
     @POST
     @Path("/{job_id}/results")

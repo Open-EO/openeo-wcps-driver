@@ -14,23 +14,12 @@ package eu.openeo.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import org.json.JSONObject;
-import org.apache.log4j.Logger;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
@@ -38,17 +27,19 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+
 import eu.openeo.dao.JSONObjectPersister;
-import eu.openeo.dao.JSONObjectSerializer;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Defines full metadata of batch jobs that have been submitted by users.
@@ -83,10 +74,6 @@ public class BatchJobResponse implements Serializable {
 	@JsonProperty("process_graph")
 	@DatabaseField(canBeNull = false, persisterClass = JSONObjectPersister.class)
 	private Object processGraph = null;
-
-	@JsonProperty("output")
-	@DatabaseField(persisterClass = JSONObjectPersister.class)
-	private Object output = null;
 
 	@JsonProperty("status")
 	@DatabaseField(canBeNull = false)
@@ -186,36 +173,11 @@ public class BatchJobResponse implements Serializable {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
-//	public BatchJobResponse processGraph(Map<String, ProcessNode> processGraph) {
-//		this.processGraph = processGraph;
-//		return this;
-//	}
 	
 	public BatchJobResponse processGraph(Object processGraph) {
 		this.processGraph = processGraph;
 		return this;
 	}
-
-//	public BatchJobResponse putProcessGraphItem(String key, ProcessNode processGraphItem) {
-//		this.processGraph.put(key, processGraphItem);
-//		return this;
-//	}
-
-//	/**
-//	 * A process graph defines a graph-like structure as a connected set of
-//	 * executable processes. Each key is a unique identifier (node id) that is used
-//	 * to refer to the process in the graph.
-//	 * 
-//	 * @return processGraph
-//	 **/
-//	@JsonProperty("process_graph")
-//	@ApiModelProperty(example = "{\"dc\":{\"process_id\":\"load_collection\",\"arguments\":{\"id\":\"Sentinel-2\",\"spatial_extent\":{\"west\":16.1,\"east\":16.6,\"north\":48.6,\"south\":47.2},\"temporal_extent\":[\"2018-01-01\",\"2018-02-01\"]}},\"bands\":{\"process_id\":\"filter_bands\",\"description\":\"Filter and order the bands. The order is important for the following reduce operation.\",\"arguments\":{\"data\":{\"from_node\":\"dc\"},\"bands\":[\"B08\",\"B04\",\"B02\"]}},\"evi\":{\"process_id\":\"reduce\",\"description\":\"Compute the EVI. Formula: 2.5 * (NIR - RED) / (1 + NIR + 6*RED + -7.5*BLUE)\",\"arguments\":{\"data\":{\"from_node\":\"bands\"},\"dimension\":\"spectral\",\"reducer\":{\"callback\":{\"nir\":{\"process_id\":\"array_element\",\"arguments\":{\"data\":{\"from_argument\":\"data\"},\"index\":0}},\"red\":{\"process_id\":\"array_element\",\"arguments\":{\"data\":{\"from_argument\":\"data\"},\"index\":1}},\"blue\":{\"process_id\":\"array_element\",\"arguments\":{\"data\":{\"from_argument\":\"data\"},\"index\":2}},\"sub\":{\"process_id\":\"subtract\",\"arguments\":{\"data\":[{\"from_node\":\"nir\"},{\"from_node\":\"red\"}]}},\"p1\":{\"process_id\":\"product\",\"arguments\":{\"data\":[6,{\"from_node\":\"red\"}]}},\"p2\":{\"process_id\":\"product\",\"arguments\":{\"data\":[-7.5,{\"from_node\":\"blue\"}]}},\"sum\":{\"process_id\":\"sum\",\"arguments\":{\"data\":[1,{\"from_node\":\"nir\"},{\"from_node\":\"p1\"},{\"from_node\":\"p2\"}]}},\"div\":{\"process_id\":\"divide\",\"arguments\":{\"data\":[{\"from_node\":\"sub\"},{\"from_node\":\"sum\"}]}},\"p3\":{\"process_id\":\"product\",\"arguments\":{\"data\":[2.5,{\"from_node\":\"div\"}]},\"result\":true}}}}},\"mintime\":{\"process_id\":\"reduce\",\"description\":\"Compute a minimum time composite by reducing the temporal dimension\",\"arguments\":{\"data\":{\"from_node\":\"evi\"},\"dimension\":\"temporal\",\"reducer\":{\"callback\":{\"min\":{\"process_id\":\"min\",\"arguments\":{\"data\":{\"from_argument\":\"data\"}},\"result\":true}}}}},\"save\":{\"process_id\":\"save_result\",\"arguments\":{\"data\":{\"from_node\":\"mintime\"},\"format\":\"GTiff\"},\"result\":true}}", required = true, value = "A process graph defines a graph-like structure as a connected set of executable processes. Each key is a unique identifier (node id) that is used to refer to the process in the graph.")
-//	@NotNull
-//	@Valid
-//	public Map<String, ProcessNode> getProcessGraph() {
-//		return processGraph;
-//	}
 	
 	/**
 	 * Get processGraph
@@ -226,69 +188,13 @@ public class BatchJobResponse implements Serializable {
 	@ApiModelProperty(required = true, value = "")
 	@NotNull	
 	public Object getProcessGraph() {		
-//		ObjectMapper mapper = new ObjectMapper();
-//		SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
-//		module.addSerializer(JSONObject.class, new JSONObjectSerializer());
-//		mapper.registerModule(module);
-//		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-//		mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
-//		mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
-//		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-//		mapper.setSerializationInclusion(Include.NON_NULL);
-//		JSONObject processgraphLocal = null;
-//		try {		
-//			processgraphLocal = new JSONObject(mapper.writeValueAsString(this.processGraph));
-//			
-//		} catch (JsonProcessingException e) {
-//			e.printStackTrace();
-//		}
-//		return processgraphLocal;
 		log.debug("process graph object:" + this.processGraph.getClass());
 		log.debug(this.processGraph.toString());
 		return new JSONObject((Map<String, Object>) this.processGraph);
 	}
-
-//	public void setProcessGraph(Map<String, ProcessNode> processGraph) {
-//		this.processGraph = processGraph;
-//	}
 	
 	public void setProcessGraph(Object processGraph) {
 		this.processGraph = processGraph;
-	}
-
-	public BatchJobResponse output(Object output) {
-		this.output = output;
-		return this;
-	}
-
-	/**
-	 * Get output
-	 * 
-	 * @return output
-	 **/
-	@JsonProperty("output")
-	@ApiModelProperty(value = "")
-	public Object getOutput() {
-		if (this.output != null) {
-			ObjectMapper mapper = new ObjectMapper();
-			SimpleModule module = new SimpleModule("JSONObjectSerializer", new Version(1, 0, 0, null, null, null));
-			module.addSerializer(JSONObject.class, new JSONObjectSerializer());
-			mapper.registerModule(module);
-			JSONObject outputLocal = null;
-			try {
-				log.debug("output = " + mapper.writeValueAsString(this.output));
-				outputLocal = new JSONObject(mapper.writeValueAsString(this.output));
-			} catch (JsonProcessingException e) {
-				log.error("error in parsing output object for job: " + e.getMessage());
-				e.printStackTrace();
-			}
-			return outputLocal;
-		} else
-			return null;
-	}
-
-	public void setOutput(Object output) {
-		this.output = output;
 	}
 
 	public BatchJobResponse status(Status status) {
@@ -506,7 +412,6 @@ public class BatchJobResponse implements Serializable {
 		return Objects.equals(this.id, batchJobResponse.id) && Objects.equals(this.title, batchJobResponse.title)
 				&& Objects.equals(this.description, batchJobResponse.description)
 				&& Objects.equals(this.processGraph, batchJobResponse.processGraph)
-				&& Objects.equals(this.output, batchJobResponse.output)
 				&& Objects.equals(this.status, batchJobResponse.status)
 				&& Objects.equals(this.progress, batchJobResponse.progress)
 				&& Objects.equals(this.error, batchJobResponse.error)
@@ -519,7 +424,7 @@ public class BatchJobResponse implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, title, description, processGraph, output, status, progress, error, submitted, updated,
+		return Objects.hash(id, title, description, processGraph, status, progress, error, submitted, updated,
 				plan, costs, budget);
 	}
 
@@ -532,7 +437,6 @@ public class BatchJobResponse implements Serializable {
 		sb.append("\"title\": ").append(toIndentedString(title)).append(",\n");
 		sb.append("\"description\": ").append(toIndentedString(description)).append(",\n");
 		sb.append("\"processGraph\": ").append(((JSONObject)this.getProcessGraph()).toString(4)).append(",\n");
-		sb.append("\"output\": ").append(toIndentedString(output)).append(",\n");
 		sb.append("\"status\": ").append(toIndentedString(status)).append(",\n");
 		sb.append("\"progress\": ").append(toIndentedString(progress)).append(",\n");
 		sb.append("\"error\": ").append(toIndentedString(error)).append(",\n");
@@ -550,29 +454,6 @@ public class BatchJobResponse implements Serializable {
 		sb.append("}");
 		return sb.toString();
 	}
-	
-//	@Override
-//	@JsonValue
-//	public String toString() {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("class BatchJobResponse {\n");
-//
-//		sb.append("    id: ").append(toIndentedString(id)).append("\n");
-//		sb.append("    title: ").append(toIndentedString(title)).append("\n");
-//		sb.append("    description: ").append(toIndentedString(description)).append("\n");
-//		sb.append("    processGraph: ").append(toIndentedString(processGraph)).append("\n");
-//		sb.append("    output: ").append(toIndentedString(output)).append("\n");
-//		sb.append("    status: ").append(toIndentedString(status)).append("\n");
-//		sb.append("    progress: ").append(toIndentedString(progress)).append("\n");
-//		sb.append("    error: ").append(toIndentedString(error)).append("\n");
-//		sb.append("    submitted: ").append(toIndentedString(submitted)).append("\n");
-//		sb.append("    updated: ").append(toIndentedString(updated)).append("\n");
-//		sb.append("    plan: ").append(toIndentedString(plan)).append("\n");
-//		sb.append("    costs: ").append(toIndentedString(costs)).append("\n");
-//		sb.append("    budget: ").append(toIndentedString(budget)).append("\n");
-//		sb.append("}");
-//		return sb.toString();
-//	}
 
 	/**
 	 * Convert the given object to string with each line indented by 4 spaces
