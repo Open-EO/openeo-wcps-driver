@@ -341,7 +341,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 		try {
 			outputFormat = (String)(((JSONObject) job.getOutput()).get(new String("format")));
 			
-            outputFormat = outputFormat.toUpperCase();
+      outputFormat = outputFormat.toUpperCase();
 			
 			if (outputFormat.equals("NETCDF"))
 			{
