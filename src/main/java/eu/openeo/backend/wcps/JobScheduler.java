@@ -55,6 +55,7 @@ public class JobScheduler implements JobEventListener{
 			}
 			log.debug("The following job was retrieved: \n" + job.toString());
 			//TODO replace here with triggering of actual processing
+			
 			job.setStatus(Status.FINISHED);
 			job.setUpdated(new Date());
 			jobDao.update(job);

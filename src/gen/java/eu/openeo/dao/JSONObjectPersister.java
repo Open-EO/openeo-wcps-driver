@@ -68,29 +68,6 @@ public class JSONObjectPersister extends StringType {
 			return null;
 		}
 	}
-	
-//	@Override
-//	public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
-//		JSONObject returnObject = null;
-//		try {
-//			log.debug("string received from db:");
-//			log.debug((String)results.getObject(columnPos));
-//			returnObject =  new JSONObject((Map<String, Object>) mapper.readValue((String) results.getObject(columnPos), new TypeReference<Map<String, Object>>(){}));
-//			log.debug("json object:");
-//			log.debug(returnObject.toString(4));
-//			return returnObject; 
-//		} catch (JsonProcessingException e) {
-//			log.error("Error resultToSqlArg: " + e.getMessage());
-//			log.error(results.getObject(columnPos).toString());
-//			return returnObject;
-//		} catch (IOException e) {
-//			log.error("Error resultToSqlArg: " + e.getMessage());
-//			log.error(results.getObject(columnPos).toString());
-//			return returnObject;
-//		} catch(NullPointerException e) {
-//			return null;
-//		}
-//	}
 
 	@Override
 	public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) {

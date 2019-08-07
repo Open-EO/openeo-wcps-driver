@@ -214,6 +214,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 		if (updateBatchJobRequest.getBudget() != null)
 			storedBatchJob.setBudget(updateBatchJobRequest.getBudget());
 		try {
+			storedBatchJob.setUpdated(new Date());
 			jobDao.update(storedBatchJob);
 			log.debug("job updated in database: " + storedBatchJob.getId());
 			return Response.status(204).entity("Changes to the job applied successfully.")
@@ -257,7 +258,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 		try {
 			job.setUpdated(new Date());
 			jobDao.update(job);
-
+			//TODO move to Job Scheduler below of this comment
 			url = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
 					+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
 
@@ -273,7 +274,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			links.put(link);
 
 			linkProcessGraph.put("links", links);
-
+			//TODO add here link to actual temporal storage of job result, for download on demand by client
 			return Response.ok(linkProcessGraph.toString().getBytes("UTF-8"), "application/json")
 					.header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 		} catch (MalformedURLException e) {
