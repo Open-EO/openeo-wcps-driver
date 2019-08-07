@@ -40,8 +40,6 @@ This repository serves for the development of the openEO driver for WC(P)S backe
   * json
   * csv
   * netcdf
-
-A note on download activities. In this domain the service is not fully compliant with the 0.3.0 API specification as a /openeo/jobs/{job-id}/results request returns directly the required file and not a list of links as specified in the API.
   
 ## Setup of the service
 
@@ -59,6 +57,7 @@ The current git project is setup as a runnable web archive maven project in ecli
 
 ### Migration Plan for v0.4
 
-- [ ] 
-- [ ] 
-- [ ] 
+- file handling -> in development 
+- authentication
+- process graph storage
+- process graph validation
