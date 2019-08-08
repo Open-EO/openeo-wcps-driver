@@ -1,10 +1,15 @@
 package eu.openeo.api.impl;
 
+import java.io.BufferedInputStream;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -265,16 +270,36 @@ public class JobsApiServiceImpl extends JobsApiService {
 			JSONObject linkProcessGraph = new JSONObject();
 			linkProcessGraph.put("job_id", job.getId());
 			linkProcessGraph.put("updated", job.getUpdated());
-
+			
+			//String fileOutputName = ConvenienceHelper.readProperties("temp-dir") + "tmp_" + wcpsFactory.getWCPSString();
+			//String filePath = "/home/sitritini@eurac.edu/eclipse-workspace/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/openEO_web_editor/";
+			String filePath = "./eclipse-workspace/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/openEO_web_editor/";
+			String fileName = (new Timestamp(new Date().getTime()) + ".tiff").replace(" ", "_");
+			log.debug("The output file will be saved here: \n" + (filePath + fileName).toString());		
+						
+			try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+					  FileOutputStream fileOutputStream = new FileOutputStream(filePath + fileName)) {
+					    byte dataBuffer[] = new byte[1024];
+					    int bytesRead;
+					    while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+					        fileOutputStream.write(dataBuffer, 0, bytesRead);
+					    }
+					    log.debug("File saved correctly");
+			} catch (IOException e) {
+				log.error("An error occured when downloading the file of the current job: " + e.getMessage());
+			}
+			
 			JSONArray links = new JSONArray();
 			JSONObject link = new JSONObject();
-			link.put("href", url);
+			link.put("href", "http://10.8.244.141:8080/editor/" + fileName);
 			link.put("type", ConvenienceHelper.getMimeTypeFromOutput(outputFormat));
 
 			links.put(link);
 
 			linkProcessGraph.put("links", links);
 			//TODO add here link to actual temporal storage of job result, for download on demand by client
+			
+			
 			return Response.ok(linkProcessGraph.toString().getBytes("UTF-8"), "application/json")
 					.header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 		} catch (MalformedURLException e) {
