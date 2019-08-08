@@ -1,10 +1,15 @@
 package eu.openeo.backend.wcps;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.Date;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -22,10 +27,12 @@ public class JobScheduler implements JobEventListener{
 	
 	private Dao<BatchJobResponse,String> jobDao = null;
 	private ConnectionSource connection = null;
+	private String wcpsEndpoint = null;
 	
 	public JobScheduler() {
 		try {
 			String dbURL = "jdbc:sqlite:" + ConvenienceHelper.readProperties("job-database");
+			wcpsEndpoint = ConvenienceHelper.readProperties("wcps-endpoint");
 			connection =  new JdbcConnectionSource(dbURL);
 			jobDao = DaoManager.createDao(connection, BatchJobResponse.class);
 		} catch (SQLException sqle) {
@@ -48,14 +55,17 @@ public class JobScheduler implements JobEventListener{
 	@Override
 	public void jobQueued(JobEvent jobEvent) {
 		BatchJobResponse job = null;
+		String outputFormat = "JSON";	
 		try {
 			job = jobDao.queryForId(jobEvent.getJobId());
 			if(job == null) {
 				log.error("A job with the specified identifier is not available.");
 			}
 			log.debug("The following job was retrieved: \n" + job.toString());
-			//TODO replace here with triggering of actual processing
+			//TODO replace here with triggering of actual processing			
 			
+			
+
 			job.setStatus(Status.FINISHED);
 			job.setUpdated(new Date());
 			jobDao.update(job);
@@ -68,7 +78,6 @@ public class JobScheduler implements JobEventListener{
 			}
 			log.error(builder.toString());
 		}
-		
 	}
 
 	@Override
