@@ -56,6 +56,9 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		JSONArray processesIDMethods = new JSONArray();
 		processesIDMethods.put(new String("GET"));
 		
+		JSONArray credentialsBasicMethods =  new JSONArray();
+		credentialsBasicMethods.put(new String("GET"));
+		
 		JSONObject defaultEndpoint = new JSONObject();
 		defaultEndpoint.put("path", "/");
 		defaultEndpoint.put("methods", defaultMethods);
@@ -63,6 +66,10 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		JSONObject wellKnownEndpoint = new JSONObject();
 		wellKnownEndpoint.put("path", "/.well-known/openeo");
 		wellKnownEndpoint.put("methods", wellKnownMethods);
+		
+		JSONObject credentialsBasicEndpoint = new JSONObject();
+		credentialsBasicEndpoint.put("path", "/credentials/basic");
+		credentialsBasicEndpoint.put("methods", credentialsBasicMethods);
 		
 		JSONObject outputFormatsEndpoint = new JSONObject();
 		outputFormatsEndpoint.put("path", "/output_formats");
@@ -99,6 +106,7 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		JSONArray endpointList = new JSONArray();
 		endpointList.put(defaultEndpoint);
 		endpointList.put(wellKnownEndpoint);
+		endpointList.put(credentialsBasicEndpoint);
 		endpointList.put(outputFormatsEndpoint);
 		endpointList.put(collectionsEndpoint);
 		endpointList.put(collectionIdEndpoint);

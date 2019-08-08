@@ -61,4 +61,17 @@
         <filter-name>ApiOriginFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    <security-constraint>
+        <web-resource-collection>
+            <url-pattern>/credentials/basic</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>PUBLIC</role-name>
+            <role-name>EURAC</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>default</realm-name>
+    </login-config>    
 </web-app>
