@@ -63,12 +63,42 @@
     </filter-mapping>
     <security-constraint>
         <web-resource-collection>
+        	<web-resource-name>Auth and Processing</web-resource-name>
             <url-pattern>/credentials/basic</url-pattern>
+            <url-pattern>/credentials/Oidc</url-pattern>
+            <url-pattern>/jobs</url-pattern>
+            <url-pattern>/results</url-pattern>
+            <http-method>PUT</http-method>
+        	<http-method>DELETE</http-method>
+        	<http-method>GET</http-method>
+        	<http-method>POST</http-method>
         </web-resource-collection>
         <auth-constraint>
             <role-name>PUBLIC</role-name>
             <role-name>EURAC</role-name>
         </auth-constraint>
+    </security-constraint>
+    <security-constraint>
+        <web-resource-collection>
+        	<web-resource-name>Auth Preflight</web-resource-name>
+            <url-pattern>/credentials/basic</url-pattern>
+            <url-pattern>/credentials/Oidc</url-pattern>
+            <http-method>OPTIONS</http-method>
+        </web-resource-collection>
+    </security-constraint>
+    <security-constraint>
+        <web-resource-collection>
+        	<web-resource-name>Discovery</web-resource-name>
+        	<url-pattern>/</url-pattern>
+        	<url-pattern>/.well-known/openeo</url-pattern>
+            <url-pattern>/collections</url-pattern>
+            <url-pattern>/collections/*</url-pattern>
+            <url-pattern>/processes</url-pattern>
+            <url-pattern>/processes/*</url-pattern>
+            <url-pattern>/output_formats</url-pattern>
+            <http-method>OPTIONS</http-method>
+            <http-method>GET</http-method>
+        </web-resource-collection>
     </security-constraint>
     <login-config>
         <auth-method>BASIC</auth-method>
