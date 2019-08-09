@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.security.RolesAllowed;
 import javax.swing.event.EventListenerList;
 import javax.validation.constraints.Pattern;
 import javax.ws.rs.core.MediaType;
@@ -37,6 +38,7 @@ import com.j256.ormlite.table.TableUtils;
 
 import eu.openeo.api.JobsApiService;
 import eu.openeo.api.NotFoundException;
+import eu.openeo.backend.auth.filter.RequireToken;
 import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.backend.wcps.JobScheduler;
 import eu.openeo.backend.wcps.WCPSQueryFactory;
@@ -46,6 +48,7 @@ import eu.openeo.model.BatchJobResponse;
 import eu.openeo.model.Status;
 import eu.openeo.model.UpdateBatchJobRequest;
 
+@RolesAllowed({"PUBLIC", "EURAC"})
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class JobsApiServiceImpl extends JobsApiService {
 
@@ -78,7 +81,12 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
+	@RequireToken
 	public Response jobsGet(SecurityContext securityContext) throws NotFoundException {
+//		log.debug("Secutiry Info:" 
+//				+ "\n user name: " + securityContext.getUserPrincipal().getName()
+//				+ "\n is user Eurac: " + securityContext.isUserInRole("EURAC")
+//				+ "\n is user Public: " + securityContext.isUserInRole("PUBLIC"));
 		List<BatchJobResponse> storedBatchJobs = null;
 		JSONObject jobSummary = new JSONObject();
 		JSONArray jobs = new JSONArray();

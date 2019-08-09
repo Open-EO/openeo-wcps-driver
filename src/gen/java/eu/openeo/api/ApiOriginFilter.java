@@ -15,7 +15,7 @@ public class ApiOriginFilter implements javax.servlet.Filter {
             FilterChain chain) throws IOException, ServletException {
         HttpServletResponse res = (HttpServletResponse) response;
         res.addHeader("Access-Control-Allow-Origin", "*");
-        res.addHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, DELETE, PUT");
+        res.addHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, DELETE, PUT, PATCH");
         res.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, authorization");
         res.addHeader("Access-Control-Allow-Credentials", "true");
         res.addHeader("Access-Control-Expose-Headers", "Location, OpenEO-Identifier, OpenEO-Costs");

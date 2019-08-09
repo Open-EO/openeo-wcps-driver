@@ -36,7 +36,7 @@
 						</resource>
 					</webResources>
 					<packagingExcludes>**/javax.servlet*.jar,
-					**/javax.validation*.jar</packagingExcludes>
+						**/javax.validation*.jar</packagingExcludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -231,9 +231,21 @@
 			<version>${beanvalidation-version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.auth0</groupId>
-		    <artifactId>java-jwt</artifactId>
-		    <version>3.8.1</version>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.10.7</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.10.7</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.10.7</version>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 	<properties>
