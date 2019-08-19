@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.Principal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -83,10 +84,12 @@ public class JobsApiServiceImpl extends JobsApiService {
 	@Override
 	@RequireToken
 	public Response jobsGet(SecurityContext securityContext) throws NotFoundException {
-//		log.debug("Secutiry Info:" 
-//				+ "\n user name: " + securityContext.getUserPrincipal().getName()
-//				+ "\n is user Eurac: " + securityContext.isUserInRole("EURAC")
-//				+ "\n is user Public: " + securityContext.isUserInRole("PUBLIC"));
+		Principal principal = securityContext.getUserPrincipal();
+		if(principal != null) {
+			log.debug("The following user asked for list of stored jobs: " + principal.getName());
+		}else {
+			log.error("No information on authentication found on request for jobs!!!");
+		}
 		List<BatchJobResponse> storedBatchJobs = null;
 		JSONObject jobSummary = new JSONObject();
 		JSONArray jobs = new JSONArray();
