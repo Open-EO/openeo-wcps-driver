@@ -105,11 +105,15 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
     	}
         String jwtToken = null;
 		try {
+			//TODO make sure to include correct user information in claims, such as role and name etc.
+			//TODO read those from a relational database....
 			jwtToken = Jwts.builder()
 			        .setSubject(login)
 			        .setIssuer(ConvenienceHelper.readProperties("openeo-endpoint") + "/credentials/basic")
 			        .setIssuedAt(new Date())
 			        .setExpiration(java.sql.Timestamp.valueOf(LocalDateTime.now().plusMinutes(15L)))
+			        .claim("name", login)
+			        .claim("scope", login)
 			        .signWith(SignatureAlgorithm.HS512, key)
 			        .compact();
 		AuthKeys authKeys = new AuthKeys(jwtToken);
