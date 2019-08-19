@@ -38,7 +38,7 @@ public class ConvenienceHelper {
 		{
 			output="GTiff";
 		}
-		log.info("assigning output type: " + output);
+		log.debug("assigning output type: " + output);
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream stream = classLoader.getResourceAsStream("output_formats.json");
 		JSONObject outputFormats = new JSONObject(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
@@ -46,6 +46,22 @@ public class ConvenienceHelper {
 		if(currentFormat != null) {
 			return currentFormat.getString("mime-type");
 		}
+		return MediaType.WILDCARD;		
+	}
+	
+	public static String getRasNameFromMimeType(String mimeTypeName) throws IOException, JSONException{
+		log.debug("Mime type request: " + mimeTypeName);
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		InputStream stream = classLoader.getResourceAsStream("output_formats.json");
+		JSONObject outputFormats = new JSONObject(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
+		String outputFormat = "";
+		for(String formatName: outputFormats.keySet()) {
+			JSONObject currentObject = outputFormats.getJSONObject(formatName);
+			if(currentObject.getString("mime-type").equals(mimeTypeName)) {
+				return outputFormat = currentObject.getString("rasdaman_name");
+			}
+		}
+		log.error("mime type could not be matched to rasdaman type: " + mimeTypeName);
 		return MediaType.WILDCARD;		
 	}
 

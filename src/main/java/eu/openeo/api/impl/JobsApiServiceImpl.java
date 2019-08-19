@@ -1,14 +1,21 @@
 package eu.openeo.api.impl;
 
+import java.io.BufferedInputStream;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.Principal;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.security.RolesAllowed;
 import javax.swing.event.EventListenerList;
 import javax.validation.constraints.Pattern;
 import javax.ws.rs.core.MediaType;
@@ -32,6 +39,7 @@ import com.j256.ormlite.table.TableUtils;
 
 import eu.openeo.api.JobsApiService;
 import eu.openeo.api.NotFoundException;
+import eu.openeo.backend.auth.filter.RequireToken;
 import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.backend.wcps.JobScheduler;
 import eu.openeo.backend.wcps.WCPSQueryFactory;
@@ -41,6 +49,7 @@ import eu.openeo.model.BatchJobResponse;
 import eu.openeo.model.Status;
 import eu.openeo.model.UpdateBatchJobRequest;
 
+@RolesAllowed({"PUBLIC", "EURAC"})
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class JobsApiServiceImpl extends JobsApiService {
 
@@ -73,7 +82,14 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
+	@RequireToken
 	public Response jobsGet(SecurityContext securityContext) throws NotFoundException {
+		Principal principal = securityContext.getUserPrincipal();
+		if(principal != null) {
+			log.debug("The following user asked for list of stored jobs: " + principal.getName());
+		}else {
+			log.error("No information on authentication found on request for jobs!!!");
+		}
 		List<BatchJobResponse> storedBatchJobs = null;
 		JSONObject jobSummary = new JSONObject();
 		JSONArray jobs = new JSONArray();
@@ -117,6 +133,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
+	@RequireToken
 	public Response jobsJobIdDelete(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 		BatchJobResponse storedBatchJob = null;
@@ -139,12 +156,14 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
+	@RequireToken
 	public Response jobsJobIdEstimateGet(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
 	}
 
 	@Override
+	@RequireToken
 	public Response jobsJobIdGet(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 		BatchJobResponse storedBatchJob = null;
@@ -188,6 +207,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
+	@RequireToken
 	public Response jobsJobIdPatch(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			UpdateBatchJobRequest updateBatchJobRequest, SecurityContext securityContext) throws NotFoundException {
 		BatchJobResponse storedBatchJob = null;
@@ -228,17 +248,18 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
+	@RequireToken
 	public Response jobsJobIdResultsDelete(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
 	}
 
 	@Override
+	@RequireToken
 	public Response jobsJobIdResultsGet(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 
 		BatchJobResponse job = null;
-		WCPSQueryFactory wcpsFactory = null;
 		String outputFormat = "JSON";
 		try {
 			job = jobDao.queryForId(jobId);
@@ -247,54 +268,43 @@ public class JobsApiServiceImpl extends JobsApiService {
 						.build();
 			}
 			log.debug("The following job was retrieved: \n" + job.toString());
-			JSONObject processGraphJSON = (JSONObject) job.getProcessGraph();
-			wcpsFactory = new WCPSQueryFactory(processGraphJSON);
+			
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
 					.build();
 		}
-		URL url;
 		try {
-			job.setUpdated(new Date());
-			jobDao.update(job);
-			//TODO move to Job Scheduler below of this comment
-			url = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
-					+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
+			JSONObject processGraphJSON = (JSONObject) job.getProcessGraph();
+			WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
 
+			String fileName = job.getId() + "." + ConvenienceHelper.getRasNameFromMimeType(wcpsFactory.getOutputFormat());
+			
 			JSONObject linkProcessGraph = new JSONObject();
 			linkProcessGraph.put("job_id", job.getId());
 			linkProcessGraph.put("updated", job.getUpdated());
-
+			
 			JSONArray links = new JSONArray();
 			JSONObject link = new JSONObject();
-			link.put("href", url);
+			link.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/tmp/" + fileName);
 			link.put("type", ConvenienceHelper.getMimeTypeFromOutput(outputFormat));
 
 			links.put(link);
 
 			linkProcessGraph.put("links", links);
-			//TODO add here link to actual temporal storage of job result, for download on demand by client
+			
 			return Response.ok(linkProcessGraph.toString().getBytes("UTF-8"), "application/json")
 					.header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
-		} catch (MalformedURLException e) {
-			log.error("An error occured when creating URL from job query: " + e.getMessage());
-			return Response.serverError().entity("An error occured when creating URL from job query: " + e.getMessage())
-					.build();
 		} catch (IOException e) {
 			log.error("An error occured when retrieving query result from WCPS endpoint: " + e.getMessage());
 			return Response.serverError()
 					.entity("An error occured when retrieving query result from WCPS endpoint: " + e.getMessage())
 					.build();
-		} catch (SQLException e) {
-			log.error("An error occured while performing an SQL-query: " + e.getMessage());
-			return Response.serverError().entity("An error occured while performing an SQL-query: " + e.getMessage())
-					.build();
 		}
-
 	}
 
 	@Override
+	@RequireToken
 	public Response jobsJobIdResultsPost(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 		BatchJobResponse job = null;
@@ -325,6 +335,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
+	@RequireToken
 	public Response jobsPost(BatchJobResponse storeBatchJobRequest, SecurityContext securityContext)
 			throws NotFoundException {
 		UUID jobID = UUID.randomUUID();

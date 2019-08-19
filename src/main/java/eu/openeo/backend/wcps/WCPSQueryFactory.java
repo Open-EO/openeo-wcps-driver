@@ -7,6 +7,10 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -241,7 +245,7 @@ public class WCPSQueryFactory {
 			if (axis.contains("DATE") && !low.contains("$")) {
 				stringBuilder.append("\"");
 			}
-			if (high != null) {
+			if (high != null && !(high.equals(low))) {
 				stringBuilder.append(":");
 				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
@@ -708,19 +712,24 @@ private void createFilterFromProcessNew(JSONObject processFilter, JSONObject pro
 		else {
 			fromDate = extentArray.get(0).toString();
 		}
-        if (extentupper.compareTo(tempupper) > 0) {
+        if ( extentupper.compareTo(tempupper) > 0) {
         	toDate = temporal.get(1).toString();
 		}
         else {
         	toDate = extentArray.get(1).toString();
 		}
-		//fromDate = extentArray.get(0).toString();
-		//toDate = extentArray.get(1).toString();
-		if (fromDate != null && toDate != null)
+		if (fromDate != null && toDate != null) {
+			log.debug("Temporal extent is: |" + fromDate + "|:|" + toDate + "|");
+			if(LocalDateTime.parse(fromDate.replace("Z", "")).equals(LocalDateTime.parse(toDate.replace("Z", "")))) {
+				toDate = null;
+				log.debug("Dates are ideentical. To date is set to null!");
+			}
+			log.debug("Temporal extent is: " + fromDate + ":" + toDate);
 			this.filters.add(new Filter("DATE", fromDate, toDate));
+		}
 	}
 
-	private static String readAll(Reader rd) throws IOException {
+	private String readAll(Reader rd) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		int cp;
 		while ((cp = rd.read()) != -1) {
@@ -729,7 +738,8 @@ private void createFilterFromProcessNew(JSONObject processFilter, JSONObject pro
 		return sb.toString();
 	}
 
-	public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+	private JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+		log.debug("Trying to read JSON from the following URL: " + url);
 		InputStream is = new URL(url).openStream();
 		try {
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));

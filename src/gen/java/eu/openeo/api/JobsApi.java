@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import eu.openeo.api.factories.JobsApiServiceFactory;
+import eu.openeo.backend.auth.filter.RequireToken;
 import eu.openeo.model.BatchJobEstimateResponse;
 import eu.openeo.model.BatchJobListResponse;
 import eu.openeo.model.BatchJobResponse;
@@ -25,8 +26,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.PATCH;
 
 @Path("/jobs")
-
-
+@RequireToken
 @io.swagger.annotations.Api(description = "the jobs API")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class JobsApi  {
@@ -53,9 +53,8 @@ public class JobsApi  {
       this.delegate = delegate;
    }
 
-    @GET
-    
-    
+    @GET    
+    @RequireToken
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "List all batch jobs", notes = "Requests to this endpoint will list all batch jobs submitted by a user with given id.", response = BatchJobListResponse.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "Bearer")

@@ -12,7 +12,8 @@
                 io.swagger.jaxrs.listing,
                 io.swagger.sample.resource,
                 eu.openeo.api,
-                eu.openeo.model
+                eu.openeo.model,
+                eu.openeo.backend.auth.filter
             </param-value>
         </init-param>
         <init-param>
@@ -23,6 +24,10 @@
             <param-name>jersey.config.server.wadl.disableWadl</param-name>
             <param-value>true</param-value>
         </init-param>
+        <init-param>
+            <param-name>jersey.config.server.provider.classnames</param-name>
+            <param-value>eu.openeo.backend.auth.filter.RequireTokenFilter</param-value>
+        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
@@ -31,7 +36,7 @@
         <servlet-class>io.swagger.jersey.config.JerseyJaxrsConfig</servlet-class>
         <init-param>
             <param-name>api.version</param-name>
-            <param-value>0.4</param-value>
+            <param-value>0.4.2</param-value>
         </init-param>
         <init-param>
             <param-name>swagger.api.title</param-name>
@@ -39,7 +44,7 @@
         </init-param>
         <init-param>
             <param-name>swagger.api.basepath</param-name>
-            <param-value>/api/v0.4</param-value>
+            <param-value>/</param-value>
         </init-param>
 
         <load-on-startup>2</load-on-startup>
@@ -61,4 +66,86 @@
         <filter-name>ApiOriginFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    <!-- 
+    <security-constraint>
+        <web-resource-collection>
+        	<web-resource-name>Auth and Processing</web-resource-name>
+            <url-pattern>/credentials/basic</url-pattern>
+            <url-pattern>/credentials/oidc</url-pattern>
+            <url-pattern>/jobs</url-pattern>
+            <url-pattern>/jobs/*</url-pattern>
+            <url-pattern>/result</url-pattern>
+            <url-pattern>/me</url-pattern>
+            <url-pattern>/subscription</url-pattern>
+            <url-pattern>/services</url-pattern>
+            <url-pattern>/files/*</url-pattern>
+            <url-pattern>/process_graphs</url-pattern>
+            <url-pattern>/process_graphs/*</url-pattern>
+            <url-pattern>/validation</url-pattern>
+            <http-method>PUT</http-method>
+            <http-method>PATCH</http-method>
+        	<http-method>DELETE</http-method>
+        	<http-method>GET</http-method>
+        	<http-method>POST</http-method>
+        	<http-method>OPTIONS</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>PUBLIC</role-name>
+            <role-name>EURAC</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+      	</user-data-constraint>
+    </security-constraint>
+     -->
+    <security-constraint>
+        <web-resource-collection>
+        	<web-resource-name>Authentication</web-resource-name>
+            <url-pattern>/credentials/basic</url-pattern>
+            <url-pattern>/credentials/oidc</url-pattern>
+        	<http-method>GET</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>PUBLIC</role-name>
+            <role-name>EURAC</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+      	</user-data-constraint>
+    </security-constraint>
+    <security-constraint>
+        <web-resource-collection>
+        	<web-resource-name>Auth Preflight</web-resource-name>
+            <url-pattern>/credentials/basic</url-pattern>
+            <url-pattern>/credentials/Oidc</url-pattern>
+            <http-method>OPTIONS</http-method>
+        </web-resource-collection>
+        <user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+      	</user-data-constraint>
+    </security-constraint>
+    <security-constraint>
+        <web-resource-collection>
+        	<web-resource-name>Discovery</web-resource-name>
+        	<url-pattern>/</url-pattern>
+        	<url-pattern>/.well-known/openeo</url-pattern>
+            <url-pattern>/collections</url-pattern>
+            <url-pattern>/collections/*</url-pattern>
+            <url-pattern>/processes</url-pattern>
+            <url-pattern>/processes/*</url-pattern>
+            <url-pattern>/output_formats</url-pattern>
+            <url-pattern>/service_types</url-pattern>
+            <url-pattern>/udf_runtimes</url-pattern>
+            <http-method>OPTIONS</http-method>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+    </security-constraint>
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>default</realm-name>
+    </login-config>
+    <security-role>
+        <role-name>PUBLIC</role-name>
+        <role-name>EURAC</role-name>
+    </security-role>
 </web-app>

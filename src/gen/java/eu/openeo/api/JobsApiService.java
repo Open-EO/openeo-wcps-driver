@@ -4,10 +4,12 @@ import javax.validation.constraints.Pattern;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import eu.openeo.backend.auth.filter.RequireToken;
 import eu.openeo.model.BatchJobResponse;
 import eu.openeo.model.UpdateBatchJobRequest;
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public abstract class JobsApiService {
+	@RequireToken
     public abstract Response jobsGet(SecurityContext securityContext) throws NotFoundException;
     public abstract Response jobsJobIdDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId,SecurityContext securityContext) throws NotFoundException;
     public abstract Response jobsJobIdEstimateGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String jobId,SecurityContext securityContext) throws NotFoundException;

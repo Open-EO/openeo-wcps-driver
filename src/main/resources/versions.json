@@ -1,7 +1,7 @@
 {
 	"versions": [
 		{
-			"url": "https://openeo.eurac.edu/",
+			"url": "http://openeo.eurac.edu",
 			"production": false,
 			"api_version": "0.4.2"
 		},

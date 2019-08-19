@@ -1,10 +1,17 @@
 package eu.openeo.backend.wcps;
 
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -22,10 +29,12 @@ public class JobScheduler implements JobEventListener{
 	
 	private Dao<BatchJobResponse,String> jobDao = null;
 	private ConnectionSource connection = null;
+	private String wcpsEndpoint = null;
 	
 	public JobScheduler() {
 		try {
 			String dbURL = "jdbc:sqlite:" + ConvenienceHelper.readProperties("job-database");
+			wcpsEndpoint = ConvenienceHelper.readProperties("wcps-endpoint");
 			connection =  new JdbcConnectionSource(dbURL);
 			jobDao = DaoManager.createDao(connection, BatchJobResponse.class);
 		} catch (SQLException sqle) {
@@ -54,8 +63,41 @@ public class JobScheduler implements JobEventListener{
 				log.error("A job with the specified identifier is not available.");
 			}
 			log.debug("The following job was retrieved: \n" + job.toString());
-			//TODO replace here with triggering of actual processing
+					
+			URL url;
+			JSONObject processGraphJSON = (JSONObject) job.getProcessGraph();
+			WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
+			job.setUpdated(new Date());
+			jobDao.update(job);
 			
+			url = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
+					+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
+
+			JSONObject linkProcessGraph = new JSONObject();
+			linkProcessGraph.put("job_id", job.getId());
+			linkProcessGraph.put("updated", job.getUpdated());
+			
+			String filePath = ConvenienceHelper.readProperties("temp-dir");
+			String fileName = job.getId() + "." + ConvenienceHelper.getRasNameFromMimeType(wcpsFactory.getOutputFormat());
+			log.debug("The output file will be saved here: \n" + (filePath + fileName).toString());		
+						
+			try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+					  FileOutputStream fileOutputStream = new FileOutputStream(filePath + fileName)) {
+					    byte dataBuffer[] = new byte[1024];
+					    int bytesRead;
+					    while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+					        fileOutputStream.write(dataBuffer, 0, bytesRead);
+					    }
+					    log.debug("File saved correctly");
+			} catch (IOException e) {
+				log.error("\"An error occured when downloading the file of the current job: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			}
+
 			job.setStatus(Status.FINISHED);
 			job.setUpdated(new Date());
 			jobDao.update(job);
@@ -67,8 +109,16 @@ public class JobScheduler implements JobEventListener{
 				builder.append(element.toString()+"\n");
 			}
 			log.error(builder.toString());
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-		
 	}
 
 	@Override

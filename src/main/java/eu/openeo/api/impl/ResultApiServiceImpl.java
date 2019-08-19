@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -16,6 +15,7 @@ import org.json.JSONObject;
 
 import eu.openeo.api.NotFoundException;
 import eu.openeo.api.ResultApiService;
+import eu.openeo.backend.auth.filter.RequireToken;
 import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.backend.wcps.WCPSQueryFactory;
 import eu.openeo.model.SynchronousResultRequest;
@@ -25,6 +25,7 @@ public class ResultApiServiceImpl extends ResultApiService {
 	Logger log = Logger.getLogger(this.getClass());
 	
     @Override
+    @RequireToken
     public Response resultPost(SynchronousResultRequest synchronousResultRequest, SecurityContext securityContext) throws NotFoundException {
 		WCPSQueryFactory wcpsFactory = null;
 		JSONObject processGraphJSON = (JSONObject) synchronousResultRequest.getProcessGraph();
