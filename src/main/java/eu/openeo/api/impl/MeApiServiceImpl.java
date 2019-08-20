@@ -28,6 +28,7 @@ public class MeApiServiceImpl extends MeApiService {
     		Principal principal = securityContext.getUserPrincipal();
     		if(principal != null) {
 		    	String userId = principal.getName();
+		    	log.debug("The following user is authenticated and authorized to get information about himself: " + userId);
 		    	JSONObject linkProcessGraph = new JSONObject();
 				linkProcessGraph.put("user_id", userId);
 				
