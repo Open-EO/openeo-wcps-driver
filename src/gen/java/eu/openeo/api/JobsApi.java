@@ -1,5 +1,6 @@
 package eu.openeo.api;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.ServletConfig;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -27,6 +28,7 @@ import io.swagger.jaxrs.PATCH;
 
 @Path("/jobs")
 @RequireToken
+@RolesAllowed({"PUBLIC", "EURAC"})
 @io.swagger.annotations.Api(description = "the jobs API")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class JobsApi  {

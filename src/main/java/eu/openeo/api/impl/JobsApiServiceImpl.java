@@ -40,7 +40,6 @@ import eu.openeo.model.BatchJobResponse;
 import eu.openeo.model.Status;
 import eu.openeo.model.UpdateBatchJobRequest;
 
-@RolesAllowed({"PUBLIC", "EURAC"})
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class JobsApiServiceImpl extends JobsApiService {
 
