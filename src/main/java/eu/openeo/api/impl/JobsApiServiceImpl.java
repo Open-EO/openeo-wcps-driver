@@ -3,11 +3,13 @@ package eu.openeo.api.impl;
 import java.io.IOException;
 import java.security.Principal;
 import java.sql.SQLException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.security.RolesAllowed;
 import javax.swing.event.EventListenerList;
 import javax.validation.constraints.Pattern;
 import javax.ws.rs.core.MediaType;
@@ -241,7 +243,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 			SecurityContext securityContext) throws NotFoundException {
 
 		BatchJobResponse job = null;
-		String outputFormat = "JSON";
 		try {
 			job = jobDao.queryForId(jobId);
 			if (job == null) {
@@ -263,12 +264,13 @@ public class JobsApiServiceImpl extends JobsApiService {
 			
 			JSONObject linkProcessGraph = new JSONObject();
 			linkProcessGraph.put("job_id", job.getId());
-			linkProcessGraph.put("updated", job.getUpdated());
+			ZonedDateTime updatedLocal = ZonedDateTime.ofInstant(job.getUpdated().toInstant(), ZoneId.systemDefault());
+			linkProcessGraph.put("updated", updatedLocal.format(DateTimeFormatter.ISO_INSTANT));
 			
 			JSONArray links = new JSONArray();
 			JSONObject link = new JSONObject();
 			link.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/tmp/" + fileName);
-			link.put("type", ConvenienceHelper.getMimeTypeFromOutput(outputFormat));
+			link.put("type", wcpsFactory.getOutputFormat());
 
 			links.put(link);
 
