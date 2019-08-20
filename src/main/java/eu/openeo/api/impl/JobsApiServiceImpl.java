@@ -1,16 +1,8 @@
 package eu.openeo.api.impl;
 
-import java.io.BufferedInputStream;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.security.Principal;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +31,6 @@ import com.j256.ormlite.table.TableUtils;
 
 import eu.openeo.api.JobsApiService;
 import eu.openeo.api.NotFoundException;
-import eu.openeo.backend.auth.filter.RequireToken;
 import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.backend.wcps.JobScheduler;
 import eu.openeo.backend.wcps.WCPSQueryFactory;
@@ -57,13 +48,11 @@ public class JobsApiServiceImpl extends JobsApiService {
 
 	private ConnectionSource connection = null;
 	private Dao<BatchJobResponse, String> jobDao = null;
-	private String wcpsEndpoint = null;
 	private EventListenerList listenerList = new EventListenerList();
 	private JobScheduler jobScheduler = null;
 
 	public JobsApiServiceImpl() {
 		try {
-			wcpsEndpoint = ConvenienceHelper.readProperties("wcps-endpoint");
 			String dbURL = "jdbc:sqlite:" + ConvenienceHelper.readProperties("job-database");
 			connection = new JdbcConnectionSource(dbURL);
 			try {
@@ -82,7 +71,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
-	@RequireToken
 	public Response jobsGet(SecurityContext securityContext) throws NotFoundException {
 		Principal principal = securityContext.getUserPrincipal();
 		if(principal != null) {
@@ -133,7 +121,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
-	@RequireToken
 	public Response jobsJobIdDelete(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 		BatchJobResponse storedBatchJob = null;
@@ -156,14 +143,12 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
-	@RequireToken
 	public Response jobsJobIdEstimateGet(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
 	}
 
 	@Override
-	@RequireToken
 	public Response jobsJobIdGet(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 		BatchJobResponse storedBatchJob = null;
@@ -207,7 +192,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
-	@RequireToken
 	public Response jobsJobIdPatch(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			UpdateBatchJobRequest updateBatchJobRequest, SecurityContext securityContext) throws NotFoundException {
 		BatchJobResponse storedBatchJob = null;
@@ -248,14 +232,12 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
-	@RequireToken
 	public Response jobsJobIdResultsDelete(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 		return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
 	}
 
 	@Override
-	@RequireToken
 	public Response jobsJobIdResultsGet(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 
@@ -304,7 +286,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
-	@RequireToken
 	public Response jobsJobIdResultsPost(@Pattern(regexp = "^[A-Za-z0-9_\\-\\.~]+$") String jobId,
 			SecurityContext securityContext) throws NotFoundException {
 		BatchJobResponse job = null;
@@ -335,7 +316,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 	}
 
 	@Override
-	@RequireToken
 	public Response jobsPost(BatchJobResponse storeBatchJobRequest, SecurityContext securityContext)
 			throws NotFoundException {
 		UUID jobID = UUID.randomUUID();

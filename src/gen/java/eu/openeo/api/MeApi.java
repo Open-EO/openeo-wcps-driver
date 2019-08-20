@@ -1,31 +1,17 @@
 package eu.openeo.api;
 
-import eu.openeo.model.*;
-import eu.openeo.api.MeApiService;
-import eu.openeo.api.factories.MeApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
-import eu.openeo.model.Error;
-import eu.openeo.model.UserDataResponse;
-
-import java.util.Map;
-import java.util.List;
-import eu.openeo.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
 import javax.servlet.ServletConfig;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.*;
-import javax.validation.constraints.*;
-import javax.validation.Valid;
+
+import eu.openeo.api.factories.MeApiServiceFactory;
+import eu.openeo.backend.auth.filter.RequireToken;
+import eu.openeo.model.Error;
+import eu.openeo.model.UserDataResponse;
 
 @Path("/me")
 
@@ -58,7 +44,7 @@ public class MeApi  {
 
     @GET
     
-    
+    @RequireToken
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Information about the authenticated user", notes = "This endpoint always returns the user id and MAY return the disk quota available to the user. It MAY also return additional links related to the user, e.g. where payments are handled or the user profile could be changed. For back-ends that involve accounting, this service MAY also return the currently available money or credits in the currency the back-end is working with. This endpoint MAY be extended to fulfil the specification of the [OpenID Connect UserInfo Endpoint](http://openid.net/specs/openid-connect-core-1_0.html#UserInfo).", response = UserDataResponse.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "Bearer")

@@ -3,7 +3,6 @@ package eu.openeo.api.impl;
 import java.io.IOException;
 import java.security.Principal;
 
-import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -13,7 +12,6 @@ import org.json.JSONObject;
 
 import eu.openeo.api.MeApiService;
 import eu.openeo.api.NotFoundException;
-import eu.openeo.backend.auth.filter.RequireToken;
 import eu.openeo.backend.wcps.ConvenienceHelper;
 
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
@@ -22,7 +20,6 @@ public class MeApiServiceImpl extends MeApiService {
 	Logger log = Logger.getLogger(this.getClass());
 	
     @Override
-    @RequireToken
     public Response meGet(SecurityContext securityContext) throws NotFoundException {
     	try {
     		Principal principal = securityContext.getUserPrincipal();
@@ -43,6 +40,7 @@ public class MeApiServiceImpl extends MeApiService {
 				
 				return Response.ok(linkProcessGraph.toString().getBytes("UTF-8"), "application/json").build();
     		}else {
+    			log.error("The security context did not contain a principal object");
     			return Response.status(Response.Status.UNAUTHORIZED).build();
     		}
     	}catch(IOException e) {
