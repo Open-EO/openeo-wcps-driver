@@ -436,7 +436,7 @@ public class BatchJobResponse implements Serializable {
 		sb.append("\"id\": ").append(toIndentedString(id)).append(",\n");
 		sb.append("\"title\": ").append(toIndentedString(title)).append(",\n");
 		sb.append("\"description\": ").append(toIndentedString(description)).append(",\n");
-		sb.append("\"processGraph\": ").append(((JSONObject)this.getProcessGraph()).toString(4)).append(",\n");
+		sb.append("\"process_graph\": ").append(((JSONObject)this.getProcessGraph()).toString(4)).append(",\n");
 		sb.append("\"status\": ").append(toIndentedString(status)).append(",\n");
 		sb.append("\"progress\": ").append(toIndentedString(progress)).append(",\n");
 		sb.append("\"error\": ").append(toIndentedString(error)).append(",\n");

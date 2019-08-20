@@ -68,7 +68,7 @@ public class RequireTokenFilter implements ContainerRequestFilter {
 			Jws<Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token);
 			log.info("Validity of token has been confirmed: " + token);
 			
-			final SecurityContext securityContext = requestContext.getSecurityContext();
+			//final SecurityContext securityContext = requestContext.getSecurityContext();
             requestContext.setSecurityContext(new SecurityContext() {
                         @Override
                         public Principal getUserPrincipal() {
