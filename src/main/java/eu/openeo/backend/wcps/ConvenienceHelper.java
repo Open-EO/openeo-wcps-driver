@@ -46,6 +46,7 @@ public class ConvenienceHelper {
 		if(currentFormat != null) {
 			return currentFormat.getString("mime-type");
 		}
+		log.error("gdal type could not be matched to mime type: " + output);
 		return MediaType.WILDCARD;		
 	}
 	
