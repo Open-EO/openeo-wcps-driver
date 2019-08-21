@@ -1,0 +1,17 @@
+[
+	{ 	"id": "guest", 
+		"roles": ["PUBLIC"],
+		"first_name": "first_guest",
+		"last_name": "last_guest"
+	},
+	{	"id": "aceo",
+		"roles":["EURAC"],
+		"first_name": "first_aceo",
+		"last_name": "last_aceo"
+	},
+	{	"id": "css",
+		"roles": ["EURAC"],
+		"first_name": "first_css",
+		"last_name": "last_css"
+	}
+]

@@ -1,5 +1,6 @@
 package eu.openeo.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -7,15 +8,19 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName = "user")
 public class User {
 	
+	@JsonProperty("roles")
 	@DatabaseField(canBeNull = false, dataType=DataType.SERIALIZABLE)
 	private String[] roles;
 	
+	@JsonProperty("id")
 	@DatabaseField(id = true)
 	private String userName;
 	
+	@JsonProperty("first_name")
 	@DatabaseField(canBeNull = false)
 	private String firstName;
 	
+	@JsonProperty("last_name")
 	@DatabaseField(canBeNull = false)
 	private String lastName;
 	

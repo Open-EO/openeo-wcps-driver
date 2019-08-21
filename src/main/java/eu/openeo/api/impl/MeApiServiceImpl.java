@@ -32,7 +32,7 @@ public class MeApiServiceImpl extends MeApiService {
 				JSONArray links = new JSONArray();
 				JSONObject link = new JSONObject();
 				link.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/me");
-				link.put("type", "self");
+				link.put("rel", "self");
 		
 				links.put(link);
 		
