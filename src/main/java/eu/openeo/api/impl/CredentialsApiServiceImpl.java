@@ -82,6 +82,7 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
 			}
 			log.error(builder.toString());
 		}
+		//TODO eventually substitute this block with access to a generic user database 
 		try {
 			try {
 				TableUtils.createTable(connection, User.class);
@@ -148,8 +149,6 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
         String jwtToken = null;        
 		try {
 			User user = userDao.queryForId(login);
-			//TODO make sure to include correct user information in claims, such as role and name etc.
-			//TODO read those from a relational database....
 			String[] roles = user.getRoles();
 			StringBuilder roleString =  new StringBuilder();
 			for(String role: roles) {
