@@ -214,9 +214,9 @@ public class JobsApiServiceImpl extends JobsApiService {
 			storedBatchJob.setDescription(updateBatchJobRequest.getDescription());
 		if (updateBatchJobRequest.getProcessGraph() != null)
 			storedBatchJob.setProcessGraph(updateBatchJobRequest.getProcessGraph());
-		if (updateBatchJobRequest.getPlan() != null)
+		if (updateBatchJobRequest.getPlan() != null && !updateBatchJobRequest.getPlan().equals("{}"))
 			storedBatchJob.setPlan(updateBatchJobRequest.getPlan());
-		if (updateBatchJobRequest.getBudget() != null)
+		if (updateBatchJobRequest.getBudget() != null && !updateBatchJobRequest.getBudget().equals("{}"))
 			storedBatchJob.setBudget(updateBatchJobRequest.getBudget());
 		try {
 			storedBatchJob.setUpdated(new Date());
