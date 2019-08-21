@@ -1,35 +1,26 @@
 package eu.openeo.api;
 
-import eu.openeo.model.*;
-import eu.openeo.api.ResultApiService;
-import eu.openeo.api.factories.ResultApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
-import eu.openeo.model.Error;
-import eu.openeo.model.SynchronousResultRequest;
-
-import java.util.Map;
-import java.util.List;
-import eu.openeo.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.ServletConfig;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.*;
-import javax.validation.constraints.*;
-import javax.validation.Valid;
+
+import eu.openeo.api.factories.ResultApiServiceFactory;
+import eu.openeo.backend.auth.filter.RequireToken;
+import eu.openeo.model.Error;
+import eu.openeo.model.SynchronousResultRequest;
+import io.swagger.annotations.ApiParam;
 
 @Path("/result")
-
-
+@RequireToken
+@RolesAllowed({"PUBLIC", "EURAC"})
 @io.swagger.annotations.Api(description = "the result API")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class ResultApi  {
@@ -57,7 +48,7 @@ public class ResultApi  {
    }
 
     @POST
-    
+    @RequireToken
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Process and download data synchronously", notes = "Process graphs will be executed directly and the result will be downloaded in the format specified in the process graph. To specify the format use a process such as `save_result`. Requests might time-out after a certain amount of time by sending openEO error `RequestTimeout`. A header named `OpenEO-Costs` MAY be sent with all responses, which MUST include the costs for processing and downloading the data. This endpoint can be used to generate small previews or test process graphs before starting a batch job.", response = Void.class, authorizations = {

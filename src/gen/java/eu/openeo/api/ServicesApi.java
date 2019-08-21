@@ -1,38 +1,32 @@
 package eu.openeo.api;
 
-import eu.openeo.model.*;
-import eu.openeo.api.ServicesApiService;
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.ServletConfig;
+import javax.validation.Valid;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import eu.openeo.api.factories.ServicesApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-import io.swagger.jaxrs.*;
-
+import eu.openeo.backend.auth.filter.RequireToken;
 import eu.openeo.model.Error;
 import eu.openeo.model.SecondaryWebServiceResponse;
 import eu.openeo.model.SecondaryWebServicesListResponse;
 import eu.openeo.model.StoreSecondaryWebServiceRequest;
 import eu.openeo.model.UpdateSecondaryWebServiceRequest;
-
-import java.util.Map;
-import java.util.List;
-import eu.openeo.api.NotFoundException;
-
-import java.io.InputStream;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
-import javax.servlet.ServletConfig;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.*;
-import javax.validation.constraints.*;
-import javax.validation.Valid;
+import io.swagger.annotations.ApiParam;
+import io.swagger.jaxrs.PATCH;
 
 @Path("/services")
-
-
+@RequireToken
+@RolesAllowed({"PUBLIC", "EURAC"})
 @io.swagger.annotations.Api(description = "the services API")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class ServicesApi  {

@@ -12,8 +12,6 @@ import eu.openeo.api.factories.UdfRuntimesApiServiceFactory;
 import eu.openeo.model.Error;
 
 @Path("/udf_runtimes")
-
-
 @io.swagger.annotations.Api(description = "the udf_runtimes API")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class UdfRuntimesApi  {

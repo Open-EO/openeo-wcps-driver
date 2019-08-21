@@ -3,11 +3,13 @@ package eu.openeo.api.impl;
 import java.io.IOException;
 import java.security.Principal;
 import java.sql.SQLException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.security.RolesAllowed;
 import javax.swing.event.EventListenerList;
 import javax.validation.constraints.Pattern;
 import javax.ws.rs.core.MediaType;
@@ -40,7 +42,6 @@ import eu.openeo.model.BatchJobResponse;
 import eu.openeo.model.Status;
 import eu.openeo.model.UpdateBatchJobRequest;
 
-@RolesAllowed({"PUBLIC", "EURAC"})
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class JobsApiServiceImpl extends JobsApiService {
 
@@ -213,9 +214,9 @@ public class JobsApiServiceImpl extends JobsApiService {
 			storedBatchJob.setDescription(updateBatchJobRequest.getDescription());
 		if (updateBatchJobRequest.getProcessGraph() != null)
 			storedBatchJob.setProcessGraph(updateBatchJobRequest.getProcessGraph());
-		if (updateBatchJobRequest.getPlan() != null)
+		if (updateBatchJobRequest.getPlan() != null && !updateBatchJobRequest.getPlan().equals("{}"))
 			storedBatchJob.setPlan(updateBatchJobRequest.getPlan());
-		if (updateBatchJobRequest.getBudget() != null)
+		if (updateBatchJobRequest.getBudget() != null && !updateBatchJobRequest.getBudget().equals("{}"))
 			storedBatchJob.setBudget(updateBatchJobRequest.getBudget());
 		try {
 			storedBatchJob.setUpdated(new Date());
@@ -242,7 +243,6 @@ public class JobsApiServiceImpl extends JobsApiService {
 			SecurityContext securityContext) throws NotFoundException {
 
 		BatchJobResponse job = null;
-		String outputFormat = "JSON";
 		try {
 			job = jobDao.queryForId(jobId);
 			if (job == null) {
@@ -264,12 +264,13 @@ public class JobsApiServiceImpl extends JobsApiService {
 			
 			JSONObject linkProcessGraph = new JSONObject();
 			linkProcessGraph.put("job_id", job.getId());
-			linkProcessGraph.put("updated", job.getUpdated());
+			ZonedDateTime updatedLocal = ZonedDateTime.ofInstant(job.getUpdated().toInstant(), ZoneId.systemDefault());
+			linkProcessGraph.put("updated", updatedLocal.format(DateTimeFormatter.ISO_INSTANT));
 			
 			JSONArray links = new JSONArray();
 			JSONObject link = new JSONObject();
 			link.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/tmp/" + fileName);
-			link.put("type", ConvenienceHelper.getMimeTypeFromOutput(outputFormat));
+			link.put("type", wcpsFactory.getOutputFormat());
 
 			links.put(link);
 
