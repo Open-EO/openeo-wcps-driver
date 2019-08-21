@@ -1,20 +1,26 @@
 package eu.openeo.api.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Iterator;
 
 import javax.crypto.KeyGenerator;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -25,6 +31,7 @@ import eu.openeo.api.CredentialsApiService;
 import eu.openeo.api.NotFoundException;
 import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.model.AuthKeys;
+import eu.openeo.model.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -36,6 +43,7 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
     
     private ConnectionSource connection = null;
 	private Dao<AuthKeys, String> authDao = null;
+	private Dao<User, String> userDao =  null;
 	
 	Logger log = Logger.getLogger(this.getClass());
 	
@@ -45,11 +53,13 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
 			String dbURL = "jdbc:sqlite:" + ConvenienceHelper.readProperties("job-database");
 			connection = new JdbcConnectionSource(dbURL);
 			try {
-				TableUtils.createTable(connection, AuthKeys.class);
+				TableUtils.createTable(connection, AuthKeys.class);				
 			} catch (SQLException sqle) {
-				log.debug("Create Table failed, probably exists already: " + sqle.getMessage());
+				log.debug("Create Table auth failed, probably exists already: " + sqle.getMessage());
 			}
+			
 			authDao = DaoManager.createDao(connection, AuthKeys.class);
+			
 		} catch (NoSuchAlgorithmException e) {
 			log.error("An error occured while instantiating key generator: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
@@ -66,6 +76,38 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
 			log.error(builder.toString());
 		} catch (SQLException e) {
 			log.error("An error occured while accesing auth table in db: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		}
+		try {
+			try {
+				TableUtils.createTable(connection, User.class);
+			} catch (SQLException sqle) {
+				log.debug("Create Table user failed, probably exists already: " + sqle.getMessage());
+			}
+			userDao = DaoManager.createDao(connection, User.class);
+			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			InputStream stream = classLoader.getResourceAsStream("user.json");
+			JSONArray users = new JSONArray(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
+			ObjectMapper mapper = new ObjectMapper();
+			Iterator usersIt = users.iterator();
+			while(usersIt.hasNext()) {
+				JSONObject userObject = (JSONObject) usersIt.next();
+				User user = mapper.readValue(userObject.toString(), User.class);
+				userDao.createOrUpdate(user);
+			}
+		} catch (IOException e) {
+			log.error("An error occured while reading from user file: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		} catch (SQLException e) {
+			log.error("An error occured while accesing user table in db: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
 			for (StackTraceElement element : e.getStackTrace()) {
 				builder.append(element.toString() + "\n");
@@ -103,17 +145,23 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
     	}else {
     		return null;
     	}
-        String jwtToken = null;
+        String jwtToken = null;        
 		try {
+			User user = userDao.queryForId(login);
 			//TODO make sure to include correct user information in claims, such as role and name etc.
 			//TODO read those from a relational database....
+			String[] roles = user.getRoles();
+			StringBuilder roleString =  new StringBuilder();
+			for(String role: roles) {
+				roleString.append(role + ",");
+			}
 			jwtToken = Jwts.builder()
-			        .setSubject(login)
+			        .setSubject(user.getUserName())
 			        .setIssuer(ConvenienceHelper.readProperties("openeo-endpoint") + "/credentials/basic")
 			        .setIssuedAt(new Date())
 			        .setExpiration(java.sql.Timestamp.valueOf(LocalDateTime.now().plusMinutes(15L)))
-			        .claim("name", login)
-			        .claim("scope", login)
+			        .claim("name", user.getFirstName() + " " + user.getLastName())
+			        .claim("scope", roleString.toString().substring(0,roleString.toString().length()-1))
 			        .signWith(SignatureAlgorithm.HS512, key)
 			        .compact();
 		AuthKeys authKeys = new AuthKeys(jwtToken);
