@@ -158,7 +158,7 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
 			        .setSubject(user.getUserName())
 			        .setIssuer(ConvenienceHelper.readProperties("openeo-endpoint") + "/credentials/basic")
 			        .setIssuedAt(new Date())
-			        .setExpiration(java.sql.Timestamp.valueOf(LocalDateTime.now().plusMinutes(15L)))
+			        .setExpiration(java.sql.Timestamp.valueOf(LocalDateTime.now().plusMinutes(Long.parseLong(ConvenienceHelper.readProperties("auth-expiry")))))
 			        .claim("name", user.getFirstName() + " " + user.getLastName())
 			        .claim("scope", roleString.toString().substring(0,roleString.toString().length()-1))
 			        .signWith(SignatureAlgorithm.HS512, key)
