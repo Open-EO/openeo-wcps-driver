@@ -440,7 +440,9 @@ public class WCPSQueryFactory {
 				JSONObject processAggregateArguements = processAggregate.getJSONObject("arguments");
 				JSONObject processAggregateArguementsData = processAggregateArguements.getJSONObject("data");
 				createAggregateFromProcessNew(processAggregate, processAggregateArguementsData);
-			} else if (processID.equals("save_result")) {
+			}
+			
+			else if (processID.equals("save_result")) {
 				log.debug("Found save result node: " + processNode.getString("process_id"));
 				String format = getFormatFromSaveResultNode(processNode);
 				try {					
@@ -452,79 +454,10 @@ public class WCPSQueryFactory {
 						builder.append(element.toString()+"\n");
 					}
 					log.error(builder.toString());
-				}
+				}				
+			}			
+		}
 				
-			}
-			
-		}
-		
-		for (Object key : processParent.keySet()) {
-			String keyStr = (String) key;
-			if (keyStr.equals("process_id")) {
-				String name = (String) processParent.get(keyStr);
-				log.debug("currently working on: " + name);
-				if (name.contains("filter")) {
-					String collectn = collectionName(processParent);
-					createFilterFromProcess(processParent, collectn);
-				} else if (name.contains("load_collection")) {
-					for (Object collName : processParent.keySet()) {
-						String collNameStr = (String) collName;
-						if (collNameStr.equals("id")) {
-
-							coll = (String) processParent.get(collNameStr);
-							collectionIDs.add(new Collection(coll));
-							log.debug("found actual dataset: " + coll);
-
-							JSONObject jsonresp = null;
-							try {
-								jsonresp = readJsonFromUrl(
-										ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
-							} catch (JSONException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-
-							int srs = 0;
-							
-							srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");
-							log.debug("srs is: " + srs);
-
-							for (Object collFilterName : processParent.keySet()) {
-								String collFilterNameStr = (String) collFilterName;
-								if (collFilterNameStr.equals("spatial_extent")) {
-									createBoundingBoxFilterFromArgs(processParent, srs, coll);
-								}
-								if (collFilterNameStr.equals("temporal_extent")) {
-									JSONArray extentArray = (JSONArray) processParent.get(collFilterNameStr);
-									createDateRangeFilterFromArgs(extentArray, coll);
-								}
-							}
-						}
-					}
-				}
-				/*
-				 * else if (name.contains("get_collection") && (keyStr.equals("spatial_extent")
-				 * || keyStr.equals("temporal_extent"))) {
-				 * createFilterFromGetCollection(processParent); }
-				 */
-				else {
-					createAggregateFromProcess(processParent);
-				}
-			} else if (keyStr.equals("arguments")) {
-				JSONObject argsObject = (JSONObject) processParent.get(keyStr);
-				result = parseOpenEOProcessGraph(argsObject);
-			}
-			/*
-			 * else if (keyStr.equals("name")) { String name = (String)
-			 * processParent.get(keyStr); collectionIDs.add(new Collection(name));
-			 * log.debug("found actual dataset: " + name);
-			 * 
-			 * }
-			 */
-		}
 		return result;
 	}
 	
