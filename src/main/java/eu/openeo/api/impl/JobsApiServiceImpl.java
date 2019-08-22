@@ -76,6 +76,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 		Principal principal = securityContext.getUserPrincipal();
 		if(principal != null) {
 			log.debug("The following user asked for list of stored jobs: " + principal.getName());
+			log.debug("Is this user part of Eurac?: " + securityContext.isUserInRole("EURAC"));
 		}else {
 			log.error("No information on authentication found on request for jobs!!!");
 		}
@@ -331,7 +332,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 
 		WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
 
-		log.debug("Graph successfully parsed and saved with ID: " + jobID);
+		log.debug("Graph of job successfully parsed and job saved with ID: " + jobID);
 		log.debug("WCPS query: " + wcpsFactory.getWCPSString());
 
 		try {

@@ -43,8 +43,8 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 				
 		JSONArray jobsIDMethods = new JSONArray();
 		jobsIDMethods.put(new String("GET"));
-		jobsIDMethods.put(new String("DELETE"));
 		jobsIDMethods.put(new String("PATCH"));
+		jobsIDMethods.put(new String("DELETE"));		
 		
 		JSONArray jobsIdResultsMethods = new JSONArray();
 		jobsIdResultsMethods.put(new String("GET"));
@@ -55,6 +55,15 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		
 		JSONArray processesIDMethods = new JSONArray();
 		processesIDMethods.put(new String("GET"));
+		
+		JSONArray processGraphsMethods = new JSONArray();
+		processGraphsMethods.put(new String("GET"));
+		processGraphsMethods.put(new String("POST"));
+		
+		JSONArray processGraphIdMethods = new JSONArray();
+		processGraphIdMethods.put(new String("GET"));
+		processGraphIdMethods.put(new String("PATCH"));
+		processGraphIdMethods.put(new String("DELETE"));
 		
 		JSONArray credentialsBasicMethods =  new JSONArray();
 		credentialsBasicMethods.put(new String("GET"));
@@ -106,6 +115,15 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		processesEndpoint.put("path", "/processes");
 		processesEndpoint.put("methods", processesMethods);
 		
+		JSONObject processGraphsEndpoint = new JSONObject();
+		processGraphsEndpoint.put("path", "/process_graphs");
+		processGraphsEndpoint.put("methods", processGraphsMethods);
+		
+		JSONObject processGraphIdEndpoint = new JSONObject();
+		processGraphIdEndpoint.put("path", "/process_graphs/{process_graph_id}");
+		processGraphIdEndpoint.put("methods", processGraphIdMethods);
+		
+		
 		JSONObject meEndpoint = new JSONObject();
 		meEndpoint.put("path", "/me");
 		meEndpoint.put("methods", meMethods);
@@ -123,6 +141,8 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		endpointList.put(resultEndpoint);
 		endpointList.put(jobsIdEndpoint);
 		endpointList.put(jobsIdResultsEndpoint);
+		endpointList.put(processGraphsEndpoint);
+		endpointList.put(processGraphIdEndpoint);
 		
 		JSONObject plans = new JSONObject();
 		plans.put("name", "free");
