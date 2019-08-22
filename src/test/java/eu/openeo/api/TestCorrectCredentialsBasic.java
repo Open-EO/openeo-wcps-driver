@@ -27,8 +27,8 @@ public class TestCorrectCredentialsBasic {
 			urlString = ConvenienceHelper.readProperties("openeo-endpoint") + "/credentials/basic";
 		} catch (IOException e) {
 			e.printStackTrace();
-			fail("Failed to read openEO endpoint url from properties");		}       
-
+			fail("Failed to read openEO endpoint url from properties");
+		}
         try {
         	URL url = new URL(urlString);
         	HttpURLConnection  urlConnection = (HttpURLConnection) url.openConnection();
