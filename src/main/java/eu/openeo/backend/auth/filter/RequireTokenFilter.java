@@ -67,8 +67,6 @@ public class RequireTokenFilter implements ContainerRequestFilter {
 			Key key = authDao.queryForId(token).getKey();
 			Jws<Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token);
 			log.info("Validity of token has been confirmed: " + token);
-			
-			//final SecurityContext securityContext = requestContext.getSecurityContext();
             requestContext.setSecurityContext(new SecurityContext() {
                         @Override
                         public Principal getUserPrincipal() {
@@ -81,12 +79,17 @@ public class RequireTokenFilter implements ContainerRequestFilter {
                         }
                         @Override
                         public boolean isUserInRole(String role) {
-                            //TODO implement checking of user's role for confirmation
-                            return true;
+                            String roles = claims.getBody().get("scope", String.class);
+                            if(roles.contains(role)) {
+                            	log.debug("User has confirmed to be part of: " + role);
+                            	return true;
+                            }else {
+                            	log.error("User is not part of: " + role);
+                            	return false;
+                            }
                         }
                         @Override
-                        public boolean isSecure() {
-                        	//TODO implement checking for https: uriInfo.getAbsolutePath().toString().startsWith("https"); 
+                        public boolean isSecure() { 
                             return claims.getBody().getIssuer().startsWith("https");
                         }
                         @Override

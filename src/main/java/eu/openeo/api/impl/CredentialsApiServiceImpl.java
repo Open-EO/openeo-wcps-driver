@@ -33,7 +33,6 @@ import eu.openeo.backend.wcps.ConvenienceHelper;
 import eu.openeo.model.AuthKeys;
 import eu.openeo.model.User;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
@@ -94,7 +93,7 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
 			InputStream stream = classLoader.getResourceAsStream("user.json");
 			JSONArray users = new JSONArray(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
 			ObjectMapper mapper = new ObjectMapper();
-			Iterator usersIt = users.iterator();
+			Iterator<Object> usersIt = users.iterator();
 			while(usersIt.hasNext()) {
 				JSONObject userObject = (JSONObject) usersIt.next();
 				User user = mapper.readValue(userObject.toString(), User.class);
@@ -161,7 +160,7 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
 			        .setExpiration(java.sql.Timestamp.valueOf(LocalDateTime.now().plusMinutes(Long.parseLong(ConvenienceHelper.readProperties("auth-expiry")))))
 			        .claim("name", user.getFirstName() + " " + user.getLastName())
 			        .claim("scope", roleString.toString().substring(0,roleString.toString().length()-1))
-			        .signWith(SignatureAlgorithm.HS512, key)
+			        .signWith(key)
 			        .compact();
 		AuthKeys authKeys = new AuthKeys(jwtToken);
 		authKeys.setKey(key);
