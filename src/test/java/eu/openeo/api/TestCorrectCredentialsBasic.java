@@ -1,4 +1,4 @@
-package eu.openeo.backend.wcps;
+package eu.openeo.api;
 
 import static org.junit.Assert.fail;
 
@@ -8,6 +8,8 @@ import java.net.URL;
 
 import org.glassfish.jersey.internal.util.Base64;
 import org.junit.jupiter.api.Test;
+
+import eu.openeo.backend.wcps.ConvenienceHelper;
 
 public class TestCorrectCredentialsBasic {	
 	
