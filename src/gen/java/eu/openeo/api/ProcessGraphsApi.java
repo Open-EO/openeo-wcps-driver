@@ -17,7 +17,6 @@ import javax.ws.rs.core.SecurityContext;
 import eu.openeo.api.factories.ProcessGraphsApiServiceFactory;
 import eu.openeo.backend.auth.filter.RequireToken;
 import eu.openeo.model.Error;
-import eu.openeo.model.StoreProcessGraphRequest;
 import eu.openeo.model.StoredProcessGraphListResponse;
 import eu.openeo.model.StoredProcessGraphResponse;
 import eu.openeo.model.UpdateStoredProcessGraphRequest;
