@@ -2,6 +2,7 @@ package eu.openeo.api.impl;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +29,7 @@ import com.j256.ormlite.table.TableUtils;
 import eu.openeo.api.NotFoundException;
 import eu.openeo.api.ProcessGraphsApiService;
 import eu.openeo.backend.wcps.ConvenienceHelper;
+import eu.openeo.model.BatchJobResponse;
 import eu.openeo.model.StoredProcessGraphResponse;
 import eu.openeo.model.UpdateStoredProcessGraphRequest;
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
@@ -71,7 +73,7 @@ public class ProcessGraphsApiServiceImpl extends ProcessGraphsApiService {
 			linkSelf.put("rel", "self");
 			linkSelf.put("title", "Stored Process Graphs");
 			links.put(linkSelf);
-			graphSummary.put("jobs", graphs);
+			graphSummary.put("process_graphs", graphs);
 			graphSummary.put("links", links);
 			return Response.ok(graphSummary.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (SQLException e) {
@@ -139,17 +141,96 @@ public class ProcessGraphsApiServiceImpl extends ProcessGraphsApiService {
     
     @Override
     public Response processGraphsProcessGraphIdDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String processGraphId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+    	StoredProcessGraphResponse storedProcessGraph = null;
+		try {
+			storedProcessGraph = graphDao.queryForId(processGraphId);
+			if (storedProcessGraph == null) {
+				return Response.status(404).entity(new String("A process graph with the specified identifier is not available."))
+						.build();
+			}
+			graphDao.deleteById(processGraphId);
+			log.debug("The following process graph was deleted: \n" + storedProcessGraph.toString());
+			return Response.status(204).entity("The process graph has been successfully deleted.")
+					.header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs")
+					.header("OpenEO-Identifier", storedProcessGraph.getId()).build();
+		} catch (SQLException sqle) {
+			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
+			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
+					.build();
+		}
     }
+    
     @Override
     public Response processGraphsProcessGraphIdGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String processGraphId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+    	StoredProcessGraphResponse storedProcessGraph = null;
+		try {
+			storedProcessGraph = graphDao.queryForId(processGraphId);
+			if (storedProcessGraph == null) {
+				return Response.status(404).entity(new String("A process graph with the specified identifier is not available."))
+						.build();
+			}
+			log.debug("The following process graph was retrieved: \n" + storedProcessGraph.toString());
+		} catch (SQLException sqle) {
+			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
+			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
+					.build();
+		}
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+			mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+			mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
+			mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+			mapper.setSerializationInclusion(Include.NON_NULL);
+			log.debug("Java object to string looks like this:");
+			log.debug(storedProcessGraph.toString());
+			log.debug("Serialized json looks like this:");
+			log.debug(mapper.writeValueAsString(storedProcessGraph));
+			return Response.status(201).entity(storedProcessGraph.toString())
+					.header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs")
+					.header("OpenEO-Identifier", storedProcessGraph.getId()).build();
+		} catch (JsonProcessingException e) {
+			log.error("An error occured while serializing job to json: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+			return Response.serverError().entity("An error occured while serializing job to json: " + e.getMessage())
+					.build();
+		}
     }
     @Override
     public Response processGraphsProcessGraphIdPatch( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String processGraphId, UpdateStoredProcessGraphRequest updateStoredProcessGraphRequest, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+    	StoredProcessGraphResponse storedProcessGraph = null;
+		try {
+			storedProcessGraph = graphDao.queryForId(processGraphId);
+			if (storedProcessGraph == null) {
+				return Response.status(404).entity(new String("A process graph with the specified identifier is not available."))
+						.build();
+			}
+			log.debug("The following process graph was retrieved: \n" + storedProcessGraph.toString());
+		} catch (SQLException sqle) {
+			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
+			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
+					.build();
+		}
+		if (updateStoredProcessGraphRequest.getTitle() != null)
+			storedProcessGraph.setTitle(updateStoredProcessGraphRequest.getTitle());
+		if (updateStoredProcessGraphRequest.getDescription() != null)
+			storedProcessGraph.setDescription(updateStoredProcessGraphRequest.getDescription());
+		if (updateStoredProcessGraphRequest.getProcessGraph() != null)
+			storedProcessGraph.setProcessGraph(updateStoredProcessGraphRequest.getProcessGraph());
+		try {
+			graphDao.update(storedProcessGraph);
+			log.debug("process graph updated in database: " + storedProcessGraph.getId());
+			return Response.status(204).entity("Changes to the process graph applied successfully.")
+					.header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs")
+					.header("OpenEO-Identifier", storedProcessGraph.getId()).build();
+		} catch (SQLException sqle) {
+			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
+			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())
+					.build();
+		}
     }
 }
