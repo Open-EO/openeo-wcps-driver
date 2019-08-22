@@ -332,7 +332,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 
 		WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
 
-		log.debug("Graph successfully parsed and saved with ID: " + jobID);
+		log.debug("Graph of job successfully parsed and job saved with ID: " + jobID);
 		log.debug("WCPS query: " + wcpsFactory.getWCPSString());
 
 		try {
