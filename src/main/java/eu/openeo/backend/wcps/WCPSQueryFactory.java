@@ -161,6 +161,7 @@ public class WCPSQueryFactory {
 		  
 	}
 		
+		
 		for (int a = 0; a < aggregates.size(); a++) {
 			if (aggregates.get(a).getAxis().equals("DATE")) {
 				wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
@@ -173,6 +174,8 @@ public class WCPSQueryFactory {
 				log.debug("NDVI WCPS  added " + wcpsStringBuilder);
 			}
 		}
+		
+		
 		
 		if (filters.size() > 0) {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
@@ -278,7 +281,7 @@ public class WCPSQueryFactory {
 		stringBuilder.append(") / ((double)");
 		stringBuilder.append(nir + " + " + red);
 		stringBuilder.append(")");
-		filters.removeAllElements();
+		//filters.removeAllElements();
 
 		return stringBuilder.toString();
 	}
@@ -470,14 +473,17 @@ public class WCPSQueryFactory {
 		   //	}
             
 			else if (processID.contains("time")) {
-				//log.debug("Found Time node: " + processNode.getString("process_id"));
+				log.debug("Found Time node: " + processNode.getString("process_id"));
 				    createTemporalAggregate(processID);
+				    log.debug("Filters are: " + filters);
 				}
 				
 			else if (processID.equals("ndvi")) {
-				//log.debug("Found NDVI node: " + processNode.getString("process_id"));
+				log.debug("Found NDVI node: " + processNode.getString("process_id"));
 				    JSONObject processAggregate = processParent.getJSONObject(processNodeKey);
 				    createNDVIAggregateFromProcess(processAggregate);
+				    log.debug("Filters are: " + filters);
+				    
 			    }
 						
 			else if (processID.equals("save_result")) {
@@ -492,7 +498,8 @@ public class WCPSQueryFactory {
 						builder.append(element.toString()+"\n");
 					}
 					log.error(builder.toString());
-				}				
+				}	
+				log.debug("Filters are: " + filters);
 			}	
 		 
 	  }
@@ -711,6 +718,7 @@ public class WCPSQueryFactory {
 			}
 			log.debug("Temporal extent is: " + fromDate + ":" + toDate);
 			this.filters.add(new Filter("DATE", fromDate, toDate));
+			log.debug("Temporal filter is: " + filters);
 		}
 	}
 
@@ -847,6 +855,7 @@ public class WCPSQueryFactory {
 		if (left != null && right != null && top != null && bottom != null) {
 			this.filters.add(new Filter("E", left, right));
 			this.filters.add(new Filter("N", bottom, top));
+			log.debug("Spatial filter is: " + filters);
 		} else {
 			log.error("no spatial information could be found in process!");
 		}
