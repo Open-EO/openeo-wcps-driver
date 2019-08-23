@@ -270,7 +270,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			
 			JSONArray links = new JSONArray();
 			JSONObject link = new JSONObject();
-			link.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/tmp/" + fileName);
+			link.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/download/" + fileName);
 			link.put("type", wcpsFactory.getOutputFormat());
 
 			links.put(link);
