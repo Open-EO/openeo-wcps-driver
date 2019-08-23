@@ -65,5 +65,22 @@ public class ConvenienceHelper {
 		log.error("mime type could not be matched to rasdaman type: " + mimeTypeName);
 		return MediaType.WILDCARD;		
 	}
+	
+	public static String getMimeTypeFromRasName(String rasName) throws IOException, JSONException{
+        log.debug("Ras type request: " + rasName);
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        InputStream stream = classLoader.getResourceAsStream("output_formats.json");
+        JSONObject outputFormats = new JSONObject(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
+        String outputFormat = "";
+        for(String formatName: outputFormats.keySet()) {
+                        JSONObject currentObject = outputFormats.getJSONObject(formatName);
+                        if(currentObject.getString("rasdaman_name").equals(rasName)) {
+                                        return outputFormat = currentObject.getString("mime-type");
+                        }
+        }
+        log.error("rasdman type could not be matched to mime type: " + rasName);
+        return MediaType.WILDCARD;                   
+}
+
 
 }

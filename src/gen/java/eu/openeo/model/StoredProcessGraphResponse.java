@@ -171,7 +171,7 @@ public class StoredProcessGraphResponse implements Serializable {
 		sb.append("\"id\": ").append(toIndentedString(id)).append(",\n");
 		sb.append("\"title\": ").append(toIndentedString(title)).append(",\n");
 		sb.append("\"description\": ").append(toIndentedString(description)).append(",\n");
-		sb.append("\"process_graph\": ").append(((JSONObject)this.getProcessGraph()).toString(4)).append(",\n");
+		sb.append("\"process_graph\": ").append(((JSONObject)this.getProcessGraph()).toString(4)).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}
@@ -184,6 +184,6 @@ public class StoredProcessGraphResponse implements Serializable {
 		if (o == null) {
 			return "null";
 		}
-		return o.toString().replace("\n", "\n    ");
+		return "\"" + o.toString().replace("\n", "\n    ") + "\"";
 	}
 }
