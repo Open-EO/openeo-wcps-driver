@@ -465,6 +465,9 @@ public class WCPSQueryFactory {
 		    if (argumentsKey.contentEquals("data")) {
 		      currentNodeKey = currentNodeData.getJSONObject("data").getString("from_node");
 		   }
+		    else if (argumentsKey.contentEquals("x")) {
+			      currentNodeKey = currentNodeData.getString("x");
+			   }
 		}
 		return currentNodeKey;
 	}
