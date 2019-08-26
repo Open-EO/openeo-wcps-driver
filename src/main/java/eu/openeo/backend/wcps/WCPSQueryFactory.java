@@ -28,6 +28,7 @@ public class WCPSQueryFactory {
 	private Vector<Filter> filters;
 	private Vector<Aggregate> aggregates;
 	private String outputFormat = "json";
+	private JSONObject processGraph;
 
 	Logger log = Logger.getLogger(this.getClass());
 
@@ -41,7 +42,8 @@ public class WCPSQueryFactory {
 		aggregates = new Vector<Aggregate>();
 		filters = new Vector<Filter>();
 		wcpsStringBuilder = new StringBuilder("for ");
-		this.build(openEOGraph);
+		this.processGraph = openEOGraph;
+		this.build2();
 	}	
 
 	public String getOutputFormat() {
@@ -50,7 +52,7 @@ public class WCPSQueryFactory {
 
 	private void build(JSONObject openEOGraph) {
 		log.debug(openEOGraph.toString());
-		parseOpenEOProcessGraph(openEOGraph);
+		parseOpenEOProcessGraph();
 		for (int c = 1; c <= collectionIDs.size(); c++) {
 			wcpsStringBuilder.append("$c" + c);
 			if (c > 1) {
@@ -175,7 +177,42 @@ public class WCPSQueryFactory {
 			}
 		}
 		
-		
+//		if (filters.size() > 0) {
+//			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
+//		}
+		// TODO define return type from process tree
+		wcpsStringBuilder.append(", \"" + this.outputFormat + "\" )");
+	}
+	
+	
+	private void build2() {
+		log.debug(processGraph.toString());
+		parseOpenEOProcessGraph();
+		for (int c = 1; c <= collectionIDs.size(); c++) {
+			wcpsStringBuilder.append("$c" + c);
+			if (c > 1) {
+				wcpsStringBuilder.append(", ");
+			}
+		}
+		wcpsStringBuilder.append(" in ( ");
+		for (int c = 1; c <= collectionIDs.size(); c++) {
+			wcpsStringBuilder.append(collectionIDs.get(c - 1).getName() + " ");
+		}
+		wcpsStringBuilder.append(") return encode ( ");
+
+		for (int a = 0; a < aggregates.size(); a++) {
+			if (aggregates.get(a).getAxis().equals("DATE")) {
+				wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
+				log.debug("Aggregate Temp " + aggregates.get(a).getAxis());
+				log.debug("Temp WCPS added " + wcpsStringBuilder);
+				log.debug("Temp WCPS added " + aggregates.size());
+			}
+			if (aggregates.get(a).getOperator().equals("NDVI")) {
+				wcpsStringBuilder.append(createNDVIWCPSString("$c1", aggregates.get(a)));
+				log.debug("Aggregate NDVI " + aggregates.get(a).getOperator());
+				log.debug("NDVI WCPS  added " + wcpsStringBuilder);
+			}
+		}
 		
 		if (filters.size() > 0) {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
@@ -183,6 +220,7 @@ public class WCPSQueryFactory {
 		// TODO define return type from process tree
 		wcpsStringBuilder.append(", \"" + this.outputFormat + "\" )");
 	}
+	
 	
 	/**
 	 * Helper Method to create a string describing an arbitrary filtering as defined
@@ -281,7 +319,7 @@ public class WCPSQueryFactory {
 		stringBuilder.append(") / ((double)");
 		stringBuilder.append(nir + " + " + red);
 		stringBuilder.append(")");
-		//filters.removeAllElements();
+		filters.removeAllElements();
 
 		return stringBuilder.toString();
 	}
@@ -337,157 +375,17 @@ public class WCPSQueryFactory {
 		log.debug(wcpsStringBuilder.toString());
 		return wcpsStringBuilder.toString();
 	}
-
-	/**
-	 * 
-	 * @param processParent
-	 * @return
-	 */
-	private JSONObject parseOpenEOProcessGraph(JSONObject processParent) {
-		JSONObject result = null;
-		String collection = null;
-		for (String processNodeKey : processParent.keySet()) {
+	
+	
+	private String getSaveNode() {
+		
+		for (String processNodeKey : processGraph.keySet()) {
 			
-			log.debug("Key found is: " + processNodeKey);
-			
-			JSONObject processNode = processParent.getJSONObject(processNodeKey);
+			JSONObject processNode = processGraph.getJSONObject(processNodeKey);
 			String processID = processNode.getString("process_id");
-			JSONObject argumentsNode = processNode.getJSONObject("arguments");
-							
-				if (processID.equals("load_collection")) {
-					
-					String collectionNodeKey = processNodeKey;
-					
-					JSONObject loadCollectionNode = processParent.getJSONObject(processNodeKey);
-					JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");
-					
-					collection = (String) loadCollectionNodeArguments.get("id");
-					collectionIDs.add(new Collection(collection));
-					log.debug("found actual dataset: " + collection);
-					
-					JSONObject collectionSTACMetdata = null;
-					try {
-						collectionSTACMetdata = readJsonFromUrl(
-								ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collection);
-					} catch (JSONException e) {
-						log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
-						StringBuilder builder = new StringBuilder();
-						for( StackTraceElement element: e.getStackTrace()) {
-							builder.append(element.toString()+"\n");
-						}
-						log.error(builder.toString());
-					} catch (IOException e) {
-						log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
-						StringBuilder builder = new StringBuilder();
-						for( StackTraceElement element: e.getStackTrace()) {
-							builder.append(element.toString()+"\n");
-						}
-						log.error(builder.toString());
-					}
-
-					int srs = 0;
-					
-					srs = ((JSONObject) collectionSTACMetdata.get("properties")).getInt("eo:epsg");
-					log.debug("srs is: " + srs);
-					
-					for (String argumentKey : loadCollectionNodeArguments.keySet()) {
-
-						if (!loadCollectionNodeArguments.isNull(argumentKey) && argumentKey.equals("spatial_extent")) {
-							JSONObject spatialExtentNode = loadCollectionNodeArguments.getJSONObject("spatial_extent");
-							log.debug("currently working on spatial extent: " + spatialExtentNode.toString(4));
-							createBoundingBoxFilterFromArgs(loadCollectionNodeArguments, srs, collection);
-						}
-						if (!loadCollectionNodeArguments.isNull(argumentKey) && argumentKey.equals("temporal_extent")) {
-							JSONArray processDatacubeTempExt = (JSONArray) loadCollectionNodeArguments.get("temporal_extent");
-							log.debug("currently working on temporal extent: " + processDatacubeTempExt.toString(4));
-							createDateRangeFilterFromArgs(processDatacubeTempExt, collection);
-						}
-					}
-				}
-				
-           // else if (processID.equals("filter_temporal")) {
-				
-           // 	String filterCollectionNodeKey = null;
-           // 	String filterTempNodeKey = processNodeKey;
-           // 	JSONObject filterTempDataNode = argumentsNode.getJSONObject("data");
-		   //		String filterTempfromNode = filterTempDataNode.getString("from_node");
-            	
-		   //		filterCollectionNodeKey = getFilterCollectionNode(processParent, filterTempfromNode);
-		   //		log.debug("Key Temp is : " + filterCollectionNodeKey);
-		   //		JSONObject loadCollectionNode = processParent.getJSONObject(filterCollectionNodeKey);
-				
-		   //		JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");
-				
-		   //		String coll1 = (String) loadCollectionNodeArguments.get("id");
-				
-		   //		JSONObject processFilter = processParent.getJSONObject(processNodeKey);
-		   //		JSONObject processFilterArguments = processFilter.getJSONObject("arguments");
-				
-		   //		JSONArray extentArray = (JSONArray) processFilterArguments.get("extent");
-		   //		createDateRangeFilterFromArgs(extentArray, coll1);
-		   //	}
-			
-           // else if (processID.equals("filter_bbox")) {
-				
-           // 	String filterCollectionNodeKey = null;
-           // 	String filterBboxNodeKey = processNodeKey;
-           // 	JSONObject filterBboxDataNode = argumentsNode.getJSONObject("data");
-		   //		String filterBboxfromNode = filterBboxDataNode.getString("from_node");
-            	
-		   //		filterCollectionNodeKey = getFilterCollectionNode(processParent, filterBboxfromNode);
-		   //		log.debug("Key Bbox is : " + filterCollectionNodeKey);
-		   //		JSONObject loadCollectionNode = processParent.getJSONObject(filterCollectionNodeKey);
-		   //		JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");
-				
-		   //		String coll2 = (String) loadCollectionNodeArguments.get("id");
-				
-		   //		JSONObject processFilter = processParent.getJSONObject(processNodeKey);
-		   //		JSONObject processFilterArguments = processFilter.getJSONObject("arguments");
-				
-           //     int srs = 0;
-				
-		   //		JSONObject jsonresp = null;
-		   //		try {
-		   //			jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll2);
-		   //		} catch (JSONException e) {
-		   //			log.error("An error occured: " + e.getMessage());
-		   //			StringBuilder builder = new StringBuilder();
-		   //			for (StackTraceElement element : e.getStackTrace()) {
-		   //				builder.append(element.toString() + "\n");
-		   //			}
-		   //			log.error(builder.toString());
-		   //		} catch (IOException e) {
-		   //			log.error("An error occured: " + e.getMessage());
-		   //			StringBuilder builder = new StringBuilder();
-		   //			for (StackTraceElement element : e.getStackTrace()) {
-		   //				builder.append(element.toString() + "\n");
-		   //			}
-		   //			log.error(builder.toString());
-		   //		}
-							
-		   //		srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");
-		   //		log.debug("srs is: " + srs);
-		   //		if (srs > 0) {
-		   //			createBoundingBoxFilterFromArgs(processFilterArguments, srs, coll2);
-		   //		}
-		   //	}
-            
-			else if (processID.contains("time")) {
-				log.debug("Found Time node: " + processNode.getString("process_id"));
-				    createTemporalAggregate(processID);
-				    log.debug("Filters are: " + filters);
-				}
-				
-			else if (processID.equals("ndvi")) {
-				log.debug("Found NDVI node: " + processNode.getString("process_id"));
-				    JSONObject processAggregate = processParent.getJSONObject(processNodeKey);
-				    createNDVIAggregateFromProcess(processAggregate);
-				    log.debug("Filters are: " + filters);
-				    
-			    }
-						
-			else if (processID.equals("save_result")) {
+			if (processID.equals("save_result")) {
 				log.debug("Found save result node: " + processNode.getString("process_id"));
+				log.debug("Save Result node key found is: " + processNodeKey);
 				String format = getFormatFromSaveResultNode(processNode);
 				try {					
 					this.outputFormat = ConvenienceHelper.getMimeTypeFromOutput(format);
@@ -498,13 +396,24 @@ public class WCPSQueryFactory {
 						builder.append(element.toString()+"\n");
 					}
 					log.error(builder.toString());
-				}	
-				log.debug("Filters are: " + filters);
-			}	
-		 
-	  }
-		return result;
-   }
+				}
+				return processNodeKey;
+			}
+		}
+		return null;
+	}
+	
+	
+	private String getFromNodeOfCurrentKey(String currentNodeKey){
+		
+		JSONObject currentNodeData = processGraph.getJSONObject(currentNodeKey).getJSONObject("arguments");
+		for (String argumentsKey : currentNodeData.keySet()) {
+		    if (argumentsKey.contentEquals("data")) {
+		      currentNodeKey = currentNodeData.getJSONObject("data").getString("from_node");
+		   }
+		}
+		return currentNodeKey;
+	}
 	
 	private String getFormatFromSaveResultNode(JSONObject saveResultNode) {
 		JSONObject saveResultArguments = saveResultNode.getJSONObject("arguments");
@@ -512,6 +421,182 @@ public class WCPSQueryFactory {
 		return format;
 	}
 
+	private JSONArray sortNodes(String saveNode, JSONArray nodesArray) {
+		
+		String nextNode = saveNode;
+		for (String nodeKey : processGraph.keySet()) {
+		          nodesArray.put(nextNode);
+		          nextNode = getFromNodeOfCurrentKey(nextNode);
+		}
+		log.debug("Order of the nodes is: " + nodesArray);
+		return nodesArray;
+	}
+	
+	/**
+	 * 
+	 * @param processParent
+	 * @return
+	 */
+	
+	private JSONObject parseOpenEOProcessGraph() {
+		JSONObject result = null;
+		JSONArray nodesArray = new JSONArray();
+		
+		String saveNode = getSaveNode();
+		
+		nodesArray = sortNodes(saveNode, nodesArray);
+		
+		for(int a = 0; a < nodesArray.length(); a++) {
+		
+		log.debug("Executing Process : " + nodesArray.getString(a));
+		String nodeKeyOfCurrentProcess = nodesArray.getString(a);
+		JSONObject currentProcess = processGraph.getJSONObject(nodeKeyOfCurrentProcess);
+		String currentProcessID = currentProcess.getString("process_id");
+		
+		executeProcesses(currentProcessID, nodeKeyOfCurrentProcess);
+		
+		}
+		return result;
+    }
+   
+	
+	private void executeProcesses(String processID, String processNodeKey) {
+		
+		JSONObject processNode = processGraph.getJSONObject(processNodeKey);
+		
+		if (processID.equals("load_collection")) {
+			
+			String collection = null;
+			JSONObject loadCollectionNode = processGraph.getJSONObject(processNodeKey);
+			JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");
+			
+			collection = (String) loadCollectionNodeArguments.get("id");
+			collectionIDs.add(new Collection(collection));
+			log.debug("found actual dataset: " + collection);
+			
+			JSONObject collectionSTACMetdata = null;
+			try {
+				collectionSTACMetdata = readJsonFromUrl(
+						ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collection);
+			} catch (JSONException e) {
+				log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for( StackTraceElement element: e.getStackTrace()) {
+					builder.append(element.toString()+"\n");
+				}
+				log.error(builder.toString());
+			} catch (IOException e) {
+				log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for( StackTraceElement element: e.getStackTrace()) {
+					builder.append(element.toString()+"\n");
+				}
+				log.error(builder.toString());
+			}
+
+			int srs = 0;
+			
+			srs = ((JSONObject) collectionSTACMetdata.get("properties")).getInt("eo:epsg");
+			log.debug("srs is: " + srs);
+			
+			for (String argumentKey : loadCollectionNodeArguments.keySet()) {
+
+				if (!loadCollectionNodeArguments.isNull(argumentKey) && argumentKey.equals("spatial_extent")) {
+					JSONObject spatialExtentNode = loadCollectionNodeArguments.getJSONObject("spatial_extent");
+					log.debug("currently working on spatial extent: " + spatialExtentNode.toString(4));
+					createBoundingBoxFilterFromArgs(loadCollectionNodeArguments, srs, collection);
+				}
+				if (!loadCollectionNodeArguments.isNull(argumentKey) && argumentKey.equals("temporal_extent")) {
+					JSONArray processDatacubeTempExt = (JSONArray) loadCollectionNodeArguments.get("temporal_extent");
+					log.debug("currently working on temporal extent: " + processDatacubeTempExt.toString(4));
+					createDateRangeFilterFromArgs(processDatacubeTempExt, collection);
+				}
+			}
+		}
+		
+		else if (processID.contains("time")) {
+			log.debug("Found Time node: " + processNode.getString("process_id"));
+			    createTemporalAggregate(processID);
+			    log.debug("Filters are: " + filters);
+			}
+			
+		else if (processID.equals("ndvi")) {
+			log.debug("Found NDVI node: " + processNode.getString("process_id"));
+			    JSONObject processAggregate = processGraph.getJSONObject(processNodeKey);
+			    createNDVIAggregateFromProcess(processAggregate);
+			    log.debug("Filters are: " + filters);
+		    }
+					
+		
+   // else if (processID.equals("filter_temporal")) {
+		
+   // 	String filterCollectionNodeKey = null;
+   // 	String filterTempNodeKey = processNodeKey;
+   // 	JSONObject filterTempDataNode = argumentsNode.getJSONObject("data");
+   //		String filterTempfromNode = filterTempDataNode.getString("from_node");
+    	
+   //		filterCollectionNodeKey = getFilterCollectionNode(processParent, filterTempfromNode);
+   //		log.debug("Key Temp is : " + filterCollectionNodeKey);
+   //		JSONObject loadCollectionNode = processParent.getJSONObject(filterCollectionNodeKey);
+		
+   //		JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");
+		
+   //		String coll1 = (String) loadCollectionNodeArguments.get("id");
+		
+   //		JSONObject processFilter = processParent.getJSONObject(processNodeKey);
+   //		JSONObject processFilterArguments = processFilter.getJSONObject("arguments");
+		
+   //		JSONArray extentArray = (JSONArray) processFilterArguments.get("extent");
+   //		createDateRangeFilterFromArgs(extentArray, coll1);
+   //	}
+	
+   // else if (processID.equals("filter_bbox")) {
+		
+   // 	String filterCollectionNodeKey = null;
+   // 	String filterBboxNodeKey = processNodeKey;
+   // 	JSONObject filterBboxDataNode = argumentsNode.getJSONObject("data");
+   //		String filterBboxfromNode = filterBboxDataNode.getString("from_node");
+    	
+   //		filterCollectionNodeKey = getFilterCollectionNode(processParent, filterBboxfromNode);
+   //		log.debug("Key Bbox is : " + filterCollectionNodeKey);
+   //		JSONObject loadCollectionNode = processParent.getJSONObject(filterCollectionNodeKey);
+   //		JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");
+		
+   //		String coll2 = (String) loadCollectionNodeArguments.get("id");
+		
+   //		JSONObject processFilter = processParent.getJSONObject(processNodeKey);
+   //		JSONObject processFilterArguments = processFilter.getJSONObject("arguments");
+		
+   //     int srs = 0;
+		
+   //		JSONObject jsonresp = null;
+   //		try {
+   //			jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll2);
+   //		} catch (JSONException e) {
+   //			log.error("An error occured: " + e.getMessage());
+   //			StringBuilder builder = new StringBuilder();
+   //			for (StackTraceElement element : e.getStackTrace()) {
+   //				builder.append(element.toString() + "\n");
+   //			}
+   //			log.error(builder.toString());
+   //		} catch (IOException e) {
+   //			log.error("An error occured: " + e.getMessage());
+   //			StringBuilder builder = new StringBuilder();
+   //			for (StackTraceElement element : e.getStackTrace()) {
+   //				builder.append(element.toString() + "\n");
+   //			}
+   //			log.error(builder.toString());
+   //		}
+					
+   //		srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");
+   //		log.debug("srs is: " + srs);
+   //		if (srs > 0) {
+   //			createBoundingBoxFilterFromArgs(processFilterArguments, srs, coll2);
+   //		}
+   //	}
+		
+	}
+	
 	private String getFilterCollectionNode(JSONObject processParent, String fromNode) {
 		
 		String filterCollectionNodeKey = null;
@@ -552,7 +637,6 @@ public class WCPSQueryFactory {
 		
 		if (processName1.equals("load_collection")) {
 			
-			String loadCollNode = keyStrdc;
 			JSONObject processDatacube = processParent.getJSONObject(keyStrdc);
 			JSONObject processDatacubeArguments = processDatacube.getJSONObject("arguments");			
 			coll = (String) processDatacubeArguments.get("id");			
@@ -566,56 +650,7 @@ public class WCPSQueryFactory {
 	 * @param process
 	 */
 	
-    private void createFilterFromProcessNew(JSONObject processFilter, JSONObject processFilterArguments, String coll) {
-		
-	    for (String keyStr : processFilterArguments.keySet()) {
-		//Object key = processFilterArguments.getJSONObject("extent");
-		
-			if (!keyStr.contains("extent")) {
-				log.debug("no spatial or temporal extent defined in filter");
-			}
-			
-			// check if filter contains spatial information
-	        else if (processFilter.get("process_id").toString().contains("bbox")) {
-				log.debug("spatial extent defined in filter");
-				int srs = 0;
-				
-				JSONObject jsonresp = null;
-				try {
-					jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
-				} catch (JSONException e) {
-					log.error("An error occured: " + e.getMessage());
-					StringBuilder builder = new StringBuilder();
-					for (StackTraceElement element : e.getStackTrace()) {
-						builder.append(element.toString() + "\n");
-					}
-					log.error(builder.toString());
-				} catch (IOException e) {
-					log.error("An error occured: " + e.getMessage());
-					StringBuilder builder = new StringBuilder();
-					for (StackTraceElement element : e.getStackTrace()) {
-						builder.append(element.toString() + "\n");
-					}
-					log.error(builder.toString());
-				}
-							
-				srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");
-				log.debug("srs is: " + srs);
-				if (srs > 0) {
-					createBoundingBoxFilterFromArgs(processFilterArguments, srs, coll);
-				}
-			}
-			// check if filter contains temporal information
-			else if (processFilter.get("process_id").toString().contains("temporal")) {
-				log.debug("temporal extent defined in filter");
-				
-				JSONArray extentArray = (JSONArray) processFilterArguments.get(keyStr);
-				createDateRangeFilterFromArgs(extentArray, coll);
-			}
-	    }
-	}
-	
-	
+    
 	private void createFilterFromProcess(JSONObject process, String coll) {
 		
 		for (Object key : process.keySet()) {
@@ -895,6 +930,7 @@ public class WCPSQueryFactory {
 				params.add(filter.getUpperBound());
 			}
 		}
+		log.debug("temporal aggregate added!");
 		aggregates.add(new Aggregate(new String("DATE"), aggregateType, params));
 	}
 
@@ -912,8 +948,10 @@ public class WCPSQueryFactory {
 		Vector<String> params = new Vector<String>();
 		params.add(red);
 		params.add(nir);
-		if (red != null && nir != null)
+		if (red != null && nir != null) {
+			log.debug("feature aggregate added!");
 			aggregates.add(new Aggregate(new String("feature"), new String("NDVI"), params));
+		}
 	}
 
 }

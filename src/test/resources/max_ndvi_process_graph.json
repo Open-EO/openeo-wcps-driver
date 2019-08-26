@@ -1,0 +1,47 @@
+{
+  "load": {
+    "process_id": "load_collection",
+    "arguments": {
+      "id": "openEO_S2_32632_10m_L2A",
+      "spatial_extent": {
+        "west": 11.286732,
+        "south": 46.466714,
+        "east": 11.389729,
+        "north": 46.513988
+      },
+      "temporal_extent": [
+        "2018-06-13T00:00:00Z",
+        "2018-06-23T00:00:00Z"
+      ],
+      "bands": null,
+      "properties": null
+    }
+  },
+  "save": {
+    "process_id": "save_result",
+    "arguments": {
+      "data": {
+        "from_node": "max"
+      },
+      "format": "JSON",
+      "options": {}
+    },
+    "result": true
+  },
+  "ndvi": {
+    "process_id": "ndvi",
+    "arguments": {
+      "data": {
+        "from_node": "load"
+      }
+    }
+  },
+  "max": {
+    "process_id": "max_time",
+    "arguments": {
+      "data": {
+        "from_node": "ndvi"
+      }
+    }
+  }
+}
