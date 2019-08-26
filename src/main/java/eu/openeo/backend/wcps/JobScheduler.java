@@ -78,7 +78,7 @@ public class JobScheduler implements JobEventListener{
 			linkProcessGraph.put("updated", job.getUpdated());
 			
 			String filePath = ConvenienceHelper.readProperties("temp-dir");
-			String fileName = job.getId() + "." + ConvenienceHelper.getRasNameFromMimeType(wcpsFactory.getOutputFormat());
+			String fileName = job.getId() + "." + wcpsFactory.getOutputFormat();
 			log.debug("The output file will be saved here: \n" + (filePath + fileName).toString());		
 						
 			try (BufferedInputStream in = new BufferedInputStream(url.openStream());

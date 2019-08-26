@@ -442,7 +442,8 @@ public class WCPSQueryFactory {
 				log.debug("Save Result node key found is: " + processNodeKey);
 				String format = getFormatFromSaveResultNode(processNode);
 				try {					
-					this.outputFormat = ConvenienceHelper.getMimeTypeFromOutput(format);
+					//this.outputFormat = ConvenienceHelper.getMimeTypeFromOutput(format);
+					this.outputFormat = ConvenienceHelper.getRasTypeFromOutput(format);
 				} catch (JSONException | IOException e) {
 					log.error("Error while parsing outputformat from process graph: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
