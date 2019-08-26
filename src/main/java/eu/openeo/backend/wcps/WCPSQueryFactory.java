@@ -206,7 +206,7 @@ public class WCPSQueryFactory {
 			
 			String name = processGraph.getJSONObject(keyNode).getString("process_id");
 			 
-			if (name.contains("linear_scale_range")) {
+			if (name.contains("linear_scale_cube")) {
 				containLinearScale = true;
 				linearScaleNodeKey = keyNode;
 				break;
@@ -465,9 +465,6 @@ public class WCPSQueryFactory {
 		    if (argumentsKey.contentEquals("data")) {
 		      currentNodeKey = currentNodeData.getJSONObject("data").getString("from_node");
 		   }
-		    else if (argumentsKey.contentEquals("x")) {
-			      currentNodeKey = currentNodeData.getString("x");
-			   }
 		}
 		return currentNodeKey;
 	}
