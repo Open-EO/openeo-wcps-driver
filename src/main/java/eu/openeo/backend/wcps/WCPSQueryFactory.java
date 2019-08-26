@@ -200,20 +200,37 @@ public class WCPSQueryFactory {
 		}
 		wcpsStringBuilder.append(") return encode ( ");
 
-		for (int a = 0; a < aggregates.size(); a++) {
-			if (aggregates.get(a).getAxis().equals("DATE")) {
-				wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
-				log.debug("Aggregate Temp " + aggregates.get(a).getAxis());
-				log.debug("Temp WCPS added " + wcpsStringBuilder);
-				log.debug("Temp WCPS added " + aggregates.size());
-			}
-			if (aggregates.get(a).getOperator().equals("NDVI")) {
-				wcpsStringBuilder.append(createNDVIWCPSString("$c1", aggregates.get(a)));
-				log.debug("Aggregate NDVI " + aggregates.get(a).getOperator());
-				log.debug("NDVI WCPS  added " + wcpsStringBuilder);
+		boolean containLinearScale = false;
+		String linearScaleNodeKey = "";
+		for (String keyNode : processGraph.keySet()) {
+			
+			String name = processGraph.getJSONObject(keyNode).getString("process_id");
+			 
+			if (name.contains("linear_scale_range")) {
+				containLinearScale = true;
+				linearScaleNodeKey = keyNode;
+				break;
 			}
 		}
 		
+		if(containLinearScale) {
+			wcpsStringBuilder.append(createLinearScaleWCPSString(linearScaleNodeKey));
+		}else {		
+			for (int a = 0; a < aggregates.size(); a++) {
+				if (aggregates.get(a).getAxis().equals("DATE")) {
+					wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
+					log.debug("Aggregate Temp " + aggregates.get(a).getAxis());
+					log.debug("Temp WCPS added " + wcpsStringBuilder);
+					log.debug("Number of Aggregates " + aggregates.size());
+				}
+				if (aggregates.get(a).getOperator().equals("NDVI")) {
+					wcpsStringBuilder.append(createNDVIWCPSString("$c1", aggregates.get(a)));
+					log.debug("Aggregate NDVI " + aggregates.get(a).getOperator());
+					log.debug("NDVI WCPS  added " + wcpsStringBuilder);
+				}
+			}
+		}
+		  
 		if (filters.size() > 0) {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
 		}
@@ -322,6 +339,43 @@ public class WCPSQueryFactory {
 		filters.removeAllElements();
 
 		return stringBuilder.toString();
+	}
+	
+	private String createLinearScaleWCPSString(String linearScaleNodeKey) {
+		
+		String name = processGraph.getJSONObject(linearScaleNodeKey).getString("process_id");
+		log.debug("currently working on: " + name);
+		double inputMin = 0;
+		double inputMax = 0;
+		double outputMin = 0;
+		double outputMax = 0;
+
+		inputMin = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMin");
+		inputMax = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMax");
+		outputMin = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMin");
+		outputMax = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
+		
+
+		StringBuilder stretchBuilder = new StringBuilder("(");
+
+		for (int a = 0; a < aggregates.size(); a++) {
+			if (aggregates.get(a).getAxis().equals("DATE")) {
+				stretchBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
+			}
+			if (aggregates.get(a).getOperator().equals("NDVI")) {
+				stretchBuilder.append(createNDVIWCPSString("$c1", aggregates.get(a)));
+			}
+		}
+		stretchBuilder.append(")");
+		String stretchString = stretchBuilder.toString();
+
+		StringBuilder stretchBuilderExtend = new StringBuilder("(unsigned char)(");
+
+		stretchBuilderExtend.append("(" + stretchString + " + " + (-inputMin) + ")");
+		stretchBuilderExtend.append("*("+ outputMax + "/" + (inputMax - inputMin) + ")");
+		stretchBuilderExtend.append(" + " + outputMin + ")");
+
+		return stretchBuilderExtend.toString();
 	}
 
 	private String createTempAggWCPSString(String collectionName, Aggregate tempAggregate) {
