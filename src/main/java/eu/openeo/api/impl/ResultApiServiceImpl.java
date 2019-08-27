@@ -37,7 +37,7 @@ public class ResultApiServiceImpl extends ResultApiService {
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			byte[] response = IOUtils.toByteArray(conn.getInputStream());
-			return Response.ok(response).type(wcpsFactory.getOutputFormat()).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
+			return Response.ok(response).type(ConvenienceHelper.getMimeTypeFromRasName(wcpsFactory.getOutputFormat())).header("Access-Control-Expose-Headers", "OpenEO-Identifier, OpenEO-Costs").build();
 		} catch (MalformedURLException e) {
 			log.error("An error occured when creating URL from job query: " + e.getMessage());
 			return Response.serverError().entity("An error occured when creating URL from job query: " + e.getMessage())
