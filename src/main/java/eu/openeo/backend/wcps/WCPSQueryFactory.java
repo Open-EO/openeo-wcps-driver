@@ -158,11 +158,8 @@ public class WCPSQueryFactory {
 					wcpsStringBuilder.append(stretchExtendString);
 				} 
 			}
-			
 		}
-		  
 	}
-		
 		
 		for (int a = 0; a < aggregates.size(); a++) {
 			if (aggregates.get(a).getAxis().equals("DATE")) {
@@ -177,9 +174,9 @@ public class WCPSQueryFactory {
 			}
 		}
 		
-//		if (filters.size() > 0) {
-//			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
-//		}
+		if (filters.size() > 0) {
+			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
+		}
 		// TODO define return type from process tree
 		wcpsStringBuilder.append(", \"" + this.outputFormat + "\" )");
 	}
@@ -201,7 +198,9 @@ public class WCPSQueryFactory {
 		wcpsStringBuilder.append(") return encode ( ");
 
 		boolean containLinearScale = false;
+		boolean applyProcess = false;
 		String linearScaleNodeKey = "";
+		String applyNodeKey = "";
 		for (String keyNode : processGraph.keySet()) {
 			
 			String name = processGraph.getJSONObject(keyNode).getString("process_id");
@@ -211,11 +210,20 @@ public class WCPSQueryFactory {
 				linearScaleNodeKey = keyNode;
 				break;
 			}
+			if (name.contains("apply")) {
+				applyProcess = true;				
+				applyNodeKey = keyNode;
+				break;
+			}
 		}
 		
 		if(containLinearScale) {
-			wcpsStringBuilder.append(createLinearScaleWCPSString(linearScaleNodeKey));
-		}else {		
+			wcpsStringBuilder.append(createLinearScaleCubeWCPSString(linearScaleNodeKey));
+		}
+		else if(applyProcess) {
+			wcpsStringBuilder.append(createApplyWCPSString(applyNodeKey));
+		}
+		else {		
 			for (int a = 0; a < aggregates.size(); a++) {
 				if (aggregates.get(a).getAxis().equals("DATE")) {
 					wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
@@ -238,7 +246,59 @@ public class WCPSQueryFactory {
 		wcpsStringBuilder.append(", \"" + this.outputFormat + "\" )");
 	}
 	
+    private String createApplyWCPSString(String applyNodeKey) {
+		String applyBuilderExtend = null;
+		JSONObject applyProcesses = processGraph.getJSONObject(applyNodeKey).getJSONObject("arguments").getJSONObject("process").getJSONObject("callback");
+				
+		for (String nodeKey : applyProcesses.keySet()) {
+			String name = applyProcesses.getJSONObject(nodeKey).getString("process_id");
+			
+			if (name.contains("linear_scale_range")) {
+				applyBuilderExtend = createLinearScaleRangeWCPSString(nodeKey, applyProcesses);
+			}
+		}		
+		return applyBuilderExtend;
+	}
+
+    private String createLinearScaleRangeWCPSString(String linearScaleNodeKey, JSONObject process) {
+		
+	String name = process.getJSONObject(linearScaleNodeKey).getString("process_id");
+	log.debug("currently working on: " + name);
 	
+	//String inputType = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getString("x");
+	
+	double inputMin = 0;
+	double inputMax = 0;
+	double outputMin = 0;
+	double outputMax = 0;
+
+	inputMin = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMin");
+	inputMax = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMax");
+	outputMin = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMin");
+	outputMax = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
+	
+	StringBuilder stretchBuilder = new StringBuilder("(");
+
+	for (int a = 0; a < aggregates.size(); a++) {
+		if (aggregates.get(a).getAxis().equals("DATE")) {
+			stretchBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
+		}
+		if (aggregates.get(a).getOperator().equals("NDVI")) {
+			stretchBuilder.append(createNDVIWCPSString("$c1", aggregates.get(a)));
+		}
+	}
+	stretchBuilder.append(")");
+	String stretchString = stretchBuilder.toString();
+
+	StringBuilder stretchBuilderExtend = new StringBuilder("(unsigned char)(");
+
+	stretchBuilderExtend.append("(" + stretchString + " + " + (-inputMin) + ")");
+	stretchBuilderExtend.append("*("+ outputMax + "/" + (inputMax - inputMin) + ")");
+	stretchBuilderExtend.append(" + " + outputMin + ")");
+
+	return stretchBuilderExtend.toString();
+    }
+
 	/**
 	 * Helper Method to create a string describing an arbitrary filtering as defined
 	 * from the process graph
@@ -341,7 +401,7 @@ public class WCPSQueryFactory {
 		return stringBuilder.toString();
 	}
 	
-	private String createLinearScaleWCPSString(String linearScaleNodeKey) {
+	private String createLinearScaleCubeWCPSString(String linearScaleNodeKey) {
 		
 		String name = processGraph.getJSONObject(linearScaleNodeKey).getString("process_id");
 		log.debug("currently working on: " + name);

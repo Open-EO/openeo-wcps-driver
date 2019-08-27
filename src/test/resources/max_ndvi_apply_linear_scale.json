@@ -47,12 +47,13 @@
             "x": {"from_argument": "x"},
             "inputMin": -1,
             "inputMax": 1,
+            "outputMin": 0,
             "outputMax": 255
           },
           "result": true
-        }
+       }
       }
-    }
+     }
     }
   },
   "6": {
