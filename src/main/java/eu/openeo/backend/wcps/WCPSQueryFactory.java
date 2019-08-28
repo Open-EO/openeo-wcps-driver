@@ -265,17 +265,27 @@ public class WCPSQueryFactory {
 	String name = process.getJSONObject(linearScaleNodeKey).getString("process_id");
 	log.debug("currently working on: " + name);
 	
-	//String inputType = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getString("x");
+	JSONObject scaleArgumets = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments");
 	
 	double inputMin = 0;
 	double inputMax = 0;
 	double outputMin = 0;
-	double outputMax = 0;
+	double outputMax = 1;
 
 	inputMin = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMin");
 	inputMax = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMax");
-	outputMin = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMin");
-	outputMax = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
+	
+	for (String outputMinMax : scaleArgumets.keySet()) {
+	
+		if (outputMinMax.contentEquals("outputMin")) {
+	        outputMin = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMin");
+	       
+		}
+		else if (outputMinMax.contentEquals("outputMax")) {
+			outputMax = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
+		}
+	
+	}
 	
 	StringBuilder stretchBuilder = new StringBuilder("(");
 
@@ -404,16 +414,27 @@ public class WCPSQueryFactory {
 	private String createLinearScaleCubeWCPSString(String linearScaleNodeKey) {
 		
 		String name = processGraph.getJSONObject(linearScaleNodeKey).getString("process_id");
+		JSONObject scaleArgumets = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments");
 		log.debug("currently working on: " + name);
 		double inputMin = 0;
 		double inputMax = 0;
 		double outputMin = 0;
-		double outputMax = 0;
+		double outputMax = 1;
 
 		inputMin = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMin");
 		inputMax = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMax");
-		outputMin = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMin");
-		outputMax = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
+		
+		for (String outputMinMax : scaleArgumets.keySet()) {
+			
+			if (outputMinMax.contentEquals("outputMin")) {
+		        outputMin = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMin");
+		       
+			}
+			else if (outputMinMax.contentEquals("outputMax")) {
+				outputMax = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
+			}
+		
+		}
 		
 
 		StringBuilder stretchBuilder = new StringBuilder("(");
