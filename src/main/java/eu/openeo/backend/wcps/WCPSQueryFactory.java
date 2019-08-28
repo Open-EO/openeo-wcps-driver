@@ -197,30 +197,37 @@ public class WCPSQueryFactory {
 		}
 		wcpsStringBuilder.append(") return encode ( ");
 
-		boolean containLinearScale = false;
-		boolean applyProcess = false;
+		boolean containsLinearScale = false;
+		boolean containsApplyProcess = false;
+		boolean containsResampleProcess = false;
 		String linearScaleNodeKey = "";
 		String applyNodeKey = "";
+		String resampleNodeKey = "";
 		for (String keyNode : processGraph.keySet()) {
 			
 			String name = processGraph.getJSONObject(keyNode).getString("process_id");
 			 
 			if (name.contains("linear_scale_cube")) {
-				containLinearScale = true;
+				containsLinearScale = true;
 				linearScaleNodeKey = keyNode;
 				break;
 			}
 			if (name.contains("apply")) {
-				applyProcess = true;				
+				containsApplyProcess = true;				
 				applyNodeKey = keyNode;
+				break;
+			}
+			if (name.contains("resample_spatial")) {
+				containsResampleProcess = true;				
+				resampleNodeKey = keyNode;
 				break;
 			}
 		}
 		
-		if(containLinearScale) {
+		if(containsLinearScale) {
 			wcpsStringBuilder.append(createLinearScaleCubeWCPSString(linearScaleNodeKey));
 		}
-		else if(applyProcess) {
+		else if(containsApplyProcess) {
 			wcpsStringBuilder.append(createApplyWCPSString(applyNodeKey));
 		}
 		else {		
@@ -242,8 +249,34 @@ public class WCPSQueryFactory {
 		if (filters.size() > 0) {
 			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
 		}
+		
 		// TODO define return type from process tree
 		wcpsStringBuilder.append(", \"" + this.outputFormat + "\" )");
+		if (containsResampleProcess) {
+			wcpsStringBuilder = new StringBuilder(createResampleWCPSString(resampleNodeKey));
+		}
+	}
+	
+	//TODO extent this to the full functionality of the openEO process
+	private String createResampleWCPSString(String resampleNodeKey) {
+		String projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getString("projection");
+
+		String currentWCPSQuery = wcpsStringBuilder.toString();
+		int beginIndex = currentWCPSQuery.indexOf("return encode (") + 15;
+		int endIndex = currentWCPSQuery.indexOf(", \"");
+		log.debug("payload range: " + beginIndex + " " + endIndex);
+		StringBuilder resampleBuilder = new StringBuilder(currentWCPSQuery.substring(0, beginIndex));
+		String currentPayload = currentWCPSQuery.substring(beginIndex, endIndex);
+		
+		//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
+		resampleBuilder.append("crsTransform(" + currentPayload + ",{"
+				+ "E:\"http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\","
+				+ "N:\"http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\""
+				+ "}, {})");
+		resampleBuilder.append(currentWCPSQuery.substring(endIndex));
+		log.debug("current payload: " + currentPayload);
+		log.debug("resample wcps query: " + resampleBuilder.toString());
+		return resampleBuilder.toString();
 	}
 	
     private String createApplyWCPSString(String applyNodeKey) {
