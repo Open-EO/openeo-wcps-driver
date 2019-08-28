@@ -261,7 +261,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			JSONObject processGraphJSON = (JSONObject) job.getProcessGraph();
 			WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
 
-			String fileName = job.getId() + "." + ConvenienceHelper.getRasNameFromMimeType(wcpsFactory.getOutputFormat());
+			String fileName = job.getId() + "." + wcpsFactory.getOutputFormat();
 			
 			JSONObject linkProcessGraph = new JSONObject();
 			linkProcessGraph.put("job_id", job.getId());
@@ -271,7 +271,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 			JSONArray links = new JSONArray();
 			JSONObject link = new JSONObject();
 			link.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/download/" + fileName);
-			link.put("type", wcpsFactory.getOutputFormat());
+			link.put("type", ConvenienceHelper.getMimeTypeFromRasName(wcpsFactory.getOutputFormat()));
 
 			links.put(link);
 

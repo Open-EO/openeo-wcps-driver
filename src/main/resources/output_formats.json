@@ -6,7 +6,7 @@
         },
         "GTiff": {
             "gis_data_types": [ "raster" ],
-            "mime-type": "image/tiff",
+            "mime-type": "image/tiff;application=geotiff",
             "rasdaman_name": "tiff"
         },
         "GIF": {
