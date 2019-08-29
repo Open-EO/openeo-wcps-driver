@@ -25,6 +25,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.j256.ormlite.dao.Dao;
@@ -71,7 +72,12 @@ public class RequireTokenFilter implements ContainerRequestFilter {
 		
 		log.debug("token header: " + decodedHeaderJSON.toString(4));
 		
-		String kid = decodedHeaderJSON.getString("kid");
+		String kid = null;
+		try {
+			kid = decodedHeaderJSON.getString("kid");
+		}catch(JSONException e) {
+			
+		}
 		
 		if(kid != null) {
 			log.debug("token will be verified using external token provider");
