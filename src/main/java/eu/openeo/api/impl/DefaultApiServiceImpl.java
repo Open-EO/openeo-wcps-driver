@@ -68,6 +68,9 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		JSONArray credentialsBasicMethods =  new JSONArray();
 		credentialsBasicMethods.put(new String("GET"));
 		
+		JSONArray credentialsOidcMethods =  new JSONArray();
+		credentialsOidcMethods.put(new String("GET"));
+		
 		JSONArray meMethods = new JSONArray();
 		meMethods.put(new String("GET"));
 		
@@ -82,6 +85,10 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		JSONObject credentialsBasicEndpoint = new JSONObject();
 		credentialsBasicEndpoint.put("path", "/credentials/basic");
 		credentialsBasicEndpoint.put("methods", credentialsBasicMethods);
+		
+		JSONObject credentialsOidcEndpoint = new JSONObject();
+		credentialsOidcEndpoint.put("path", "/credentials/oidc");
+		credentialsOidcEndpoint.put("methods", credentialsOidcMethods);
 		
 		JSONObject outputFormatsEndpoint = new JSONObject();
 		outputFormatsEndpoint.put("path", "/output_formats");
@@ -132,6 +139,7 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		endpointList.put(defaultEndpoint);
 		endpointList.put(wellKnownEndpoint);
 		endpointList.put(credentialsBasicEndpoint);
+		endpointList.put(credentialsOidcEndpoint);
 		endpointList.put(meEndpoint);
 		endpointList.put(outputFormatsEndpoint);
 		endpointList.put(collectionsEndpoint);

@@ -135,7 +135,13 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
     
     @Override
     public Response credentialsOidcGet(SecurityContext securityContext) throws NotFoundException {
-        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+    	try {
+			String oidcEnpoint = ConvenienceHelper.readProperties("oidc-provider") + "/.well-known/openid-configuration";
+			return Response.status(303).header("location", oidcEnpoint).build();
+		} catch (IOException e) {
+			log.error("An error occured while sending oidc location: " + e.getMessage());
+			return Response.serverError().entity("An error occured while sending oidc location").build();
+		}       
     }
     
     private String issueToken(String login) {
