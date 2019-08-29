@@ -186,15 +186,14 @@ public class RequireTokenFilter implements ContainerRequestFilter {
 	                }
 	                @Override
 	                public boolean isUserInRole(String role) {
-//	                    String roles = verifiedClaims.getBody().get("scope", String.class);
-//	                    if(roles.contains(role)) {
-//	                    	log.debug("User has confirmed to be part of: " + role);
-//	                    	return true;
-//	                    }else {
-//	                    	log.error("User is not part of: " + role);
-//	                    	return false;
-//	                    }
-	                    return true;
+	                    String roles = verifiedClaims.getBody().get("roles", String.class);
+	                    if(roles != null && roles.contains(role)) {
+	                    	log.debug("User has confirmed to be part of: " + role);
+	                    	return true;
+	                    }else {
+	                    	log.error("User is not part of: " + role);
+	                    	return false;
+	                    }
 	                }
 	                @Override
 	                public boolean isSecure() { 
