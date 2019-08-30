@@ -47,6 +47,16 @@ public class FilesApiServiceImpl extends FilesApiService {
     			
     			File userFolder = new File(userFolderPath);
     			
+    			boolean pathCreated = userFolder.exists();
+				if(!pathCreated) {
+					pathCreated= userFolder.mkdir();
+				}
+				if(pathCreated) {
+					log.debug("The following path was successfully created: " + userFolder.getAbsolutePath());
+				}else {
+					return Response.serverError().entity("The requested resource path could not be created: /files/" + authUserId).build();
+				}
+    			
     			File[] listFiles = userFolder.listFiles();
     			
     			log.debug("Number of files in the user folder " + userFolderPath + ": " + listFiles.length);
@@ -255,10 +265,8 @@ public class FilesApiServiceImpl extends FilesApiService {
 			   	os.close();
 			   	is.close();
 			   	
-			   	String pathToShow = "files/" + authUserId;
-			   	
 			   	String jsonString = new JSONObject()
-		                  .put("path", (pathToShow + "/" + path))
+		                  .put("path", (path))
 		                  .put("size", body.length())
 		                  .put("modified", java.time.Clock.systemUTC().instant()).toString();
 
