@@ -268,11 +268,12 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				cube_dimensions.put(dim.getString("axis"), dim);
 			}			
 			
+						
 			properties.put("cube:dimensions", cube_dimensions);
 			properties.put("eo:epsg", Double.parseDouble(srsDescription));
-			properties.put("sci:citation", "Copernicus Sentinel data 2019");
-			properties.put("eo:constellation", "Sentinel-2");
-			properties.put("eo:instrument", "MSI");
+			properties.put("sci:citation", metadataElement.getChildText("CITATION"));
+			properties.put("eo:constellation", metadataElement.getChildText("CONSTELLATION"));
+			properties.put("eo:instrument", metadataElement.getChildText("INSTRUMENT"));
 			properties.put("eo:bands", bandArray);
 			
 			//other_properties.put("eo:platform", pltfrmvalues);
