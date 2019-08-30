@@ -68,8 +68,19 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		JSONArray credentialsBasicMethods =  new JSONArray();
 		credentialsBasicMethods.put(new String("GET"));
 		
+		JSONArray credentialsOidcMethods =  new JSONArray();
+		credentialsOidcMethods.put(new String("GET"));
+		
 		JSONArray meMethods = new JSONArray();
 		meMethods.put(new String("GET"));
+		
+		JSONArray fileUserIdPathMethods = new JSONArray();
+		fileUserIdPathMethods.put(new String("GET"));
+		fileUserIdPathMethods.put(new String("PUT"));
+		fileUserIdPathMethods.put(new String("DELETE"));
+		
+		JSONArray fileUserIdMethods = new JSONArray();
+		fileUserIdMethods.put(new String("GET"));
 		
 		JSONObject defaultEndpoint = new JSONObject();
 		defaultEndpoint.put("path", "/");
@@ -82,6 +93,10 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		JSONObject credentialsBasicEndpoint = new JSONObject();
 		credentialsBasicEndpoint.put("path", "/credentials/basic");
 		credentialsBasicEndpoint.put("methods", credentialsBasicMethods);
+		
+		JSONObject credentialsOidcEndpoint = new JSONObject();
+		credentialsOidcEndpoint.put("path", "/credentials/oidc");
+		credentialsOidcEndpoint.put("methods", credentialsOidcMethods);
 		
 		JSONObject outputFormatsEndpoint = new JSONObject();
 		outputFormatsEndpoint.put("path", "/output_formats");
@@ -121,17 +136,25 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		
 		JSONObject processGraphIdEndpoint = new JSONObject();
 		processGraphIdEndpoint.put("path", "/process_graphs/{process_graph_id}");
-		processGraphIdEndpoint.put("methods", processGraphIdMethods);
-		
+		processGraphIdEndpoint.put("methods", processGraphIdMethods);		
 		
 		JSONObject meEndpoint = new JSONObject();
 		meEndpoint.put("path", "/me");
 		meEndpoint.put("methods", meMethods);
 		
+		JSONObject fileUserIdPathEndpoint = new JSONObject();
+		fileUserIdPathEndpoint.put("path", "/files/{user_id}/{path}");		
+		fileUserIdPathEndpoint.put("methods", fileUserIdPathMethods);
+		
+		JSONObject fileUserIdEndpoint = new JSONObject();
+		fileUserIdEndpoint.put("path", "/files/{user_id}");
+		fileUserIdEndpoint.put("methods", fileUserIdMethods);
+		
 		JSONArray endpointList = new JSONArray();
 		endpointList.put(defaultEndpoint);
 		endpointList.put(wellKnownEndpoint);
 		endpointList.put(credentialsBasicEndpoint);
+		endpointList.put(credentialsOidcEndpoint);
 		endpointList.put(meEndpoint);
 		endpointList.put(outputFormatsEndpoint);
 		endpointList.put(collectionsEndpoint);
@@ -143,6 +166,8 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		endpointList.put(jobsIdResultsEndpoint);
 		endpointList.put(processGraphsEndpoint);
 		endpointList.put(processGraphIdEndpoint);
+		endpointList.put(fileUserIdEndpoint);
+		endpointList.put(fileUserIdPathEndpoint);		
 		
 		JSONObject plans = new JSONObject();
 		plans.put("name", "free");

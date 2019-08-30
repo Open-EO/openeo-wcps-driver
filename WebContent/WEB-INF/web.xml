@@ -102,7 +102,6 @@
         <web-resource-collection>
         	<web-resource-name>Authentication</web-resource-name>
             <url-pattern>/credentials/basic</url-pattern>
-            <url-pattern>/credentials/oidc</url-pattern>
         	<http-method>GET</http-method>
         </web-resource-collection>
         <auth-constraint>
@@ -129,6 +128,7 @@
         	<web-resource-name>Discovery</web-resource-name>
         	<url-pattern>/</url-pattern>
         	<url-pattern>/.well-known/openeo</url-pattern>
+           	<url-pattern>/credentials/oidc</url-pattern>
             <url-pattern>/collections</url-pattern>
             <url-pattern>/collections/*</url-pattern>
             <url-pattern>/processes</url-pattern>

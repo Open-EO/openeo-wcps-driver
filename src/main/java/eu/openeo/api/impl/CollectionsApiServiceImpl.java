@@ -243,7 +243,12 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				product.put("name", bandId);
 				bandValues.put(bandId);
 				product.put("center_wavelength", bandWave);
-				product.put("gsd", Double.parseDouble(collectionId.split("_")[3].substring(0, collectionId.split("_")[3].length()-1)));				
+				try {
+					//TODO read this from meta data and not from collection name
+					product.put("gsd", Double.parseDouble(collectionId.split("_")[3].substring(0, collectionId.split("_")[3].length()-1)));
+				}catch(Exception e) {
+					log.error("Error in parsing band wave-lenght:" + e.getMessage());
+				}
 				
 				bandArray.put(product);
 			}

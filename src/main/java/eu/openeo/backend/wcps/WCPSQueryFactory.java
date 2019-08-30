@@ -1104,16 +1104,16 @@ public class WCPSQueryFactory {
 	}
 
 	private void createNDVIAggregateFromProcess(JSONObject argsObject) {
-		String red = "B04";
-		String nir = "B08";
-		for (Object argsKey : argsObject.keySet()) {
-			String argsKeyStr = (String) argsKey;
-			if (argsKeyStr.equals("red")) {
-				red = "" + argsObject.getString(argsKeyStr);
-			} else if (argsKeyStr.equals("nir")) {
-				nir = "" + argsObject.getString(argsKeyStr);
-			}
-		}
+		String red = "red";
+		String nir = "nir";
+//		for (String argsKeyStr : argsObject.keySet()) {
+//			
+//			if (argsKeyStr.equals("red")) {
+//				red = "" + argsObject.getString(argsKeyStr);
+//			} else if (argsKeyStr.equals("nir")) {
+//				nir = "" + argsObject.getString(argsKeyStr);
+//			}
+//		}
 		Vector<String> params = new Vector<String>();
 		params.add(red);
 		params.add(nir);
