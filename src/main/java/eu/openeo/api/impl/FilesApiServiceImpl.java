@@ -1,5 +1,6 @@
 package eu.openeo.api.impl;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -7,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 
 import javax.validation.constraints.Pattern;
 import javax.ws.rs.core.Response;
@@ -48,13 +50,14 @@ public class FilesApiServiceImpl extends FilesApiService {
     			
     			log.debug("Number of files in the user folder " + userFolderPath + ": " + listFiles.length);
     			
+    			String pathToShow = "files/" + authUserId + "/";
     			JSONObject[] jsonFileList = new JSONObject[listFiles.length];    					
     			
     			for (int i=0; i < listFiles.length; i++) {
-    				File currentFile = listFiles[i];
+    				File currentFile = listFiles[i];   				
     			    				
     				JSONObject currentFileJson = new JSONObject()
-    						.put("path", currentFile.getAbsolutePath())
+    						.put("path", pathToShow + currentFile.getName())
     						.put("size", currentFile.length())
     						.put("modified", currentFile.lastModified());
     						
@@ -108,18 +111,114 @@ public class FilesApiServiceImpl extends FilesApiService {
     public Response filesUserIdPathDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String userId, String path, SecurityContext securityContext) throws NotFoundException {
         // do some magic!
     	// rm
-        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+    	
+    	String authUserId = securityContext.getUserPrincipal().getName();
+    	if(userId.equals(authUserId)) {
+    		try {    			
+    			String fileToDeletePath = ConvenienceHelper.readProperties("temp-dir") + authUserId +  "/" + path;
+    			log.debug("File to delete: " + fileToDeletePath);
+    			
+    			File fileToDelete = new File(fileToDeletePath);
+    			
+    			fileToDelete.delete();
+    			log.debug("File " + fileToDeletePath + " deleted successfully");
+    			
+    			return Response.status(204).entity(new String("File " + fileToDeletePath + " deleted successfully")).build();
+    			    			
+    		} catch (FileNotFoundException e) {
+    			StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+				
+				String jsonStringError = new JSONObject()
+						.put("id", userId)
+						.put("code", "File not found exception")
+						.put("message", e.getMessage())
+						.put("links", "[]").toString();
+				
+    			return Response.status(404).entity(jsonStringError).build();
+    		} catch (IOException e) {
+    			StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+				
+				String jsonStringError = new JSONObject()
+						.put("id", userId)
+						.put("code", "Input/Output exception")
+						.put("message", e.getMessage())
+						.put("links", "[]").toString();
+				
+    			return Response.status(500).entity(jsonStringError).build();
+
+    		}
+    	} else {
+    		log.error(new String("The user " + authUserId + " is not authorized to access the path /files/" + userId));
+    		return Response.status(403).entity(new String("The user " + authUserId + " is not authorized to access the path /files/" + userId)).build();
+    	}
     }
     @Override
     public Response filesUserIdPathGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String userId, String path, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-    	// wget
-        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
+    	String authUserId = securityContext.getUserPrincipal().getName();
+    	if(userId.equals(authUserId)) {
+    		try {    			
+    			String fileToDownloadPath = ConvenienceHelper.readProperties("temp-dir") + authUserId +  "/" + path;
+    			log.debug("File to download: " + fileToDownloadPath);
+    			
+    			BufferedInputStream bis = new BufferedInputStream(new URL(fileToDownloadPath).openStream());
+    			FileOutputStream fos = new FileOutputStream(path);
+    			byte dataBuffer[] = new byte[1024];
+    			int bytesRead;
+    			while ((bytesRead = bis.read(dataBuffer, 0, 1024)) != -1) {
+    				fos.write(dataBuffer, 0, bytesRead);
+    			}
+    			
+    			log.debug("File " + fileToDownloadPath + " downloaded successfully");
+    			
+    			return Response.status(200).entity(new String("File downloaded")).build();
+    			    			
+    		} catch (FileNotFoundException e) {
+    			StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+				
+				String jsonStringError = new JSONObject()
+						.put("id", userId)
+						.put("code", "File not found exception")
+						.put("message", e.getMessage())
+						.put("links", "[]").toString();
+				
+    			return Response.status(404).entity(jsonStringError).build();
+    		} catch (IOException e) {
+    			StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+				
+				String jsonStringError = new JSONObject()
+						.put("id", userId)
+						.put("code", "Input/Output exception")
+						.put("message", e.getMessage())
+						.put("links", "[]").toString();
+				
+    			return Response.status(500).entity(jsonStringError).build();
+
+    		}
+    	} else {
+    		log.error(new String("The user " + authUserId + " is not authorized to access the path /files/" + userId));
+    		return Response.status(403).entity(new String("The user " + authUserId + " is not authorized to access the path /files/" + userId)).build();
+    	}    
+    	
     }
+    
     @Override
     public Response filesUserIdPathPut( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String userId, String path, File body, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-    	// mkdir css/my_shape_file/shape1.shp
     	String authUserId = securityContext.getUserPrincipal().getName();
     	if(userId.equals(authUserId)) {
 	    	File file;
@@ -153,8 +252,10 @@ public class FilesApiServiceImpl extends FilesApiService {
 			   	os.close();
 			   	is.close();
 			   	
+			   	String pathToShow = "files/" + authUserId;
+			   	
 			   	String jsonString = new JSONObject()
-		                  .put("path", (filePath + "/" + path))
+		                  .put("path", (pathToShow + "/" + path))
 		                  .put("size", body.length())
 		                  .put("modified", java.time.Clock.systemUTC().instant()).toString();
 

@@ -74,8 +74,13 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		JSONArray meMethods = new JSONArray();
 		meMethods.put(new String("GET"));
 		
-		JSONArray fileManagementMethods = new JSONArray();
-		fileManagementMethods.put(new String("PUT"));
+		JSONArray fileUserIdPathMethods = new JSONArray();
+		fileUserIdPathMethods.put(new String("GET"));
+		fileUserIdPathMethods.put(new String("PUT"));
+		fileUserIdPathMethods.put(new String("DELETE"));
+		
+		JSONArray fileUserIdMethods = new JSONArray();
+		fileUserIdMethods.put(new String("GET"));
 		
 		JSONObject defaultEndpoint = new JSONObject();
 		defaultEndpoint.put("path", "/");
@@ -137,9 +142,13 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		meEndpoint.put("path", "/me");
 		meEndpoint.put("methods", meMethods);
 		
-		JSONObject fileManagementEndpoint = new JSONObject();
-		fileManagementEndpoint.put("path", "/files/{user_id}/{path}");
-		fileManagementEndpoint.put("methods", fileManagementMethods);
+		JSONObject fileUserIdPathEndpoint = new JSONObject();
+		fileUserIdPathEndpoint.put("path", "/files/{user_id}/{path}");		
+		fileUserIdPathEndpoint.put("methods", fileUserIdPathMethods);
+		
+		JSONObject fileUserIdEndpoint = new JSONObject();
+		fileUserIdEndpoint.put("path", "/files/{user_id}");
+		fileUserIdEndpoint.put("methods", fileUserIdMethods);
 		
 		JSONArray endpointList = new JSONArray();
 		endpointList.put(defaultEndpoint);
@@ -157,7 +166,8 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		endpointList.put(jobsIdResultsEndpoint);
 		endpointList.put(processGraphsEndpoint);
 		endpointList.put(processGraphIdEndpoint);
-		endpointList.put(fileManagementEndpoint);
+		endpointList.put(fileUserIdEndpoint);
+		endpointList.put(fileUserIdPathEndpoint);		
 		
 		JSONObject plans = new JSONObject();
 		plans.put("name", "free");
