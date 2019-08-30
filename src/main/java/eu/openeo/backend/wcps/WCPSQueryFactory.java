@@ -691,9 +691,10 @@ public class WCPSQueryFactory {
 			
 		else if (processID.equals("ndvi")) {
 			log.debug("Found NDVI node: " + processNode.getString("process_id"));
-			    JSONObject processAggregate = processGraph.getJSONObject(processNodeKey);
-			    
-			    String collection = getFilterCollectionNode(processGraph, processNodeKey);
+			    JSONObject processAggregate = processGraph.getJSONObject(processNodeKey);			    
+			    String collectionNode = getFilterCollectionNode(processNodeKey);
+			    String collection = processGraph.getJSONObject(collectionNode).getJSONObject("arguments").getString("id");
+			    log.debug("Collection : " + collection);
 			    createNDVIAggregateFromProcess(processAggregate, collection);
 			    log.debug("Filters are: " + filters);
 		    }
@@ -768,25 +769,28 @@ public class WCPSQueryFactory {
 		
 	}
 	
-	private String getFilterCollectionNode(JSONObject processParent, String fromNode) {
+	private String getFilterCollectionNode(String fromNode) {
 		
 		String filterCollectionNodeKey = null;
 		
-		JSONObject loadCollectionNodeKey = processParent.getJSONObject(fromNode);
-		JSONObject loadCollectionNodeKeyArguments = loadCollectionNodeKey.getJSONObject("arguments");
+		
+		JSONObject loadCollectionNodeKeyArguments = processGraph.getJSONObject(fromNode).getJSONObject("arguments");
 		
 		for (String argumentsKey : loadCollectionNodeKeyArguments.keySet()) {
 		
 		  if (argumentsKey.contentEquals("id")) {
-			  filterCollectionNodeKey = fromNode;
-		  }
-		  if (argumentsKey.contentEquals("data")) {
-			  JSONObject filterDataNode = loadCollectionNodeKeyArguments.getJSONObject("data");
-			  String filterfromNode = filterDataNode.getString("from_node");
+			  filterCollectionNodeKey = fromNode;			  
 			  
-			  filterCollectionNodeKey = getFilterCollectionNode(processParent, filterfromNode);
 		  }
-		}
+		  else if (argumentsKey.contentEquals("data")) {
+			  
+			  String filterfromNode = loadCollectionNodeKeyArguments.getJSONObject("data").getString("from_node");
+			  
+			  filterCollectionNodeKey = getFilterCollectionNode(filterfromNode);
+		  }
+		}	
+		
+		log.debug("Collection Key : " + filterCollectionNodeKey);
 		return filterCollectionNodeKey;
 	}
 	
