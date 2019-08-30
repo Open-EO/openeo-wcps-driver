@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.validation.constraints.Pattern;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -50,14 +51,14 @@ public class FilesApiServiceImpl extends FilesApiService {
     			
     			log.debug("Number of files in the user folder " + userFolderPath + ": " + listFiles.length);
     			
-    			String pathToShow = "files/" + authUserId + "/";
+    			//String pathToShow = "files/" + authUserId + "/";
     			JSONObject[] jsonFileList = new JSONObject[listFiles.length];    					
     			
     			for (int i=0; i < listFiles.length; i++) {
     				File currentFile = listFiles[i];   				
     			    				
     				JSONObject currentFileJson = new JSONObject()
-    						.put("path", pathToShow + currentFile.getName())
+    						.put("path", currentFile.getName())
     						.put("size", currentFile.length())
     						.put("modified", currentFile.lastModified());
     						
@@ -109,9 +110,7 @@ public class FilesApiServiceImpl extends FilesApiService {
     }
     @Override
     public Response filesUserIdPathDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String userId, String path, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-    	// rm
-    	
+
     	String authUserId = securityContext.getUserPrincipal().getName();
     	if(userId.equals(authUserId)) {
     		try {    			
@@ -168,18 +167,22 @@ public class FilesApiServiceImpl extends FilesApiService {
     			String fileToDownloadPath = ConvenienceHelper.readProperties("temp-dir") + authUserId +  "/" + path;
     			log.debug("File to download: " + fileToDownloadPath);
     			
-    			BufferedInputStream bis = new BufferedInputStream(new URL(fileToDownloadPath).openStream());
-    			FileOutputStream fos = new FileOutputStream(path);
-    			byte dataBuffer[] = new byte[1024];
-    			int bytesRead;
-    			while ((bytesRead = bis.read(dataBuffer, 0, 1024)) != -1) {
-    				fos.write(dataBuffer, 0, bytesRead);
-    			}
+    			File file = new File(fileToDownloadPath);
+				byte[] bytesArray = new byte[(int) file.length()]; 
+	
+				FileInputStream fis = new FileInputStream(file);
+				fis.read(bytesArray);
+				fis.close();
     			
     			log.debug("File " + fileToDownloadPath + " downloaded successfully");
     			
-    			return Response.status(200).entity(new String("File downloaded")).build();
-    			    			
+    			MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
+    		    String mimeType = fileTypeMap.getContentType(file.getName());
+    		    
+    		    log.debug("The file " + fileToDownloadPath + "is of type " + mimeType);
+    			
+    			return Response.ok(bytesArray, mimeType).build();
+    			    			    			
     		} catch (FileNotFoundException e) {
     			StringBuilder builder = new StringBuilder();
 				for (StackTraceElement element : e.getStackTrace()) {
