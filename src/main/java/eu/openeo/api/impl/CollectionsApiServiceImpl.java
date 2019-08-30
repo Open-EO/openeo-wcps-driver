@@ -72,22 +72,20 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			}
 			
 			log.debug("root node info: " + rootNode.getName());		
-			List<Element> bandList = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
-			
-			
+					
 			Element coverageDescElement = rootNode.getChild("CoverageDescription", defaultNS);
 			Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
 			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
-			Element metadataElement = rootNode.getChild("CoverageDescription", defaultNS).getChild("metadata", gmlNS).getChild("Extension", gmlNS);
-			JSONObject metadataObj = new JSONObject();
-			if(metadataElement != null) {
-				String metadataString1 = metadataElement.getChildText("covMetadata", gmlNS);
-				//metadataObj = new JSONObject(metadataString1);
-				//String metadataString2 = metadataString1.replaceAll("\\n","");
-				//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
-				//metadataObj = new JSONObject(metadataString3);
-				//JSONArray slices = metadataObj.getJSONArray("slices");
-			}
+			Element metadataElement = rootNode.getChild("CoverageDescription", defaultNS).getChild("metadata", gmlNS).getChild("Extension", gmlNS).getChild("covMetadata", gmlNS);
+			
+			List<Element> bandsList = metadataElement.getChild("bands", gmlNS).getChildren();
+			//List<Element> bandsListSwe = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
+			
+			//metadataObj = new JSONObject(metadataString1);
+			//String metadataString2 = metadataString1.replaceAll("\\n","");
+			//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
+			//metadataObj = new JSONObject(metadataString3);
+			//JSONArray slices = metadataObj.getJSONArray("slices");
 			
 			
 			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
@@ -218,34 +216,31 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			JSONObject properties = new JSONObject();
 			
 			JSONArray bandArray = new JSONArray();
-			log.debug("number of bands found: " + bandList.size());
+			log.debug("number of bands found: " + bandsList.size());
 			
 			dimObjects[3] = new JSONObject();
 			dimObjects[3].put("type", "bands");
 			dimObjects[3].put("axis", "spectral");
 			JSONArray bandValues = new JSONArray();
 			
-			for(int c = 0; c < bandList.size(); c++) {
-				Element band = bandList.get(c);
-				Double bandWave = null;
+			for(int c = 0; c < bandsList.size(); c++) {
+				Element band = bandsList.get(c);
+				JSONObject product = new JSONObject();
+				String bandId = band.getName();				
+				String bandWave = null;
 				try {
-					bandWave = Double.parseDouble(band.getChild("Quantity", sweNS).getChildText("description", sweNS).split(" ")[3])/1000d;
+					bandWave = band.getChildText("center_wavelength");
 				}catch(Exception e) {
 					log.error("Error in parsing band wave-lenght:" + e.getMessage());
-				}
-				
-				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
-				JSONObject product = new JSONObject();
-				String bandId = band.getAttributeValue("name");
-				
-				product.put("common_name", bandId);
-				
+				}			
+										
 				product.put("name", bandId);
-				bandValues.put(bandId);
+				product.put("common_name", band.getChildText("common_name"));				
 				product.put("center_wavelength", bandWave);
+				bandValues.put(bandId);
 				try {
 					//TODO read this from meta data and not from collection name
-					product.put("gsd", Double.parseDouble(collectionId.split("_")[3].substring(0, collectionId.split("_")[3].length()-1)));
+					product.put("gsd", band.getChildText("gsd"));
 				}catch(Exception e) {
 					log.error("Error in parsing band wave-lenght:" + e.getMessage());
 				}

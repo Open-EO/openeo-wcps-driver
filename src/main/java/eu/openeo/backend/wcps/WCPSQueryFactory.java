@@ -692,10 +692,12 @@ public class WCPSQueryFactory {
 		else if (processID.equals("ndvi")) {
 			log.debug("Found NDVI node: " + processNode.getString("process_id"));
 			    JSONObject processAggregate = processGraph.getJSONObject(processNodeKey);
-			    createNDVIAggregateFromProcess(processAggregate);
+			    
+			    String collection = getFilterCollectionNode(processGraph, processNodeKey);
+			    createNDVIAggregateFromProcess(processAggregate, collection);
 			    log.debug("Filters are: " + filters);
 		    }
-					
+		
 		
    // else if (processID.equals("filter_temporal")) {
 		
@@ -1070,25 +1072,25 @@ public class WCPSQueryFactory {
 	 * @param process
 	 */
 	
-	private void createAggregateFromProcess(JSONObject process) {
-		boolean isTemporalAggregate = false;
-		boolean isNDVIAggregate = false;
-		String processName = null;
-		for (Object key : process.keySet()) {
-			String keyStr = (String) key;
-			if (keyStr.equals("process_id")) {
-				processName = (String) process.get(keyStr);
-				log.debug("currently working on: " + processName);
-				if (processName.contains("temporal") || processName.contains("time")) {
-					isTemporalAggregate = true;
-					createTemporalAggregate(processName);
-				} else if (processName.contains("ndvi")) {
-					isNDVIAggregate = true;
-					createNDVIAggregateFromProcess(process);
-				}
-			}
-		}
-	}
+//	private void createAggregateFromProcess(JSONObject process) {
+//		boolean isTemporalAggregate = false;
+//		boolean isNDVIAggregate = false;
+//		String processName = null;
+//		for (Object key : process.keySet()) {
+//			String keyStr = (String) key;
+//			if (keyStr.equals("process_id")) {
+//				processName = (String) process.get(keyStr);
+//				log.debug("currently working on: " + processName);
+//				if (processName.contains("temporal") || processName.contains("time")) {
+//					isTemporalAggregate = true;
+//					createTemporalAggregate(processName);
+//				} else if (processName.contains("ndvi")) {
+//					isNDVIAggregate = true;
+//					createNDVIAggregateFromProcess(process);
+//				}
+//			}
+//		}
+//	}
 
 	private void createTemporalAggregate(String processName) {
 		String aggregateType = processName.split("_")[0];
@@ -1103,17 +1105,42 @@ public class WCPSQueryFactory {
 		aggregates.add(new Aggregate(new String("DATE"), aggregateType, params));
 	}
 
-	private void createNDVIAggregateFromProcess(JSONObject argsObject) {
-		String red = "red";
-		String nir = "nir";
-//		for (String argsKeyStr : argsObject.keySet()) {
-//			
-//			if (argsKeyStr.equals("red")) {
-//				red = "" + argsObject.getString(argsKeyStr);
-//			} else if (argsKeyStr.equals("nir")) {
-//				nir = "" + argsObject.getString(argsKeyStr);
-//			}
-//		}
+	private void createNDVIAggregateFromProcess(JSONObject argsObject, String collection) {
+		String red = null;
+		String nir = null;
+		
+		JSONObject collectionSTACMetdata = null;
+		try {
+			collectionSTACMetdata = readJsonFromUrl(
+					ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collection);
+		} catch (JSONException e) {
+			log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
+		} catch (IOException e) {
+			log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
+		}
+
+		JSONArray bandsArray = ((JSONObject) collectionSTACMetdata.get("properties")).getJSONArray("eo:bands");
+		
+		for(int c = 0; c < bandsArray.length(); c++) {
+			String bandCommon = bandsArray.getJSONObject(c).getString("common_name");
+			if (bandCommon.equals("red")) {
+				red = bandsArray.getJSONObject(c).getString("name");
+			}
+			else if (bandCommon.equals("nir")) {
+				nir = bandsArray.getJSONObject(c).getString("name");
+			}
+		}
+		
 		Vector<String> params = new Vector<String>();
 		params.add(red);
 		params.add(nir);
