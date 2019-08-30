@@ -35,35 +35,74 @@ public class FilesApiServiceImpl extends FilesApiService {
 	
     @Override
     public Response filesUserIdGet( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String userId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-    	// ll
-    	
-//    	log.debug("Path from URL " + path);
-//		
-//		String filePath = ConvenienceHelper.readProperties("temp-dir") + authUserId +"/files_uploaded";
+
+    	String authUserId = securityContext.getUserPrincipal().getName();
+    	if(userId.equals(authUserId)) {
+    		try {    			
+    			String userFolderPath = ConvenienceHelper.readProperties("temp-dir") + authUserId;
+    			log.debug("Current user folder path: " + userFolderPath);
+    			
+    			File userFolder = new File(userFolderPath);
+    			
+    			File[] listFiles = userFolder.listFiles();
+    			
+    			log.debug("Number of files in the user folder " + userFolderPath + ": " + listFiles.length);
+    			
+    			JSONObject[] jsonFileList = new JSONObject[listFiles.length];    					
+    			
+    			for (int i=0; i < listFiles.length; i++) {
+    				File currentFile = listFiles[i];
+    			    				
+    				JSONObject currentFileJson = new JSONObject()
+    						.put("path", currentFile.getAbsolutePath())
+    						.put("size", currentFile.length())
+    						.put("modified", currentFile.lastModified());
+    						
+    				jsonFileList[i] = currentFileJson;
+    				
+    			}
+    			
+    			String jsonString = new JSONObject()
+		                  .put("files", jsonFileList)
+		                  .put("links", "[]").toString();
+    			
+    			log.debug("Files' list of the folder " + jsonString);
+    			return Response.status(201).entity(jsonString).build();
+    		} catch (FileNotFoundException e) {
+    			StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+				
+				String jsonStringError = new JSONObject()
+						.put("id", userId)
+						.put("code", "File not found exception")
+						.put("message", e.getMessage())
+						.put("links", "[]").toString();
+				
+    			return Response.status(404).entity(jsonStringError).build();
+    		} catch (IOException e) {
+    			StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+				
+				String jsonStringError = new JSONObject()
+						.put("id", userId)
+						.put("code", "Input/Output exception")
+						.put("message", e.getMessage())
+						.put("links", "[]").toString();
+				
+    			return Response.status(500).entity(jsonStringError).build();
+
+    		}
+    	} else {
+    		log.error(new String("The user " + authUserId + " is not authorized to access the path /files/" + userId));
+    		return Response.status(403).entity(new String("The user " + authUserId + " is not authorized to access the path /files/" + userId)).build();
+    	}
 		
-//		{
-//			  "files": [
-//			    {
-//			      "path": "test.txt",
-//			      "size": 182,
-//			      "modified": "2015-10-20T17:22:10Z"
-//			    },
-//			    {
-//			      "path": "test.tif",
-//			      "size": 183142,
-//			      "modified": "2017-01-01T09:36:18Z"
-//			    },
-//			    {
-//			      "path": "Sentinel2/S2A_MSIL1C_20170819T082011_N0205_R121_T34KGD_20170819T084427.zip",
-//			      "size": 4183353142,
-//			      "modified": "2018-01-03T10:55:29Z"
-//			    }
-//			  ],
-//			  "links": []
-//			}
-    	
-        return Response.status(501).entity(new String("This API feature is not supported by the back-end.")).build();
     }
     @Override
     public Response filesUserIdPathDelete( @Pattern(regexp="^[A-Za-z0-9_\\-\\.~]+$")String userId, String path, SecurityContext securityContext) throws NotFoundException {
