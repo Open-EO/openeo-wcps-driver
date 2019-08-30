@@ -88,10 +88,18 @@ public class FilesApiServiceImpl extends FilesApiService {
 				
 				log.debug("Path from URL " + path);
 				
-				String filePath = ConvenienceHelper.readProperties("temp-dir") + authUserId +"/files_uploaded";
+				String filePath = ConvenienceHelper.readProperties("temp-dir") + authUserId;
 				log.debug("Path associated to the user " + authUserId + ": " + filePath);
 				file = new File(filePath);
-				file.mkdir();
+				boolean pathCreated = file.exists();
+				if(!pathCreated) {
+					pathCreated= file.mkdir();
+				}
+				if(pathCreated) {
+					log.debug("The following path was successfully created: " + file.getAbsolutePath());
+				}else {
+					return Response.serverError().entity("The requested resource path could not be created: /files/" + authUserId + "/" + path).build();
+				}
 				
 				log.debug("File to write " + filePath + "/" + path);
 			    InputStream is = new FileInputStream(body);
