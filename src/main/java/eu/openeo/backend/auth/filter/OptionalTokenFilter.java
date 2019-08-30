@@ -14,7 +14,6 @@ import java.util.Base64;
 import java.util.Iterator;
 
 import javax.annotation.Priority;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -46,8 +45,8 @@ import io.jsonwebtoken.security.SignatureException;
 
 @Provider
 @Priority(Priorities.AUTHENTICATION)
-@RequireToken
-public class RequireTokenFilter implements ContainerRequestFilter {
+@OptionalToken
+public class OptionalTokenFilter implements ContainerRequestFilter {
 	
 	Logger log = Logger.getLogger(this.getClass());
 
@@ -56,14 +55,14 @@ public class RequireTokenFilter implements ContainerRequestFilter {
 
 		String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
 		if (authHeader == null ) {
-			log.error("Authorization header is not present but is required!");
-			throw new NotAuthorizedException("Authorization header must be provided");
+			log.debug("Authorization header not present. Workflow continues without authorization.");
+			return;
 		}
 		if (!authHeader.startsWith("Bearer ")) {
 			log.error("Authorization header is not valid: " + authHeader);
-			throw new NotAuthorizedException("Authorization header is invalid");
+			return;
 		}
-		log.info("The following authorization header has been received: " + authHeader);		
+		log.info("The following authorization header has been received: " + authHeader);
 		
 		String token = authHeader.substring("Bearer".length()).trim();
 		
