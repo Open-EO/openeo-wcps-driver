@@ -223,7 +223,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				String bandId = band.getName();				
 				String bandWave = null;
 				try {
-					bandWave = band.getChildText("center_wavelength");
+					bandWave = band.getChildText("WAVELENGTH");
 				}catch(Exception e) {
 					log.error("Error in parsing band wave-lenght:" + e.getMessage());
 				}				
@@ -252,7 +252,12 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			
 			JSONArray platform_values = new JSONArray();
 			JSONObject pltfrmvalues = new JSONObject();
+			platform_values.put("Sentinel-2A");
+			platform_values.put("Sentinel-2B");
 			pltfrmvalues.put("values", platform_values);
+			
+			String title = metadataElement.getChildText("Project", gmlNS);
+			String description = metadataElement.getChildText("Title", gmlNS);
 			
 			JSONArray cloud_cover = new JSONArray();
 			JSONObject cloud_cover_extent = new JSONObject();			
@@ -323,8 +328,8 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			
 			coverage.put("stac_version", "0.6.2");
 			coverage.put("id", collectionId);
-			coverage.put("title", collectionId);
-			coverage.put("description", collectionId);
+			coverage.put("title", title);
+			coverage.put("description", description);
 			coverage.put("license", "CC-BY-4.0");
 			coverage.put("keywords", keywords);
 			coverage.put("providers", provider1);
