@@ -269,7 +269,17 @@ public class WCPSQueryFactory {
 		}
 	}
 	
-	//TODO extend this to the full functionality of the openEO process
+	private String createReturnResultWCPSString(String returnResultNodeKey, String payload) {
+		String outputFormat = processGraph.getJSONObject(returnResultNodeKey).getJSONObject("arguments").getString("format");
+		StringBuilder resultBuilder = new StringBuilder("return encode(");
+		
+		resultBuilder.append(payload);
+		
+		resultBuilder.append(", " + outputFormat + " )");
+		return resultBuilder.toString();
+	}	
+	
+	//TODO extend this to the full functionality of the openEO process	
 	private String createResampleWCPSString(String resampleNodeKey) {
 		String projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getString("projection");
 
@@ -290,6 +300,23 @@ public class WCPSQueryFactory {
 		log.debug("resample wcps query: " + resampleBuilder.toString());
 		return resampleBuilder.toString();
 	}
+	
+	//TODO extend this to the full functionality of the openEO process	
+		private String createResampleWCPSString(String resampleNodeKey, String payload) {
+			String projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getString("projection");
+			StringBuilder resampleBuilder = new StringBuilder("crsTransform(" );
+			
+			//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
+			resampleBuilder.append(payload);
+			
+			resampleBuilder.append(" ,{"
+					+ "E:\"http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\","
+					+ "N:\"http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\""
+					+ "}, {})");
+			log.debug("current payload: " + payload);
+			log.debug("resample wcps query: " + resampleBuilder.toString());
+			return resampleBuilder.toString();
+		}
 	
     private String createApplyWCPSString(String applyNodeKey) {
 		String applyBuilderExtend = null;
