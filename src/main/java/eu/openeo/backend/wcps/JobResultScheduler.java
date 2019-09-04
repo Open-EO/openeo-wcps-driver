@@ -45,9 +45,6 @@ public class JobResultScheduler extends GenericServlet {
 			TimeUnit unit = TimeUnit.MINUTES;
 			long period = Integer.parseInt(ConvenienceHelper.readProperties("servlet-remove-file-expiry"));
 			
-			//Test schedul time		
-			//TimeUnit unit = TimeUnit.SECONDS;
-			//long period = 30; // Put here the value in the properties file
 			
 			log.debug("Run the scheduled servlet to delete outdated files...");
 			scheduler.scheduleAtFixedRate(command, 0, period, unit);
