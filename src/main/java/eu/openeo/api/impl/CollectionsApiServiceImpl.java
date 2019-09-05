@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.validation.constraints.Pattern;
@@ -72,23 +73,20 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			}
 			
 			log.debug("root node info: " + rootNode.getName());		
-			List<Element> bandList = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
-			
-			
+					
 			Element coverageDescElement = rootNode.getChild("CoverageDescription", defaultNS);
 			Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
 			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
-			Element metadataElement = rootNode.getChild("CoverageDescription", defaultNS).getChild("metadata", gmlNS).getChild("Extension", gmlNS);
-			JSONObject metadataObj = new JSONObject();
-			if(metadataElement != null) {
-				String metadataString1 = metadataElement.getChildText("covMetadata", gmlNS);
-				//metadataObj = new JSONObject(metadataString1);
-				//String metadataString2 = metadataString1.replaceAll("\\n","");
-				//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
-				//metadataObj = new JSONObject(metadataString3);
-				//JSONArray slices = metadataObj.getJSONArray("slices");
-			}
+			Element metadataElement = rootNode.getChild("CoverageDescription", defaultNS).getChild("metadata", gmlNS).getChild("Extension", gmlNS).getChild("covMetadata", gmlNS);
 			
+			List<Element> bandsList = metadataElement.getChild("bands", gmlNS).getChildren();
+			//List<Element> bandsListSwe = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
+			
+			//metadataObj = new JSONObject(metadataString1);
+			//String metadataString2 = metadataString1.replaceAll("\\n","");
+			//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
+			//metadataObj = new JSONObject(metadataString3);
+			//JSONArray slices = metadataObj.getJSONArray("slices");			
 			
 			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
 			try {
@@ -97,27 +95,21 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				
 			}catch(StringIndexOutOfBoundsException e) {
 				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
-				srsDescription = srsDescription.replaceAll("EPSG:","");
-							
-			}
+				srsDescription = srsDescription.replaceAll("EPSG:","");							
+			}			
 			
-			
-            JSONObject extentCollection = new JSONObject();
-			
+            JSONObject extentCollection = new JSONObject();			
 			JSONArray spatialExtent = new JSONArray();
-			JSONArray temporalExtent =  new JSONArray();
-			
+			JSONArray temporalExtent =  new JSONArray();			
 			
 			SpatialReference src = new SpatialReference();
 			src.ImportFromEPSG(Integer.parseInt(srsDescription));
 
 			SpatialReference dst = new SpatialReference();
-			dst.ImportFromEPSG(4326);
-			
+			dst.ImportFromEPSG(4326);			
 			
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
-			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
-			
+			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");			
 			
 			CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 		    
@@ -212,44 +204,42 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			provider1Info.put("name", "Eurac Research - Institute for Earth Observation");
 			provider1Info.put("roles", roles1);
 			provider1Info.put("url", "http://www.eurac.edu");
-			provider1.put(provider1Info);
-			
+			provider1.put(provider1Info);			
 			
 			JSONObject properties = new JSONObject();
+			JSONObject other_properties = new JSONObject();
 			
 			JSONArray bandArray = new JSONArray();
-			log.debug("number of bands found: " + bandList.size());
+			log.debug("number of bands found: " + bandsList.size());
 			
 			dimObjects[3] = new JSONObject();
 			dimObjects[3].put("type", "bands");
 			dimObjects[3].put("axis", "spectral");
 			JSONArray bandValues = new JSONArray();
 			
-			for(int c = 0; c < bandList.size(); c++) {
-				Element band = bandList.get(c);
-				Double bandWave = null;
-				try {
-					bandWave = Double.parseDouble(band.getChild("Quantity", sweNS).getChildText("description", sweNS).split(" ")[3])/1000d;
-				}catch(Exception e) {
-					log.error("Error in parsing band wave-lenght:" + e.getMessage());
-				}
-				
-				log.debug("band info: " + band.getName() + ":" + band.getAttributeValue("name"));		
+			for(int c = 0; c < bandsList.size(); c++) {
+				Element band = bandsList.get(c);
 				JSONObject product = new JSONObject();
-				String bandId = band.getAttributeValue("name");
-				
-				product.put("common_name", bandId);
-				
-				product.put("name", bandId);
-				bandValues.put(bandId);
-				product.put("center_wavelength", bandWave);
+				String bandId = band.getName();				
+				String bandWave = null;
 				try {
-					//TODO read this from meta data and not from collection name
-					product.put("gsd", Double.parseDouble(collectionId.split("_")[3].substring(0, collectionId.split("_")[3].length()-1)));
+					bandWave = band.getChildText("WAVELENGTH");
 				}catch(Exception e) {
 					log.error("Error in parsing band wave-lenght:" + e.getMessage());
-				}
-				
+				}				
+				try {				
+					product.put("common_name", band.getChildText("common_name"));
+				}catch(Exception e) {
+					log.error("Error in parsing band wave-lenght:" + e.getMessage());
+				}				
+				product.put("name", bandId);							
+				product.put("center_wavelength", bandWave);				
+				bandValues.put(bandId);
+				try {				
+					product.put("gsd", band.getChildText("gsd"));
+				}catch(Exception e) {
+					log.error("Error in parsing band wave-lenght:" + e.getMessage());
+				}				
 				bandArray.put(product);
 			}
 			
@@ -262,37 +252,84 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			
 			JSONArray platform_values = new JSONArray();
 			JSONObject pltfrmvalues = new JSONObject();
+			platform_values.put("Sentinel-2A");
+			platform_values.put("Sentinel-2B");
 			pltfrmvalues.put("values", platform_values);
 			
+			String title = metadataElement.getChildText("Project", gmlNS);
+			String description = metadataElement.getChildText("Title", gmlNS);
+			
 			JSONArray cloud_cover = new JSONArray();
-			JSONObject cloud_cover_extent = new JSONObject();
-			cloud_cover_extent.put("extent", cloud_cover);
+			JSONObject cloud_cover_extent = new JSONObject();			
 			
 			JSONObject cube_dimensions = new JSONObject();
 			for(JSONObject dim: dimObjects) {
 				cube_dimensions.put(dim.getString("axis"), dim);
 			}			
 			
+			List<Element> slices = metadataElement.getChild("slices", gmlNS).getChildren();			
+			
+			Element props = slices.get(0);
+
+			try {
+				properties.put("sci:citation", props.getChildText("CITATION"));
+			}catch(Exception e) {
+				log.error("Error in parsing Constellation:" + e.getMessage());
+			}
+
+			try {
+				properties.put("eo:constellation", props.getChildText("CONSTELLATON"));
+			}catch(Exception e) {
+				log.error("Error in parsing Constellation:" + e.getMessage());
+			}				
+
+			try {				
+				properties.put("eo:instrument", props.getChildText("INSTRUMENT"));
+			}catch(Exception e) {
+				log.error("Error in parsing Instrument:" + e.getMessage());
+			}
+
+			JSONArray cloudCovArray = new JSONArray();
+			
+			for(int c = 0; c < slices.size(); c++) {				
+				try {					
+					double cloudCov = Double.parseDouble(slices.get(c).getChildText("CLOUD_COVERAGE_ASSESSMENT"));
+					cloudCovArray.put(cloudCov);					
+				}catch(Exception e) {
+					log.error("Error in parsing Cloud Coverage:" + e.getMessage());
+				}				
+			}
+			
+			double maxCCValue = cloudCovArray.getDouble(0);
+			double minCCValue = cloudCovArray.getDouble(0);	
+			
+			for(int i=1;i < cloudCovArray.length();i++){
+				if(cloudCovArray.getDouble(i) > maxCCValue){
+					maxCCValue = cloudCovArray.getDouble(i); 
+				}
+				if(cloudCovArray.getDouble(i) < minCCValue){
+					minCCValue = cloudCovArray.getDouble(i);
+				}					      
+			}
+			
+			cloud_cover.put(minCCValue);
+			cloud_cover.put(maxCCValue);
+			cloud_cover_extent.put("extent", cloud_cover);
+			other_properties.put("eo:cloud_cover", cloud_cover_extent);
+			
 			properties.put("cube:dimensions", cube_dimensions);
-			properties.put("eo:epsg", Double.parseDouble(srsDescription));
-			properties.put("sci:citation", "Copernicus Sentinel data 2019");
-			properties.put("eo:constellation", "Sentinel-2");
-			properties.put("eo:instrument", "MSI");
+			properties.put("eo:epsg", Double.parseDouble(srsDescription));			
 			properties.put("eo:bands", bandArray);
 			
-			//other_properties.put("eo:platform", pltfrmvalues);
-			//other_properties.put("eo:epsg", epsgvalues);
-			//other_properties.put("eo:cloud_cover", cloud_cover_extent);
-			
-			//String title = metadataObj.getString("Title");
+			other_properties.put("eo:platform", pltfrmvalues);
+			other_properties.put("eo:epsg", epsgvalues);			
 								
 			JSONObject coverage = new JSONObject();
 			
-			//coverage.put("extraMetadata", metadataObj);
 			coverage.put("stac_version", "0.6.2");
 			coverage.put("id", collectionId);
-			coverage.put("title", collectionId);
-			coverage.put("description", collectionId);
+			coverage.put("title", title);
+			coverage.put("description", description);
 			coverage.put("license", "CC-BY-4.0");
 			coverage.put("keywords", keywords);
 			coverage.put("providers", provider1);
@@ -301,8 +338,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			extentCollection.put("temporal", temporalExtent);
 			coverage.put("extent", extentCollection);
 			coverage.put("properties", properties);
-			//coverage.put("other_properties", other_properties);
-			
+			coverage.put("other_properties", other_properties);			
 
 			return Response.ok(coverage.toString(4), MediaType.APPLICATION_JSON).build();
 		} catch (MalformedURLException e) {
@@ -357,22 +393,20 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			JSONObject data = new JSONObject ();
 			JSONArray linksCollections = new JSONArray();
 				
-				JSONObject linkDesc = new JSONObject();
-				linkDesc.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/collections");
-				linkDesc.put("rel", "self");
-				
-				JSONObject linkCsw = new JSONObject();
-				linkCsw.put("href", ConvenienceHelper.readProperties("wcps-endpoint"));
-				linkCsw.put("rel", "alternate");
-				linkCsw.put("title", "openEO catalog (OGC Catalogue Services 3.0)");
-				
-				linksCollections.put(linkDesc);
-				linksCollections.put(linkCsw);
-			
+			JSONObject linkDesc = new JSONObject();
+			linkDesc.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/collections");
+			linkDesc.put("rel", "self");
+
+			JSONObject linkCsw = new JSONObject();
+			linkCsw.put("href", ConvenienceHelper.readProperties("wcps-endpoint"));
+			linkCsw.put("rel", "alternate");
+			linkCsw.put("title", "openEO catalog (OGC Catalogue Services 3.0)");
+
+			linksCollections.put(linkDesc);
+			linksCollections.put(linkCsw);			
 								
 			JSONArray productArray = new JSONArray();
-			log.debug("number of coverages found: " + coverageList.size());
-			
+			log.debug("number of coverages found: " + coverageList.size());			
 						
 			for(int c = 0; c < coverageList.size(); c++) {
 				Element coverage = coverageList.get(c);
@@ -415,8 +449,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
 				Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
 				Element metadataElement = rootNodeCollections.getChild("CoverageDescription", defaultNSCollections).getChild("metadata", gmlNS).getChild("Extension", gmlNS);
-				
-				
+								
 					//metadataObj = new JSONObject(metadataString1);
 					//String metadataString2 = metadataString1.replaceAll("\\n","");
 					//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
