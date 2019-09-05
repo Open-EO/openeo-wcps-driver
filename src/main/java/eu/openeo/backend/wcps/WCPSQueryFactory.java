@@ -341,7 +341,15 @@ public class WCPSQueryFactory {
 	
 	//TODO extend this to the full functionality of the openEO process
 	private String createResampleWCPSString(String resampleNodeKey, String payload) {
-		int projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getInt("projection");
+		int projectionEPSGCode = 0;
+		try {
+			projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getInt("projection");
+		}catch(JSONException e) {
+			log.error("no epsg code was detected!");
+		}
+		if(projectionEPSGCode == 0) {
+			return "";
+		}
 		StringBuilder resampleBuilder = new StringBuilder("crsTransform(" );
 
 		//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
