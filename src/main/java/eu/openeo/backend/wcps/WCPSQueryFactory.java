@@ -200,9 +200,12 @@ public class WCPSQueryFactory {
 		nodesArray = sortNodes(saveNode, nodesArray);
 		
 		StringBuilder wcpsPayLoad = new StringBuilder("");
-		wcpsPayLoad.append(createFilteredCollectionString("$c1"));		
+		String collName = "$c1";
+		wcpsPayLoad.append(createFilteredCollectionString(collName));
+		log.debug("Initial PayLoad WCPS is: " + wcpsPayLoad);
 		wcpsStringBuilder.append(wcpsPayLoad.toString());
 		
+		boolean containsFilterBandProcess = false;
 		boolean containsNDVIProcess = false;
 		boolean containsTempAggProcess = false;
 		boolean containsLinearScale = false;
@@ -219,29 +222,42 @@ public class WCPSQueryFactory {
 			log.debug("Building WCPS Query for : " + nodesArray.getString(i));
 			log.debug("currently working on: " + currentProcessID);
 			
+			if (currentProcessID.equals("filter_bands")) {
+				containsFilterBandProcess = true;
+				StringBuilder wcpsFilterPayloadpayLoad = new StringBuilder("");
+				StringBuilder wcpsStringBuilderFilterPayload = basicWCPSStringBuilder();
+				String filterString = wcpsPayLoad.toString();
+				filterString = filterString.substring(collName.length());
+				JSONArray currentProcessBands = currentProcessArguments.getJSONArray("bands");
+				String bandName = currentProcessBands.getString(0);
+				wcpsFilterPayloadpayLoad.append(createBandSubsetString(collName, bandName, filterString));
+				wcpsPayLoad=wcpsFilterPayloadpayLoad;
+				wcpsStringBuilder=wcpsStringBuilderFilterPayload.append(wcpsFilterPayloadpayLoad.toString());
+			}
+			
 			if (currentProcessID.equals("ndvi")) {
 				containsNDVIProcess = true;
 				StringBuilder wcpsNDVIpayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderNDVI = basicWCPSStringBuilder();
 				for (int a = 0; a < aggregates.size(); a++) {
 					if (aggregates.get(a).getOperator().equals("NDVI")) {
-						wcpsNDVIpayLoad.append(createNDVIWCPSString(wcpsPayLoad.toString(), "$c1", aggregates.get(a)));
+						wcpsNDVIpayLoad.append(createNDVIWCPSString(wcpsPayLoad.toString(), collName, aggregates.get(a)));
 						wcpsPayLoad=wcpsNDVIpayLoad;
 						wcpsStringBuilder=wcpsStringBuilderNDVI.append(wcpsNDVIpayLoad.toString());
 						log.debug("Aggregate NDVI " + aggregates.get(a).getOperator());
 						log.debug("NDVI WCPS added " + wcpsStringBuilderNDVI);
 					}
 				}
-			}			
+			}
 			if (currentProcessID.contains("_time")) {
 				containsTempAggProcess = true;
 				StringBuilder wcpsTempAggpayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderTempAgg = basicWCPSStringBuilder();
 				for (int a = 0; a < aggregates.size(); a++) {
 					if (aggregates.get(a).getAxis().equals("DATE")) {
-						wcpsTempAggpayLoad.append(createTempAggWCPSString("$c1", aggregates.get(a)));
-						//String replaceDate = Pattern.compile("[DATE\\(.*?\\)]").matcher(wcpsAggBuilder).replaceAll("\\$pm");
-						String replaceDate = wcpsPayLoad.toString().replaceAll("DATE\\(.*?\\)", "DATE\\(\\$pm\\)");
+						wcpsTempAggpayLoad.append(createTempAggWCPSString(collName, aggregates.get(a)));
+						String replaceDate = Pattern.compile("DATE\\(.*?\\)").matcher(wcpsPayLoad).replaceAll("DATE\\(\\$pm\\)");
+						//String replaceDate = wcpsPayLoad.toString().replaceAll("DATE\\(.*?\\)", "DATE\\(\\$pm\\)");
 						StringBuilder wcpsAggBuilderMod = new StringBuilder("");
 						wcpsAggBuilderMod.append(replaceDate);
 						wcpsTempAggpayLoad.append(wcpsAggBuilderMod);
@@ -382,14 +398,12 @@ public class WCPSQueryFactory {
     }
     
     private String createLinearScaleCubeWCPSString(String linearScaleNodeKey, String payLoad) {		
-		String name = processGraph.getJSONObject(linearScaleNodeKey).getString("process_id");
 		JSONObject scaleArgumets = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments");
-		log.debug("currently working on: " + name);
+		
 		double inputMin = 0;
 		double inputMax = 0;
 		double outputMin = 0;
 		double outputMax = 1;
-
 		inputMin = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMin");
 		inputMax = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMax");
 		
@@ -441,7 +455,6 @@ public class WCPSQueryFactory {
 				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
 				}
-
 				stringBuilder.append(high);
 				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
