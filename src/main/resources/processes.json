@@ -121,13 +121,13 @@
 		],
 		"parameters": {
 			"data": {
-				"description": "A raster data cube",
-				"schema": {
-					"type": "object",
-					"format": "raster-cube"
-				},
-				"required": true
-			},
+                 "description": "A data cube with bands.",
+                 "schema": {
+                        "type": "object",
+                        "format": "raster-cube"
+                 },
+                 "required": true
+            },
 			"inputMin": {
 				"description": "Minimum value the input can obtain.",
 				"schema": {
@@ -174,18 +174,18 @@
 		],
 		"parameter_order": [
 			"data",			
-			"outputMin",
-			"outputMax"
+			"min",
+			"max"
 		],
 		"parameters": {
 			"data": {
-				"description": "A raster data cube",
-				"schema": {
-					"type": "object",
-					"format": "raster-cube"
-				},
-				"required": true
-			},			
+                 "description": "A data cube with bands.",
+                 "schema": {
+                        "type": "object",
+                        "format": "raster-cube"
+                 },
+                 "required": true
+            },
 			"min": {
 				"description": "Minimum value of the desired output range.",
 				"schema": {
