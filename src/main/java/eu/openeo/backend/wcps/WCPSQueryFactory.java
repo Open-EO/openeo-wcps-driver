@@ -67,118 +67,6 @@ public class WCPSQueryFactory {
 	basicWCPS.append(") return encode ( ");	
 	return basicWCPS;
 	}
-
-	private void build2(JSONObject openEOGraph) {
-		log.debug(openEOGraph.toString());
-		parseOpenEOProcessGraph();
-		for (int c = 1; c <= collectionIDs.size(); c++) {
-			wcpsStringBuilder.append("$c" + c);
-			if (c > 1) {
-				wcpsStringBuilder.append(", ");
-			}
-		}
-		wcpsStringBuilder.append(" in ( ");
-		for (int c = 1; c <= collectionIDs.size(); c++) {
-			wcpsStringBuilder.append(collectionIDs.get(c - 1).getName() + " ");
-		}
-		wcpsStringBuilder.append(") return encode ( ");
-		for (String keyNode : openEOGraph.keySet()) {			
-		 JSONObject processKeyNode = openEOGraph.getJSONObject(keyNode);
-		 
-		  for (Object key : processKeyNode.keySet()) {			
-			String keyStr = (String) key;
-			if (keyStr.equals("process_id")) {
-				String name = (String) processKeyNode.get(keyStr);
-				log.debug("currently working on: " + name);
-				if (name.contains("stretch_colors")) {
-					double min = 0;
-					double max = 0;
-
-					for (Object Val : processKeyNode.keySet()) {
-						String ValStr = (String) Val;
-						if (ValStr.equals("min")) {
-							min = processKeyNode.getDouble(ValStr);
-						}
-						if (ValStr.equals("max")) {
-							max = processKeyNode.getDouble(ValStr);
-						}
-					}
-					StringBuilder stretchBuilder = new StringBuilder("(");
-					
-					for (int a = 0; a < aggregates.size(); a++) {
-						if (aggregates.get(a).getAxis().equals("DATE")) {
-							stretchBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
-						}
-						if (aggregates.get(a).getOperator().equals("NDVI")) {
-							String filterString = createFilteredCollectionString("$c1");
-							stretchBuilder.append(createNDVIWCPSString(filterString, "$c1", aggregates.get(a)));
-						}
-					}
-					stretchBuilder.append(")");
-					String stretchString = stretchBuilder.toString();
-					StringBuilder stretchBuilderExtend = new StringBuilder("(unsigned char)(");
-					stretchBuilderExtend.append("(" + stretchString + " + " + (-min) + ")");
-					stretchBuilderExtend.append("*(255" + "/" + (max - min) + ")");
-					stretchBuilderExtend.append(" + 0)");
-					String stretchExtendString = stretchBuilderExtend.toString();
-					wcpsStringBuilder.append(stretchExtendString);
-				} else if (name.contains("linear_stretch")) {
-					int min = 0;
-					int max = 0;
-
-					for (Object Val : processKeyNode.keySet()) {
-						String ValStr = (String) Val;
-						if (ValStr.equals("min")) {
-							min = (int) processKeyNode.get(ValStr);
-						}
-						if (ValStr.equals("max")) {
-							max = (int) processKeyNode.get(ValStr);
-						}
-					}
-					StringBuilder stretchBuilder = new StringBuilder("(");
-					for (int a = 0; a < aggregates.size(); a++) {
-						if (aggregates.get(a).getAxis().equals("DATE")) {
-							stretchBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
-						}
-						if (aggregates.get(a).getOperator().equals("NDVI")) {
-							String filterString = createFilteredCollectionString("$c1");
-							stretchBuilder.append(createNDVIWCPSString(filterString, "$c1", aggregates.get(a)));
-						}
-					}
-					stretchBuilder.append(")");
-					String stretchString = stretchBuilder.toString();
-					String stretch1 = stretchString.replace("$pm", "$pm1");
-					String stretch2 = stretchString.replace("$pm", "$pm2");
-					String stretch3 = stretchString.replace("$pm", "$pm3");
-					String stretch4 = stretchString.replace("$pm", "$pm4");
-					StringBuilder stretchBuilderExtend = new StringBuilder("(");
-					stretchBuilderExtend.append(stretch1 + " - " + "min" + stretch2 + ")*((" + max + "-" + min + ")"
-							+ "/(max" + stretch3 + "-min" + stretch4 + ")) + 0");
-					String stretchExtendString = stretchBuilderExtend.toString();
-					wcpsStringBuilder.append(stretchExtendString);
-				} 
-			}
-		}
-	}		
-		for (int a = 0; a < aggregates.size(); a++) {
-			if (aggregates.get(a).getAxis().equals("DATE")) {
-				wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
-				log.debug("Aggregate Temp " + aggregates.get(a).getAxis());
-				log.debug("Temp WCPS added " + wcpsStringBuilder);
-			}
-			if (aggregates.get(a).getOperator().equals("NDVI")) {
-				String filterString = createFilteredCollectionString("$c1");
-				wcpsStringBuilder.append(createNDVIWCPSString(filterString, "$c1", aggregates.get(a)));
-				log.debug("Aggregate NDVI " + aggregates.get(a).getOperator());
-				log.debug("NDVI WCPS  added " + wcpsStringBuilder);
-			}
-		}
-		if (filters.size() > 0) {
-			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
-		}
-		// TODO define return type from process tree
-		wcpsStringBuilder.append(", \"" + this.outputFormat + "\" )");
-	}
 	
 	private void build() {
 		log.debug(processGraph.toString());
@@ -208,6 +96,7 @@ public class WCPSQueryFactory {
 		boolean containsFilterBandProcess = false;
 		boolean containsNDVIProcess = false;
 		boolean containsTempAggProcess = false;
+		boolean containsLinearStretch = false;
 		boolean containsLinearScale = false;
 		boolean containsApplyProcess = false;
 		boolean containsResampleProcess = false;
@@ -233,8 +122,7 @@ public class WCPSQueryFactory {
 				wcpsFilterPayloadpayLoad.append(createBandSubsetString(collName, bandName, filterString));
 				wcpsPayLoad=wcpsFilterPayloadpayLoad;
 				wcpsStringBuilder=wcpsStringBuilderFilterPayload.append(wcpsFilterPayloadpayLoad.toString());
-			}
-			
+			}			
 			if (currentProcessID.equals("ndvi")) {
 				containsNDVIProcess = true;
 				StringBuilder wcpsNDVIpayLoad = new StringBuilder("");
@@ -276,6 +164,14 @@ public class WCPSQueryFactory {
 				wcpsScalepayLoad.append(createLinearScaleCubeWCPSString(nodeKeyOfCurrentProcess, wcpsPayLoad.toString()));				
 				wcpsPayLoad=wcpsScalepayLoad;
 				wcpsStringBuilder = wcpsStringBuilderScale.append(wcpsScalepayLoad.toString());
+			}
+			if (currentProcessID.equals("linear_stretch_cube")) {
+				containsLinearStretch = true;
+				StringBuilder wcpsStretchpayLoad = new StringBuilder("");
+				StringBuilder wcpsStringBuilderStretch = basicWCPSStringBuilder();
+				wcpsStretchpayLoad.append(createLinearStretchCubeWCPSString(nodeKeyOfCurrentProcess, wcpsPayLoad.toString()));				
+				wcpsPayLoad=wcpsStretchpayLoad;
+				wcpsStringBuilder = wcpsStringBuilderStretch.append(wcpsStretchpayLoad.toString());
 			}
 			if (currentProcessID.equals("apply")) {
 				containsApplyProcess = true;
@@ -397,7 +293,7 @@ public class WCPSQueryFactory {
     	return stretchBuilderExtend.toString();
     }
     
-    private String createLinearScaleCubeWCPSString(String linearScaleNodeKey, String payLoad) {		
+    private String createLinearScaleCubeWCPSString(String linearScaleNodeKey, String payLoad) {
 		JSONObject scaleArgumets = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments");
 		
 		double inputMin = 0;
@@ -427,6 +323,34 @@ public class WCPSQueryFactory {
 		return stretchBuilderExtend.toString();
 	}
 
+    private String createLinearStretchCubeWCPSString(String linearScaleNodeKey, String payLoad) {
+		JSONObject scaleArgumets = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments");
+		
+		double min = 0;
+		double max = 1;
+				
+		for (String outputMinMax : scaleArgumets.keySet()) {
+			if (outputMinMax.contentEquals("min")) {
+		        min = (double) processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("min");		       
+			}
+			else if (outputMinMax.contentEquals("max")) {
+				max = (double) processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("max");
+			}
+		}	
+
+		StringBuilder stretchBuilder = new StringBuilder("(");
+		stretchBuilder.append(payLoad + ")");
+		String stretchString = stretchBuilder.toString();
+		String stretch1 = stretchString.replace("$pm", "$pm1");
+		String stretch2 = stretchString.replace("$pm", "$pm2");
+		String stretch3 = stretchString.replace("$pm", "$pm3");
+		String stretch4 = stretchString.replace("$pm", "$pm4");
+		StringBuilder stretchBuilderExtend = new StringBuilder("(unsigned char)(");
+		stretchBuilderExtend.append(stretch1 + " - " + "min" + stretch2 + ")*((" + max + "-" + min + ")" + "/(max" + stretch3 + "-min" + stretch4 + ")) + 0");
+		
+		return stretchBuilderExtend.toString();
+	}
+    
 	/**
 	 * Helper Method to create a string describing an arbitrary filtering as defined
 	 * from the process graph

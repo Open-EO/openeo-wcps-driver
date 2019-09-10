@@ -166,6 +166,50 @@
 		}
 	},
 	{
+		"id": "linear_stretch_cube",
+		"summary": "Linear Stretch transformation between two ranges",
+		"description": "Performs a linear transformation between the input and output range.\n\nThe underlying formula is: `((x - inputMin) / (inputMax - inputMin)) * (outputMax - outputMin) + outputMin`.\n\nPotential use case include\n\n* scaling values to the 8-bit range (0 - 255) often used for numeric representation of values in one of the channels of the [RGB colour model](https://en.wikipedia.org/wiki/RGB_color_model#Numeric_representations) or\n* calculating percentages (0 - 100).\n\nThe no-data value `null` is passed through and therefore gets propagated.",
+		"categories": [
+			"math"
+		],
+		"parameter_order": [
+			"data",			
+			"outputMin",
+			"outputMax"
+		],
+		"parameters": {
+			"data": {
+				"description": "A raster data cube",
+				"schema": {
+					"type": "object",
+					"format": "raster-cube"
+				},
+				"required": true
+			},			
+			"min": {
+				"description": "Minimum value of the desired output range.",
+				"schema": {
+					"type": "number",
+					"default": 0
+				}
+			},
+			"max": {
+				"description": "Maximum value of the desired output range.",
+				"schema": {
+					"type": "number",
+					"default": 1
+				}
+			}
+		},
+		"returns": {
+			"description": "A raster data cube with every value in the cube scaled according to the min and max parameters.",
+			"schema": {
+				"type": "object",
+				"format": "raster-cube"
+			}
+		}
+	},
+	{
 		"id": "save_result",
 		"summary": "Save processed data to storage",
 		"description": "Saves processed data to the local user workspace / data store of the authenticated user. This process aims to be compatible to GDAL/OGR formats and options. STAC-compatible metadata should be stored with the processed data.\n\nCalling this process may be rejected by back-ends in the context of secondary web services.",
