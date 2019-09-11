@@ -153,6 +153,102 @@
     ]
     },
     {
+    "id": "max",
+    "summary": "Maximum value",
+    "description": "Computes the largest value of an array of numbers, which is is equal to the first element of a sorted (i.e., ordered) version the array.",
+    "categories": [
+        "math",
+        "reducer"
+    ],
+    "parameter_order": ["data", "ignore_nodata"],
+    "parameters": {
+        "data": {
+            "description": "An array of numbers. An empty array resolves always with `null`.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                }
+            },
+            "required": true
+        },
+        "ignore_nodata": {
+            "description": "Indicates whether no-data values are ignored or not. Ignores them by default. Setting this flag to `false` considers no-data values so that `null` is returned if any value is such a value.",
+            "schema": {
+                "type": "boolean",
+                "default": true
+            }
+        }
+    },
+    "returns": {
+        "description": "The maximum value.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },    
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/Maximum.html",
+            "title": "Maximum explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "min",
+    "summary": "Minimum value",
+    "description": "Computes the smallest value of an array of numbers, which is is equal to the last element of a sorted (i.e., ordered) version the array.",
+    "categories": [
+        "math",
+        "reducer"
+    ],
+    "parameter_order": ["data", "ignore_nodata"],
+    "parameters": {
+        "data": {
+            "description": "An array of numbers. An empty array resolves always with `null`.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                }
+            },
+            "required": true
+        },
+        "ignore_nodata": {
+            "description": "Indicates whether no-data values are ignored or not. Ignores them by default. Setting this flag to `false` considers no-data values so that `null` is returned if any value is such a value.",
+            "schema": {
+                "type": "boolean",
+                "default": true
+            }
+        }
+    },
+    "returns": {
+        "description": "The minimum value.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/Minimum.html",
+            "title": "Minimum explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
 		"id": "apply",
 		"summary": "Applies a unary process to each pixel",
 		"description": "Applies a **unary** process which takes a single value such as `abs` or `sqrt` to each pixel value in the data cube (i.e. a local operation). In contrast, the process ``apply_dimension()`` applies an n-ary process to a particular dimension.",
