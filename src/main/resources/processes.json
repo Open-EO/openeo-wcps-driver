@@ -121,13 +121,13 @@
 		],
 		"parameters": {
 			"data": {
-				"description": "A raster data cube",
-				"schema": {
-					"type": "object",
-					"format": "raster-cube"
-				},
-				"required": true
-			},
+                 "description": "A data cube with bands.",
+                 "schema": {
+                        "type": "object",
+                        "format": "raster-cube"
+                 },
+                 "required": true
+            },
 			"inputMin": {
 				"description": "Minimum value the input can obtain.",
 				"schema": {
@@ -150,6 +150,50 @@
 				}
 			},
 			"outputMax": {
+				"description": "Maximum value of the desired output range.",
+				"schema": {
+					"type": "number",
+					"default": 1
+				}
+			}
+		},
+		"returns": {
+			"description": "A raster data cube with every value in the cube scaled according to the min and max parameters.",
+			"schema": {
+				"type": "object",
+				"format": "raster-cube"
+			}
+		}
+	},
+	{
+		"id": "linear_stretch_cube",
+		"summary": "Linear Stretch transformation between two ranges",
+		"description": "Performs a linear transformation between the input and output range.\n\nThe underlying formula is: `((x - inputMin) / (inputMax - inputMin)) * (outputMax - outputMin) + outputMin`.\n\nPotential use case include\n\n* scaling values to the 8-bit range (0 - 255) often used for numeric representation of values in one of the channels of the [RGB colour model](https://en.wikipedia.org/wiki/RGB_color_model#Numeric_representations) or\n* calculating percentages (0 - 100).\n\nThe no-data value `null` is passed through and therefore gets propagated.",
+		"categories": [
+			"math"
+		],
+		"parameter_order": [
+			"data",			
+			"min",
+			"max"
+		],
+		"parameters": {
+			"data": {
+                 "description": "A data cube with bands.",
+                 "schema": {
+                        "type": "object",
+                        "format": "raster-cube"
+                 },
+                 "required": true
+            },
+			"min": {
+				"description": "Minimum value of the desired output range.",
+				"schema": {
+					"type": "number",
+					"default": 0
+				}
+			},
+			"max": {
 				"description": "Maximum value of the desired output range.",
 				"schema": {
 					"type": "number",
@@ -234,6 +278,84 @@
 		]
 	},
 	{
+    "id": "filter_bands",
+    "summary": "Filter the bands by name",
+    "description": "Filters the bands in the data cube so that bands that don't match any of the criteria are dropped from the data cube. The data cube is expected to have only one dimension of type `bands`. Fails with a `DimensionMissing` error if no such dimension exists.\n\nThe following criteria can be used to select bands:\n\n* `bands`: band name (e.g. `B01` or `B8A`)\n* `common_names`: common band names (e.g. `red` or `nir`)\n* `wavelengths`: ranges of wavelengths in micrometres (?m) (e.g. 0.5 - 0.6)\n\nTo keep algorithms interoperable it is recommended to prefer the common bands names or the wavelengths over collection and/or back-end specific band names.\n\nIf multiple criteria are specified, any of them must match and not all of them, i.e. they are combined with an OR-operation. If no criteria is specified, the `BandFilterParameterMissing` exception must be thrown.\n\n**Important:** The order of the specified array defines the order of the bands in the data cube, which can be important for subsequent processes. If multiple bands are matched by a single criterion (e.g. a range of wavelengths), they are ordered alphabetically by band names. Bands without names have an arbitrary order.",
+    "categories": [
+        "filter"
+    ],
+    "parameter_order": ["data", "bands", "common_names", "wavelengths"],
+    "parameters": {
+        "data": {
+            "description": "A data cube with bands.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube"
+            },
+            "required": true
+        },
+        "bands": {
+            "description": "A list of band names.\n\nThe order of the specified array defines the order of the bands in the data cube.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "format": "band-name"
+                }
+            }
+        },
+        "common_names": {
+            "description": "A list of common band names.\n\nThe order of the specified array defines the order of the bands in the data cube.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "wavelengths": {
+            "description": "A list of sub-lists with each sub-list consisting of two elements. The first element is the minimum wavelength and the second element is the maximum wavelength. Wavelengths are specified in micrometres (?m).\n\nThe order of the specified array defines the order of the bands in the data cube.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                        "type": "number"
+                    },
+                    "examples": [
+                        [[0.45, 0.5], [0.6, 0.7]]
+                    ]
+                }
+            }
+        }
+    },
+    "returns": {
+        "description": "A data cube limited to a subset of its original bands. Therefore, the cardinality is potentially lower, but the resolution and the number of dimensions are the same as for the original data cube.",
+        "schema": {
+            "type": "object",
+            "format": "raster-cube"
+        }
+    },
+    "exceptions": {
+        "BandFilterParameterMissing": {
+            "message": "The process 'filter_bands' requires any of the parameters 'bands', 'common_names' or 'wavelengths' to be set."
+        },
+        "DimensionMissing": {
+            "message": "A band dimension is missing."
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "https://github.com/radiantearth/stac-spec/tree/master/extensions/eo#common-band-names",
+            "title": "List of common band names as specified by the STAC specification"
+        }
+    ]
+    
+    },
+    {
 		"id": "ndvi",
 		"summary": "Normalized Difference Vegetation Index",
 		"description": "Computes the Normalized Difference Vegetation Index (NDVI). The NDVI is computed as *(nir - red) / (nir + red)*.\n\nThe `data` parameter expects a raster data cube with two bands that have the common names `red` and `nir` assigned. The process returns a raster data cube with two bands being replaced with a new band that holds the computed values. The newly created band is named `ndvi` by default. This name can be changed with the `name` parameter.\n\nThis process is very similar to the process ``normalized_difference()``, but determines the bands automatically based on the common name (`red`/`nir`) specified in the metadata.",
@@ -284,6 +406,131 @@
 		]
 	},
 	{
+    "id": "resample_spatial",
+    "summary": "Resample and warp the spatial dimensions",
+    "description": "Resamples the spatial dimensions (x,y) of the data cube to a specified resolution and/or warps the data cube to the target projection. At least `resolution` or `projection` must be specified.\n\nUse ``filter_bbox()`` to set the target spatial extent.",
+    "categories": [
+        "cubes",
+        "aggregate & resample"
+    ],
+    "parameter_order": ["data", "resolution", "projection", "method", "align"],
+    "parameters": {
+        "data": {
+            "description": "A raster data cube.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube"
+            },
+            "required": true
+        },
+        "resolution": {
+            "description": "Resamples the data cube to the target resolution, which can be specified either as separate values for x and y or as a single value for both axes. Specified in the units of the target projection. Doesn't change the resolution by default (`0`).",
+            "schema": {
+                "anyOf": [
+                    {
+                        "description": "A single number used as resolution for both x and y.",
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "description": "A two-element array to specify separate resolutions for x (first element) and y (second element).",
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {
+                            "type": "number",
+                            "minimum": 0
+                        }
+                    }
+                ],
+                "default": 0
+            }
+        },
+        "projection": {
+            "description": "Warps the data cube to the target projection. Target projection specified as [EPSG](http://www.epsg.org) code or [PROJ](https://proj4.org) definition. Doesn't change the projection by default (`null`).",
+            "schema": {
+                "anyOf": [
+                    {
+                        "title": "EPSG Code",
+                        "type": "integer",
+                        "format": "epsg-code",
+                        "examples": [7099]
+                    },
+                    {
+                        "title": "PROJ definition",
+                        "type": "string",
+                        "format": "proj-definition",
+                        "examples": ["+proj=moll +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"]
+                    },
+                    {
+                        "title": "Don't change projection",
+                        "type": "null"
+                    }
+                ],
+                "default": null
+            }
+        },
+        "method": {
+          "description": "Resampling method. Methods are inspired by GDAL, see [gdalwarp](https://www.gdal.org/gdalwarp.html) for more information.",
+          "schema": {
+            "type": "string",
+            "default": "near",
+            "enum": [
+              "near",
+              "bilinear",
+              "cubic",
+              "cubicspline",
+              "lanczos",
+              "average",
+              "mode",
+              "max",
+              "min",
+              "med",
+              "q1",
+              "q3"
+            ]
+          }
+        },
+        "align": {
+            "description": "Specifies to which corner of the spatial extent the new resampled data is aligned to.",
+            "schema": {
+                "type": "string",
+                "enum": [
+                    "lower-left",
+                    "upper-left",
+                    "lower-right",
+                    "upper-right"
+                ],
+                "default": "lower-left"
+            }
+        }
+    },
+    "returns": {
+        "description": "A raster data cube with values warped onto the new projection.",
+        "schema": {
+            "type": "object",
+            "format": "raster-cube"
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "https://proj4.org/usage/projections.html",
+            "title": "PROJ parameters for cartographic projections"
+        },
+        {
+            "rel": "about",
+            "href": "http://www.epsg-registry.org",
+            "title": "Official EPSG code registry"
+        },
+        {
+            "rel": "about",
+            "href": "http://www.epsg.io",
+            "title": "Unofficial EPSG code database"
+        }
+    ]
+    },
+    {
 		"id": "min_time",
 		"summary": "Calculates minimum values of time series.",
 		"description": "Finds the minimum value of a time series for every given pixel location for all bands.",
@@ -422,6 +669,111 @@
 		]
 	},
 	{
+    "id": "filter_bbox",
+    "summary": "Spatial filter using a bounding box",
+    "description": "Limits the data cube to the specified bounding box.\n\nThe filter retains a pixel in the data cube if the point at the pixel center intersects with the bounding box (as defined in the Simple Features standard by the OGC).",
+    "categories": [
+        "filter"
+    ],
+    "parameter_order": ["data", "extent"],
+    "parameters": {
+        "data": {
+            "description": "A data cube.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube"
+            },
+            "required": true
+        },
+        "extent": {
+            "description": "A bounding box, which may include a vertical axis (see `base` and `height`).\n\nThe coordinate reference system of the extent must be specified as [EPSG](http://www.epsg.org) code or [PROJ](https://proj4.org) definition.",
+            "required": true,
+            "schema": {
+                "type": "object",
+                "format": "bounding-box",
+                "required": ["west", "south", "east", "north"],
+                "properties": {
+                    "west": {
+                        "description": "West (lower left corner, coordinate axis 1).",
+                        "type": "number"
+                    },
+                    "south": {
+                        "description": "South (lower left corner, coordinate axis 2).",
+                        "type": "number"
+                    },
+                    "east": {
+                        "description": "East (upper right corner, coordinate axis 1).",
+                        "type": "number"
+                    },
+                    "north": {
+                        "description": "North (upper right corner, coordinate axis 2).",
+                        "type": "number"
+                    },
+                    "base": {
+                        "description": "Base (optional, lower left corner, coordinate axis 3).",
+                        "type": ["number", "null"],
+                        "default": null
+                    },
+                    "height": {
+                        "description": "Height (optional, upper right corner, coordinate axis 3).",
+                        "type": ["number", "null"],
+                        "default": null
+                    },
+                    "crs": {
+                        "description": "Coordinate reference system of the extent specified as EPSG code or PROJ definition. Whenever possible, it is recommended to use EPSG codes instead of PROJ definitions. Defaults to `4326` (EPSG code 4326) unless the client explicitly requests a different coordinate reference system.",
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "title": "EPSG Code",
+                                    "type": "integer",
+                                    "format": "epsg-code",
+                                    "examples": [7099]
+                                },
+                                {
+                                    "title": "PROJ definition",
+                                    "type": "string",
+                                    "format": "proj-definition",
+                                    "examples": ["+proj=moll +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"]
+                                }
+                            ],
+                            "default": 4326
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "returns": {
+        "description": "A data cube restricted to the bounding box. Therefore, the cardinality is potentially lower, but the resolution and the number of dimensions are the same as for the original data cube.",
+        "schema": {
+            "type": "object",
+            "format": "raster-cube"
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "https://proj4.org/usage/projections.html",
+            "title": "PROJ parameters for cartographic projections"
+        },
+        {
+            "rel": "about",
+            "href": "http://www.epsg-registry.org",
+            "title": "Official EPSG code registry"
+        },
+        {
+            "rel": "about",
+            "href": "http://www.epsg.io",
+            "title": "Unofficial EPSG code database"
+        },
+        {
+            "href": "http://www.opengeospatial.org/standards/sfa",
+            "rel": "about",
+            "title": "Simple Features standard by the OGC"
+        }
+    ]
+    },
+    {
 		"id": "load_collection",
 		"summary": "Load a collection",
 		"description": "Loads a collection from the current back-end by its id and returns it as processable data cube. The data that is added to the data cube can be restricted with the additional `spatial_extent`, `temporal_extent`, `bands` and `properties`.\n\n**Remarks:**\n\n* The bands (and all dimensions that specify nominal dimension values) are expected to be ordered as specified in the metadata if the `bands` parameter is set to `null`.\n* If no additional parameter is specified this would imply that the whole data set is expected to be loaded. Due to the large size of many data sets this is not recommended and may be optimized by back-ends to only load the data that is actually required after evaluating subsequent processes such as filters. This means that the pixel values should be processed only after the data has been limited to the required extents and as a consequence also to a manageable size.",

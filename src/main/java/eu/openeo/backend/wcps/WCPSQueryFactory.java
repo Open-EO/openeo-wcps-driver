@@ -51,8 +51,7 @@ public class WCPSQueryFactory {
 		return outputFormat;
 	}
 	
-	private StringBuilder basicWCPSStringBuilder() {
-	
+	private StringBuilder basicWCPSStringBuilder() {	
 	StringBuilder basicWCPS;
 	basicWCPS = new StringBuilder("for ");
 	for (int c = 1; c <= collectionIDs.size(); c++) {
@@ -65,143 +64,8 @@ public class WCPSQueryFactory {
 	for (int c = 1; c <= collectionIDs.size(); c++) {
 		basicWCPS.append(collectionIDs.get(c - 1).getName() + " ");
 	}
-	basicWCPS.append(") return encode ( ");
-	
+	basicWCPS.append(") return encode ( ");	
 	return basicWCPS;
-	}
-
-	private void build2(JSONObject openEOGraph) {
-		log.debug(openEOGraph.toString());
-		parseOpenEOProcessGraph();
-		for (int c = 1; c <= collectionIDs.size(); c++) {
-			wcpsStringBuilder.append("$c" + c);
-			if (c > 1) {
-				wcpsStringBuilder.append(", ");
-			}
-		}
-		wcpsStringBuilder.append(" in ( ");
-		for (int c = 1; c <= collectionIDs.size(); c++) {
-			wcpsStringBuilder.append(collectionIDs.get(c - 1).getName() + " ");
-		}
-		wcpsStringBuilder.append(") return encode ( ");
-
-		for (String keyNode : openEOGraph.keySet()) {
-			
-		 JSONObject processKeyNode = openEOGraph.getJSONObject(keyNode);
-		 
-		  for (Object key : processKeyNode.keySet()) {
-			
-			String keyStr = (String) key;
-			if (keyStr.equals("process_id")) {
-				String name = (String) processKeyNode.get(keyStr);
-				log.debug("currently working on: " + name);
-				if (name.contains("stretch_colors")) {
-
-					double min = 0;
-					double max = 0;
-
-					for (Object Val : processKeyNode.keySet()) {
-						String ValStr = (String) Val;
-
-						if (ValStr.equals("min")) {
-							min = processKeyNode.getDouble(ValStr);
-						}
-						if (ValStr.equals("max")) {
-							max = processKeyNode.getDouble(ValStr);
-						}
-					}
-
-					StringBuilder stretchBuilder = new StringBuilder("(");
-
-					for (int a = 0; a < aggregates.size(); a++) {
-						if (aggregates.get(a).getAxis().equals("DATE")) {
-							stretchBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
-						}
-						if (aggregates.get(a).getOperator().equals("NDVI")) {
-							String filterString = createFilteredCollectionString("$c1");
-							stretchBuilder.append(createNDVIWCPSString(filterString, "$c1", aggregates.get(a)));
-						}
-					}
-					stretchBuilder.append(")");
-					String stretchString = stretchBuilder.toString();
-
-					StringBuilder stretchBuilderExtend = new StringBuilder("(unsigned char)(");
-
-					stretchBuilderExtend.append("(" + stretchString + " + " + (-min) + ")");
-					stretchBuilderExtend.append("*(255" + "/" + (max - min) + ")");
-					stretchBuilderExtend.append(" + 0)");
-
-					String stretchExtendString = stretchBuilderExtend.toString();
-
-					wcpsStringBuilder.append(stretchExtendString);
-
-				} else if (name.contains("linear_stretch")) {
-
-					int min = 0;
-					int max = 0;
-
-					for (Object Val : processKeyNode.keySet()) {
-						String ValStr = (String) Val;
-
-						if (ValStr.equals("min")) {
-							min = (int) processKeyNode.get(ValStr);
-						}
-						if (ValStr.equals("max")) {
-							max = (int) processKeyNode.get(ValStr);
-						}
-					}
-
-					StringBuilder stretchBuilder = new StringBuilder("(");
-
-					for (int a = 0; a < aggregates.size(); a++) {
-						if (aggregates.get(a).getAxis().equals("DATE")) {
-							stretchBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
-						}
-						if (aggregates.get(a).getOperator().equals("NDVI")) {
-							String filterString = createFilteredCollectionString("$c1");
-							stretchBuilder.append(createNDVIWCPSString(filterString, "$c1", aggregates.get(a)));
-						}
-					}
-					stretchBuilder.append(")");
-					String stretchString = stretchBuilder.toString();
-
-					String stretch1 = stretchString.replace("$pm", "$pm1");
-					String stretch2 = stretchString.replace("$pm", "$pm2");
-					String stretch3 = stretchString.replace("$pm", "$pm3");
-					String stretch4 = stretchString.replace("$pm", "$pm4");
-
-					StringBuilder stretchBuilderExtend = new StringBuilder("(");
-
-					stretchBuilderExtend.append(stretch1 + " - " + "min" + stretch2 + ")*((" + max + "-" + min + ")"
-							+ "/(max" + stretch3 + "-min" + stretch4 + ")) + 0");
-
-					String stretchExtendString = stretchBuilderExtend.toString();
-
-					wcpsStringBuilder.append(stretchExtendString);
-				} 
-			}
-		}
-	}
-		
-		for (int a = 0; a < aggregates.size(); a++) {
-			if (aggregates.get(a).getAxis().equals("DATE")) {
-				wcpsStringBuilder.append(createTempAggWCPSString("$c1", aggregates.get(a)));
-				log.debug("Aggregate Temp " + aggregates.get(a).getAxis());
-				log.debug("Temp WCPS added " + wcpsStringBuilder);
-			}
-			if (aggregates.get(a).getOperator().equals("NDVI")) {
-				String filterString = createFilteredCollectionString("$c1");
-				wcpsStringBuilder.append(createNDVIWCPSString(filterString, "$c1", aggregates.get(a)));
-				log.debug("Aggregate NDVI " + aggregates.get(a).getOperator());
-				log.debug("NDVI WCPS  added " + wcpsStringBuilder);
-			}
-		}
-		
-		if (filters.size() > 0) {
-			wcpsStringBuilder.append(createFilteredCollectionString("$c1"));
-		}
-		// TODO define return type from process tree
-		wcpsStringBuilder.append(", \"" + this.outputFormat + "\" )");
 	}
 	
 	private void build() {
@@ -224,12 +88,15 @@ public class WCPSQueryFactory {
 		nodesArray = sortNodes(saveNode, nodesArray);
 		
 		StringBuilder wcpsPayLoad = new StringBuilder("");
-		wcpsPayLoad.append(createFilteredCollectionString("$c1"));
-		
+		String collName = "$c1";
+		wcpsPayLoad.append(createFilteredCollectionString(collName));
+		log.debug("Initial PayLoad WCPS is: " + wcpsPayLoad);
 		wcpsStringBuilder.append(wcpsPayLoad.toString());
 		
+		boolean containsFilterBandProcess = false;
 		boolean containsNDVIProcess = false;
 		boolean containsTempAggProcess = false;
+		boolean containsLinearStretch = false;
 		boolean containsLinearScale = false;
 		boolean containsApplyProcess = false;
 		boolean containsResampleProcess = false;
@@ -244,13 +111,25 @@ public class WCPSQueryFactory {
 			log.debug("Building WCPS Query for : " + nodesArray.getString(i));
 			log.debug("currently working on: " + currentProcessID);
 			
+			if (currentProcessID.equals("filter_bands")) {
+				containsFilterBandProcess = true;
+				StringBuilder wcpsFilterPayloadpayLoad = new StringBuilder("");
+				StringBuilder wcpsStringBuilderFilterPayload = basicWCPSStringBuilder();
+				String filterString = wcpsPayLoad.toString();
+				filterString = filterString.substring(collName.length());
+				JSONArray currentProcessBands = currentProcessArguments.getJSONArray("bands");
+				String bandName = currentProcessBands.getString(0);
+				wcpsFilterPayloadpayLoad.append(createBandSubsetString(collName, bandName, filterString));
+				wcpsPayLoad=wcpsFilterPayloadpayLoad;
+				wcpsStringBuilder=wcpsStringBuilderFilterPayload.append(wcpsFilterPayloadpayLoad.toString());
+			}			
 			if (currentProcessID.equals("ndvi")) {
 				containsNDVIProcess = true;
 				StringBuilder wcpsNDVIpayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderNDVI = basicWCPSStringBuilder();
 				for (int a = 0; a < aggregates.size(); a++) {
 					if (aggregates.get(a).getOperator().equals("NDVI")) {
-						wcpsNDVIpayLoad.append(createNDVIWCPSString(wcpsPayLoad.toString(), "$c1", aggregates.get(a)));
+						wcpsNDVIpayLoad.append(createNDVIWCPSString(wcpsPayLoad.toString(), collName, aggregates.get(a)));
 						wcpsPayLoad=wcpsNDVIpayLoad;
 						wcpsStringBuilder=wcpsStringBuilderNDVI.append(wcpsNDVIpayLoad.toString());
 						log.debug("Aggregate NDVI " + aggregates.get(a).getOperator());
@@ -258,16 +137,15 @@ public class WCPSQueryFactory {
 					}
 				}
 			}
-			
 			if (currentProcessID.contains("_time")) {
 				containsTempAggProcess = true;
 				StringBuilder wcpsTempAggpayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderTempAgg = basicWCPSStringBuilder();
 				for (int a = 0; a < aggregates.size(); a++) {
 					if (aggregates.get(a).getAxis().equals("DATE")) {
-						wcpsTempAggpayLoad.append(createTempAggWCPSString("$c1", aggregates.get(a)));
-						//String replaceDate = Pattern.compile("[DATE\\(.*?\\)]").matcher(wcpsAggBuilder).replaceAll("\\$pm");
-						String replaceDate = wcpsPayLoad.toString().replaceAll("DATE\\(.*?\\)", "DATE\\(\\$pm\\)");
+						wcpsTempAggpayLoad.append(createTempAggWCPSString(collName, aggregates.get(a)));
+						String replaceDate = Pattern.compile("DATE\\(.*?\\)").matcher(wcpsPayLoad).replaceAll("DATE\\(\\$pm\\)");
+						//String replaceDate = wcpsPayLoad.toString().replaceAll("DATE\\(.*?\\)", "DATE\\(\\$pm\\)");
 						StringBuilder wcpsAggBuilderMod = new StringBuilder("");
 						wcpsAggBuilderMod.append(replaceDate);
 						wcpsTempAggpayLoad.append(wcpsAggBuilderMod);
@@ -278,8 +156,7 @@ public class WCPSQueryFactory {
 						log.debug("Temp WCPS added " + wcpsStringBuilderTempAgg);
 					}
 				}
-			}
-			
+			}			
 			if (currentProcessID.equals("linear_scale_cube")) {
 				containsLinearScale = true;
 				StringBuilder wcpsScalepayLoad = new StringBuilder("");
@@ -287,6 +164,14 @@ public class WCPSQueryFactory {
 				wcpsScalepayLoad.append(createLinearScaleCubeWCPSString(nodeKeyOfCurrentProcess, wcpsPayLoad.toString()));				
 				wcpsPayLoad=wcpsScalepayLoad;
 				wcpsStringBuilder = wcpsStringBuilderScale.append(wcpsScalepayLoad.toString());
+			}
+			if (currentProcessID.equals("linear_stretch_cube")) {
+				containsLinearStretch = true;
+				StringBuilder wcpsStretchpayLoad = new StringBuilder("");
+				StringBuilder wcpsStringBuilderStretch = basicWCPSStringBuilder();
+				wcpsStretchpayLoad.append(createLinearStretchCubeWCPSString(nodeKeyOfCurrentProcess, wcpsPayLoad.toString()));				
+				wcpsPayLoad=wcpsStretchpayLoad;
+				wcpsStringBuilder = wcpsStringBuilderStretch.append(wcpsStretchpayLoad.toString());
 			}
 			if (currentProcessID.equals("apply")) {
 				containsApplyProcess = true;
@@ -306,34 +191,16 @@ public class WCPSQueryFactory {
 			}
 			if (currentProcessID.equals("save_result")) {
 				String savePayload = wcpsStringBuilder.toString();
-				StringBuilder wcpsStringBuilderSaveResult = new StringBuilder("");				
+				StringBuilder wcpsStringBuilderSaveResult = new StringBuilder("");
 				wcpsStringBuilderSaveResult.append(createReturnResultWCPSString(nodeKeyOfCurrentProcess, savePayload));
-				wcpsStringBuilder = wcpsStringBuilderSaveResult;							
+				wcpsStringBuilder = wcpsStringBuilderSaveResult;
 			}
 		}
-
-//		boolean containsResampleProcess = false;
-//		String resampleNodeKey = "";
-//		for (String keyNode : processGraph.keySet()) {
-//			String name = processGraph.getJSONObject(keyNode).getString("process_id");
-//			
-//			if (name.contains("resample_spatial")) {
-//				containsResampleProcess = true;
-//				resampleNodeKey = keyNode;
-//				break;
-//			}
-//		}
-//		
-//		if (containsResampleProcess) {
-//			wcpsStringBuilder = new StringBuilder(createResampleWCPSString(resampleNodeKey));
-//		}
 	}
 	
 	private String createReturnResultWCPSString(String returnResultNodeKey, String payload) {
-		//String outputFormat = processGraph.getJSONObject(returnResultNodeKey).getJSONObject("arguments").getString("format");
-		
 		StringBuilder resultBuilder = new StringBuilder("");
-		resultBuilder.append(payload);		
+		resultBuilder.append(payload);
 		resultBuilder.append(", \"" + this.outputFormat + "\" )");
 		log.debug("Save payload: " + resultBuilder);
 		return resultBuilder.toString();
@@ -351,10 +218,8 @@ public class WCPSQueryFactory {
 			return "";
 		}
 		StringBuilder resampleBuilder = new StringBuilder("crsTransform(" );
-
 		//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
 		resampleBuilder.append(payload);
-
 		resampleBuilder.append(" ,{"
 				+ "E:\"http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\","
 				+ "N:\"http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\""
@@ -367,14 +232,12 @@ public class WCPSQueryFactory {
 	//TODO extend this to the full functionality of the openEO process
 	private String createResampleWCPSString(String resampleNodeKey) {
 		String projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getString("projection");
-        
-		String currentWCPSQuery = wcpsStringBuilder.toString();
+        String currentWCPSQuery = wcpsStringBuilder.toString();
 		int beginIndex = currentWCPSQuery.indexOf("return encode (") + 15;
 		int endIndex = currentWCPSQuery.indexOf(", \"");
 		log.debug("payload range: " + beginIndex + " " + endIndex);
 		StringBuilder resampleBuilder = new StringBuilder(currentWCPSQuery.substring(0, beginIndex));
-		String currentPayload = currentWCPSQuery.substring(beginIndex, endIndex);
-		
+		String currentPayload = currentWCPSQuery.substring(beginIndex, endIndex);		
 		//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
 		resampleBuilder.append("crsTransform(" + currentPayload + ",{"
 				+ "E:\"http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\","
@@ -399,57 +262,50 @@ public class WCPSQueryFactory {
 		return applyBuilderExtend;
 	}
 
-    private String createLinearScaleRangeWCPSString(String linearScaleNodeKey, String payLoad, JSONObject process) {
-	
-	JSONObject scaleArgumets = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments");
-	
-	double inputMin = 0;
-	double inputMax = 0;
-	double outputMin = 0;
-	double outputMax = 1;
+    private String createLinearScaleRangeWCPSString(String linearScaleNodeKey, String payLoad, JSONObject process) {	
+    	JSONObject scaleArgumets = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments");
 
-	inputMin = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMin");
-	inputMax = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMax");
-	
-	for (String outputMinMax : scaleArgumets.keySet()) {	
-		if (outputMinMax.contentEquals("outputMin")) {
-	        outputMin = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMin");	        
-		}
-		else if (outputMinMax.contentEquals("outputMax")) {
-			outputMax = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
-		}	
-	}
-	
-	StringBuilder stretchBuilder = new StringBuilder("(");
-	stretchBuilder.append(payLoad + ")");
-	String stretchString = stretchBuilder.toString();
+    	double inputMin = 0;
+    	double inputMax = 0;
+    	double outputMin = 0;
+    	double outputMax = 1;
 
-	StringBuilder stretchBuilderExtend = new StringBuilder("(unsigned char)(");
+    	inputMin = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMin");
+    	inputMax = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMax");
 
-	stretchBuilderExtend.append("(" + stretchString + " + " + (-inputMin) + ")");
-	stretchBuilderExtend.append("*("+ outputMax + "/" + (inputMax - inputMin) + ")");
-	stretchBuilderExtend.append(" + " + outputMin + ")");
+    	for (String outputMinMax : scaleArgumets.keySet()) {	
+    		if (outputMinMax.contentEquals("outputMin")) {
+    			outputMin = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMin");	        
+    		}
+    		else if (outputMinMax.contentEquals("outputMax")) {
+    			outputMax = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
+    		}	
+    	}
 
-	return stretchBuilderExtend.toString();
+    	StringBuilder stretchBuilder = new StringBuilder("(");
+    	stretchBuilder.append(payLoad + ")");
+    	String stretchString = stretchBuilder.toString();
+    	StringBuilder stretchBuilderExtend = new StringBuilder("(unsigned char)(");
+    	stretchBuilderExtend.append("(" + stretchString + " + " + (-inputMin) + ")");
+    	stretchBuilderExtend.append("*("+ outputMax + "/" + (inputMax - inputMin) + ")");
+    	stretchBuilderExtend.append(" + " + outputMin + ")");
+
+    	return stretchBuilderExtend.toString();
     }
     
     private String createLinearScaleCubeWCPSString(String linearScaleNodeKey, String payLoad) {
-		
-		String name = processGraph.getJSONObject(linearScaleNodeKey).getString("process_id");
 		JSONObject scaleArgumets = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments");
-		log.debug("currently working on: " + name);
+		
 		double inputMin = 0;
 		double inputMax = 0;
 		double outputMin = 0;
 		double outputMax = 1;
-
 		inputMin = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMin");
 		inputMax = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMax");
 		
 		for (String outputMinMax : scaleArgumets.keySet()) {			
 			if (outputMinMax.contentEquals("outputMin")) {
-		        outputMin = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMin");
-		       
+		        outputMin = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMin");		       
 			}
 			else if (outputMinMax.contentEquals("outputMax")) {
 				outputMax = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
@@ -459,9 +315,7 @@ public class WCPSQueryFactory {
 		StringBuilder stretchBuilder = new StringBuilder("(");
 		stretchBuilder.append(payLoad + ")");
 		String stretchString = stretchBuilder.toString();
-
 		StringBuilder stretchBuilderExtend = new StringBuilder("(unsigned char)(");
-
 		stretchBuilderExtend.append("(" + stretchString + " + " + (-inputMin) + ")");
 		stretchBuilderExtend.append("*("+ outputMax + "/" + (inputMax - inputMin) + ")");
 		stretchBuilderExtend.append(" + " + outputMin + ")");
@@ -469,6 +323,34 @@ public class WCPSQueryFactory {
 		return stretchBuilderExtend.toString();
 	}
 
+    private String createLinearStretchCubeWCPSString(String linearScaleNodeKey, String payLoad) {
+		JSONObject scaleArgumets = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments");
+		
+		double min = 0;
+		double max = 1;
+				
+		for (String outputMinMax : scaleArgumets.keySet()) {
+			if (outputMinMax.contentEquals("min")) {
+		        min = (double) processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("min");		       
+			}
+			else if (outputMinMax.contentEquals("max")) {
+				max = (double) processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("max");
+			}
+		}	
+
+		StringBuilder stretchBuilder = new StringBuilder("(");
+		stretchBuilder.append(payLoad + ")");
+		String stretchString = stretchBuilder.toString();
+		String stretch1 = stretchString.replace("$pm", "$pm1");
+		String stretch2 = stretchString.replace("$pm", "$pm2");
+		String stretch3 = stretchString.replace("$pm", "$pm3");
+		String stretch4 = stretchString.replace("$pm", "$pm4");
+		StringBuilder stretchBuilderExtend = new StringBuilder("(unsigned char)(");
+		stretchBuilderExtend.append(stretch1 + " - " + "min" + stretch2 + ")*((" + max + "-" + min + ")" + "/(max" + stretch3 + "-min" + stretch4 + ")) + 0");
+		
+		return stretchBuilderExtend.toString();
+	}
+    
 	/**
 	 * Helper Method to create a string describing an arbitrary filtering as defined
 	 * from the process graph
@@ -497,7 +379,6 @@ public class WCPSQueryFactory {
 				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
 				}
-
 				stringBuilder.append(high);
 				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
@@ -539,7 +420,6 @@ public class WCPSQueryFactory {
 				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
 				}
-
 				stringBuilder.append(high);
 				if (axis.contains("DATE")) {
 					stringBuilder.append("\"");
@@ -585,8 +465,7 @@ public class WCPSQueryFactory {
 			StringBuilder stringBuilder = new StringBuilder("condense ");			
 			stringBuilder.append(operator + " over $pm t (imageCrsDomain(");
 			stringBuilder.append(createFilteredCollectionString(collectionName, tempFilter) + ",");
-			stringBuilder.append(axis + ")) using ");
-			
+			stringBuilder.append(axis + ")) using ");			
 			this.filters.remove(tempFilter);
 			this.filters.add(new Filter(axis, "$pm"));
 			
@@ -645,7 +524,7 @@ public class WCPSQueryFactory {
 		}
 		return null;
 	}
-		
+	
 	private String getFromNodeOfCurrentKey(String currentNodeKey){		
 		JSONObject currentNodeData = processGraph.getJSONObject(currentNodeKey).getJSONObject("arguments");
 		for (String argumentsKey : currentNodeData.keySet()) {
@@ -662,7 +541,7 @@ public class WCPSQueryFactory {
 		return format;
 	}
 
-	private JSONArray sortNodes(String saveNode, JSONArray nodesArray) {		
+	private JSONArray sortNodes(String saveNode, JSONArray nodesArray) {
 		String nextNode = saveNode;
 		for (String nodeKey : processGraph.keySet()) {
 		          nodesArray.put(nextNode);
@@ -676,7 +555,7 @@ public class WCPSQueryFactory {
 	 * 
 	 * @param processParent
 	 * @return
-	 */	
+	 */
 	private JSONObject parseOpenEOProcessGraph() {
 		JSONObject result = null;
 		JSONArray nodesArray = new JSONArray();
@@ -684,18 +563,17 @@ public class WCPSQueryFactory {
 		String saveNode = getSaveNode();		
 		nodesArray = sortNodes(saveNode, nodesArray);
 		
-		for(int a = 0; a < nodesArray.length(); a++) {		
+		for(int a = 0; a < nodesArray.length(); a++) {
 		log.debug("Executing Process : " + nodesArray.getString(a));
 		String nodeKeyOfCurrentProcess = nodesArray.getString(a);
 		JSONObject currentProcess = processGraph.getJSONObject(nodeKeyOfCurrentProcess);
-		String currentProcessID = currentProcess.getString("process_id");
-		
-		executeProcesses(currentProcessID, nodeKeyOfCurrentProcess);		
+		String currentProcessID = currentProcess.getString("process_id");		
+		executeProcesses(currentProcessID, nodeKeyOfCurrentProcess);
 		}
 		return result;
-    }   
+    }
 	
-	private void executeProcesses(String processID, String processNodeKey) {		
+	private void executeProcesses(String processID, String processNodeKey) {
 		JSONObject processNode = processGraph.getJSONObject(processNodeKey);
 		
 		if (processID.equals("load_collection")) {			
@@ -746,19 +624,19 @@ public class WCPSQueryFactory {
 		
 		else if (processID.contains("_time")) {
 			log.debug("Found Time node: " + processNode.getString("process_id"));
-			    createTemporalAggregate(processID);
-			    log.debug("Filters are: " + filters);
-			}
+			createTemporalAggregate(processID);
+			log.debug("Filters are: " + filters);
+		}
 			
 		else if (processID.equals("ndvi")) {
 			log.debug("Found NDVI node: " + processNode.getString("process_id"));
-			    JSONObject processAggregate = processGraph.getJSONObject(processNodeKey);			    
-			    String collectionNode = getFilterCollectionNode(processNodeKey);
-			    String collection = processGraph.getJSONObject(collectionNode).getJSONObject("arguments").getString("id");
-			    log.debug("Collection found: " + collection);
-			    createNDVIAggregateFromProcess(processAggregate, collection);
-			    log.debug("Filters are: " + filters);
-		    }		
+			JSONObject processAggregate = processGraph.getJSONObject(processNodeKey);			    
+			String collectionNode = getFilterCollectionNode(processNodeKey);
+			String collection = processGraph.getJSONObject(collectionNode).getJSONObject("arguments").getString("id");
+			log.debug("Collection found: " + collection);
+			createNDVIAggregateFromProcess(processAggregate, collection);
+			log.debug("Filters are: " + filters);
+		}		
 		
    // else if (processID.equals("filter_temporal")) {
 		
@@ -850,17 +728,18 @@ public class WCPSQueryFactory {
 	}
 
 	private String collectionName(JSONObject processParent) {
-	String coll = null;
-	
-	for (Object keydc : processParent.keySet()) {		
-		String keyStrdc = (String) keydc;				
-		JSONObject processNode1 = processParent.getJSONObject(keyStrdc);
-		String processName1 = processNode1.getString("process_id");		
-		if (processName1.equals("load_collection")) {			
-			JSONObject processDatacube = processParent.getJSONObject(keyStrdc);
-			JSONObject processDatacubeArguments = processDatacube.getJSONObject("arguments");			
-			coll = (String) processDatacubeArguments.get("id");			
-		}}
+		String coll = null;
+
+		for (Object keydc : processParent.keySet()) {
+			String keyStrdc = (String) keydc;
+			JSONObject processNode1 = processParent.getJSONObject(keyStrdc);
+			String processName1 = processNode1.getString("process_id");
+			if (processName1.equals("load_collection")) {
+				JSONObject processDatacube = processParent.getJSONObject(keyStrdc);
+				JSONObject processDatacubeArguments = processDatacube.getJSONObject("arguments");
+				coll = (String) processDatacubeArguments.get("id");
+			}
+		}
 		return coll;
 	}
 	
@@ -876,7 +755,6 @@ public class WCPSQueryFactory {
 			if (!keyStr.contains("extent")) {
 				log.debug("no spatial or temporal extent defined in filter");
 			}			
-			// check if filter contains spatial information
 			else if (process.get("process_id").toString().contains("bbox")) {
 				log.debug("spatial extent defined in filter");
 				int srs = 0;				
@@ -904,8 +782,7 @@ public class WCPSQueryFactory {
 				if (srs > 0) {
 					createBoundingBoxFilterFromArgs(process, srs, coll);
 				}
-			}
-			// check if filter contains temporal information
+			}			
 			else if (process.get("process_id").toString().contains("temporal")) {
 				log.debug("temporal extent defined in filter");				
 				JSONArray extentArray = (JSONArray) process.get(keyStr);
@@ -920,7 +797,7 @@ public class WCPSQueryFactory {
 		JSONObject extent;
 		String extentlower = extentArray.get(0).toString();
 		String extentupper = extentArray.get(1).toString();
-
+		
 		JSONObject jsonresp = null;
 		try {
 			jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
