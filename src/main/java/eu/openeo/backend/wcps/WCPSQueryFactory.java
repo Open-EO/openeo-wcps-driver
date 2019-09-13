@@ -216,28 +216,28 @@ public class WCPSQueryFactory {
 		
 		for (String nodeKey : reduceProcesses.keySet()) {
 			String name = reduceProcesses.getJSONObject(nodeKey).getString("process_id");
-			String arrayElementPayLoad = null;
-			if (name.contains("array_element")) {
+			
+			if (name.equals("array_element")) {
 				JSONObject arrayData =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				int arrayIndex = arrayData.getInt("index");
 				if (((JsonElement) arrayData.get("data")).isJsonObject()) {
 					reduceBuilderExtend = createBandWCPSString(arrayIndex, reduceNodeKey, filterString, collName);
-					arrayElementPayLoad = reduceBuilderExtend;
+					
 				}
 				else {
 					reduceBuilderExtend = arrayData.getJSONArray("data").getString(arrayIndex);					
 				}
 			}
-			if (name.contains("mean")) {
+			if (name.equals("mean")) {
 				reduceBuilderExtend = createMeanWCPSString(nodeKey, payLoad, reduceProcesses);
 			}
-			if (name.contains("min")) {
+			if (name.equals("min")) {
 				reduceBuilderExtend = createMinWCPSString(nodeKey, payLoad, reduceProcesses);
 			}
-			if (name.contains("max")) {
+			if (name.equals("max")) {
 				reduceBuilderExtend = createMaxWCPSString(nodeKey, payLoad, reduceProcesses);
 			}
-			if (name.contains("product")) {
+			if (name.equals("product")) {
 				JSONArray productArray =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("data");
 				JSONArray productArrayreturn = new JSONArray();;
 				for (int a = 0; a < productArray.length(); a++) {
@@ -246,8 +246,8 @@ public class WCPSQueryFactory {
 						JSONObject bandData =  reduceProcesses.getJSONObject(dataNode).getJSONObject("arguments");
 						int bandIndex = bandData.getInt("index");
 						if (((JsonElement) bandData.get("data")).isJsonObject()) {
-							arrayElementPayLoad = createBandWCPSString(bandIndex, reduceNodeKey, filterString, collName);							
-							productArrayreturn.put(arrayElementPayLoad);
+							String bandPayLoad = createBandWCPSString(bandIndex, reduceNodeKey, filterString, collName);							
+							productArrayreturn.put(bandPayLoad);
 						}
 					}
 					else {
@@ -255,6 +255,63 @@ public class WCPSQueryFactory {
 					}
 				}
 				reduceBuilderExtend = createProductWCPSString(productArrayreturn);
+			}
+			if (name.equals("sum")) {
+				JSONArray sumArray =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("data");
+				JSONArray sumArrayreturn = new JSONArray();;
+				for (int a = 0; a < sumArray.length(); a++) {
+					if (((JsonElement) sumArray.get(a)).isJsonObject()) {
+						String dataNode = sumArray.getJSONObject(a).getString("from_node");
+						JSONObject bandData =  reduceProcesses.getJSONObject(dataNode).getJSONObject("arguments");
+						int bandIndex = bandData.getInt("index");
+						if (((JsonElement) bandData.get("data")).isJsonObject()) {
+							String bandPayLoad = createBandWCPSString(bandIndex, reduceNodeKey, filterString, collName);							
+							sumArrayreturn.put(bandPayLoad);
+						}
+					}
+					else {
+						sumArrayreturn.put(sumArray.get(a));
+					}
+				}
+				reduceBuilderExtend = createSumWCPSString(sumArrayreturn);
+			}
+			if (name.equals("subtract")) {
+				JSONArray subtractArray =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("data");
+				JSONArray subtractArrayreturn = new JSONArray();;
+				for (int a = 0; a < subtractArray.length(); a++) {
+					if (((JsonElement) subtractArray.get(a)).isJsonObject()) {
+						String dataNode = subtractArray.getJSONObject(a).getString("from_node");
+						JSONObject bandData =  reduceProcesses.getJSONObject(dataNode).getJSONObject("arguments");
+						int bandIndex = bandData.getInt("index");
+						if (((JsonElement) bandData.get("data")).isJsonObject()) {
+							String bandPayLoad = createBandWCPSString(bandIndex, reduceNodeKey, filterString, collName);							
+							subtractArrayreturn.put(bandPayLoad);
+						}
+					}
+					else {
+						subtractArrayreturn.put(subtractArray.get(a));
+					}
+				}
+				reduceBuilderExtend = createSubtractWCPSString(subtractArrayreturn);
+			}
+			if (name.equals("divide")) {
+				JSONArray divideArray =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("data");
+				JSONArray divideArrayreturn = new JSONArray();;
+				for (int a = 0; a < divideArray.length(); a++) {
+					if (((JsonElement) divideArray.get(a)).isJsonObject()) {
+						String dataNode = divideArray.getJSONObject(a).getString("from_node");
+						JSONObject bandData =  reduceProcesses.getJSONObject(dataNode).getJSONObject("arguments");
+						int bandIndex = bandData.getInt("index");
+						if (((JsonElement) bandData.get("data")).isJsonObject()) {
+							String bandPayLoad = createBandWCPSString(bandIndex, reduceNodeKey, filterString, collName);							
+							divideArrayreturn.put(bandPayLoad);
+						}
+					}
+					else {
+						divideArrayreturn.put(divideArray.get(a));
+					}
+				}
+				reduceBuilderExtend = createDivideWCPSString(divideArrayreturn);
 			}
 		}
 		return reduceBuilderExtend;
@@ -272,8 +329,34 @@ public class WCPSQueryFactory {
 	}
 	
 	private String createProductWCPSString(JSONArray productArrayreturn) {
-		StringBuilder stretchBuilder = new StringBuilder("");
-		
+		StringBuilder stretchBuilder = new StringBuilder("("+productArrayreturn.get(0));
+		for (int f = 1; f < productArrayreturn.length(); f++) {
+			stretchBuilder.append("*"+productArrayreturn.get(f));
+		}
+		return stretchBuilder.toString();
+	}
+	
+	private String createSumWCPSString(JSONArray sumArrayreturn) {
+		StringBuilder stretchBuilder = new StringBuilder("("+sumArrayreturn.get(0));
+		for (int f = 1; f < sumArrayreturn.length(); f++) {
+			stretchBuilder.append("+"+sumArrayreturn.get(f));
+		}
+		return stretchBuilder.toString();
+	}
+	
+	private String createSubtractWCPSString(JSONArray subtractArrayreturn) {
+		StringBuilder stretchBuilder = new StringBuilder("("+subtractArrayreturn.get(0));
+		for (int f = 1; f < subtractArrayreturn.length(); f++) {
+			stretchBuilder.append("-"+subtractArrayreturn.get(f));
+		}
+		return stretchBuilder.toString();
+	}
+	
+	private String createDivideWCPSString(JSONArray divideArrayreturn) {
+		StringBuilder stretchBuilder = new StringBuilder("("+divideArrayreturn.get(0));
+		for (int f = 1; f < divideArrayreturn.length(); f++) {
+			stretchBuilder.append("/"+divideArrayreturn.get(f));
+		}
 		return stretchBuilder.toString();
 	}
 	
@@ -422,7 +505,7 @@ public class WCPSQueryFactory {
 			else if (outputMinMax.contentEquals("outputMax")) {
 				outputMax = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
 			}		
-		}	
+		}
 
 		StringBuilder stretchBuilder = new StringBuilder("(");
 		stretchBuilder.append(payLoad + ")");

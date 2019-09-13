@@ -105,6 +105,229 @@
     ]
     },
     {
+    "id": "product",
+    "summary": "Multiplication of a sequence of numbers",
+    "description": "This process is an exact alias for the `multiply` process. See ``multiply()`` for more information.",
+    "categories": [
+        "math",
+        "reducer"
+    ],
+    "parameter_order": ["data", "ignore_nodata"],
+    "parameters": {
+        "data": {
+            "description": "See ``multiply()`` for more information.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                }
+            },
+            "required": true
+        },
+        "ignore_nodata": {
+            "description": "See ``multiply()`` for more information.",
+            "schema": {
+                "type": "boolean",
+                "default": true
+            }
+        }
+    },
+    "returns": {
+        "description": "See ``multiply()`` for more information.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "exceptions": {
+        "MultiplicandMissing": {
+            "message": "Multiplication requires at least two numbers."
+        }
+    }
+    },
+    {
+    "id": "sum",
+    "summary": "Addition of a sequence of numbers",
+    "description": "Sums up all elements in a sequential array of numbers and returns the computed sum.\n\nThe computations should follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/4610935) whenever the processing environment supports it. Otherwise an exception must the thrown for incomputable results.\n\nBy default no-data values are ignored. Setting `ignore_nodata` to `false` considers no-data values so that `null` is returned if any element is such a value.",
+    "categories": [
+        "math",
+        "reducer"
+    ],
+    "parameter_order": ["data", "ignore_nodata"],
+    "parameters": {
+        "data": {
+            "description": "An array of numbers with at least two elements.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "minItems": 2
+            },
+            "required": true
+        },
+        "ignore_nodata": {
+            "description": "Indicates whether no-data values are ignored or not. Ignores them by default. Setting this flag to `false` considers no-data values so that `null` is returned if any value is such a value.",
+            "schema": {
+                "type": "boolean",
+                "default": true
+            }
+        }
+    },
+    "returns": {
+        "description": "The computed sum of the sequence of numbers.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "exceptions": {
+        "SummandMissing": {
+            "message": "Addition requires at least two numbers."
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/Sum.html",
+            "title": "Sum explained by Wolfram MathWorld"
+        },
+        {
+            "rel": "about",
+            "href": "https://ieeexplore.ieee.org/document/4610935",
+            "title": "IEEE Standard 754-2008 for Floating-Point Arithmetic"
+        }
+    ]
+    },
+    {
+    "id": "subtract",
+    "summary": "Subtraction of a sequence of numbers",
+    "description": "Takes the first element of a sequential array of numbers and subtracts all other elements from it.\n\nThe computations should follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/4610935) whenever the processing environment supports it. Otherwise an exception must the thrown for incomputable results.\n\nBy default no-data values are ignored. Setting `ignore_nodata` to `false` considers no-data values so that `null` is returned if any element is such a value.",
+    "categories": [
+        "math",
+        "reducer"
+    ],
+    "parameter_order": ["data", "ignore_nodata"],
+    "parameters": {
+        "data": {
+            "description": "An array of numbers with at least two elements.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "minItems": 2
+            },
+            "required": true
+        },
+        "ignore_nodata": {
+            "description": "Indicates whether no-data values are ignored or not. Ignores them by default. Setting this flag to `false` considers no-data values so that `null` is returned if any value is such a value.",
+            "schema": {
+                "type": "boolean",
+                "default": true
+            }
+        }
+    },
+    "returns": {
+        "description": "The computed result of the sequence of numbers.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "exceptions": {
+        "SubtrahendMissing": {
+            "message": "Subtraction requires at least two numbers (a minuend and one or more subtrahends)."
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/Subtraction.html",
+            "title": "Subtraction explained by Wolfram MathWorld"
+        },
+        {
+            "rel": "about",
+            "href": "https://ieeexplore.ieee.org/document/4610935",
+            "title": "IEEE Standard 754-2008 for Floating-Point Arithmetic"
+        }
+    ]
+    },
+    {
+    "id": "divide",
+    "summary": "Division of a sequence of numbers",
+    "description": "Divides the first element in a sequential array of numbers by all other elements.\n\nThe computations should follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/4610935) so that for example a division by zero should result in ±infinity if the processing environment supports it. Otherwise an exception must the thrown for incomputable results.\n\nBy default no-data values are ignored. Setting `ignore_nodata` to `false` considers no-data values so that `null` is returned if any element is such a value.",
+    "categories": [
+        "math",
+        "reducer"
+    ],
+    "parameter_order": ["data", "ignore_nodata"],
+    "parameters": {
+        "data": {
+            "description": "An array of numbers with at least two elements.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "minItems": 2
+            },
+            "required": true
+        },
+        "ignore_nodata": {
+            "description": "Indicates whether no-data values are ignored or not. Ignores them by default. Setting this flag to `false` considers no-data values so that `null` is returned if any value is such a value.",
+            "schema": {
+                "type": "boolean",
+                "default": true
+            }
+        }
+    },
+    "returns": {
+        "description": "The computed result of the sequence of numbers.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "exceptions": {
+        "DivisorMissing": {
+            "message": "Division requires at least two numbers (a dividend and one or more divisors)."
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/Division.html",
+            "title": "Division explained by Wolfram MathWorld"
+        },
+        {
+            "rel": "about",
+            "href": "https://ieeexplore.ieee.org/document/4610935",
+            "title": "IEEE Standard 754-2008 for Floating-Point Arithmetic"
+        }
+    ]
+    },
+    {
     "id": "mean",
     "summary": "Arithmetic mean (average)",
     "description": "The arithmetic mean of an array of numbers is the quantity commonly called the average. It is defined as the sum of all elements divided by the number of elements.",
