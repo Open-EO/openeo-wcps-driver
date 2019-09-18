@@ -105,6 +105,1316 @@
     ]
     },
     {
+    "id": "absolute",
+    "summary": "Absolute value",
+    "description": "Computes the absolute value of a real number `x`, which is the \"unsigned\" portion of x and often denoted as *|x|*.\n\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math"
+    ],
+    "parameters": {
+        "x": {
+            "description": "A number.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed absolute value.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ],
+            "minimum": 0
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/AbsoluteValue.html",
+            "title": "Absolute value explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "and",
+    "summary": "Are all of the values true?",
+    "description": "Checks if **all** of the values are true. Evaluates each expression from the first to the last element and stops once the outcome is unambiguous.\n\nIf only one value is given the process evaluates to the given value. If no value is given (i.e. the array is empty) the process returns `null`.\n\nBy default all no-data values are ignored so that the process returns `true` if all other values are true and otherwise returns `false`.\nSetting the `ignore_nodata` flag to `false` considers no-data values so that `null` is a valid logical object. If a component is `null`, the result will be `null` if the outcome is ambiguous. See the following truth table:\n\n```\n      || null  | false | true\n----- || ----- | ----- | -----\nnull  || null  | false | null\nfalse || false | false | false\ntrue  || null  | false | true\n```",
+    "categories": [
+        "logic",
+        "reducer"
+    ],
+    "parameter_order": ["expressions", "ignore_nodata"],
+    "parameters": {
+        "expressions": {
+            "description": "A set of boolean values.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                }
+            },
+            "required": true
+        },
+        "ignore_nodata": {
+            "description": "Indicates whether no-data values are ignored or not and ignores them by default.",
+            "schema": {
+                "type": "boolean",
+                "default": true
+            }
+        }
+    },
+    "returns": {
+        "description": "Boolean result of the logical expressions.",
+        "schema": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    }
+    },
+    {
+    "id": "xor",
+    "summary": "Is exactly one value true?",
+    "description": "Checks if **exactly one** of the values is true. Evaluates each expression from the first to the last element and stops once the outcome is unambiguous.\n\nIf only one value is given the process evaluates to the given value. If no value is given (i.e. the array is empty) the process returns `null`.\n\nBy default all no-data values are ignored so that the process returns `true` if exactly one of the other values is true and otherwise returns `false`.\nSetting the `ignore_nodata` flag to `false` considers no-data values so that `null` is a valid logical object. If a component is `null`, the result will be `null` if the outcome is ambiguous. See the following truth table:\n\n```\n      || null | false | true\n----- || ---- | ----- | -----\nnull  || null | null  | null\nfalse || null | false | true\ntrue  || null | true  | false\n```",
+    "categories": [
+        "logic",
+        "reducer"
+    ],
+    "parameter_order": ["expressions", "ignore_nodata"],
+    "parameters": {
+        "expressions": {
+            "description": "A set of boolean values.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                }
+            },
+            "required": true
+        },
+        "ignore_nodata": {
+            "description": "Indicates whether no-data values are ignored or not and ignores them by default.",
+            "schema": {
+                "type": "boolean",
+                "default": true
+            }
+        }
+    },
+    "returns": {
+        "description": "Boolean result of the logical expressions.",
+        "schema": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    }
+    },
+    {
+    "id": "or",
+    "summary": "Is at least one value true?",
+    "description": "Checks if **at least one** of the values is true. Evaluates each expression from the first to the last element and stops once the outcome is unambiguous.\n\nIf only one value is given the process evaluates to the given value. If no value is given (i.e. the array is empty) the process returns `null`.\n\nBy default all no-data values are ignored so that the process returns `true` if at least one of the other values is true and otherwise returns `false`.\nSetting the `ignore_nodata` flag to `false` considers no-data values so that `null` is a valid logical object. If a component is `null`, the result will be `null` if the outcome is ambiguous. See the following truth table:\n\n```\n      || null | false | true\n----- || ---- | ----- | ----\nnull  || null | null  | true\nfalse || null | false | true\ntrue  || true | true  | true\n```",
+    "categories": [
+        "logic",
+        "reducer"
+    ],
+    "parameter_order": ["expressions", "ignore_nodata"],
+    "parameters": {
+        "expressions": {
+            "description": "A set of boolean values.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                }
+            },
+            "required": true
+        },
+        "ignore_nodata": {
+            "description": "Indicates whether no-data values are ignored or not and ignores them by default.",
+            "schema": {
+                "type": "boolean",
+                "default": true
+            }
+        }
+    },
+    "returns": {
+        "description": "Boolean result of the logical expressions.",
+        "schema": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    }
+    },
+    {
+    "id": "not",
+    "summary": "Inverting a boolean",
+    "description": "Inverts a single boolean so that `true` gets `false` and `false` gets `true`.\n\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "logic"
+    ],
+    "parameters": {
+        "expression": {
+            "description": "Boolean value to invert.",
+            "schema": {
+                "type": [
+                    "boolean",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "Inverted boolean value.",
+        "schema": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    }
+    },
+    {
+    "id": "log",
+    "summary": "Logarithm to a base",
+    "description": "Logarithm to the base `base` of the number `x` is defined to be the inverse function of taking b to the power of x.\n\nThe computations should follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/4610935) so that for example `log(0, 2)` should result in ±infinity if the processing environment supports it. Otherwise an exception must the thrown for incomputable results.\n\nThe no-data value `null` is passed through and therefore gets propagated if any of the arguments is `null`.",
+    "categories": [
+        "math > exponential & logarithmic"
+    ],
+    "parameter_order": ["x", "base"],
+    "parameters": {
+        "x": {
+            "description": "A number to compute the logarithm for.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        },
+        "base": {
+            "description": "The numerical base.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed logarithm.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/Logarithm.html",
+            "title": "Logarithm explained by Wolfram MathWorld"
+        },
+        {
+            "rel": "about",
+            "href": "https://ieeexplore.ieee.org/document/4610935",
+            "title": "IEEE Standard 754-2008 for Floating-Point Arithmetic"
+        }
+    ]
+    },
+    {
+    "id": "ln",
+    "summary": "Natural logarithm",
+    "description": "The natural logarithm is the logarithm to the base *e* of the number `x`. This process is an alias for the *log* process with the base set to *e*: `log(x, e())`. The natural logarithm is the inverse function of taking *e* to the power x.\n\nThe computations should follow [IEEE Standard 754](https://ieeexplore.ieee.org/document/4610935) so that for example `ln(0)` should result in ±infinity if the processing environment supports it. Otherwise an exception must the thrown for incomputable results.\n\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math > exponential & logarithmic"
+    ],
+    "parameters": {
+        "x": {
+            "description": "A number to compute the natural logarithm for.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed natural logarithm.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/NaturalLogarithm.html",
+            "title": "Natural logarithm explained by Wolfram MathWorld"
+        },
+        {
+            "rel": "about",
+            "href": "https://ieeexplore.ieee.org/document/4610935",
+            "title": "IEEE Standard 754-2008 for Floating-Point Arithmetic"
+        }
+    ]
+    },
+    {
+    "id": "power",
+    "summary": "Exponentiation",
+    "description": "Computes the exponentiation for the base `base` raised to the power of `p`.\n\nThe no-data value `null` is passed through and therefore gets propagated if any of the arguments is `null`.",
+    "categories": [
+        "math",
+        "math > exponential & logarithmic"
+    ],
+    "parameter_order": ["base", "p"],
+    "parameters": {
+        "base": {
+            "description": "The numerical base.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        },
+        "p": {
+            "description": "The numerical exponent.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed value for `base` raised to the power of `p`.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/Power.html",
+            "title": "Power explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "exp",
+    "summary": "Exponentiation to the base e",
+    "description": "Exponential function to the base *e* raised to the power of `p`. This process is an alias for *e^p^* / `power(e(), p)`.\n\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math > exponential & logarithmic"
+    ],
+    "parameters": {
+        "p": {
+            "description": "The numerical exponent.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed value for *e* raised to the power of `p`.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/ExponentialFunction.html",
+            "title": "Exponential function explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "pi",
+    "summary": "Pi (\u03c0)",
+    "description": "The real number Pi (\u03c0) is a mathematical constant that is the ratio of the circumference of a circle to its diameter. The numerical value is approximately *3.14159*.",
+    "categories": [
+        "math > constants",
+        "math > trigonometric"
+    ],
+    "parameters": {},
+    "returns": {
+        "description": "The numerical value of Pi.",
+        "schema": {
+            "type": "number"
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/Pi.html",
+            "title": "Mathematical constant Pi explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "e",
+    "summary": "Euler's number (e)",
+    "description": "The real number *e* is a mathematical constant that is the base of the natural logarithm such that *ln(e) = 1*. The numerical value is approximately *2.71828*.",
+    "categories": [
+        "math > constants",
+        "math > exponential & logarithmic"
+    ],
+    "parameters": {},
+    "returns": {
+        "description": "The numerical value of Euler's number.",
+        "schema": {
+            "type": "number"
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/e.html",
+            "title": "Mathematical constant e explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "gte",
+    "summary": "Greater than or equal to comparison",
+    "description": "Compares whether `x` is greater than or equal to `y`.\n\n**Remarks:**\n\n* If any of the operands is `null`, the return value is `null`.\n* Temporal strings can *not* be compared based on their string representation due to the time zone / time-offset representations.\n* Comparing strings is currently not supported, but is planned to be added in the future.",
+    "categories": [
+        "comparison"
+    ],
+    "parameter_order": ["x", "y"],
+    "parameters": {
+        "x": {
+            "description": "First operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        },
+        "y": {
+            "description": "Second operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "`true` if `x` is greater than or equal to `y` or `null` if any of the operands is `null`, otherwise `false`.",
+        "schema": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "https://open-eo.github.io/openeo-api/processes/#openeo-specific-formats",
+            "title": "Information about the supported temporal formats."
+        }
+    ]
+    },
+    {
+    "id": "gt",
+    "summary": "Greater than comparison",
+    "description": "Compares whether `x` is strictly greater than `y`.\n\n**Remarks:**\n\n* If any of the operands is `null`, the return value is `null`.\n* Temporal strings can *not* be compared based on their string representation due to the time zone / time-offset representations.\n* Comparing strings is currently not supported, but is planned to be added in the future.",
+    "categories": [
+        "comparison"
+    ],
+    "parameter_order": ["x", "y"],
+    "parameters": {
+        "x": {
+            "description": "First operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        },
+        "y": {
+            "description": "Second operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "`true` if `x` is strictly greater than `y` or `null` if any of the operands is `null`, otherwise `false`.",
+        "schema": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "https://open-eo.github.io/openeo-api/processes/#openeo-specific-formats",
+            "title": "Information about the supported temporal formats."
+        }
+    ]
+    },
+    {
+    "id": "eq",
+    "summary": "Equal to comparison",
+    "description": "Compares whether `x` is strictly equal to `y`.\n\n**Remarks:**\n\n* Data types MUST be checked strictly, for example a string with the content *1* is not equal to the number *1*. Nevertheless, an integer *1* is equal to a floating point number *1.0* as `integer` is a sub-type of `number`.\n* If any of the operands is `null`, the return value is `null`.\n* Strings are expected to be encoded in UTF-8 by default.\n* Temporal strings MUST be compared differently than other strings and MUST NOT be compared based on their string representation due to different possible representations. For example, the UTC time zone representation `Z` has the same meaning as `+00:00`.",
+    "categories": [
+        "texts",
+        "comparison"
+    ],
+    "parameter_order": ["x", "y", "delta", "case_sensitive"],
+    "parameters": {
+        "x": {
+            "description": "First operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        },
+        "y": {
+            "description": "Second operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        },
+        "delta": {
+            "description": "Only applicable for comparing two numbers. If this optional parameter is set to a positive non-zero number the equality of two numbers is checked against a delta value. This is especially useful to circumvent problems with floating point inaccuracy in machine-based computation.\n\nThis option is basically an alias for the following computation: `lte(abs(minus([x, y]), delta)`",
+            "schema": {
+                "type": ["number", "null"],
+                "default": null
+            }
+        },
+        "case_sensitive": {
+            "description": "Only applicable for comparing two strings. Case sensitive comparison can be disabled by setting this parameter to `false`.",
+            "schema": {
+                "type": "boolean",
+                "default": true
+            }
+        }
+    },
+    "returns": {
+        "description": "Returns `true` if `x` is equal to `y`, `null` if any of the operands is `null`, otherwise `false`.",
+        "schema": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "https://open-eo.github.io/openeo-api/processes/#openeo-specific-formats",
+            "title": "Information about the supported temporal formats."
+        }
+    ]
+    },
+    {
+    "id": "lt",
+    "summary": "Less than comparison",
+    "description": "Compares whether `x` is strictly less than `y`.\n\n**Remarks:**\n\n* If any of the operands is `null`, the return value is `null`.\n* Temporal strings can *not* be compared based on their string representation due to the time zone / time-offset representations.\n* Comparing strings is currently not supported, but is planned to be added in the future.",
+    "categories": [
+        "comparison"
+    ],
+    "parameter_order": ["x", "y"],
+    "parameters": {
+        "x": {
+            "description": "First operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        },
+        "y": {
+            "description": "Second operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "`true` if `x` is strictly less than `y`, `null` if any of the operands is `null`, otherwise `false`.",
+        "schema": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "https://open-eo.github.io/openeo-api/processes/#openeo-specific-formats",
+            "title": "Information about the supported temporal formats."
+        }
+    ]
+    },
+    {
+    "id": "lte",
+    "summary": "Less than or equal to comparison",
+    "description": "Compares whether `x` is less than or equal to `y`.\n\n**Remarks:**\n\n* If any of the operands is `null`, the return value is `null`.\n* Temporal strings can *not* be compared based on their string representation due to the time zone / time-offset representations.\n* Comparing strings is currently not supported, but is planned to be added in the future.",
+    "categories": [
+        "comparison"
+    ],
+    "parameter_order": ["x", "y"],
+    "parameters": {
+        "x": {
+            "description": "First operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        },
+        "y": {
+            "description": "Second operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "`true` if `x` is less than or equal to `y`, `null` if any of the operands is `null`, otherwise `false`.",
+        "schema": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "https://open-eo.github.io/openeo-api/processes/#openeo-specific-formats",
+            "title": "Information about the supported temporal formats."
+        }
+    ]
+    },
+    {
+    "id": "neq",
+    "summary": "Not equal to comparison",
+    "description": "Compares whether `x` is *not* strictly equal to `y`. This process is an alias for: `not(eq(val1, val2))`.\n\n**Remarks:**\n\n* Data types MUST be checked strictly, for example a string with the content *1* is not equal to the number *1*. Nevertheless, an integer *1* is equal to a floating point number *1.0* as `integer` is a sub-type of `number`.\n* If any of the operands is `null`, the return value is `null`.\n* Strings are expected to be encoded in UTF-8 by default.\n* Temporal strings MUST be compared differently than other strings and MUST NOT be compared based on their string representation due to different possible representations. For example, the UTC time zone representation `Z` has the same meaning as `+00:00`.",
+    "categories": [
+        "texts",
+        "comparison"
+    ],
+    "parameter_order": ["x", "y", "delta", "case_sensitive"],
+    "parameters": {
+        "x": {
+            "description": "First operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        },
+        "y": {
+            "description": "Second operand.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    {
+                        "type": "string",
+                        "format": "time"
+                    }
+                ]
+            },
+            "required": true
+        },
+        "delta": {
+            "description": "Only applicable for comparing two numbers. If this optional parameter is set to a positive non-zero number the non-equality of two numbers is checked against a delta value. This is especially useful to circumvent problems with floating point inaccuracy in machine-based computation.\n\nThis option is basically an alias for the following computation: `gt(abs(minus([x, y]), delta)`",
+            "schema": {
+                "type": ["number", "null"],
+                "default": null
+            }
+        },
+        "case_sensitive": {
+            "description": "Only applicable for comparing two strings. Case sensitive comparison can be disabled by setting this parameter to `false`.",
+            "schema": {
+                "type": "boolean",
+                "default": true
+            }
+        }
+    },
+    "returns": {
+        "description": "Returns `true` if `x` is *not* equal to `y`, `null` if any of the operands is `null`, otherwise `false`.",
+        "schema": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "https://open-eo.github.io/openeo-api/processes/#openeo-specific-formats",
+            "title": "Information about the supported temporal formats."
+        }
+    ]
+    },
+    {
+    "id": "sin",
+    "summary": "Sine",
+    "description": "Computes the sine of `x`.\n\nWorks on radians only.\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math > trigonometric"
+    ],
+    "parameters": {
+        "x": {
+            "description": "An angle in radians.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed sine of `x`.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/Sine.html",
+            "title": "Sine explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "cos",
+    "summary": "Cosine",
+    "description": "Computes the cosine of `x`.\n\nWorks on radians only.\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math > trigonometric"
+    ],
+    "parameters": {
+        "x": {
+            "description": "An angle in radians.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed cosine of `x`.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/Cosine.html",
+            "title": "Cosine explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "tan",
+    "summary": "Tangent",
+    "description": "Computes the tangent of `x`. The tangent is defined to be the sine of x divided by the cosine of x.\n\nWorks on radians only.\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math > trigonometric"
+    ],
+    "parameters": {
+        "x": {
+            "description": "An angle in radians.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed tangent of `x`.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/Tangent.html",
+            "title": "Tangent explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "sinh",
+    "summary": "Hyperbolic sine",
+    "description": "Computes the hyperbolic sine of `x`.\n\nWorks on radians only.\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math > trigonometric"
+    ],
+    "parameters": {
+        "x": {
+            "description": "An angle in radians.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed hyperbolic sine of `x`.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/HyperbolicSine.html",
+            "title": "Hyperbolic sine explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "cosh",
+    "summary": "Hyperbolic cosine",
+    "description": "Computes the hyperbolic cosine of `x`.\n\nWorks on radians only.\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math > trigonometric"
+    ],
+    "parameters": {
+        "x": {
+            "description": "An angle in radians.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed hyperbolic cosine of `x`.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/HyperbolicCosine.html",
+            "title": "Hyperbolic cosine explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "tanh",
+    "summary": "Hyperbolic tangent",
+    "description": "Computes the hyperbolic tangent of `x`. The tangent is defined to be the hyperbolic sine of x divided by the hyperbolic cosine of x.\n\nWorks on radians only.\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math > trigonometric"
+    ],
+    "parameters": {
+        "x": {
+            "description": "An angle in radians.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed hyperbolic tangent of `x`.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/HyperbolicTangent.html",
+            "title": "Hyperbolic tangent explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "arcsin",
+    "summary": "Inverse sine",
+    "description": "Computes the arc sine of `x`. The arc sine is the inverse function of the sine so that *arcsin(sin(x)) = x*.\n\nWorks on radians only.\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math > trigonometric"
+    ],
+    "parameters": {
+        "x": {
+            "description": "A number.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed angle in radians.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/InverseSine.html",
+            "title": "Inverse sine explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "arccos",
+    "summary": "Inverse cosine",
+    "description": "Computes the arc cosine of `x`. The arc cosine is the inverse function of the cosine so that *arccos(cos(x)) = x*.\n\nWorks on radians only.\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math > trigonometric"
+    ],
+    "parameters": {
+        "x": {
+            "description": "A number.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed angle in radians.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/InverseCosine.html",
+            "title": "Inverse cosine explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "arctan",
+    "summary": "Inverse tangent",
+    "description": "Computes the arc tangent of `x`. The arc tangent is the inverse function of the tangent so that *arctan(tan(x)) = x*.\n\nWorks on radians only.\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math > trigonometric"
+    ],
+    "parameters": {
+        "x": {
+            "description": "A number.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed angle in radians.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/InverseTangent.html",
+            "title": "Inverse tangent explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
+    "id": "array_element",
+    "summary": "Get an element from an array",
+    "description": "Returns the element at the specified index from the array.",
+    "categories": [
+        "arrays"
+    ],
+    "parameter_order": ["data", "index", "return_nodata"],
+    "parameters": {
+        "data": {
+            "description": "An array.",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "description": "Any data type is allowed."
+                }
+            },
+            "required": true
+        },
+        "index": {
+            "description": "The zero-based index of the element to retrieve.",
+            "schema": {
+                 "type": "integer"
+            },
+            "required": true
+        },
+        "return_nodata": {
+            "description": "By default this process throws an `IndexOutOfBounds` exception if the index is invalid. If you want to return `null` instead, set this flag to `true`.",
+            "schema": {
+                 "type": "boolean",
+                 "default": false
+            }
+        }
+    },
+    "returns": {
+        "description": "The value of the requested element.",
+        "schema": {
+            "description": "Any data type is allowed."
+        }
+    },
+    "exceptions": {
+        "IndexOutOfBounds": {
+            "message": "The array has no element with the specified index."
+        }
+    }
+    },
+    {
     "id": "product",
     "summary": "Multiplication of a sequence of numbers",
     "description": "This process is an exact alias for the `multiply` process. See ``multiply()`` for more information.",
