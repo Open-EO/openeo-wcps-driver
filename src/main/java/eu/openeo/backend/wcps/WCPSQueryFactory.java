@@ -773,8 +773,9 @@ public class WCPSQueryFactory {
 	}
 
 	private String createBandWCPSString(int arrayIndex, String reduceNodeKey, String filterString, String collName) {
-		StringBuilder stretchBuilder = new StringBuilder("");
+		StringBuilder stretchBuilder = new StringBuilder("");		
 		String fromNodeOfReduce = processGraph.getJSONObject(reduceNodeKey).getJSONObject("arguments").getJSONObject("data").getString("from_node");
+		fromNodeOfReduce = getFilterCollectionNode(fromNodeOfReduce);
 		JSONObject fromProcess = processGraph.getJSONObject(fromNodeOfReduce);
 		if (fromProcess.getString("process_id").equals("load_collection")) {
 			String bandName = fromProcess.getJSONObject("arguments").getJSONArray("bands").getString(arrayIndex);
@@ -1368,11 +1369,10 @@ public class WCPSQueryFactory {
 		String saveNode = getSaveNode();		
 		nodesArray = sortNodes(saveNode, nodesArray);
 
-		for(int a = 0; a < nodesArray.length(); a++) {
+		for(int a = nodesArray.length()-1; a>0; a--) {
 			log.debug("Executing Process : " + nodesArray.getString(a));
 			String nodeKeyOfCurrentProcess = nodesArray.getString(a);
-			JSONObject currentProcess = processGraph.getJSONObject(nodeKeyOfCurrentProcess);
-			String currentProcessID = currentProcess.getString("process_id");		
+			String currentProcessID = processGraph.getJSONObject(nodeKeyOfCurrentProcess).getString("process_id");
 			executeProcesses(currentProcessID, nodeKeyOfCurrentProcess);
 		}
 		return result;
@@ -1454,20 +1454,20 @@ public class WCPSQueryFactory {
 			log.debug("Collection found: " + collection);
 			createNDVIAggregateFromProcess(processAggregate, collection);
 			log.debug("Filters are: " + filters);
-		}		
+		}
 
 		else if (processID.equals("filter_temporal")) {
 			String filterCollectionNodeKey = null;
 			String filterTempNodeKey = processNodeKey;
-			String filterTempfromNode = processNode.getJSONObject("arguments").getJSONObject("data").getString("from_node");
+			String filterTempfromNode = processNode.getJSONObject("arguments").getJSONObject("data").getString("from_node");			
+			log.debug("Key Temp is : " + filterTempNodeKey);
 			filterCollectionNodeKey = getFilterCollectionNode(filterTempfromNode);
-			log.debug("Key Temp is : " + filterCollectionNodeKey);
-			JSONObject loadCollectionNode = processGraph.getJSONObject(filterCollectionNodeKey);		
-			JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");		
-			String coll = (String) loadCollectionNodeArguments.get("id");		
+			JSONObject loadCollectionNode = processGraph.getJSONObject(filterCollectionNodeKey).getJSONObject("arguments");				
+			String coll = (String) loadCollectionNode.get("id");
 			JSONObject processFilter = processGraph.getJSONObject(filterTempNodeKey);
 			JSONObject processFilterArguments = processFilter.getJSONObject("arguments");		
 			JSONArray extentArray = (JSONArray) processFilterArguments.get("extent");
+			log.debug("Temp New Extent : " + extentArray);
 			createDateRangeFilterFromArgs(extentArray, coll);
 		}
 
@@ -1477,9 +1477,8 @@ public class WCPSQueryFactory {
 			String filterBboxfromNode = processNode.getJSONObject("arguments").getJSONObject("data").getString("from_node");			
 			filterCollectionNodeKey = getFilterCollectionNode(filterBboxfromNode);
 			log.debug("Key Bbox is : " + filterCollectionNodeKey);
-			JSONObject loadCollectionNode = processGraph.getJSONObject(filterCollectionNodeKey);
-			JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");
-			String coll = (String) loadCollectionNodeArguments.get("id");
+			JSONObject loadCollectionNode = processGraph.getJSONObject(filterCollectionNodeKey).getJSONObject("arguments");			
+			String coll = (String) loadCollectionNode.get("id");
 			JSONObject processFilter = processGraph.getJSONObject(filterBboxNodeKey);
 			JSONObject processFilterArguments = processFilter.getJSONObject("arguments");
 
@@ -1506,6 +1505,7 @@ public class WCPSQueryFactory {
 			srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");
 			log.debug("srs is: " + srs);
 			if (srs > 0) {
+				log.debug("Spat New Extent : " + processFilterArguments);
 				createBoundingBoxFilterFromArgs(processFilterArguments, srs, coll);
 			}
 		}		
@@ -1517,7 +1517,7 @@ public class WCPSQueryFactory {
 
 		for (String argumentsKey : loadCollectionNodeKeyArguments.keySet()) {
 			if (argumentsKey.contentEquals("id")) {
-				filterCollectionNodeKey = fromNode;			  
+				filterCollectionNodeKey = fromNode;
 			}
 			else if (argumentsKey.contentEquals("data")) {			  
 				String filterfromNode = loadCollectionNodeKeyArguments.getJSONObject("data").getString("from_node");			  
@@ -1558,7 +1558,7 @@ public class WCPSQueryFactory {
 		String templower = temporal.get(0).toString();
 		String tempupper = temporal.get(1).toString();
 
-		log.debug("temporal extent is: " + temporal);
+		log.debug("Temporal extent is: " + temporal);
 		if (extentlower.compareTo(templower) < 0) {
 			fromDate = temporal.get(0).toString();
 		}
@@ -1576,17 +1576,15 @@ public class WCPSQueryFactory {
 			if(LocalDateTime.parse(fromDate.replace("Z", "")).equals(LocalDateTime.parse(toDate.replace("Z", "")))) {
 				toDate = null;
 				log.debug("Dates are identical. To date is set to null!");
-			}
-			log.debug("Temporal extent is: " + fromDate + ":" + toDate);
+			}			
 			Filter dateFilter = null;
 			for (Filter filter : this.filters) {
 				if (filter.getAxis().equals("DATE")) {
 					dateFilter = filter;
 				}
-			}
+			}			
 			this.filters.remove(dateFilter);
 			this.filters.add(new Filter("DATE", fromDate, toDate));
-			log.debug("Temporal filter is: " + filters);
 		}
 	}
 
@@ -1617,7 +1615,7 @@ public class WCPSQueryFactory {
 		String right = null;
 		String top = null;
 		String bottom = null;
-		log.debug("creating spatial extent filter from process");
+		log.debug("Creating spatial extent filter from process");
 		for (Object argsKey : argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
 			if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
@@ -1652,7 +1650,7 @@ public class WCPSQueryFactory {
 					double southlower = spatial.getDouble(1);
 					double northupper = spatial.getDouble(3);
 
-					log.debug("spatial extent is: " + spatial);
+					log.debug("Spatial extent is: " + spatial);
 					double leftlower = 0;
 					double rightupper = 0;
 					double topupper = 0;
@@ -1717,17 +1715,16 @@ public class WCPSQueryFactory {
 				if (filter.getAxis().equals("E")) {
 					eastFilter = filter;
 				}
-				else if (filter.getAxis().equals("W")) {
+				else if (filter.getAxis().equals("N")) {
 					westFilter = filter;
 				}
 			}
 			this.filters.remove(eastFilter);
 			this.filters.remove(westFilter);
 			this.filters.add(new Filter("E", left, right));
-			this.filters.add(new Filter("N", bottom, top));
-			log.debug("Spatial filter is: " + filters);
+			this.filters.add(new Filter("N", bottom, top));			
 		} else {
-			log.error("no spatial information could be found in process!");
+			log.error("No spatial information could be found in process!");
 		}
 	}
 
