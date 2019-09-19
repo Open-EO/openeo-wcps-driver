@@ -862,7 +862,7 @@ public class WCPSQueryFactory {
 		String stretchString = null;
 		StringBuilder stretchBuilder = new StringBuilder("");
 		if (reduceProcesses.getJSONObject(maxNodeKey).getJSONObject("arguments").get("data") instanceof JSONObject) {
-			if (dimension.equals("spectral")) {
+			if (dimension.equals("spectral") || dimension.equals("bands")) {
 				stretchBuilder.append("max(" + payLoad + ")");    	    
 				stretchString = stretchBuilder.toString();    	
 			}
@@ -887,7 +887,7 @@ public class WCPSQueryFactory {
 		String stretchString = null;
 		StringBuilder stretchBuilder = new StringBuilder("");
 		if (reduceProcesses.getJSONObject(minNodeKey).getJSONObject("arguments").get("data") instanceof JSONObject) {
-			if (dimension.equals("spectral")) {
+			if (dimension.equals("spectral") || dimension.equals("bands")) {
 				stretchBuilder.append("min(" + payLoad + ")");
 				stretchString = stretchBuilder.toString();
 			}
@@ -1408,21 +1408,30 @@ public class WCPSQueryFactory {
 				}
 				log.error(builder.toString());
 			}
-
+			
 			int srs = 0;			
 			srs = ((JSONObject) collectionSTACMetdata.get("properties")).getInt("eo:epsg");
 			log.debug("srs is: " + srs);
-
+			
+			JSONArray processDataCubeTempExt = new JSONArray();
+			JSONObject spatialExtentNode = new JSONObject();
+			createDateRangeFilterFromArgs(processDataCubeTempExt, collection, true);
+			createBoundingBoxFilterFromArgs(loadCollectionNodeArguments, srs, collection, true);
+			
 			for (String argumentKey : loadCollectionNodeArguments.keySet()) {
-				if (!loadCollectionNodeArguments.isNull(argumentKey) && argumentKey.equals("spatial_extent")) {
-					JSONObject spatialExtentNode = loadCollectionNodeArguments.getJSONObject("spatial_extent");
-					log.debug("currently working on spatial extent: " + spatialExtentNode.toString(4));
-					createBoundingBoxFilterFromArgs(loadCollectionNodeArguments, srs, collection);
+				if (argumentKey.equals("spatial_extent")) {
+					if (!loadCollectionNodeArguments.isNull(argumentKey)) {
+						spatialExtentNode = loadCollectionNodeArguments.getJSONObject("spatial_extent");
+						log.debug("currently working on spatial extent: " + spatialExtentNode.toString(4));
+						createBoundingBoxFilterFromArgs(loadCollectionNodeArguments, srs, collection, false);
+					}
 				}
-				if (!loadCollectionNodeArguments.isNull(argumentKey) && argumentKey.equals("temporal_extent")) {
-					JSONArray processDataCubeTempExt = (JSONArray) loadCollectionNodeArguments.get("temporal_extent");
-					log.debug("currently working on temporal extent: " + processDataCubeTempExt.toString(4));
-					createDateRangeFilterFromArgs(processDataCubeTempExt, collection);
+				if (argumentKey.equals("temporal_extent")) {
+					if (!loadCollectionNodeArguments.isNull(argumentKey)) {						
+						processDataCubeTempExt = (JSONArray) loadCollectionNodeArguments.get("temporal_extent");					
+						log.debug("currently working on temporal extent: " + processDataCubeTempExt.toString(4));					
+						createDateRangeFilterFromArgs(processDataCubeTempExt, collection, false);
+					}
 				}
 			}
 		}
@@ -1465,10 +1474,11 @@ public class WCPSQueryFactory {
 			JSONObject loadCollectionNode = processGraph.getJSONObject(filterCollectionNodeKey).getJSONObject("arguments");				
 			String coll = (String) loadCollectionNode.get("id");
 			JSONObject processFilter = processGraph.getJSONObject(filterTempNodeKey);
-			JSONObject processFilterArguments = processFilter.getJSONObject("arguments");		
-			JSONArray extentArray = (JSONArray) processFilterArguments.get("extent");
+			JSONObject processFilterArguments = processFilter.getJSONObject("arguments");
+			JSONArray extentArray = new JSONArray();			
+			extentArray = (JSONArray) processFilterArguments.get("extent");			
 			log.debug("Temp New Extent : " + extentArray);
-			createDateRangeFilterFromArgs(extentArray, coll);
+			createDateRangeFilterFromArgs(extentArray, coll, false);
 		}
 
 		else if (processID.equals("filter_bbox")) {
@@ -1506,7 +1516,7 @@ public class WCPSQueryFactory {
 			log.debug("srs is: " + srs);
 			if (srs > 0) {
 				log.debug("Spat New Extent : " + processFilterArguments);
-				createBoundingBoxFilterFromArgs(processFilterArguments, srs, coll);
+				createBoundingBoxFilterFromArgs(processFilterArguments, srs, coll, false);
 			}
 		}		
 	}
@@ -1527,64 +1537,110 @@ public class WCPSQueryFactory {
 		return filterCollectionNodeKey;
 	}
 
-	private void createDateRangeFilterFromArgs(JSONArray extentArray, String coll) {
+	private void createDateRangeFilterFromArgs(JSONArray extentArray, String coll, Boolean tempNull) {
 		String fromDate = null;
 		String toDate = null;
 		JSONObject extent;
-		String extentlower = extentArray.get(0).toString();
-		String extentupper = extentArray.get(1).toString();
-
-		JSONObject jsonresp = null;
-		try {
-			jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
-		} catch (JSONException e) {
-			log.error("An error occured: " + e.getMessage());
-			StringBuilder builder = new StringBuilder();
-			for (StackTraceElement element : e.getStackTrace()) {
-				builder.append(element.toString() + "\n");
-			}
-			log.error(builder.toString());
-		} catch (IOException e) {
-			log.error("An error occured: " + e.getMessage());
-			StringBuilder builder = new StringBuilder();
-			for (StackTraceElement element : e.getStackTrace()) {
-				builder.append(element.toString() + "\n");
-			}
-			log.error(builder.toString());
-		}
-
-		extent = jsonresp.getJSONObject("extent");
-		JSONArray temporal = extent.getJSONArray("temporal");
-		String templower = temporal.get(0).toString();
-		String tempupper = temporal.get(1).toString();
-
-		log.debug("Temporal extent is: " + temporal);
-		if (extentlower.compareTo(templower) < 0) {
-			fromDate = temporal.get(0).toString();
-		}
-		else {
-			fromDate = extentArray.get(0).toString();
-		}
-		if ( extentupper.compareTo(tempupper) > 0) {
-			toDate = temporal.get(1).toString();
-		}
-		else {
-			toDate = extentArray.get(1).toString();
-		}
-		if (fromDate != null && toDate != null) {
-			log.debug("Temporal extent is: |" + fromDate + "|:|" + toDate + "|");
-			if(LocalDateTime.parse(fromDate.replace("Z", "")).equals(LocalDateTime.parse(toDate.replace("Z", "")))) {
-				toDate = null;
-				log.debug("Dates are identical. To date is set to null!");
-			}			
-			Filter dateFilter = null;
-			for (Filter filter : this.filters) {
-				if (filter.getAxis().equals("DATE")) {
-					dateFilter = filter;
+		
+		if (tempNull) {
+			JSONObject jsonresp = null;
+			try {
+				jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
+			} catch (JSONException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
 				}
-			}			
-			this.filters.remove(dateFilter);
-			this.filters.add(new Filter("DATE", fromDate, toDate));
+				log.error(builder.toString());
+			} catch (IOException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			}
+
+			extent = jsonresp.getJSONObject("extent");
+			JSONArray temporal = extent.getJSONArray("temporal");
+			String templower = temporal.get(0).toString();
+			String tempupper = temporal.get(1).toString();
+
+			log.debug("Temporal extent is: " + temporal);
+
+			if (templower != null && tempupper != null) {
+				log.debug("Temporal extent is: |" + templower + "|:|" + tempupper + "|");
+				if(LocalDateTime.parse(templower.replace("Z", "")).equals(LocalDateTime.parse(tempupper.replace("Z", "")))) {
+					tempupper = null;
+					log.debug("Dates are identical. To date is set to null!");
+				}			
+				Filter dateFilter = null;
+				for (Filter filter : this.filters) {
+					if (filter.getAxis().equals("DATE")) {
+						dateFilter = filter;
+					}
+				}
+				this.filters.remove(dateFilter);
+				this.filters.add(new Filter("DATE", templower, tempupper));
+			}
+		}
+
+		else {
+			String extentlower = extentArray.get(0).toString();
+			String extentupper = extentArray.get(1).toString();
+			JSONObject jsonresp = null;
+			try {
+				jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
+			} catch (JSONException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			} catch (IOException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			}
+
+			extent = jsonresp.getJSONObject("extent");
+			JSONArray temporal = extent.getJSONArray("temporal");
+			String templower = temporal.get(0).toString();
+			String tempupper = temporal.get(1).toString();
+
+			log.debug("Temporal extent is: " + temporal);
+			if (extentlower.compareTo(templower) < 0) {
+				fromDate = temporal.get(0).toString();
+			}
+			else {
+				fromDate = extentArray.get(0).toString();
+			}
+			if ( extentupper.compareTo(tempupper) > 0) {
+				toDate = temporal.get(1).toString();
+			}
+			else {
+				toDate = extentArray.get(1).toString();
+			}
+			if (fromDate != null && toDate != null) {
+				log.debug("Temporal extent is: |" + fromDate + "|:|" + toDate + "|");
+				if(LocalDateTime.parse(fromDate.replace("Z", "")).equals(LocalDateTime.parse(toDate.replace("Z", "")))) {
+					toDate = null;
+					log.debug("Dates are identical. To date is set to null!");
+				}			
+				Filter dateFilter = null;
+				for (Filter filter : this.filters) {
+					if (filter.getAxis().equals("DATE")) {
+						dateFilter = filter;
+					}
+				}			
+				this.filters.remove(dateFilter);
+				this.filters.add(new Filter("DATE", fromDate, toDate));
+			}
 		}
 	}
 
@@ -1610,121 +1666,197 @@ public class WCPSQueryFactory {
 		}
 	}
 
-	private void createBoundingBoxFilterFromArgs(JSONObject argsObject, int srs, String coll) {
+	private void createBoundingBoxFilterFromArgs(JSONObject argsObject, int srs, String coll, Boolean spatNull) {
 		String left = null;
 		String right = null;
 		String top = null;
 		String bottom = null;
 		log.debug("Creating spatial extent filter from process");
-		for (Object argsKey : argsObject.keySet()) {
-			String argsKeyStr = (String) argsKey;
-			if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
-				JSONObject extentObject = (JSONObject) argsObject.get(argsKeyStr);
 
-				for (Object extentKey : extentObject.keySet()) {
-					String extentKeyStr = extentKey.toString();
-					JSONObject extent;
-					JSONObject jsonresp = null;
-					try {
-						jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
-					} catch (JSONException e) {
-						log.error("An error occured: " + e.getMessage());
-						StringBuilder builder = new StringBuilder();
-						for (StackTraceElement element : e.getStackTrace()) {
-							builder.append(element.toString() + "\n");
-						}
-						log.error(builder.toString());
-					} catch (IOException e) {
-						log.error("An error occured: " + e.getMessage());
-						StringBuilder builder = new StringBuilder();
-						for (StackTraceElement element : e.getStackTrace()) {
-							builder.append(element.toString() + "\n");
-						}
-						log.error(builder.toString());
+		if (spatNull) {
+			JSONObject extent;
+			JSONObject jsonresp = null;
+			try {
+				jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
+			} catch (JSONException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			} catch (IOException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			}
+			
+			extent = jsonresp.getJSONObject("extent");
+			JSONArray spatial = extent.getJSONArray("spatial");
+			double westlower = spatial.getDouble(0)+0.00001;
+			double eastupper = spatial.getDouble(2)-0.00001;
+			double southlower = spatial.getDouble(1)+0.00001;
+			double northupper = spatial.getDouble(3)-0.00001;
+			log.debug("Spatial extent is: " + spatial);
+			left = Double.toString(westlower);
+			right = Double.toString(eastupper);
+			top = Double.toString(northupper);
+			bottom = Double.toString(southlower).toString();
+
+			SpatialReference src = new SpatialReference();
+			src.ImportFromEPSG(4326);
+			SpatialReference dst = new SpatialReference();
+			dst.ImportFromEPSG(srs);
+			log.debug(srs);
+
+			CoordinateTransformation tx = new CoordinateTransformation(src, dst);
+			double[] c1 = null;
+			double[] c2 = null;
+			c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(bottom));
+			c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(top));
+			left = Double.toString(c1[0]);
+			bottom = Double.toString(c1[1]);
+			right = Double.toString(c2[0]);
+			top = Double.toString(c2[1]);
+			log.debug("WEST: "+left);
+			log.debug("SOUTH: "+bottom);
+			log.debug("EAST: "+right);
+			log.debug("NORTH: "+top);
+
+			if (left != null && right != null && top != null && bottom != null) {
+				Filter eastFilter = null;
+				Filter westFilter = null;
+				for (Filter filter : this.filters) {
+					if (filter.getAxis().equals("E")) {
+						eastFilter = filter;
 					}
-
-					extent = jsonresp.getJSONObject("extent");
-					JSONArray spatial = extent.getJSONArray("spatial");
-					double westlower = spatial.getDouble(0);
-					double eastupper = spatial.getDouble(2);
-					double southlower = spatial.getDouble(1);
-					double northupper = spatial.getDouble(3);
-
-					log.debug("Spatial extent is: " + spatial);
-					double leftlower = 0;
-					double rightupper = 0;
-					double topupper = 0;
-					double bottomlower = 0;
-
-					if (extentKeyStr.equals("west")) {
-						left = "" + extentObject.get(extentKeyStr).toString();
-						leftlower = Double.parseDouble(left);
-						if (leftlower < westlower) {							
-							left = Double.toString(westlower);
-						}
-
-					} else if (extentKeyStr.equals("east")) {
-						right = "" + extentObject.get(extentKeyStr).toString();
-						rightupper = Double.parseDouble(right);
-						if (rightupper > eastupper) {							
-							right = Double.toString(eastupper);
-						}
-
-					} else if (extentKeyStr.equals("north")) {
-						top = "" + extentObject.get(extentKeyStr).toString();
-						topupper = Double.parseDouble(top);
-						if (topupper > northupper) {							
-							top = Double.toString(northupper);
-						}
-
-					} else if (extentKeyStr.equals("south")) {
-						bottom = "" + extentObject.get(extentKeyStr);
-						bottomlower = Double.parseDouble(bottom);
-						if (bottomlower < southlower) {							
-							bottom = Double.toString(southlower).toString();
-						}
+					else if (filter.getAxis().equals("N")) {
+						westFilter = filter;
 					}
 				}
-
-				SpatialReference src = new SpatialReference();
-				src.ImportFromEPSG(4326);
-				SpatialReference dst = new SpatialReference();
-				dst.ImportFromEPSG(srs);
-				log.debug(srs);
-
-				CoordinateTransformation tx = new CoordinateTransformation(src, dst);
-				double[] c1 = null;
-				double[] c2 = null;
-				c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(bottom));
-				c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(top));
-				left = Double.toString(c1[0]);
-				bottom = Double.toString(c1[1]);
-				right = Double.toString(c2[0]);
-				top = Double.toString(c2[1]);
-
-				log.debug("WEST: "+left);
-				log.debug("SOUTH: "+bottom);
-				log.debug("EAST: "+right);
-				log.debug("NORTH: "+top);				
+				this.filters.remove(eastFilter);
+				this.filters.remove(westFilter);
+				this.filters.add(new Filter("E", left, right));
+				this.filters.add(new Filter("N", bottom, top));			
+			} else {
+				log.error("No spatial information could be found in process!");
 			}
 		}
-		if (left != null && right != null && top != null && bottom != null) {
-			Filter eastFilter = null;
-			Filter westFilter = null;
-			for (Filter filter : this.filters) {
-				if (filter.getAxis().equals("E")) {
-					eastFilter = filter;
-				}
-				else if (filter.getAxis().equals("N")) {
-					westFilter = filter;
+
+		else {
+			for (Object argsKey : argsObject.keySet()) {
+				String argsKeyStr = (String) argsKey;
+				if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
+					JSONObject extentObject = (JSONObject) argsObject.get(argsKeyStr);
+
+					for (Object extentKey : extentObject.keySet()) {
+						String extentKeyStr = extentKey.toString();
+						JSONObject extent;
+						JSONObject jsonresp = null;
+						try {
+							jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
+						} catch (JSONException e) {
+							log.error("An error occured: " + e.getMessage());
+							StringBuilder builder = new StringBuilder();
+							for (StackTraceElement element : e.getStackTrace()) {
+								builder.append(element.toString() + "\n");
+							}
+							log.error(builder.toString());
+						} catch (IOException e) {
+							log.error("An error occured: " + e.getMessage());
+							StringBuilder builder = new StringBuilder();
+							for (StackTraceElement element : e.getStackTrace()) {
+								builder.append(element.toString() + "\n");
+							}
+							log.error(builder.toString());
+						}
+
+						extent = jsonresp.getJSONObject("extent");
+						JSONArray spatial = extent.getJSONArray("spatial");
+						double westlower = spatial.getDouble(0);
+						double eastupper = spatial.getDouble(2);
+						double southlower = spatial.getDouble(1);
+						double northupper = spatial.getDouble(3);
+
+						log.debug("Spatial extent is: " + spatial);
+						double leftlower = 0;
+						double rightupper = 0;
+						double topupper = 0;
+						double bottomlower = 0;
+
+						if (extentKeyStr.equals("west")) {
+							left = "" + extentObject.get(extentKeyStr).toString();
+							leftlower = Double.parseDouble(left);
+							if (leftlower < westlower) {							
+								left = Double.toString(westlower);
+							}
+
+						} else if (extentKeyStr.equals("east")) {
+							right = "" + extentObject.get(extentKeyStr).toString();
+							rightupper = Double.parseDouble(right);
+							if (rightupper > eastupper) {							
+								right = Double.toString(eastupper);
+							}
+
+						} else if (extentKeyStr.equals("north")) {
+							top = "" + extentObject.get(extentKeyStr).toString();
+							topupper = Double.parseDouble(top);
+							if (topupper > northupper) {							
+								top = Double.toString(northupper);
+							}
+
+						} else if (extentKeyStr.equals("south")) {
+							bottom = "" + extentObject.get(extentKeyStr);
+							bottomlower = Double.parseDouble(bottom);
+							if (bottomlower < southlower) {							
+								bottom = Double.toString(southlower).toString();
+							}
+						}
+					}
+
+					SpatialReference src = new SpatialReference();
+					src.ImportFromEPSG(4326);
+					SpatialReference dst = new SpatialReference();
+					dst.ImportFromEPSG(srs);
+					log.debug(srs);
+
+					CoordinateTransformation tx = new CoordinateTransformation(src, dst);
+					double[] c1 = null;
+					double[] c2 = null;
+					c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(bottom));
+					c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(top));
+					left = Double.toString(c1[0]);
+					bottom = Double.toString(c1[1]);
+					right = Double.toString(c2[0]);
+					top = Double.toString(c2[1]);
+
+					log.debug("WEST: "+left);
+					log.debug("SOUTH: "+bottom);
+					log.debug("EAST: "+right);
+					log.debug("NORTH: "+top);				
 				}
 			}
-			this.filters.remove(eastFilter);
-			this.filters.remove(westFilter);
-			this.filters.add(new Filter("E", left, right));
-			this.filters.add(new Filter("N", bottom, top));			
-		} else {
-			log.error("No spatial information could be found in process!");
+			if (left != null && right != null && top != null && bottom != null) {
+				Filter eastFilter = null;
+				Filter westFilter = null;
+				for (Filter filter : this.filters) {
+					if (filter.getAxis().equals("E")) {
+						eastFilter = filter;
+					}
+					else if (filter.getAxis().equals("N")) {
+						westFilter = filter;
+					}
+				}
+				this.filters.remove(eastFilter);
+				this.filters.remove(westFilter);
+				this.filters.add(new Filter("E", left, right));
+				this.filters.add(new Filter("N", bottom, top));			
+			} else {
+				log.error("No spatial information could be found in process!");
+			}			
 		}
 	}
 
