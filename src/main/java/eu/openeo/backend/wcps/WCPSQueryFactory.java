@@ -17,6 +17,7 @@ import org.gdal.osr.SpatialReference;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.lang.Math.*;
 
 import eu.openeo.backend.wcps.domain.Aggregate;
 import eu.openeo.backend.wcps.domain.Collection;
@@ -45,13 +46,13 @@ public class WCPSQueryFactory {
 		wcpsStringBuilder = new StringBuilder("for ");
 		this.processGraph = openEOGraph;
 		this.build();
-	}	
+	}
 
 	public String getOutputFormat() {
 		return outputFormat;
 	}
 	
-	private StringBuilder basicWCPSStringBuilder() {	
+	private StringBuilder basicWCPSStringBuilder() {
 	StringBuilder basicWCPS;
 	basicWCPS = new StringBuilder("for ");
 	for (int c = 1; c <= collectionIDs.size(); c++) {
@@ -66,7 +67,7 @@ public class WCPSQueryFactory {
 	}
 	basicWCPS.append(") return encode ( ");	
 	return basicWCPS;
-	}
+	}	
 	
 	private void build() {
 		log.debug(processGraph.toString());
@@ -96,6 +97,7 @@ public class WCPSQueryFactory {
 		boolean containsFilterBandProcess = false;
 		boolean containsNDVIProcess = false;
 		boolean containsTempAggProcess = false;
+		boolean containsReduceProcess = false;
 		boolean containsLinearStretch = false;
 		boolean containsLinearScale = false;
 		boolean containsApplyProcess = false;
@@ -107,21 +109,21 @@ public class WCPSQueryFactory {
 			JSONObject currentProcess = processGraph.getJSONObject(nodeKeyOfCurrentProcess);
 			String currentProcessID = currentProcess.getString("process_id");
 			JSONObject currentProcessArguments = currentProcess.getJSONObject("arguments");
-			String currentProcessFromNodeKey = getFromNodeOfCurrentKey(nodeKeyOfCurrentProcess);
+			//String currentProcessFromNodeKey = getFromNodeOfCurrentKey(nodeKeyOfCurrentProcess);
 			log.debug("Building WCPS Query for : " + nodesArray.getString(i));
 			log.debug("currently working on: " + currentProcessID);
 			
 			if (currentProcessID.equals("filter_bands")) {
 				containsFilterBandProcess = true;
-				StringBuilder wcpsFilterPayloadpayLoad = new StringBuilder("");
+				StringBuilder wcpsFilterpayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderFilterPayload = basicWCPSStringBuilder();
 				String filterString = wcpsPayLoad.toString();
 				filterString = filterString.substring(collName.length());
 				JSONArray currentProcessBands = currentProcessArguments.getJSONArray("bands");
 				String bandName = currentProcessBands.getString(0);
-				wcpsFilterPayloadpayLoad.append(createBandSubsetString(collName, bandName, filterString));
-				wcpsPayLoad=wcpsFilterPayloadpayLoad;
-				wcpsStringBuilder=wcpsStringBuilderFilterPayload.append(wcpsFilterPayloadpayLoad.toString());
+				wcpsFilterpayLoad.append(createBandSubsetString(collName, bandName, filterString));
+				wcpsPayLoad=wcpsFilterpayLoad;
+				wcpsStringBuilder=wcpsStringBuilderFilterPayload.append(wcpsFilterpayLoad.toString());
 			}			
 			if (currentProcessID.equals("ndvi")) {
 				containsNDVIProcess = true;
@@ -152,11 +154,22 @@ public class WCPSQueryFactory {
 						wcpsPayLoad=wcpsTempAggpayLoad;
 						wcpsStringBuilder=wcpsStringBuilderTempAgg.append(wcpsTempAggpayLoad.toString());
 						log.debug("Aggregate Temp " + aggregates.get(a).getAxis());
-						log.debug("temp Agg Payload " + wcpsPayLoad);
+						log.debug("Temp Agg Payload " + wcpsPayLoad);
 						log.debug("Temp WCPS added " + wcpsStringBuilderTempAgg);
 					}
 				}
-			}			
+			}
+			if (currentProcessID.equals("reduce")) {
+				containsReduceProcess = true;
+				StringBuilder wcpsReducepayLoad = new StringBuilder("");
+				StringBuilder wcpsStringBuilderReduce = basicWCPSStringBuilder();
+				String dimension = currentProcess.getJSONObject("arguments").getString("dimension");
+				String filterString = wcpsPayLoad.toString();
+				filterString = filterString.substring(collName.length());
+				wcpsReducepayLoad.append(createReduceWCPSString(nodeKeyOfCurrentProcess, wcpsPayLoad.toString(), filterString, collName, dimension));
+				wcpsPayLoad=wcpsReducepayLoad;
+				wcpsStringBuilder = wcpsStringBuilderReduce.append(wcpsReducepayLoad.toString());				
+			}
 			if (currentProcessID.equals("linear_scale_cube")) {
 				containsLinearScale = true;
 				StringBuilder wcpsScalepayLoad = new StringBuilder("");
@@ -198,6 +211,706 @@ public class WCPSQueryFactory {
 		}
 	}
 	
+	private String createReduceWCPSString(String reduceNodeKey, String payLoad, String filterString, String collName, String dimension) {
+		String reduceBuilderExtend = null;
+		JSONObject reduceProcesses = processGraph.getJSONObject(reduceNodeKey).getJSONObject("arguments").getJSONObject("reducer").getJSONObject("callback");
+		JSONObject reducerPayLoads = new JSONObject();		
+		JSONArray reduceNodesArray = new JSONArray();
+		String endReducerNode = null;
+		
+		for (String reducerKey : reduceProcesses.keySet()) {
+			JSONObject reducerProcess =  reduceProcesses.getJSONObject(reducerKey);
+			for (String reducerField : reducerProcess.keySet()) {
+				if (reducerField.equals("result")) {
+					Boolean resultFlag = reducerProcess.getBoolean("result");
+					if (resultFlag) {
+						endReducerNode = reducerKey;
+						log.debug("End Reducer is " + endReducerNode);
+					}
+				}
+			}
+		}
+		
+		int n = 1;
+		reduceNodesArray.put(endReducerNode);
+		reduceNodesArray.put(getReducerFromNodes(endReducerNode, reduceProcesses));
+		for (String reducerKey : reduceProcesses.keySet()) {
+			for (int a = 0; a < reduceNodesArray.getJSONArray(n).length(); a++) {
+				reduceNodesArray.put(getReducerFromNodes(reduceNodesArray.getJSONArray(n).getString(a), reduceProcesses));
+			}
+			n = n+1;
+			log.debug("Reducer number is " + n);
+		}
+		
+		JSONArray reduceNodesSortedArray = new JSONArray();
+		for (int i = reduceNodesArray.length()-2; i>0; i--) {
+			if (reduceNodesArray.getJSONArray(i).length()>0) {
+				for (int a = 0; a < reduceNodesArray.getJSONArray(i).length(); a++) {
+					reduceNodesSortedArray.put(reduceNodesArray.getJSONArray(i).getString(a));
+				}
+			}
+		}
+		reduceNodesSortedArray.put(endReducerNode);
+		
+		for (int i = 0; i < reduceNodesSortedArray.length(); i++) {
+			for (int j = i + 1 ; j < reduceNodesSortedArray.length(); j++) {
+				if (reduceNodesSortedArray.get(i).equals(reduceNodesSortedArray.get(j))) {
+					reduceNodesSortedArray.remove(j);
+				}
+			}
+		}
+		
+		log.debug("Reducer's Graph Sequence is " + reduceNodesSortedArray);
+		
+		for (int r = 0; r < reduceNodesSortedArray.length(); r++) {
+			String nodeKey = reduceNodesSortedArray.getString(r);
+			String name = reduceProcesses.getJSONObject(nodeKey).getString("process_id");
+			if (name.equals("array_element")) {
+				JSONObject arrayData =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
+				int arrayIndex = arrayData.getInt("index");
+				if ( arrayData.get("data") instanceof JSONObject) {
+					reduceBuilderExtend = createBandWCPSString(arrayIndex, reduceNodeKey, filterString, collName);
+				}
+				else {
+					reduceBuilderExtend = arrayData.getJSONArray("data").getString(arrayIndex);
+				}
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+				log.debug("Reducer PayLoad is " + reducerPayLoads);
+			}
+			if (name.equals("mean")) {
+				reduceBuilderExtend = createMeanWCPSString(nodeKey, payLoad, reduceProcesses);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("min")) {
+				reduceBuilderExtend = createMinWCPSString(nodeKey, payLoad, reduceProcesses, dimension, collName);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("max")) {
+				reduceBuilderExtend = createMaxWCPSString(nodeKey, payLoad, reduceProcesses, dimension, collName);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("absolute")) {
+				reduceBuilderExtend = createAbsWCPSString(nodeKey, payLoad, reduceProcesses);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("pi")) {
+				reduceBuilderExtend = createPiWCPSString();
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("e")) {
+				reduceBuilderExtend = createEulerNumWCPSString();
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("ln")) {
+				reduceBuilderExtend = createLogNWCPSString(nodeKey, payLoad, reduceProcesses);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}			
+			if (name.equals("log")) {
+				reduceBuilderExtend = createLogWCPSString(nodeKey, payLoad, reduceProcesses);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("exp")) {
+				reduceBuilderExtend = createExpWCPSString(nodeKey, payLoad, reduceProcesses);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}			
+			if (name.equals("power")) {
+				reduceBuilderExtend = createPowWCPSString(nodeKey, payLoad, reduceProcesses);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("sqrt")) {
+				reduceBuilderExtend = createSqrtWCPSString(nodeKey, payLoad, reduceProcesses);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("not")) {
+				reduceBuilderExtend = createNotWCPSString(nodeKey, payLoad, reduceProcesses);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}			
+			if (name.equals("eq")) {
+				String x = null;
+				String y = null;
+				JSONObject eqArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
+				if (eqArguments.get("x")  instanceof JSONObject) {
+					String dataNodeX = eqArguments.getJSONObject("x").getString("from_node");
+					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
+					x = eqPayLoadX;
+				}
+				else {
+					x = String.valueOf(eqArguments.getDouble("x"));
+				}
+				if (eqArguments.get("y") instanceof JSONObject) {
+					String dataNodeY = eqArguments.getJSONObject("y").getString("from_node");
+					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
+					y = eqPayLoadY;
+				}
+				else {
+					y = String.valueOf(eqArguments.getDouble("y"));
+				}
+				reduceBuilderExtend = createEqWCPSString(x, y);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("neq")) {
+				String x = null;
+				String y = null;
+				JSONObject neqArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
+				if (neqArguments.get("x") instanceof JSONObject) {
+					String dataNodeX = neqArguments.getJSONObject("x").getString("from_node");
+					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
+					x = eqPayLoadX;
+				}
+				else {
+					x = String.valueOf(neqArguments.getDouble("x"));
+				}
+				if (neqArguments.get("y") instanceof JSONObject) {
+					String dataNodeY = neqArguments.getJSONObject("y").getString("from_node");
+					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
+					y = eqPayLoadY;
+				}
+				else {
+					y = String.valueOf(neqArguments.getDouble("y"));
+				}
+				reduceBuilderExtend = createNotEqWCPSString(x, y);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("lt")) {
+				String x = null;
+				String y = null;
+				JSONObject ltArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
+				if (ltArguments.get("x") instanceof JSONObject) {
+					String dataNodeX = ltArguments.getJSONObject("x").getString("from_node");
+					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
+					x = eqPayLoadX;
+				}
+				else {
+					x = String.valueOf(ltArguments.getDouble("x"));
+				}
+				if (ltArguments.get("y") instanceof JSONObject) {
+					String dataNodeY = ltArguments.getJSONObject("y").getString("from_node");
+					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
+					y = eqPayLoadY;
+				}
+				else {
+					y = String.valueOf(ltArguments.getDouble("y"));
+				}
+				reduceBuilderExtend = createLessThanWCPSString(x, y);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("lte")) {
+				String x = null;
+				String y = null;
+				JSONObject lteArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
+				if (lteArguments.get("x") instanceof JSONObject) {
+					String dataNodeX = lteArguments.getJSONObject("x").getString("from_node");
+					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
+					x = eqPayLoadX;
+				}
+				else {
+					x = String.valueOf(lteArguments.getDouble("x"));
+				}
+				if (lteArguments.get("y") instanceof JSONObject) {
+					String dataNodeY = lteArguments.getJSONObject("y").getString("from_node");
+					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
+					y = eqPayLoadY;
+				}
+				else {
+					y = String.valueOf(lteArguments.getDouble("y"));
+				}
+				reduceBuilderExtend = createLessThanEqWCPSString(x, y);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("gt")) {
+				String x = null;
+				String y = null;
+				JSONObject gtArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
+				if (gtArguments.get("x") instanceof JSONObject) {
+					String dataNodeX = gtArguments.getJSONObject("x").getString("from_node");
+					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
+					x = eqPayLoadX;
+				}
+				else {
+					x = String.valueOf(gtArguments.getDouble("x"));
+				}
+				if (gtArguments.get("y") instanceof JSONObject) {
+					String dataNodeY = gtArguments.getJSONObject("y").getString("from_node");
+					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
+					y = eqPayLoadY;
+				}
+				else {
+					y = String.valueOf(gtArguments.getDouble("y"));
+				}
+				reduceBuilderExtend = createGreatThanWCPSString(x, y);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("gte")) {
+				String x = null;
+				String y = null;
+				JSONObject gteArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
+				if (gteArguments.get("x") instanceof JSONObject) {
+					String dataNodeX = gteArguments.getJSONObject("x").getString("from_node");
+					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
+					x = eqPayLoadX;
+				}
+				else {
+					x = String.valueOf(gteArguments.getDouble("x"));
+				}
+				if (gteArguments.get("y") instanceof JSONObject) {
+					String dataNodeY = gteArguments.getJSONObject("y").getString("from_node");
+					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
+					y = eqPayLoadY;
+				}
+				else {
+					y = String.valueOf(gteArguments.getDouble("y"));
+				}
+				reduceBuilderExtend = createGreatThanEqWCPSString(x, y);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("sin")||name.equals("cos")||name.equals("tan")||name.equals("sinh")||name.equals("cosh")||name.equals("tanh")||name.equals("arcsin")||name.equals("arccos")||name.equals("arctan")) {
+				reduceBuilderExtend = createTrigWCPSString(nodeKey, payLoad, reduceProcesses, name);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("and")) {
+				JSONArray andArray =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("expression");
+				JSONArray andArrayreturn = new JSONArray();
+				for (int a = 0; a < andArray.length(); a++) {
+					if (andArray.get(a) instanceof JSONObject) {
+						String dataNode = andArray.getJSONObject(a).getString("from_node");						
+						String andPayLoad = reducerPayLoads.getString(dataNode);;
+						andArrayreturn.put(andPayLoad);						
+					}
+					else {
+						andArrayreturn.put(andArray.get(a));
+					}
+				}
+				reduceBuilderExtend = createANDWCPSString(andArrayreturn);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("or")) {
+				JSONArray orArray =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("expression");
+				JSONArray orArrayreturn = new JSONArray();
+				for (int a = 0; a < orArray.length(); a++) {
+					if (orArray.get(a) instanceof JSONObject) {
+						String dataNode = orArray.getJSONObject(a).getString("from_node");						
+						String orPayLoad = reducerPayLoads.getString(dataNode);;
+						orArrayreturn.put(orPayLoad);						
+					}
+					else {
+						orArrayreturn.put(orArray.get(a));
+					}
+				}
+				reduceBuilderExtend = createORWCPSString(orArrayreturn);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("xor")) {
+				JSONArray xorArray =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("expression");
+				JSONArray xorArrayreturn = new JSONArray();
+				for (int a = 0; a < xorArray.length(); a++) {
+					if (xorArray.get(a) instanceof JSONObject) {
+						String dataNode = xorArray.getJSONObject(a).getString("from_node");						
+						String xorPayLoad = reducerPayLoads.getString(dataNode);;
+						xorArrayreturn.put(xorPayLoad);						
+					}
+					else {
+						xorArrayreturn.put(xorArray.get(a));
+					}
+				}
+				reduceBuilderExtend = createXORWCPSString(xorArrayreturn);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
+			if (name.equals("product")) {
+				JSONArray productArray =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("data");
+				JSONArray productArrayreturn = new JSONArray();
+				for (int a = 0; a < productArray.length(); a++) {
+					if (productArray.get(a) instanceof JSONObject) {
+						String dataNode = productArray.getJSONObject(a).getString("from_node");										
+						String bandPayLoad = reducerPayLoads.getString(dataNode);
+						productArrayreturn.put(bandPayLoad);
+					}
+					else {
+						productArrayreturn.put(productArray.get(a));
+					}
+				}
+				reduceBuilderExtend = createProductWCPSString(productArrayreturn);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+				log.debug("Reducer PayLoad is " + reducerPayLoads);
+			}
+			if (name.equals("sum")) {
+				JSONArray sumArray =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("data");
+				JSONArray sumArrayreturn = new JSONArray();
+				for (int a = 0; a < sumArray.length(); a++) {
+					if (sumArray.get(a) instanceof JSONObject) {
+						String dataNode = sumArray.getJSONObject(a).getString("from_node");
+						String bandPayLoad = reducerPayLoads.getString(dataNode);
+						sumArrayreturn.put(bandPayLoad);						
+					}
+					else {
+						sumArrayreturn.put(sumArray.get(a));
+					}
+				}
+				reduceBuilderExtend = createSumWCPSString(sumArrayreturn);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+				log.debug("Reducer PayLoad is " + reducerPayLoads);
+			}
+			if (name.equals("subtract")) {
+				JSONArray subtractArray =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("data");
+				JSONArray subtractArrayreturn = new JSONArray();
+				for (int a = 0; a < subtractArray.length(); a++) {
+					if (subtractArray.get(a) instanceof JSONObject) {
+						String dataNode = subtractArray.getJSONObject(a).getString("from_node");
+						String bandPayLoad = reducerPayLoads.getString(dataNode);
+						subtractArrayreturn.put(bandPayLoad);
+					}
+					else {
+						subtractArrayreturn.put(subtractArray.get(a));
+					}
+				}
+				reduceBuilderExtend = createSubtractWCPSString(subtractArrayreturn);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+				log.debug("Reducer PayLoad is " + reducerPayLoads);
+			}
+			if (name.equals("divide")) {
+				JSONArray divideArray =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("data");
+				JSONArray divideArrayreturn = new JSONArray();
+				for (int a = 0; a < divideArray.length(); a++) {
+					if (divideArray.get(a) instanceof JSONObject) {
+						String dataNode = divideArray.getJSONObject(a).getString("from_node");
+						String bandPayLoad = reducerPayLoads.getString(dataNode);
+						divideArrayreturn.put(bandPayLoad);
+					}
+					else {
+						divideArrayreturn.put(divideArray.get(a));
+					}
+				}
+				reduceBuilderExtend = createDivideWCPSString(divideArrayreturn);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+				log.debug("Reducer PayLoad is " + reducerPayLoads);
+			}
+		}
+		return reduceBuilderExtend;
+	}
+	
+	private String createEqWCPSString(String x, String y) {
+		StringBuilder stretchBuilder = new StringBuilder("(");				
+		stretchBuilder.append(x + " = " + y +")");
+		return stretchBuilder.toString();
+	}
+	
+	private String createNotEqWCPSString(String x, String y) {
+		StringBuilder stretchBuilder = new StringBuilder("(");				
+		stretchBuilder.append(x + " != " + y +")");		
+		return stretchBuilder.toString();
+	}
+	
+	private String createLessThanWCPSString(String x, String y) {
+		StringBuilder stretchBuilder = new StringBuilder("(");				
+		stretchBuilder.append(x + " < " + y +")");		
+		return stretchBuilder.toString();
+	}
+	
+	private String createLessThanEqWCPSString(String x, String y) {
+		StringBuilder stretchBuilder = new StringBuilder("(");				
+		stretchBuilder.append(x + " <= " + y +")");		
+		return stretchBuilder.toString();
+	}
+	
+	private String createGreatThanWCPSString(String x, String y) {
+		StringBuilder stretchBuilder = new StringBuilder("(");				
+		stretchBuilder.append(x + " > " + y +")");		
+		return stretchBuilder.toString();
+	}
+	
+	private String createGreatThanEqWCPSString(String x, String y) {
+		StringBuilder stretchBuilder = new StringBuilder("(");				
+		stretchBuilder.append(x + " >= " + y +")");		
+		return stretchBuilder.toString();
+	}
+	
+	private String createNotWCPSString(String logNodeKey, String payLoad, JSONObject reduceProcesses) {
+		JSONObject logArguments = reduceProcesses.getJSONObject(logNodeKey).getJSONObject("arguments");
+		String stretchString = null;
+		if (logArguments.get("expression") instanceof JSONObject) {
+			if (logArguments.getJSONObject("expression").getString("from_argument").equals("data")) {
+				StringBuilder stretchBuilder = new StringBuilder("");
+				stretchBuilder.append("not " + payLoad);
+				stretchString = stretchBuilder.toString();
+			}
+		}
+		else {
+			StringBuilder stretchBuilder = new StringBuilder("");
+			stretchBuilder.append("not " + logArguments.getBoolean("expression"));
+			stretchString = stretchBuilder.toString();  
+		}
+		return stretchString;
+	}
+	
+	private String createLogNWCPSString(String logNNodeKey, String payLoad, JSONObject reduceProcesses) {
+		JSONObject logNArguments = reduceProcesses.getJSONObject(logNNodeKey).getJSONObject("arguments");
+		String stretchString = null;
+		if (logNArguments.get("x") instanceof JSONObject) {
+			if (logNArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+				StringBuilder stretchBuilder = new StringBuilder("");
+				stretchBuilder.append("ln(" + payLoad + ")");
+				stretchString = stretchBuilder.toString();
+			}
+		}
+		else {
+			StringBuilder stretchBuilder = new StringBuilder("");
+			stretchBuilder.append("ln(" + logNArguments.getDouble("x") + ")");
+			stretchString = stretchBuilder.toString();  
+		}
+		return stretchString;
+	}
+	
+	private String createLogWCPSString(String logNodeKey, String payLoad, JSONObject reduceProcesses) {
+		JSONObject logArguments = reduceProcesses.getJSONObject(logNodeKey).getJSONObject("arguments");
+		String stretchString = null;
+		if (logArguments.get("x") instanceof JSONObject) {
+			if (logArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+				StringBuilder stretchBuilder = new StringBuilder("");
+				stretchBuilder.append("log(" + payLoad + ")");
+				stretchString = stretchBuilder.toString();
+			}
+		}
+		else {
+			StringBuilder stretchBuilder = new StringBuilder("");
+			stretchBuilder.append("log(" + logArguments.getDouble("x") + ")");
+			stretchString = stretchBuilder.toString();  
+		}
+		return stretchString;
+	}
+	
+	private String createExpWCPSString(String expNodeKey, String payLoad, JSONObject reduceProcesses) {
+		JSONObject expArguments = reduceProcesses.getJSONObject(expNodeKey).getJSONObject("arguments");
+		String stretchString = null;
+		if (expArguments.get("x") instanceof JSONObject) {
+			if (expArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+				StringBuilder stretchBuilder = new StringBuilder("");
+				stretchBuilder.append("exp(" + payLoad + ")");
+				stretchString = stretchBuilder.toString();
+			}
+		}
+		else {
+			StringBuilder stretchBuilder = new StringBuilder("");
+			stretchBuilder.append("exp(" + expArguments.getDouble("x") + ")");
+			stretchString = stretchBuilder.toString();  
+		}
+		return stretchString;
+	}
+	
+	private String createPowWCPSString(String powNodeKey, String payLoad, JSONObject reduceProcesses) {
+		String stretchString = null;
+		JSONObject powArguments = reduceProcesses.getJSONObject(powNodeKey).getJSONObject("arguments");		
+		double base = powArguments.getDouble("base");
+		if (powArguments.get("x") instanceof JSONObject) {
+			if (powArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+				StringBuilder stretchBuilder = new StringBuilder("");
+				stretchBuilder.append("pow(" + payLoad + "," + base + ")");
+				stretchString = stretchBuilder.toString();
+			}
+		}
+		else {
+			StringBuilder stretchBuilder = new StringBuilder("");
+			stretchBuilder.append("pow(" + powArguments.getDouble("x") + "," + base + ")");
+			stretchString = stretchBuilder.toString();  
+		}
+		return stretchString;
+	}
+	
+	private String createSqrtWCPSString(String sqrtNodeKey, String payLoad, JSONObject reduceProcesses) {
+		JSONObject sqrtArguments = reduceProcesses.getJSONObject(sqrtNodeKey).getJSONObject("arguments");
+		String stretchString = null;
+		if (sqrtArguments.get("x") instanceof JSONObject) {
+			if (sqrtArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+				StringBuilder stretchBuilder = new StringBuilder("");
+				stretchBuilder.append("sqrt(" + payLoad + ")");
+				stretchString = stretchBuilder.toString();
+			}
+		}
+		else {
+			StringBuilder stretchBuilder = new StringBuilder("");
+			stretchBuilder.append("sqrt(" + sqrtArguments.getDouble("x") + ")");
+			stretchString = stretchBuilder.toString();  
+		}
+		return stretchString;
+	}
+	
+	private String createAbsWCPSString(String absNodeKey, String payLoad, JSONObject reduceProcesses) {
+		JSONObject absArguments = reduceProcesses.getJSONObject(absNodeKey).getJSONObject("arguments");
+		String stretchString = null;
+		if (absArguments.get("x") instanceof JSONObject) {
+			if (absArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+				StringBuilder stretchBuilder = new StringBuilder("");
+				stretchBuilder.append("abs(" + payLoad + ")");
+				stretchString = stretchBuilder.toString();
+			}
+		}
+		else {
+			StringBuilder stretchBuilder = new StringBuilder("");
+			stretchBuilder.append("abs(" + absArguments.getDouble("x") + ")");
+			stretchString = stretchBuilder.toString();  
+		}
+		return stretchString;
+	}
+	
+	private String createPiWCPSString() {		
+		return String.valueOf(Math.PI);
+	}
+	
+	private String createEulerNumWCPSString() {		
+		return String.valueOf(Math.E);
+	}
+	
+	private String createBandWCPSString(int arrayIndex, String reduceNodeKey, String filterString, String collName) {
+		StringBuilder stretchBuilder = new StringBuilder("");
+		String fromNodeOfReduce = processGraph.getJSONObject(reduceNodeKey).getJSONObject("arguments").getJSONObject("data").getString("from_node");
+		JSONObject fromProcess = processGraph.getJSONObject(fromNodeOfReduce);
+		if (fromProcess.getString("process_id").equals("load_collection")) {
+			String bandName = fromProcess.getJSONObject("arguments").getJSONArray("bands").getString(arrayIndex);
+			stretchBuilder.append(createBandSubsetString(collName, bandName, filterString));
+		}
+		return stretchBuilder.toString();
+	}
+	
+	private String createANDWCPSString(JSONArray andArrayreturn) {
+		StringBuilder stretchBuilder = new StringBuilder("(" + andArrayreturn.get(0));
+		for (int f = 1; f < andArrayreturn.length(); f++) {
+			stretchBuilder.append(" and " + andArrayreturn.get(f));
+		}
+		stretchBuilder.append(")");
+		return stretchBuilder.toString();
+	}
+	
+	private String createORWCPSString(JSONArray orArrayreturn) {
+		StringBuilder stretchBuilder = new StringBuilder("(" + orArrayreturn.get(0));
+		for (int f = 1; f < orArrayreturn.length(); f++) {
+			stretchBuilder.append(" or " + orArrayreturn.get(f));
+		}
+		stretchBuilder.append(")");
+		return stretchBuilder.toString();
+	}
+	
+	private String createXORWCPSString(JSONArray xorArrayreturn) {
+		StringBuilder stretchBuilder = new StringBuilder("(" + xorArrayreturn.get(0));
+		for (int f = 1; f < xorArrayreturn.length(); f++) {
+			stretchBuilder.append(" xor " + xorArrayreturn.get(f));
+		}
+		stretchBuilder.append(")");
+		return stretchBuilder.toString();
+	}
+	
+	private String createProductWCPSString(JSONArray productArrayreturn) {
+		StringBuilder stretchBuilder = new StringBuilder("("+productArrayreturn.get(0));
+		for (int f = 1; f < productArrayreturn.length(); f++) {
+			stretchBuilder.append(" * "+productArrayreturn.get(f));
+		}
+		stretchBuilder.append(")");
+		return stretchBuilder.toString();
+	}
+	
+	private String createSumWCPSString(JSONArray sumArrayreturn) {
+		StringBuilder stretchBuilder = new StringBuilder("("+sumArrayreturn.get(0));
+		for (int f = 1; f < sumArrayreturn.length(); f++) {
+			stretchBuilder.append(" + "+sumArrayreturn.get(f));
+		}
+		stretchBuilder.append(")");
+		return stretchBuilder.toString();
+	}
+	
+	private String createSubtractWCPSString(JSONArray subtractArrayreturn) {
+		StringBuilder stretchBuilder = new StringBuilder("("+subtractArrayreturn.get(0));
+		for (int f = 1; f < subtractArrayreturn.length(); f++) {
+			stretchBuilder.append(" - "+subtractArrayreturn.get(f));
+		}
+		stretchBuilder.append(")");
+		return stretchBuilder.toString();
+	}
+	
+	private String createDivideWCPSString(JSONArray divideArrayreturn) {
+		StringBuilder stretchBuilder = new StringBuilder("("+divideArrayreturn.get(0));
+		for (int f = 1; f < divideArrayreturn.length(); f++) {
+			stretchBuilder.append(" / "+divideArrayreturn.get(f));
+		}
+		stretchBuilder.append(")");
+		return stretchBuilder.toString();
+	}
+	
+	private String createMeanWCPSString(String meanNodeKey, String payLoad, JSONObject reduceProcesses) {
+		String meanArguments = reduceProcesses.getJSONObject(meanNodeKey).getJSONObject("arguments").getJSONObject("data").getString("from_argument");
+		String stretchString = null;
+		if (meanArguments.equals("data")) {
+			StringBuilder stretchBuilder = new StringBuilder("avg(");
+			stretchBuilder.append(payLoad + ")");
+			stretchString = stretchBuilder.toString();    	
+		}
+		return stretchString;
+	}
+	
+	private String createMaxWCPSString(String maxNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collName) {
+		String stretchString = null;
+		StringBuilder stretchBuilder = new StringBuilder("");
+		if (reduceProcesses.getJSONObject(maxNodeKey).getJSONObject("arguments").get("data") instanceof JSONObject) {
+			if (dimension.equals("spectral")) {
+				stretchBuilder.append("max(" + payLoad + ")");    	    
+				stretchString = stretchBuilder.toString();    	
+			}
+			else if (dimension.equals("temporal")) {
+				for (int a = 0; a < aggregates.size(); a++) {
+					if (aggregates.get(a).getAxis().equals("DATE")) {
+						stretchBuilder.append(createTempAggWCPSString(collName, aggregates.get(a)));
+						String replaceDate = Pattern.compile("DATE\\(.*?\\)").matcher(payLoad).replaceAll("DATE\\(\\$pm\\)");
+						//String replaceDate = wcpsPayLoad.toString().replaceAll("DATE\\(.*?\\)", "DATE\\(\\$pm\\)");
+						StringBuilder wcpsAggBuilderMod = new StringBuilder("");
+						wcpsAggBuilderMod.append(replaceDate);
+						stretchBuilder.append(wcpsAggBuilderMod);
+						stretchString=stretchBuilder.toString();
+					}
+				}
+			}
+		}
+		return stretchString;
+	}
+	
+	private String createMinWCPSString(String minNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collName) {
+		String stretchString = null;
+		StringBuilder stretchBuilder = new StringBuilder("");
+		if (reduceProcesses.getJSONObject(minNodeKey).getJSONObject("arguments").get("data") instanceof JSONObject) {
+			if (dimension.equals("spectral")) {
+				stretchBuilder.append("min(" + payLoad + ")");
+				stretchString = stretchBuilder.toString();
+			}
+			else if (dimension.equals("temporal")) {
+				for (int a = 0; a < aggregates.size(); a++) {
+					if (aggregates.get(a).getAxis().equals("DATE")) {
+						stretchBuilder.append(createTempAggWCPSString(collName, aggregates.get(a)));
+						String replaceDate = Pattern.compile("DATE\\(.*?\\)").matcher(payLoad).replaceAll("DATE\\(\\$pm\\)");
+						//String replaceDate = wcpsPayLoad.toString().replaceAll("DATE\\(.*?\\)", "DATE\\(\\$pm\\)");
+						StringBuilder wcpsAggBuilderMod = new StringBuilder("");
+						wcpsAggBuilderMod.append(replaceDate);
+						stretchBuilder.append(wcpsAggBuilderMod);
+						stretchString=stretchBuilder.toString();
+					}
+				}
+			}
+		}
+		return stretchString;
+	}
+	
+	private String createTrigWCPSString(String trigNodeKey, String payLoad, JSONObject reduceProcesses, String name) {
+		JSONObject trigArguments = reduceProcesses.getJSONObject(trigNodeKey).getJSONObject("arguments");
+		String stretchString = null;
+		if (trigArguments.get("x") instanceof JSONObject) {
+			if (trigArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+				StringBuilder stretchBuilder = new StringBuilder("");
+				stretchBuilder.append(name + "(" + payLoad + ")");
+				stretchString = stretchBuilder.toString();
+			}
+		}
+		else {
+			StringBuilder stretchBuilder = new StringBuilder("");
+			stretchBuilder.append(name + "(" + trigArguments.getDouble("x") + ")");
+			stretchString = stretchBuilder.toString();  
+		}
+		return stretchString;
+	}
+	
 	private String createReturnResultWCPSString(String returnResultNodeKey, String payload) {
 		StringBuilder resultBuilder = new StringBuilder("");
 		resultBuilder.append(payload);
@@ -230,39 +943,39 @@ public class WCPSQueryFactory {
 	}
 	
 	//TODO extend this to the full functionality of the openEO process
-	private String createResampleWCPSString(String resampleNodeKey) {
-		String projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getString("projection");
-        String currentWCPSQuery = wcpsStringBuilder.toString();
-		int beginIndex = currentWCPSQuery.indexOf("return encode (") + 15;
-		int endIndex = currentWCPSQuery.indexOf(", \"");
-		log.debug("payload range: " + beginIndex + " " + endIndex);
-		StringBuilder resampleBuilder = new StringBuilder(currentWCPSQuery.substring(0, beginIndex));
-		String currentPayload = currentWCPSQuery.substring(beginIndex, endIndex);		
-		//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
-		resampleBuilder.append("crsTransform(" + currentPayload + ",{"
-				+ "E:\"http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\","
-				+ "N:\"http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\""
-				+ "}, {})");
-		resampleBuilder.append(currentWCPSQuery.substring(endIndex));
-		log.debug("current payload: " + currentPayload);
-		log.debug("resample wcps query: " + resampleBuilder.toString());
-		return resampleBuilder.toString();
-	}
+//	private String createResampleWCPSString(String resampleNodeKey) {
+//		String projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getString("projection");
+//        String currentWCPSQuery = wcpsStringBuilder.toString();
+//		int beginIndex = currentWCPSQuery.indexOf("return encode (") + 15;
+//		int endIndex = currentWCPSQuery.indexOf(", \"");
+//		log.debug("payload range: " + beginIndex + " " + endIndex);
+//		StringBuilder resampleBuilder = new StringBuilder(currentWCPSQuery.substring(0, beginIndex));
+//		String currentPayload = currentWCPSQuery.substring(beginIndex, endIndex);		
+//		//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
+//		resampleBuilder.append("crsTransform(" + currentPayload + ",{"
+//				+ "E:\"http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\","
+//				+ "N:\"http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\""
+//				+ "}, {})");
+//		resampleBuilder.append(currentWCPSQuery.substring(endIndex));
+//		log.debug("current payload: " + currentPayload);
+//		log.debug("resample wcps query: " + resampleBuilder.toString());
+//		return resampleBuilder.toString();
+//	}
 	
     private String createApplyWCPSString(String applyNodeKey, String payLoad) {
 		String applyBuilderExtend = null;
 		JSONObject applyProcesses = processGraph.getJSONObject(applyNodeKey).getJSONObject("arguments").getJSONObject("process").getJSONObject("callback");
 		
 		for (String nodeKey : applyProcesses.keySet()) {
-			String name = applyProcesses.getJSONObject(nodeKey).getString("process_id");			
+			String name = applyProcesses.getJSONObject(nodeKey).getString("process_id");
 			if (name.contains("linear_scale_range")) {
 				applyBuilderExtend = createLinearScaleRangeWCPSString(nodeKey, payLoad, applyProcesses);
 			}
-		}		
+		}
 		return applyBuilderExtend;
 	}
 
-    private String createLinearScaleRangeWCPSString(String linearScaleNodeKey, String payLoad, JSONObject process) {	
+    private String createLinearScaleRangeWCPSString(String linearScaleNodeKey, String payLoad, JSONObject process) {
     	JSONObject scaleArgumets = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments");
 
     	double inputMin = 0;
@@ -310,7 +1023,7 @@ public class WCPSQueryFactory {
 			else if (outputMinMax.contentEquals("outputMax")) {
 				outputMax = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
 			}		
-		}	
+		}
 
 		StringBuilder stretchBuilder = new StringBuilder("(");
 		stretchBuilder.append(payLoad + ")");
@@ -462,13 +1175,12 @@ public class WCPSQueryFactory {
 		log.debug("Filters " + filters);
 		log.debug("Temp filter " + tempFilter);
 		if (tempFilter != null) {
-			StringBuilder stringBuilder = new StringBuilder("condense ");			
+			StringBuilder stringBuilder = new StringBuilder("condense ");
 			stringBuilder.append(operator + " over $pm t (imageCrsDomain(");
 			stringBuilder.append(createFilteredCollectionString(collectionName, tempFilter) + ",");
-			stringBuilder.append(axis + ")) using ");			
-			this.filters.remove(tempFilter);
-			this.filters.add(new Filter(axis, "$pm"));
-			
+			stringBuilder.append(axis + ")) using ");
+			//this.filters.remove(tempFilter);
+			//this.filters.add(new Filter(axis, "$pm"));
 			return stringBuilder.toString();
 		} else {
 			for (Filter filter : this.filters) {
@@ -478,7 +1190,7 @@ public class WCPSQueryFactory {
 			// meaning no appropriate filter found for running the condense operator in
 			// temporal axis.
 			return "";
-		}		
+		}
 	}
 
 	private String createBandSubsetString(String collectionName, String bandName, String subsetString) {
@@ -525,7 +1237,7 @@ public class WCPSQueryFactory {
 		return null;
 	}
 	
-	private String getFromNodeOfCurrentKey(String currentNodeKey){		
+	private String getFromNodeOfCurrentKey(String currentNodeKey){
 		JSONObject currentNodeData = processGraph.getJSONObject(currentNodeKey).getJSONObject("arguments");
 		for (String argumentsKey : currentNodeData.keySet()) {
 		    if (argumentsKey.contentEquals("data")) {
@@ -534,6 +1246,22 @@ public class WCPSQueryFactory {
 		}
 		return currentNodeKey;
 	}
+	
+//	private String getFromNodeOfReducerKey(String currentNodeKey, JSONObject reduceProcesses) {
+//		JSONObject reducerProcessArguments =  reduceProcesses.getJSONObject(currentNodeKey).getJSONObject("arguments");
+//		
+//		for (String argumentsKey : reducerProcessArguments.keySet()) {
+//			if (argumentsKey.contentEquals("data")) {
+//				if (((JsonElement) reducerProcessArguments.get("data")).isJsonObject()) {
+//					currentNodeKey = reducerProcessArguments.getJSONObject("data").getString("from_node");
+//				}
+//				else if (((JsonElement) reducerProcessArguments.get("data")).isJsonArray()) {
+//					currentNodeKey = reducerProcessArguments.getJSONArray("data").get("from_node");
+//				}
+//			}
+//		}
+//		return currentNodeKey;
+//	}
 	
 	private String getFormatFromSaveResultNode(JSONObject saveResultNode) {
 		JSONObject saveResultArguments = saveResultNode.getJSONObject("arguments");
@@ -551,6 +1279,87 @@ public class WCPSQueryFactory {
 		return nodesArray;
 	}
 	
+	private JSONArray getReducerFromNodes(String nextNode, JSONObject reduceProcesses) {
+		JSONObject nextNodeName = new JSONObject();
+		JSONArray fromNodes = new JSONArray();
+		String nextFromNode = null;
+		JSONObject reducerProcessArguments =  reduceProcesses.getJSONObject(nextNode).getJSONObject("arguments");
+		for (String argumentsKey : reducerProcessArguments.keySet()) {
+			if (argumentsKey.contentEquals("data")) {
+				if (reducerProcessArguments.get("data") instanceof JSONObject) {
+					for (String fromKey : reducerProcessArguments.getJSONObject("data").keySet()) {
+						if (fromKey.contentEquals("from_node")) {
+							nextFromNode = reducerProcessArguments.getJSONObject("data").getString("from_node");
+							fromNodes.put(nextFromNode);
+						}
+					}
+				}
+				else if (reducerProcessArguments.get("data") instanceof JSONArray) {
+					JSONArray reduceData = reducerProcessArguments.getJSONArray("data");
+					for(int a = 0; a < reduceData.length(); a++) {
+						if (reduceData.get(a) instanceof JSONObject) {
+							for (String fromKey : reduceData.getJSONObject(a).keySet()) {
+								if (fromKey.contentEquals("from_node")) {
+									nextFromNode = reduceData.getJSONObject(a).getString("from_node");
+									fromNodes.put(nextFromNode);
+								}
+							}
+						}
+					}
+				}
+				nextNodeName.put(nextNode, fromNodes);				
+			}
+			if (argumentsKey.contentEquals("expressions")) {
+				if (reducerProcessArguments.get("expressions") instanceof JSONObject) {
+					for (String fromKey : reducerProcessArguments.getJSONObject("data").keySet()) {
+						if (fromKey.contentEquals("from_node")) {
+							nextFromNode = reducerProcessArguments.getJSONObject("expressions").getString("from_node");
+							fromNodes.put(nextFromNode);
+						}
+					}
+				}
+				else if (reducerProcessArguments.get("expressions") instanceof JSONObject) {
+					JSONArray reduceData = reducerProcessArguments.getJSONArray("expressions");
+					for(int a = 0; a < reduceData.length(); a++) {
+						if (reduceData.get(a) instanceof JSONObject) {
+							for (String fromKey : reduceData.getJSONObject(a).keySet()) {
+								if (fromKey.contentEquals("from_node")) {
+									nextFromNode = reduceData.getJSONObject(a).getString("from_node");
+									fromNodes.put(nextFromNode);
+								}
+							}
+						}
+					}
+				}
+				nextNodeName.put(nextNode, fromNodes);
+			}
+			if (argumentsKey.contentEquals("x")) {
+				if (reducerProcessArguments.get("x") instanceof JSONObject) {
+					for (String fromKey : reducerProcessArguments.getJSONObject("data").keySet()) {
+						if (fromKey.contentEquals("from_node")) {
+							nextFromNode = reducerProcessArguments.getJSONObject("x").getString("from_node");
+							fromNodes.put(nextFromNode);
+						}
+					}
+				}
+				nextNodeName.put(nextNode, fromNodes);
+			}
+			if (argumentsKey.contentEquals("y")) {
+				if (reducerProcessArguments.get("y") instanceof JSONObject) {
+					for (String fromKey : reducerProcessArguments.getJSONObject("data").keySet()) {
+						if (fromKey.contentEquals("from_node")) {
+							nextFromNode = reducerProcessArguments.getJSONObject("y").getString("from_node");
+							fromNodes.put(nextFromNode);
+						}
+					}
+				}
+				nextNodeName.put(nextNode, fromNodes);
+			}
+		}
+		log.debug("Order of the nodes is: " + nextNodeName);
+		return fromNodes;
+	}
+	
 	/**
 	 * 
 	 * @param processParent
@@ -559,10 +1368,10 @@ public class WCPSQueryFactory {
 	private JSONObject parseOpenEOProcessGraph() {
 		JSONObject result = null;
 		JSONArray nodesArray = new JSONArray();
-		
+
 		String saveNode = getSaveNode();		
 		nodesArray = sortNodes(saveNode, nodesArray);
-		
+
 		for(int a = 0; a < nodesArray.length(); a++) {
 			log.debug("Executing Process : " + nodesArray.getString(a));
 			String nodeKeyOfCurrentProcess = nodesArray.getString(a);
@@ -571,7 +1380,7 @@ public class WCPSQueryFactory {
 			executeProcesses(currentProcessID, nodeKeyOfCurrentProcess);
 		}
 		return result;
-    }
+	}
 	
 	private void executeProcesses(String processID, String processNodeKey) {
 		JSONObject processNode = processGraph.getJSONObject(processNodeKey);
@@ -615,9 +1424,9 @@ public class WCPSQueryFactory {
 					createBoundingBoxFilterFromArgs(loadCollectionNodeArguments, srs, collection);
 				}
 				if (!loadCollectionNodeArguments.isNull(argumentKey) && argumentKey.equals("temporal_extent")) {
-					JSONArray processDatacubeTempExt = (JSONArray) loadCollectionNodeArguments.get("temporal_extent");
-					log.debug("currently working on temporal extent: " + processDatacubeTempExt.toString(4));
-					createDateRangeFilterFromArgs(processDatacubeTempExt, collection);
+					JSONArray processDataCubeTempExt = (JSONArray) loadCollectionNodeArguments.get("temporal_extent");
+					log.debug("currently working on temporal extent: " + processDataCubeTempExt.toString(4));
+					createDateRangeFilterFromArgs(processDataCubeTempExt, collection);
 				}
 			}
 		}
@@ -627,7 +1436,20 @@ public class WCPSQueryFactory {
 			createTemporalAggregate(processID);
 			log.debug("Filters are: " + filters);
 		}
-			
+		
+		else if (processID.contains("reduce")) {
+			log.debug("Found Time node: " + processNode.getString("process_id"));
+			String dimension = processNode.getJSONObject("arguments").getString("dimension");
+			if (dimension.equals("temporal")) {
+				JSONObject reducer = processNode.getJSONObject("arguments").getJSONObject("reducer").getJSONObject("callback");
+				for (String nodeKey : reducer.keySet()) {
+					String name = reducer.getJSONObject(nodeKey).getString("process_id");
+					createReduceTemporalAggregate(name);
+				}
+			}			
+			log.debug("Filters are: " + filters);
+		}
+		
 		else if (processID.equals("ndvi")) {
 			log.debug("Found NDVI node: " + processNode.getString("process_id"));
 			JSONObject processAggregate = processGraph.getJSONObject(processNodeKey);			    
@@ -638,73 +1460,61 @@ public class WCPSQueryFactory {
 			log.debug("Filters are: " + filters);
 		}		
 		
-   // else if (processID.equals("filter_temporal")) {
-		
-   // 	String filterCollectionNodeKey = null;
-   // 	String filterTempNodeKey = processNodeKey;
-   // 	JSONObject filterTempDataNode = argumentsNode.getJSONObject("data");
-   //		String filterTempfromNode = filterTempDataNode.getString("from_node");
-    	
-   //		filterCollectionNodeKey = getFilterCollectionNode(processParent, filterTempfromNode);
-   //		log.debug("Key Temp is : " + filterCollectionNodeKey);
-   //		JSONObject loadCollectionNode = processParent.getJSONObject(filterCollectionNodeKey);
-		
-   //		JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");
-		
-   //		String coll1 = (String) loadCollectionNodeArguments.get("id");
-		
-   //		JSONObject processFilter = processParent.getJSONObject(processNodeKey);
-   //		JSONObject processFilterArguments = processFilter.getJSONObject("arguments");
-		
-   //		JSONArray extentArray = (JSONArray) processFilterArguments.get("extent");
-   //		createDateRangeFilterFromArgs(extentArray, coll1);
-   //	}
+		else if (processID.equals("filter_temporal")) {		
+			String filterCollectionNodeKey = null;
+			String filterTempNodeKey = processNodeKey;
+			String filterTempfromNode = processNode.getJSONObject("arguments").getJSONObject("data").getString("from_node");
+
+			filterCollectionNodeKey = getFilterCollectionNode(filterTempfromNode);
+			log.debug("Key Temp is : " + filterCollectionNodeKey);
+			JSONObject loadCollectionNode = processGraph.getJSONObject(filterCollectionNodeKey);		
+			JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");		
+			String coll = (String) loadCollectionNodeArguments.get("id");		
+			JSONObject processFilter = processGraph.getJSONObject(filterTempNodeKey);
+			JSONObject processFilterArguments = processFilter.getJSONObject("arguments");		
+			JSONArray extentArray = (JSONArray) processFilterArguments.get("extent");
+			createDateRangeFilterFromArgs(extentArray, coll);
+		}
 	
-   // else if (processID.equals("filter_bbox")) {
-		
-   // 	String filterCollectionNodeKey = null;
-   // 	String filterBboxNodeKey = processNodeKey;
-   // 	JSONObject filterBboxDataNode = argumentsNode.getJSONObject("data");
-   //		String filterBboxfromNode = filterBboxDataNode.getString("from_node");
-    	
-   //		filterCollectionNodeKey = getFilterCollectionNode(processParent, filterBboxfromNode);
-   //		log.debug("Key Bbox is : " + filterCollectionNodeKey);
-   //		JSONObject loadCollectionNode = processParent.getJSONObject(filterCollectionNodeKey);
-   //		JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");
-		
-   //		String coll2 = (String) loadCollectionNodeArguments.get("id");
-		
-   //		JSONObject processFilter = processParent.getJSONObject(processNodeKey);
-   //		JSONObject processFilterArguments = processFilter.getJSONObject("arguments");
-		
-   //     int srs = 0;
-		
-   //		JSONObject jsonresp = null;
-   //		try {
-   //			jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll2);
-   //		} catch (JSONException e) {
-   //			log.error("An error occured: " + e.getMessage());
-   //			StringBuilder builder = new StringBuilder();
-   //			for (StackTraceElement element : e.getStackTrace()) {
-   //				builder.append(element.toString() + "\n");
-   //			}
-   //			log.error(builder.toString());
-   //		} catch (IOException e) {
-   //			log.error("An error occured: " + e.getMessage());
-   //			StringBuilder builder = new StringBuilder();
-   //			for (StackTraceElement element : e.getStackTrace()) {
-   //				builder.append(element.toString() + "\n");
-   //			}
-   //			log.error(builder.toString());
-   //		}
-					
-   //		srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");
-   //		log.debug("srs is: " + srs);
-   //		if (srs > 0) {
-   //			createBoundingBoxFilterFromArgs(processFilterArguments, srs, coll2);
-   //		}
-   //	}
-		
+		else if (processID.equals("filter_bbox")) {
+			String filterCollectionNodeKey = null;
+			String filterBboxNodeKey = processNodeKey;
+			String filterBboxfromNode = processNode.getJSONObject("arguments").getJSONObject("data").getString("from_node");
+
+			filterCollectionNodeKey = getFilterCollectionNode(filterBboxfromNode);
+			log.debug("Key Bbox is : " + filterCollectionNodeKey);
+			JSONObject loadCollectionNode = processGraph.getJSONObject(filterCollectionNodeKey);
+			JSONObject loadCollectionNodeArguments = loadCollectionNode.getJSONObject("arguments");
+			String coll = (String) loadCollectionNodeArguments.get("id");
+			JSONObject processFilter = processGraph.getJSONObject(filterBboxNodeKey);
+			JSONObject processFilterArguments = processFilter.getJSONObject("arguments");
+
+			int srs = 0;
+			JSONObject jsonresp = null;
+			try {
+				jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
+			} catch (JSONException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			} catch (IOException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			}
+
+			srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");
+			log.debug("srs is: " + srs);
+			if (srs > 0) {
+				createBoundingBoxFilterFromArgs(processFilterArguments, srs, coll);
+			}
+		}		
 	}
 	
 	private String getFilterCollectionNode(String fromNode) {		
@@ -877,7 +1687,7 @@ public class WCPSQueryFactory {
 		log.debug("creating spatial extent filter from process");
 		for (Object argsKey : argsObject.keySet()) {
 			String argsKeyStr = (String) argsKey;
-			if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {				
+			if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
 				JSONObject extentObject = (JSONObject) argsObject.get(argsKeyStr);
 				
 				for (Object extentKey : extentObject.keySet()) {
@@ -901,6 +1711,7 @@ public class WCPSQueryFactory {
 						}
 						log.error(builder.toString());
 					}
+					
 					extent = jsonresp.getJSONObject("extent");
 					JSONArray spatial = extent.getJSONArray("spatial");
 					double westlower = spatial.getDouble(0);
@@ -944,6 +1755,7 @@ public class WCPSQueryFactory {
 						}
 					}
 				}
+				
 				SpatialReference src = new SpatialReference();
 				src.ImportFromEPSG(4326);
 				SpatialReference dst = new SpatialReference();
@@ -978,8 +1790,7 @@ public class WCPSQueryFactory {
 	/**
 	 * 
 	 * @param process
-	 */
-	
+	 */	
 //	private void createAggregateFromProcess(JSONObject process) {
 //		boolean isTemporalAggregate = false;
 //		boolean isNDVIAggregate = false;
@@ -1000,6 +1811,19 @@ public class WCPSQueryFactory {
 //		}
 //	}
 
+	private void createReduceTemporalAggregate(String processName) {
+		String aggregateType = processName;
+		Vector<String> params = new Vector<String>();
+		for (Filter filter : this.filters) {
+			if (filter.getAxis().equals("DATE")) {
+				params.add(filter.getLowerBound());
+				params.add(filter.getUpperBound());
+			}
+		}
+		log.debug("temporal aggregate added!");
+		aggregates.add(new Aggregate(new String("DATE"), aggregateType, params));
+	}
+	
 	private void createTemporalAggregate(String processName) {
 		String aggregateType = processName.split("_")[0];
 		Vector<String> params = new Vector<String>();

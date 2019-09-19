@@ -37,6 +37,8 @@ This repository serves for the development of the openEO driver for WC(P)S backe
 13. Processing of raster
   * subsetting in crs projection space
   * Normalied Difference Vegetation Index
+  * Arithemeatic, logarithmic and Trigonometric Processing
+  * Boolean operations possible except on Date, Time or Strings
 14. Download of image as 
   * tiff
   * png
