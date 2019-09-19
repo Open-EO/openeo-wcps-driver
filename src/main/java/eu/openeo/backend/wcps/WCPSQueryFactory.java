@@ -564,11 +564,11 @@ public class WCPSQueryFactory {
 		nodesArray = sortNodes(saveNode, nodesArray);
 		
 		for(int a = 0; a < nodesArray.length(); a++) {
-		log.debug("Executing Process : " + nodesArray.getString(a));
-		String nodeKeyOfCurrentProcess = nodesArray.getString(a);
-		JSONObject currentProcess = processGraph.getJSONObject(nodeKeyOfCurrentProcess);
-		String currentProcessID = currentProcess.getString("process_id");		
-		executeProcesses(currentProcessID, nodeKeyOfCurrentProcess);
+			log.debug("Executing Process : " + nodesArray.getString(a));
+			String nodeKeyOfCurrentProcess = nodesArray.getString(a);
+			JSONObject currentProcess = processGraph.getJSONObject(nodeKeyOfCurrentProcess);
+			String currentProcessID = currentProcess.getString("process_id");		
+			executeProcesses(currentProcessID, nodeKeyOfCurrentProcess);
 		}
 		return result;
     }
