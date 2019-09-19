@@ -255,16 +255,19 @@ public class WCPSQueryFactory {
 			n = n+1;
 			log.debug("Reducer number is " + n);
 		}
+		
+		log.debug("Reducer's Loose Graph Sequence is " + reduceNodesArray);
 
 		JSONArray reduceNodesSortedArray = new JSONArray();
-		for (int i = reduceNodesArray.length()-2; i>0; i--) {
+		for (int i = reduceNodesArray.length()-1; i>0; i--) {
 			if (reduceNodesArray.getJSONArray(i).length()>0) {
+				log.debug("Reducer Array " + reduceNodesSortedArray);
 				for (int a = 0; a < reduceNodesArray.getJSONArray(i).length(); a++) {
 					reduceNodesSortedArray.put(reduceNodesArray.getJSONArray(i).getString(a));
 				}
 			}
 		}
-		reduceNodesSortedArray.put(endReducerNode);
+		reduceNodesSortedArray.put(endReducerNode);		
 
 		for (int i = 0; i < reduceNodesSortedArray.length(); i++) {
 			for (int j = i + 1 ; j < reduceNodesSortedArray.length(); j++) {
@@ -658,14 +661,13 @@ public class WCPSQueryFactory {
 	private String createLogNWCPSString(String logNNodeKey, String payLoad, JSONObject reduceProcesses) {
 		JSONObject logNArguments = reduceProcesses.getJSONObject(logNNodeKey).getJSONObject("arguments");
 		String stretchString = null;
-		if (logNArguments.get("x") instanceof JSONObject) {
-			if (logNArguments.getJSONObject("x").getString("from_argument").equals("data")) {
-				StringBuilder stretchBuilder = new StringBuilder("");
-				stretchBuilder.append("ln(" + payLoad + ")");
-				stretchString = stretchBuilder.toString();
-			}
+		if (logNArguments.get("data") instanceof JSONObject) {
+			StringBuilder stretchBuilder = new StringBuilder("");
+			stretchBuilder.append("ln(" + payLoad + ")");
+			stretchString = stretchBuilder.toString();
+			
 		}
-		else {
+		else if (logNArguments.get("x") instanceof Double) {
 			StringBuilder stretchBuilder = new StringBuilder("");
 			stretchBuilder.append("ln(" + logNArguments.getDouble("x") + ")");
 			stretchString = stretchBuilder.toString();  
@@ -676,14 +678,12 @@ public class WCPSQueryFactory {
 	private String createLogWCPSString(String logNodeKey, String payLoad, JSONObject reduceProcesses) {
 		JSONObject logArguments = reduceProcesses.getJSONObject(logNodeKey).getJSONObject("arguments");
 		String stretchString = null;
-		if (logArguments.get("x") instanceof JSONObject) {
-			if (logArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+		if (logArguments.get("data") instanceof JSONObject) {
 				StringBuilder stretchBuilder = new StringBuilder("");
 				stretchBuilder.append("log(" + payLoad + ")");
-				stretchString = stretchBuilder.toString();
-			}
+				stretchString = stretchBuilder.toString();			
 		}
-		else {
+		else if (logArguments.get("x") instanceof Double) {
 			StringBuilder stretchBuilder = new StringBuilder("");
 			stretchBuilder.append("log(" + logArguments.getDouble("x") + ")");
 			stretchString = stretchBuilder.toString();  
@@ -694,14 +694,12 @@ public class WCPSQueryFactory {
 	private String createExpWCPSString(String expNodeKey, String payLoad, JSONObject reduceProcesses) {
 		JSONObject expArguments = reduceProcesses.getJSONObject(expNodeKey).getJSONObject("arguments");
 		String stretchString = null;
-		if (expArguments.get("x") instanceof JSONObject) {
-			if (expArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+		if (expArguments.get("data") instanceof JSONObject) {
 				StringBuilder stretchBuilder = new StringBuilder("");
 				stretchBuilder.append("exp(" + payLoad + ")");
-				stretchString = stretchBuilder.toString();
-			}
+				stretchString = stretchBuilder.toString();			
 		}
-		else {
+		else if (expArguments.get("x") instanceof Double) {
 			StringBuilder stretchBuilder = new StringBuilder("");
 			stretchBuilder.append("exp(" + expArguments.getDouble("x") + ")");
 			stretchString = stretchBuilder.toString();  
@@ -713,14 +711,12 @@ public class WCPSQueryFactory {
 		String stretchString = null;
 		JSONObject powArguments = reduceProcesses.getJSONObject(powNodeKey).getJSONObject("arguments");		
 		double base = powArguments.getDouble("base");
-		if (powArguments.get("x") instanceof JSONObject) {
-			if (powArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+		if (powArguments.get("data") instanceof JSONObject) {
 				StringBuilder stretchBuilder = new StringBuilder("");
 				stretchBuilder.append("pow(" + payLoad + "," + base + ")");
-				stretchString = stretchBuilder.toString();
-			}
+				stretchString = stretchBuilder.toString();			
 		}
-		else {
+		else if (powArguments.get("x") instanceof Double) {
 			StringBuilder stretchBuilder = new StringBuilder("");
 			stretchBuilder.append("pow(" + powArguments.getDouble("x") + "," + base + ")");
 			stretchString = stretchBuilder.toString();  
@@ -731,14 +727,12 @@ public class WCPSQueryFactory {
 	private String createSqrtWCPSString(String sqrtNodeKey, String payLoad, JSONObject reduceProcesses) {
 		JSONObject sqrtArguments = reduceProcesses.getJSONObject(sqrtNodeKey).getJSONObject("arguments");
 		String stretchString = null;
-		if (sqrtArguments.get("x") instanceof JSONObject) {
-			if (sqrtArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+		if (sqrtArguments.get("data") instanceof JSONObject) {
 				StringBuilder stretchBuilder = new StringBuilder("");
 				stretchBuilder.append("sqrt(" + payLoad + ")");
-				stretchString = stretchBuilder.toString();
-			}
+				stretchString = stretchBuilder.toString();			
 		}
-		else {
+		else if (sqrtArguments.get("x") instanceof Double) {
 			StringBuilder stretchBuilder = new StringBuilder("");
 			stretchBuilder.append("sqrt(" + sqrtArguments.getDouble("x") + ")");
 			stretchString = stretchBuilder.toString();  
@@ -749,14 +743,12 @@ public class WCPSQueryFactory {
 	private String createAbsWCPSString(String absNodeKey, String payLoad, JSONObject reduceProcesses) {
 		JSONObject absArguments = reduceProcesses.getJSONObject(absNodeKey).getJSONObject("arguments");
 		String stretchString = null;
-		if (absArguments.get("x") instanceof JSONObject) {
-			if (absArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+		if (absArguments.get("data") instanceof JSONObject) {
 				StringBuilder stretchBuilder = new StringBuilder("");
 				stretchBuilder.append("abs(" + payLoad + ")");
-				stretchString = stretchBuilder.toString();
-			}
+				stretchString = stretchBuilder.toString();			
 		}
-		else {
+		else if (absArguments.get("x") instanceof Double) {
 			StringBuilder stretchBuilder = new StringBuilder("");
 			stretchBuilder.append("abs(" + absArguments.getDouble("x") + ")");
 			stretchString = stretchBuilder.toString();  
@@ -911,14 +903,13 @@ public class WCPSQueryFactory {
 	private String createTrigWCPSString(String trigNodeKey, String payLoad, JSONObject reduceProcesses, String name) {
 		JSONObject trigArguments = reduceProcesses.getJSONObject(trigNodeKey).getJSONObject("arguments");
 		String stretchString = null;
-		if (trigArguments.get("x") instanceof JSONObject) {
-			if (trigArguments.getJSONObject("x").getString("from_argument").equals("data")) {
-				StringBuilder stretchBuilder = new StringBuilder("");
-				stretchBuilder.append(name + "(" + payLoad + ")");
-				stretchString = stretchBuilder.toString();
-			}
+		if (trigArguments.get("data") instanceof JSONObject) {
+			log.debug("Applying Trigonometric function: " + name);
+			StringBuilder stretchBuilder = new StringBuilder("");
+			stretchBuilder.append(name + "(" + payLoad + ")");
+			stretchString = stretchBuilder.toString();			
 		}
-		else {
+		else if (trigArguments.get("x") instanceof Double) {
 			StringBuilder stretchBuilder = new StringBuilder("");
 			stretchBuilder.append(name + "(" + trigArguments.getDouble("x") + ")");
 			stretchString = stretchBuilder.toString();  
@@ -1005,7 +996,7 @@ public class WCPSQueryFactory {
 			}
 			else if (outputMinMax.contentEquals("outputMax")) {
 				outputMax = process.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMax");
-			}	
+			}
 		}
 
 		StringBuilder stretchBuilder = new StringBuilder("(");
@@ -1028,7 +1019,7 @@ public class WCPSQueryFactory {
 		inputMin = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMin");
 		inputMax = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("inputMax");
 
-		for (String outputMinMax : scaleArgumets.keySet()) {			
+		for (String outputMinMax : scaleArgumets.keySet()) {
 			if (outputMinMax.contentEquals("outputMin")) {
 				outputMin = processGraph.getJSONObject(linearScaleNodeKey).getJSONObject("arguments").getDouble("outputMin");		       
 			}
