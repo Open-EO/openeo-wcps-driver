@@ -308,9 +308,16 @@ public class WCPSQueryFactory {
 				String x = null;
 				JSONObject meanArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				if (meanArguments.get("data") instanceof JSONObject) {
-					String dataNode = meanArguments.getJSONObject("data").getString("from_node");
-					String meanPayLoad = reducerPayLoads.getString(dataNode);
-					x = meanPayLoad;
+					for (String fromType : meanArguments.getJSONObject("data").keySet()) {
+						if (fromType.equals("from_argument") && meanArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+							x = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = meanArguments.getJSONObject("data").getString("from_node");
+							String meanPayLoad = reducerPayLoads.getString(dataNode);
+							x = meanPayLoad;
+						}						
+					}
 				}
 				else {
 					x = String.valueOf(meanArguments.getJSONArray("data"));
@@ -363,13 +370,22 @@ public class WCPSQueryFactory {
 			if (name.equals("absolute")) {
 				String x = null;
 				JSONObject absArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
-				if (absArguments.get("data") instanceof JSONObject) {
-					String dataNode = absArguments.getJSONObject("data").getString("from_node");
-					String absPayLoad = reducerPayLoads.getString(dataNode);
-					x = absPayLoad;
-				}
-				else {
-					x = String.valueOf(absArguments.getDouble("x"));
+				for (String argType : absArguments.keySet()) {
+					if (argType.equals("data")) {
+						for (String fromType : absArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && absArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+								x = payLoad;
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = absArguments.getJSONObject("data").getString("from_node");
+								String absPayLoad = reducerPayLoads.getString(dataNode);
+								x = absPayLoad;
+							}						
+						}
+					}
+					else {
+						x = String.valueOf(absArguments.getDouble("x"));
+					}
 				}
 				reduceBuilderExtend = createAbsWCPSString(x);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
@@ -385,13 +401,22 @@ public class WCPSQueryFactory {
 			if (name.equals("ln")) {
 				String x = null;
 				JSONObject logNArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
-				if (logNArguments.get("data") instanceof JSONObject) {
-					String dataNode = logNArguments.getJSONObject("data").getString("from_node");
-					String logNPayLoad = reducerPayLoads.getString(dataNode);
-					x = logNPayLoad;
-				}
-				else {
-					x = String.valueOf(logNArguments.getDouble("x"));
+				for (String argType : logNArguments.keySet()) {
+					if (argType.equals("data")) {
+						for (String fromType : logNArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && logNArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+								x = payLoad;
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = logNArguments.getJSONObject("data").getString("from_node");
+								String logNPayLoad = reducerPayLoads.getString(dataNode);
+								x = logNPayLoad;
+							}						
+						}
+					}
+					else {
+						x = String.valueOf(logNArguments.getDouble("x"));
+					}
 				}
 				reduceBuilderExtend = createLogNWCPSString(x);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
@@ -399,13 +424,22 @@ public class WCPSQueryFactory {
 			if (name.equals("log")) {
 				String x = null;
 				JSONObject logArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
-				if (logArguments.get("data") instanceof JSONObject) {
-					String dataNode = logArguments.getJSONObject("data").getString("from_node");
-					String logPayLoad = reducerPayLoads.getString(dataNode);
-					x = logPayLoad;
-				}
-				else {
-					x = String.valueOf(logArguments.getDouble("x"));
+				for (String argType : logArguments.keySet()) {
+					if (argType.equals("data")) {
+						for (String fromType : logArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && logArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+								x = payLoad;
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = logArguments.getJSONObject("data").getString("from_node");
+								String logPayLoad = reducerPayLoads.getString(dataNode);
+								x = logPayLoad;
+							}						
+						}
+					}
+					else {
+						x = String.valueOf(logArguments.getDouble("x"));
+					}
 				}
 				reduceBuilderExtend = createLogWCPSString(x);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
@@ -413,13 +447,22 @@ public class WCPSQueryFactory {
 			if (name.equals("exp")) {
 				String p = null;
 				JSONObject expArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
-				if (expArguments.get("data") instanceof JSONObject) {
-					String dataNode = expArguments.getJSONObject("data").getString("from_node");
-					String expPayLoad = reducerPayLoads.getString(dataNode);
-					p = expPayLoad;
-				}
-				else {
-					p = String.valueOf(expArguments.getDouble("p"));
+				for (String argType : expArguments.keySet()) {
+					if (argType.equals("data")) {
+						for (String fromType : expArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && expArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+								p = payLoad;
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = expArguments.getJSONObject("data").getString("from_node");
+								String expPayLoad = reducerPayLoads.getString(dataNode);
+								p = expPayLoad;
+							}
+						}
+					}
+					else {
+						p = String.valueOf(expArguments.getDouble("p"));
+					}
 				}
 				reduceBuilderExtend = createExpWCPSString(p);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
@@ -427,13 +470,22 @@ public class WCPSQueryFactory {
 			if (name.equals("power")) {
 				String base = null;
 				JSONObject powArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
-				if (powArguments.get("data") instanceof JSONObject) {
-					String dataNode = powArguments.getJSONObject("base").getString("from_node");
-					String powPayLoad = reducerPayLoads.getString(dataNode);
-					base = powPayLoad;
-				}
-				else {
-					base = String.valueOf(powArguments.getDouble("base"));
+				for (String argType : powArguments.keySet()) {
+					if (argType.equals("data")) {
+						for (String fromType : powArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && powArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+								base = payLoad;
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = powArguments.getJSONObject("data").getString("from_node");
+								String powPayLoad = reducerPayLoads.getString(dataNode);
+								base = powPayLoad;
+							}						
+						}
+					}
+					else {
+						base = String.valueOf(powArguments.getDouble("base"));
+					}
 				}
 				reduceBuilderExtend = createPowWCPSString(nodeKey, base, reduceProcesses);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
@@ -441,13 +493,22 @@ public class WCPSQueryFactory {
 			if (name.equals("sqrt")) {
 				String x = null;
 				JSONObject sqrtArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
-				if (sqrtArguments.get("data") instanceof JSONObject) {
-					String dataNode = sqrtArguments.getJSONObject("data").getString("from_node");
-					String sqrtPayLoad = reducerPayLoads.getString(dataNode);
-					x = sqrtPayLoad;
-				}
-				else {
-					x = String.valueOf(sqrtArguments.getDouble("x"));
+				for (String argType : sqrtArguments.keySet()) {
+					if (argType.equals("data")) {
+						for (String fromType : sqrtArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && sqrtArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+								x = payLoad;
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = sqrtArguments.getJSONObject("data").getString("from_node");
+								String sqrtPayLoad = reducerPayLoads.getString(dataNode);
+								x = sqrtPayLoad;
+							}						
+						}
+					}
+					else {
+						x = String.valueOf(sqrtArguments.getDouble("x"));
+					}
 				}
 				reduceBuilderExtend = createSqrtWCPSString(x);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
@@ -456,32 +517,53 @@ public class WCPSQueryFactory {
 				String x = null;
 				JSONObject notArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				if (notArguments.get("expression") instanceof JSONObject) {
-					String dataNode = notArguments.getJSONObject("data").getString("from_node");
-					String sqrtPayLoad = reducerPayLoads.getString(dataNode);
-					x = sqrtPayLoad;
+					for (String fromType : notArguments.getJSONObject("expression").keySet()) {
+						if (fromType.equals("from_argument") && notArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+							x = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = notArguments.getJSONObject("expression").getString("from_node");
+							String notPayLoad = reducerPayLoads.getString(dataNode);
+							x = notPayLoad;
+						}						
+					}
 				}
 				else {
 					x = String.valueOf(notArguments.getBoolean("expression"));
 				}
 				reduceBuilderExtend = createNotWCPSString(x);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
-			}			
+			}
 			if (name.equals("eq")) {
 				String x = null;
 				String y = null;
 				JSONObject eqArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				if (eqArguments.get("x")  instanceof JSONObject) {
-					String dataNodeX = eqArguments.getJSONObject("x").getString("from_node");
-					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
-					x = eqPayLoadX;
+					for (String fromType : eqArguments.getJSONObject("x").keySet()) {
+						if (fromType.equals("from_argument") && eqArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+							x = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeX = eqArguments.getJSONObject("x").getString("from_node");
+							String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
+							x = eqPayLoadX;
+						}						
+					}
 				}
 				else {
 					x = String.valueOf(eqArguments.getDouble("x"));
 				}
 				if (eqArguments.get("y") instanceof JSONObject) {
-					String dataNodeY = eqArguments.getJSONObject("y").getString("from_node");
-					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
-					y = eqPayLoadY;
+					for (String fromType : eqArguments.getJSONObject("y").keySet()) {
+						if (fromType.equals("from_argument") && eqArguments.getJSONObject("y").getString("from_argument").equals("data")) {
+							y = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeY = eqArguments.getJSONObject("y").getString("from_node");
+							String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
+							y = eqPayLoadY;
+						}						
+					}
 				}
 				else {
 					y = String.valueOf(eqArguments.getDouble("y"));
@@ -494,17 +576,31 @@ public class WCPSQueryFactory {
 				String y = null;
 				JSONObject neqArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				if (neqArguments.get("x") instanceof JSONObject) {
-					String dataNodeX = neqArguments.getJSONObject("x").getString("from_node");
-					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
-					x = eqPayLoadX;
+					for (String fromType : neqArguments.getJSONObject("x").keySet()) {
+						if (fromType.equals("from_argument") && neqArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+							x = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeX = neqArguments.getJSONObject("x").getString("from_node");
+							String neqPayLoadX = reducerPayLoads.getString(dataNodeX);
+							x = neqPayLoadX;
+						}						
+					}
 				}
 				else {
 					x = String.valueOf(neqArguments.getDouble("x"));
 				}
 				if (neqArguments.get("y") instanceof JSONObject) {
-					String dataNodeY = neqArguments.getJSONObject("y").getString("from_node");
-					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
-					y = eqPayLoadY;
+					for (String fromType : neqArguments.getJSONObject("y").keySet()) {
+						if (fromType.equals("from_argument") && neqArguments.getJSONObject("y").getString("from_argument").equals("data")) {
+							y = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeY = neqArguments.getJSONObject("y").getString("from_node");
+							String neqPayLoadY = reducerPayLoads.getString(dataNodeY);
+							y = neqPayLoadY;
+						}						
+					}
 				}
 				else {
 					y = String.valueOf(neqArguments.getDouble("y"));
@@ -517,17 +613,31 @@ public class WCPSQueryFactory {
 				String y = null;
 				JSONObject ltArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				if (ltArguments.get("x") instanceof JSONObject) {
-					String dataNodeX = ltArguments.getJSONObject("x").getString("from_node");
-					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
-					x = eqPayLoadX;
+					for (String fromType : ltArguments.getJSONObject("x").keySet()) {
+						if (fromType.equals("from_argument") && ltArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+							x = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeX = ltArguments.getJSONObject("x").getString("from_node");
+							String ltPayLoadX = reducerPayLoads.getString(dataNodeX);
+							x = ltPayLoadX;
+						}						
+					}
 				}
 				else {
 					x = String.valueOf(ltArguments.getDouble("x"));
 				}
 				if (ltArguments.get("y") instanceof JSONObject) {
-					String dataNodeY = ltArguments.getJSONObject("y").getString("from_node");
-					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
-					y = eqPayLoadY;
+					for (String fromType : ltArguments.getJSONObject("y").keySet()) {
+						if (fromType.equals("from_argument") && ltArguments.getJSONObject("y").getString("from_argument").equals("data")) {
+							y = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeY = ltArguments.getJSONObject("y").getString("from_node");
+							String ltPayLoadY = reducerPayLoads.getString(dataNodeY);
+							y = ltPayLoadY;
+						}						
+					}
 				}
 				else {
 					y = String.valueOf(ltArguments.getDouble("y"));
@@ -540,17 +650,31 @@ public class WCPSQueryFactory {
 				String y = null;
 				JSONObject lteArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				if (lteArguments.get("x") instanceof JSONObject) {
-					String dataNodeX = lteArguments.getJSONObject("x").getString("from_node");
-					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
-					x = eqPayLoadX;
+					for (String fromType : lteArguments.getJSONObject("x").keySet()) {
+						if (fromType.equals("from_argument") && lteArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+							x = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeX = lteArguments.getJSONObject("x").getString("from_node");
+							String ltePayLoadX = reducerPayLoads.getString(dataNodeX);
+							x = ltePayLoadX;
+						}						
+					}
 				}
 				else {
 					x = String.valueOf(lteArguments.getDouble("x"));
 				}
 				if (lteArguments.get("y") instanceof JSONObject) {
-					String dataNodeY = lteArguments.getJSONObject("y").getString("from_node");
-					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
-					y = eqPayLoadY;
+					for (String fromType : lteArguments.getJSONObject("y").keySet()) {
+						if (fromType.equals("from_argument") && lteArguments.getJSONObject("y").getString("from_argument").equals("data")) {
+							y = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeY = lteArguments.getJSONObject("y").getString("from_node");
+							String ltePayLoadY = reducerPayLoads.getString(dataNodeY);
+							y = ltePayLoadY;
+						}						
+					}
 				}
 				else {
 					y = String.valueOf(lteArguments.getDouble("y"));
@@ -563,17 +687,31 @@ public class WCPSQueryFactory {
 				String y = null;
 				JSONObject gtArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				if (gtArguments.get("x") instanceof JSONObject) {
-					String dataNodeX = gtArguments.getJSONObject("x").getString("from_node");
-					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
-					x = eqPayLoadX;
+					for (String fromType : gtArguments.getJSONObject("x").keySet()) {
+						if (fromType.equals("from_argument") && gtArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+							x = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeX = gtArguments.getJSONObject("x").getString("from_node");
+							String gtPayLoadX = reducerPayLoads.getString(dataNodeX);
+							x = gtPayLoadX;
+						}						
+					}
 				}
 				else {
 					x = String.valueOf(gtArguments.getDouble("x"));
 				}
 				if (gtArguments.get("y") instanceof JSONObject) {
-					String dataNodeY = gtArguments.getJSONObject("y").getString("from_node");
-					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
-					y = eqPayLoadY;
+					for (String fromType : gtArguments.getJSONObject("y").keySet()) {
+						if (fromType.equals("from_argument") && gtArguments.getJSONObject("y").getString("from_argument").equals("data")) {
+							y = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeY = gtArguments.getJSONObject("y").getString("from_node");
+							String gtPayLoadY = reducerPayLoads.getString(dataNodeY);
+							y = gtPayLoadY;
+						}						
+					}
 				}
 				else {
 					y = String.valueOf(gtArguments.getDouble("y"));
@@ -586,17 +724,31 @@ public class WCPSQueryFactory {
 				String y = null;
 				JSONObject gteArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				if (gteArguments.get("x") instanceof JSONObject) {
-					String dataNodeX = gteArguments.getJSONObject("x").getString("from_node");
-					String eqPayLoadX = reducerPayLoads.getString(dataNodeX);
-					x = eqPayLoadX;
+					for (String fromType : gteArguments.getJSONObject("x").keySet()) {
+						if (fromType.equals("from_argument") && gteArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+							x = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeX = gteArguments.getJSONObject("x").getString("from_node");
+							String gtePayLoadX = reducerPayLoads.getString(dataNodeX);
+							x = gtePayLoadX;
+						}						
+					}
 				}
 				else {
 					x = String.valueOf(gteArguments.getDouble("x"));
 				}
 				if (gteArguments.get("y") instanceof JSONObject) {
-					String dataNodeY = gteArguments.getJSONObject("y").getString("from_node");
-					String eqPayLoadY = reducerPayLoads.getString(dataNodeY);
-					y = eqPayLoadY;
+					for (String fromType : gteArguments.getJSONObject("y").keySet()) {
+						if (fromType.equals("from_argument") && gteArguments.getJSONObject("y").getString("from_argument").equals("data")) {
+							y = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNodeY = gteArguments.getJSONObject("y").getString("from_node");
+							String gtePayLoadY = reducerPayLoads.getString(dataNodeY);
+							y = gtePayLoadY;
+						}						
+					}
 				}
 				else {
 					y = String.valueOf(gteArguments.getDouble("y"));
@@ -607,13 +759,22 @@ public class WCPSQueryFactory {
 			if (name.equals("sin")||name.equals("cos")||name.equals("tan")||name.equals("sinh")||name.equals("cosh")||name.equals("tanh")||name.equals("arcsin")||name.equals("arccos")||name.equals("arctan")) {
 				String x = null;
 				JSONObject trigArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
-				if (trigArguments.get("data") instanceof JSONObject) {
-					String dataNode = trigArguments.getJSONObject("data").getString("from_node");
-					String trigPayLoad = reducerPayLoads.getString(dataNode);
-					x = trigPayLoad;
-				}
-				else {
-					x = String.valueOf(trigArguments.getDouble("x"));
+				for (String argType : trigArguments.keySet()) {
+					if (argType.equals("data")) {
+						for (String fromType : trigArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && trigArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+								x = payLoad;
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = trigArguments.getJSONObject("data").getString("from_node");
+								String trigPayLoad = reducerPayLoads.getString(dataNode);
+								x = trigPayLoad;
+							}
+						}
+					}
+					else {
+						x = String.valueOf(trigArguments.getDouble("x"));
+					}
 				}
 				reduceBuilderExtend = createTrigWCPSString(nodeKey, x, reduceProcesses, name);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
@@ -623,9 +784,16 @@ public class WCPSQueryFactory {
 				JSONArray andArrayreturn = new JSONArray();
 				for (int a = 0; a < andArray.length(); a++) {
 					if (andArray.get(a) instanceof JSONObject) {
-						String dataNode = andArray.getJSONObject(a).getString("from_node");						
-						String andPayLoad = reducerPayLoads.getString(dataNode);
-						andArrayreturn.put(andPayLoad);						
+						for (String fromType : andArray.getJSONObject(a).keySet()) {
+							if (fromType.equals("from_argument") && andArray.getJSONObject(a).getString("from_argument").equals("data")) {						
+								andArrayreturn.put(payLoad);
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = andArray.getJSONObject(a).getString("from_node");
+								String andPayLoad = reducerPayLoads.getString(dataNode);
+								andArrayreturn.put(andPayLoad);
+							}			
+						}
 					}
 					else {
 						andArrayreturn.put(andArray.get(a));
@@ -639,9 +807,16 @@ public class WCPSQueryFactory {
 				JSONArray orArrayreturn = new JSONArray();
 				for (int a = 0; a < orArray.length(); a++) {
 					if (orArray.get(a) instanceof JSONObject) {
-						String dataNode = orArray.getJSONObject(a).getString("from_node");						
-						String orPayLoad = reducerPayLoads.getString(dataNode);
-						orArrayreturn.put(orPayLoad);
+						for (String fromType : orArray.getJSONObject(a).keySet()) {
+							if (fromType.equals("from_argument") && orArray.getJSONObject(a).getString("from_argument").equals("data")) {						
+								orArrayreturn.put(payLoad);
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = orArray.getJSONObject(a).getString("from_node");
+								String orPayLoad = reducerPayLoads.getString(dataNode);
+								orArrayreturn.put(orPayLoad);
+							}			
+						}
 					}
 					else {
 						orArrayreturn.put(orArray.get(a));
@@ -655,12 +830,19 @@ public class WCPSQueryFactory {
 				JSONArray xorArrayreturn = new JSONArray();
 				for (int a = 0; a < xorArray.length(); a++) {
 					if (xorArray.get(a) instanceof JSONObject) {
-						String dataNode = xorArray.getJSONObject(a).getString("from_node");						
-						String xorPayLoad = reducerPayLoads.getString(dataNode);
-						xorArrayreturn.put(xorPayLoad);						
+						for (String fromType : xorArray.getJSONObject(a).keySet()) {
+							if (fromType.equals("from_argument") && xorArray.getJSONObject(a).getString("from_argument").equals("data")) {
+								xorArrayreturn.put(payLoad);
+							}
+							if (fromType.equals("from_node")) {
+								String dataNode = xorArray.getJSONObject(a).getString("from_node");						
+								String xorPayLoad = reducerPayLoads.getString(dataNode);
+								xorArrayreturn.put(xorPayLoad);
+							}
+						}
 					}
 					else {
-						xorArrayreturn.put(xorArray.get(a));
+						xorArrayreturn.put(xorArray.getBoolean(a));
 					}
 				}
 				reduceBuilderExtend = createXORWCPSString(xorArrayreturn);
@@ -671,9 +853,16 @@ public class WCPSQueryFactory {
 				JSONArray productArrayreturn = new JSONArray();
 				for (int a = 0; a < productArray.length(); a++) {
 					if (productArray.get(a) instanceof JSONObject) {
-						String dataNode = productArray.getJSONObject(a).getString("from_node");										
-						String bandPayLoad = reducerPayLoads.getString(dataNode);
-						productArrayreturn.put(bandPayLoad);
+						for (String fromType : productArray.getJSONObject(a).keySet()) {
+							if (fromType.equals("from_argument") && productArray.getJSONObject(a).getString("from_argument").equals("data")) {						
+								productArrayreturn.put(payLoad);
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = productArray.getJSONObject(a).getString("from_node");
+								String productPayLoad = reducerPayLoads.getString(dataNode);
+								productArrayreturn.put(productPayLoad);
+							}			
+						}
 					}
 					else {
 						productArrayreturn.put(productArray.get(a));
@@ -688,9 +877,16 @@ public class WCPSQueryFactory {
 				JSONArray sumArrayreturn = new JSONArray();
 				for (int a = 0; a < sumArray.length(); a++) {
 					if (sumArray.get(a) instanceof JSONObject) {
-						String dataNode = sumArray.getJSONObject(a).getString("from_node");
-						String bandPayLoad = reducerPayLoads.getString(dataNode);
-						sumArrayreturn.put(bandPayLoad);						
+						for (String fromType : sumArray.getJSONObject(a).keySet()) {
+							if (fromType.equals("from_argument") && sumArray.getJSONObject(a).getString("from_argument").equals("data")) {						
+								sumArrayreturn.put(payLoad);
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = sumArray.getJSONObject(a).getString("from_node");
+								String sumPayLoad = reducerPayLoads.getString(dataNode);
+								sumArrayreturn.put(sumPayLoad);
+							}			
+						}
 					}
 					else {
 						sumArrayreturn.put(sumArray.get(a));
@@ -705,9 +901,16 @@ public class WCPSQueryFactory {
 				JSONArray subtractArrayreturn = new JSONArray();
 				for (int a = 0; a < subtractArray.length(); a++) {
 					if (subtractArray.get(a) instanceof JSONObject) {
-						String dataNode = subtractArray.getJSONObject(a).getString("from_node");
-						String bandPayLoad = reducerPayLoads.getString(dataNode);
-						subtractArrayreturn.put(bandPayLoad);
+						for (String fromType : subtractArray.getJSONObject(a).keySet()) {
+							if (fromType.equals("from_argument") && subtractArray.getJSONObject(a).getString("from_argument").equals("data")) {						
+								subtractArrayreturn.put(payLoad);
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = subtractArray.getJSONObject(a).getString("from_node");
+								String subtractPayLoad = reducerPayLoads.getString(dataNode);
+								subtractArrayreturn.put(subtractPayLoad);
+							}			
+						}
 					}
 					else {
 						subtractArrayreturn.put(subtractArray.get(a));
@@ -722,9 +925,16 @@ public class WCPSQueryFactory {
 				JSONArray divideArrayreturn = new JSONArray();
 				for (int a = 0; a < divideArray.length(); a++) {
 					if (divideArray.get(a) instanceof JSONObject) {
-						String dataNode = divideArray.getJSONObject(a).getString("from_node");
-						String bandPayLoad = reducerPayLoads.getString(dataNode);
-						divideArrayreturn.put(bandPayLoad);
+						for (String fromType : divideArray.getJSONObject(a).keySet()) {
+							if (fromType.equals("from_argument") && divideArray.getJSONObject(a).getString("from_argument").equals("data")) {						
+								divideArrayreturn.put(payLoad);
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = divideArray.getJSONObject(a).getString("from_node");
+								String dividePayLoad = reducerPayLoads.getString(dataNode);
+								divideArrayreturn.put(dividePayLoad);
+							}			
+						}
 					}
 					else {
 						divideArrayreturn.put(divideArray.get(a));
@@ -936,7 +1146,7 @@ public class WCPSQueryFactory {
 		StringBuilder stretchBuilder = new StringBuilder("");
 		if (dimension.equals("spectral") || dimension.equals("bands")) {
 			stretchBuilder.append("max(" + payLoad + ")");    	    
-			stretchString = stretchBuilder.toString();    	
+			stretchString = stretchBuilder.toString();
 		}
 		else if (dimension.equals("temporal")) {
 			for (int a = 0; a < aggregates.size(); a++) {
@@ -951,7 +1161,6 @@ public class WCPSQueryFactory {
 				}
 			}
 		}
-
 		return stretchString;
 	}
 
@@ -1396,7 +1605,7 @@ public class WCPSQueryFactory {
 			}
 			if (argumentsKey.contentEquals("x")) {
 				if (reducerProcessArguments.get("x") instanceof JSONObject) {
-					for (String fromKey : reducerProcessArguments.getJSONObject("data").keySet()) {
+					for (String fromKey : reducerProcessArguments.getJSONObject("x").keySet()) {
 						if (fromKey.contentEquals("from_node")) {
 							nextFromNode = reducerProcessArguments.getJSONObject("x").getString("from_node");
 							fromNodes.put(nextFromNode);
@@ -1407,7 +1616,7 @@ public class WCPSQueryFactory {
 			}
 			if (argumentsKey.contentEquals("y")) {
 				if (reducerProcessArguments.get("y") instanceof JSONObject) {
-					for (String fromKey : reducerProcessArguments.getJSONObject("data").keySet()) {
+					for (String fromKey : reducerProcessArguments.getJSONObject("y").keySet()) {
 						if (fromKey.contentEquals("from_node")) {
 							nextFromNode = reducerProcessArguments.getJSONObject("y").getString("from_node");
 							fromNodes.put(nextFromNode);
