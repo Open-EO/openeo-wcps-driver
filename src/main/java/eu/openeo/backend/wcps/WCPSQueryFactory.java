@@ -519,6 +519,27 @@ public class WCPSQueryFactory {
 				}
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
 			}
+			if (name.equals("count")) {
+				String x = null;
+				JSONObject countArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
+				if (countArguments.get("data") instanceof JSONObject) {
+					for (String fromType : countArguments.getJSONObject("data").keySet()) {
+						if (fromType.equals("from_argument") && countArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+							x = payLoad;
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = countArguments.getJSONObject("data").getString("from_node");
+							String countPayLoad = reducerPayLoads.getString(dataNode);
+							x = countPayLoad;
+						}						
+					}
+				}
+				else {
+					x = String.valueOf(countArguments.getJSONArray("data"));
+				}
+				reduceBuilderExtend = createCountWCPSString(x);
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+			}
 			if (name.equals("mean")) {
 				String x = null;
 				JSONObject meanArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
@@ -1345,6 +1366,15 @@ public class WCPSQueryFactory {
 		}
 		stretchBuilder.append(")");
 		return stretchBuilder.toString();
+	}
+	
+	private String createCountWCPSString(String payLoad) {
+		String stretchString = null;
+		StringBuilder stretchBuilder = new StringBuilder("count(");
+		stretchBuilder.append(payLoad + ")");
+		stretchString = stretchBuilder.toString();    	
+
+		return stretchString;
 	}
 
 	private String createMeanWCPSString(String payLoad) {
