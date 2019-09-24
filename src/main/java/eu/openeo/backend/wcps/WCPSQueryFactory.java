@@ -1372,8 +1372,8 @@ public class WCPSQueryFactory {
 		String stretchString = null;
 		StringBuilder stretchBuilder = new StringBuilder("count(");
 		stretchBuilder.append(payLoad + ")");
-		stretchString = stretchBuilder.toString();    	
-
+		stretchString = stretchBuilder.toString();
+		
 		return stretchString;
 	}
 
@@ -1381,8 +1381,8 @@ public class WCPSQueryFactory {
 		String stretchString = null;
 		StringBuilder stretchBuilder = new StringBuilder("avg(");
 		stretchBuilder.append(payLoad + ")");
-		stretchString = stretchBuilder.toString();    	
-
+		stretchString = stretchBuilder.toString();
+		
 		return stretchString;
 	}
 
