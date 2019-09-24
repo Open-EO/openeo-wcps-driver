@@ -79,14 +79,21 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
 			Element metadataElement = rootNode.getChild("CoverageDescription", defaultNS).getChild("metadata", gmlNS).getChild("Extension", gmlNS).getChild("covMetadata", gmlNS);
 			
-			List<Element> bandsList = metadataElement.getChild("bands", gmlNS).getChildren();
-			//List<Element> bandsListSwe = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
+			List<Element> bandsList = null;
+			Boolean bandsMeta = false;
+			try {
+			bandsList = metadataElement.getChild("bands", gmlNS).getChildren();
+			bandsMeta = true;
+		    }catch(Exception e) {
+			log.error("Error in parsing bands :" + e.getMessage());
+		    }
+			List<Element> bandsListSwe = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
 			
 			//metadataObj = new JSONObject(metadataString1);
 			//String metadataString2 = metadataString1.replaceAll("\\n","");
 			//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
 			//metadataObj = new JSONObject(metadataString3);
-			//JSONArray slices = metadataObj.getJSONArray("slices");			
+			//JSONArray slices = metadataObj.getJSONArray("slices");
 			
 			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
 			try {
@@ -209,43 +216,59 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			JSONObject properties = new JSONObject();
 			JSONObject other_properties = new JSONObject();
 			
-			JSONArray bandArray = new JSONArray();
-			log.debug("number of bands found: " + bandsList.size());
+			JSONArray bandArray = new JSONArray();			
 			
 			dimObjects[3] = new JSONObject();
 			dimObjects[3].put("type", "bands");
 			dimObjects[3].put("axis", "spectral");
 			JSONArray bandValues = new JSONArray();
-			
-			for(int c = 0; c < bandsList.size(); c++) {
-				Element band = bandsList.get(c);
-				JSONObject product = new JSONObject();
-				String bandId = band.getName();				
-				String bandWave = null;
+			log.debug("number of bands found: " + bandsListSwe.size());
+			if (bandsMeta) {
 				try {
-					bandWave = band.getChildText("WAVELENGTH");
+					for(int c = 0; c < bandsList.size(); c++) {
+						JSONObject product = new JSONObject();				
+						String bandWave = null;
+						Element band = bandsList.get(c);
+						String bandId = band.getName();
+
+						try {
+							bandWave = band.getChildText("WAVELENGTH");
+						}catch(Exception e) {
+							log.error("Error in parsing band wave-lenght:" + e.getMessage());
+						}
+						try {
+							product.put("common_name", band.getChildText("common_name"));
+						}catch(Exception e) {
+							log.error("Error in parsing band common name:" + e.getMessage());
+						}				
+						product.put("name", bandId);
+						product.put("center_wavelength", bandWave);
+						bandValues.put(bandId);
+						try {
+							product.put("gsd", band.getChildText("gsd"));
+						}catch(Exception e) {
+							log.error("Error in parsing band gsd:" + e.getMessage());
+						}
+						bandArray.put(product);
+					}
 				}catch(Exception e) {
-					log.error("Error in parsing band wave-lenght:" + e.getMessage());
-				}				
-				try {				
-					product.put("common_name", band.getChildText("common_name"));
-				}catch(Exception e) {
-					log.error("Error in parsing band wave-lenght:" + e.getMessage());
-				}				
-				product.put("name", bandId);							
-				product.put("center_wavelength", bandWave);				
-				bandValues.put(bandId);
-				try {				
-					product.put("gsd", band.getChildText("gsd"));
-				}catch(Exception e) {
-					log.error("Error in parsing band wave-lenght:" + e.getMessage());
-				}				
-				bandArray.put(product);
+					log.error("Error in parsing bands :" + e.getMessage());
+				}
 			}
-			
+			else {
+				for(int c = 0; c < bandsListSwe.size(); c++) {
+					JSONObject product = new JSONObject();
+					String bandId = bandsListSwe.get(c).getAttributeValue("name");
+								
+					product.put("name", bandId);					
+					bandValues.put(bandId);					
+					bandArray.put(product);
+				}
+			}
 			dimObjects[3].put("values", bandValues);
 			
 			JSONArray epsg_values = new JSONArray();
+			epsg_values.put(Double.parseDouble(srsDescription));
 			JSONObject epsgvalues = new JSONObject();
 			
 			epsgvalues.put("values", epsg_values);
@@ -256,21 +279,40 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			platform_values.put("Sentinel-2B");
 			pltfrmvalues.put("values", platform_values);
 			
-			String title = metadataElement.getChildText("Project", gmlNS);
-			String description = metadataElement.getChildText("Title", gmlNS);
-			
+			String title = null;
+			String description = null;
+			try {
+			title = metadataElement.getChildText("Project", gmlNS);
+		    }catch(Exception e) {
+			log.error("Error in parsing Project Name :" + e.getMessage());
+		    }
+		    try {
+			description = metadataElement.getChildText("Title", gmlNS);
+            }catch(Exception e) {
+		    log.error("Error in parsing Title :" + e.getMessage());
+	        }
+		    
 			JSONArray cloud_cover = new JSONArray();
 			JSONObject cloud_cover_extent = new JSONObject();			
-			
 			JSONObject cube_dimensions = new JSONObject();
+			
 			for(JSONObject dim: dimObjects) {
 				cube_dimensions.put(dim.getString("axis"), dim);
 			}			
 			
-			List<Element> slices = metadataElement.getChild("slices", gmlNS).getChildren();			
+			List<Element> slices = null;
+			try {
+			slices = metadataElement.getChild("slices", gmlNS).getChildren();
+		    }catch(Exception e) {
+			log.error("Error in parsing metadata slices:" + e.getMessage());
+		    }
 			
-			Element props = slices.get(0);
-
+			Element props = null;
+			try {
+				props = slices.get(0);
+		    }catch(Exception e) {
+			log.error("Error in parsing metadata slice :" + e.getMessage());
+		    }
 			try {
 				properties.put("sci:citation", props.getChildText("CITATION"));
 			}catch(Exception e) {
@@ -291,7 +333,8 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 
 			JSONArray cloudCovArray = new JSONArray();
 			
-			for(int c = 0; c < slices.size(); c++) {				
+			try {
+			for(int c = 0; c < slices.size(); c++) {
 				try {					
 					double cloudCov = Double.parseDouble(slices.get(c).getChildText("CLOUD_COVERAGE_ASSESSMENT"));
 					cloudCovArray.put(cloudCov);					
@@ -299,23 +342,40 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 					log.error("Error in parsing Cloud Coverage:" + e.getMessage());
 				}				
 			}
+		    }catch(Exception e) {
+			log.error("Error in parsing metadata slice :" + e.getMessage());
+		    }
 			
-			double maxCCValue = cloudCovArray.getDouble(0);
-			double minCCValue = cloudCovArray.getDouble(0);	
+			double maxCCValue = 0;
+			double minCCValue = 0;	
+			Boolean cloudCoverFlag = false;
+			try {
+			maxCCValue = cloudCovArray.getDouble(0);
+			minCCValue = cloudCovArray.getDouble(0);
+			cloudCoverFlag = true;
+		    }catch(Exception e) {
+			log.error("Error in parsing cloud cover Extents :" + e.getMessage());
+		    }
 			
+			try {
 			for(int i=1;i < cloudCovArray.length();i++){
 				if(cloudCovArray.getDouble(i) > maxCCValue){
 					maxCCValue = cloudCovArray.getDouble(i); 
 				}
 				if(cloudCovArray.getDouble(i) < minCCValue){
 					minCCValue = cloudCovArray.getDouble(i);
-				}					      
+				}
 			}
+		    }catch(Exception e) {
+			log.error("Error in parsing cloud cover array :" + e.getMessage());
+		    }
 			
 			cloud_cover.put(minCCValue);
 			cloud_cover.put(maxCCValue);
 			cloud_cover_extent.put("extent", cloud_cover);
+			if (cloudCoverFlag) {
 			other_properties.put("eo:cloud_cover", cloud_cover_extent);
+			}
 			
 			properties.put("cube:dimensions", cube_dimensions);
 			properties.put("eo:epsg", Double.parseDouble(srsDescription));			

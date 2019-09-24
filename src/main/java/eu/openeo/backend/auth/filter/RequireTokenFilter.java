@@ -183,7 +183,8 @@ public class RequireTokenFilter implements ContainerRequestFilter {
 	                    return new Principal() {
 	                        @Override
 	                        public String getName() {
-	                            return verifiedClaims.getBody().get("preferred_username", String.class);
+	                            //return verifiedClaims.getBody().get("preferred_username", String.class);
+	                            return verifiedClaims.getBody().getSubject();
 	                        }
 	                    };
 	                }
