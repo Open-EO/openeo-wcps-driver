@@ -77,8 +77,13 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			Element coverageDescElement = rootNode.getChild("CoverageDescription", defaultNS);
 			Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
 			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
-			Element metadataElement = rootNode.getChild("CoverageDescription", defaultNS).getChild("metadata", gmlNS).getChild("Extension", gmlNS).getChild("covMetadata", gmlNS);
-			
+			Element metadataElement = null;
+			try {
+			metadataElement = rootNode.getChild("CoverageDescription", defaultNS).getChild("metadata", gmlNS).getChild("Extension", gmlNS).getChild("covMetadata", gmlNS);
+		    }catch(Exception e) {
+			log.error("Error in parsing bands :" + e.getMessage());
+		    }
+		
 			List<Element> bandsList = null;
 			Boolean bandsMeta = false;
 			try {
