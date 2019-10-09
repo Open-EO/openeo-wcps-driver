@@ -154,13 +154,13 @@ public class WCPSQueryFactory {
 			log.debug("Currently working on: " + currentProcessID);
 			
 			if (currentProcessID.equals("load_collection")) {
-				wcpsPayLoad.append(createFilteredCollectionString(collName));		
+				wcpsPayLoad.append(createFilteredCollectionString(collName));
 				log.debug("Initial PayLoad WCPS is: " + wcpsPayLoad);
 				wcpsStringBuilder.append(wcpsPayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsPayLoad.toString());
 			}
 			if (currentProcessID.equals("filter_bbox")) {
-				StringBuilder wcpsFilterBboxpayLoad = wcpsPayLoad;
+				StringBuilder wcpsFilterBboxpayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderFilterBboxPayload = basicWCPSStringBuilder();
 				String payLoad = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
@@ -172,7 +172,7 @@ public class WCPSQueryFactory {
 						else if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("data").getString("from_node");
 							log.debug("Stored PayLoad is : " + storedPayLoads);
-							payLoad = storedPayLoads.getString(dataNode);							
+							payLoad = storedPayLoads.getString(dataNode);
 						}
 					}
 				}
@@ -181,7 +181,7 @@ public class WCPSQueryFactory {
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterBboxpayLoad.toString());
 			}			
             if (currentProcessID.equals("filter_temporal")) {
-            	StringBuilder wcpsFilterDatepayLoad = wcpsPayLoad;
+            	StringBuilder wcpsFilterDatepayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderFilterDatePayload = basicWCPSStringBuilder();
 				String payLoad = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
@@ -200,7 +200,7 @@ public class WCPSQueryFactory {
 				wcpsFilterDatepayLoad.append(payLoad);
 				wcpsStringBuilder=wcpsStringBuilderFilterDatePayload.append(wcpsFilterDatepayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterDatepayLoad.toString());
-			}			
+			}
 			if (currentProcessID.equals("filter_bands")) {
 				containsFilterBandProcess = true;
 				StringBuilder wcpsFilterpayLoad = new StringBuilder("");
@@ -2039,7 +2039,7 @@ public class WCPSQueryFactory {
 					}
 				}
 				if (argumentKey.equals("temporal_extent")) {
-					if (!loadCollectionNodeArguments.isNull(argumentKey)) {						
+					if (!loadCollectionNodeArguments.isNull(argumentKey)) {
 						processDataCubeTempExt = (JSONArray) loadCollectionNodeArguments.get("temporal_extent");					
 						log.debug("currently working on temporal extent: " + processDataCubeTempExt.toString(4));					
 						createDateRangeFilterFromArgs(processDataCubeTempExt, collection, false);
@@ -2284,7 +2284,7 @@ public class WCPSQueryFactory {
 		String top = null;
 		String bottom = null;
 		log.debug("Creating spatial extent filter from process");
-
+		
 		if (spatNull) {
 			JSONObject extent;
 			JSONObject jsonresp = null;

@@ -83,7 +83,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 		    }catch(Exception e) {
 			log.error("Error in parsing bands :" + e.getMessage());
 		    }
-		
+			
 			List<Element> bandsList = null;
 			Boolean bandsMeta = false;
 			try {
