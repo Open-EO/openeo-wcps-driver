@@ -270,8 +270,13 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 					bandArray.put(product);
 				}
 			}
-			dimObjects[3].put("values", bandValues);
 			
+			try {
+			dimObjects[3].put("values", bandValues);
+		    }catch(Exception e) {
+			log.error("Error in Band values :" + e.getMessage());
+		    }
+		
 			JSONArray epsg_values = new JSONArray();
 			epsg_values.put(Double.parseDouble(srsDescription));
 			JSONObject epsgvalues = new JSONObject();
@@ -301,9 +306,13 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			JSONObject cloud_cover_extent = new JSONObject();			
 			JSONObject cube_dimensions = new JSONObject();
 			
+			try {
 			for(JSONObject dim: dimObjects) {
 				cube_dimensions.put(dim.getString("axis"), dim);
-			}			
+			}
+			}catch(Exception e) {
+				log.error("Error in parsing Band Values :" + e.getMessage());
+			    }
 			
 			List<Element> slices = null;
 			try {
