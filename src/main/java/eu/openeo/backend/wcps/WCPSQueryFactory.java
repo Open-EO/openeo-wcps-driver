@@ -28,6 +28,7 @@ public class WCPSQueryFactory {
 	private StringBuilder wcpsStringBuilder;
 	private Vector<Collection> collectionIDs;
 	private Vector<Filter> filters;
+	private Vector<Filter> filtersPolygon;
 	private Vector<Aggregate> aggregates;
 	private String outputFormat = "json";
 	private JSONObject processGraph;
@@ -43,6 +44,7 @@ public class WCPSQueryFactory {
 		collectionIDs = new Vector<Collection>();
 		aggregates = new Vector<Aggregate>();
 		filters = new Vector<Filter>();
+		filtersPolygon = new Vector<Filter>();
 		wcpsStringBuilder = new StringBuilder("for ");
 		this.processGraph = openEOGraph;
 		this.build();
@@ -158,7 +160,7 @@ public class WCPSQueryFactory {
 				log.debug("Initial PayLoad WCPS is: " + wcpsPayLoad);
 				wcpsStringBuilder.append(wcpsPayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsPayLoad.toString());
-			}
+			}			
 			if (currentProcessID.equals("filter_bbox")) {
 				StringBuilder wcpsFilterBboxpayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderFilterBboxPayload = basicWCPSStringBuilder();
@@ -179,7 +181,7 @@ public class WCPSQueryFactory {
 				wcpsFilterBboxpayLoad.append(payLoad);
 				wcpsStringBuilder=wcpsStringBuilderFilterBboxPayload.append(wcpsFilterBboxpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterBboxpayLoad.toString());
-			}			
+			}
             if (currentProcessID.equals("filter_temporal")) {
             	StringBuilder wcpsFilterDatepayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderFilterDatePayload = basicWCPSStringBuilder();
@@ -286,6 +288,43 @@ public class WCPSQueryFactory {
 						storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsNDVIpayLoad.toString());						
 					}
 				}
+			}
+			if (currentProcessID.equals("filter_polygon")) {
+				StringBuilder wcpsFilterPolygonpayLoad = new StringBuilder("clip(");
+				StringBuilder wcpsStringBuilderFilterPolygonPayload = basicWCPSStringBuilder();
+				String payLoad = null;
+				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
+				if (processArguments.get("data") instanceof JSONObject) {
+					for (String fromType : processArguments.getJSONObject("data").keySet()) {
+						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+							payLoad = wcpsPayLoad.toString();
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = processArguments.getJSONObject("data").getString("from_node");
+							log.debug("Stored PayLoad is : " + storedPayLoads);
+							payLoad = storedPayLoads.getString(dataNode);
+						}
+					}
+				}
+				StringBuilder stringBuilderPoly = new StringBuilder();
+				stringBuilderPoly.append("POLYGON((");
+				for (int f = 0; f < filtersPolygon.size(); f++) {
+					Filter filter = filtersPolygon.get(f);					
+					String low = filter.getLowerBound();
+					String high = filter.getUpperBound();					
+					stringBuilderPoly.append(low);					
+					if (high != null && !(high.equals(low))) {
+						stringBuilderPoly.append(" ");
+						stringBuilderPoly.append(high);
+					}					
+					if (f < filtersPolygon.size() - 1) {
+						stringBuilderPoly.append(",");
+					}
+				}
+				stringBuilderPoly.append("))");
+				wcpsFilterPolygonpayLoad.append(payLoad + "," + stringBuilderPoly.toString() + ")");
+				wcpsStringBuilder=wcpsStringBuilderFilterPolygonPayload.append(wcpsFilterPolygonpayLoad.toString());
+				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterPolygonpayLoad.toString());
 			}
 			if (currentProcessID.contains("_time")) {
 				containsTempAggProcess = true;
@@ -1728,8 +1767,81 @@ public class WCPSQueryFactory {
 		return stringBuilder.toString();
 	}
 	
-	private String filter_polygon(String collectionName) {
-		return collectionName;
+	private void createPolygonFilter(JSONObject argsObject, int srs, String coll) {
+		log.debug("Creating Polygon filter from process");
+		double polygonArrayLong = 0;
+		double polygonArrayLat = 0;
+
+		if (argsObject.getString("type").equals("Polygon")) {
+			for (Object argsKey : argsObject.keySet()) {
+				String argsKeyStr = (String) argsKey;
+				if (argsKeyStr.equals("coordinates")) {
+					JSONArray polygonArray = (JSONArray) argsObject.getJSONArray(argsKeyStr).getJSONArray(0);
+					for (int a = 0; a < polygonArray.length(); a++) {
+						polygonArrayLong = polygonArray.getJSONArray(a).getDouble(0);
+						polygonArrayLat = polygonArray.getJSONArray(a).getDouble(0);
+						JSONObject extent;
+						JSONObject jsonresp = null;
+						try {
+							jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
+						} catch (JSONException e) {
+							log.error("An error occured: " + e.getMessage());
+							StringBuilder builder = new StringBuilder();
+							for (StackTraceElement element : e.getStackTrace()) {
+								builder.append(element.toString() + "\n");
+							}
+							log.error(builder.toString());
+						} catch (IOException e) {
+							log.error("An error occured: " + e.getMessage());
+							StringBuilder builder = new StringBuilder();
+							for (StackTraceElement element : e.getStackTrace()) {
+								builder.append(element.toString() + "\n");
+							}
+							log.error(builder.toString());
+						}
+
+						extent = jsonresp.getJSONObject("extent");
+						JSONArray spatial = extent.getJSONArray("spatial");
+						double westlower = spatial.getDouble(0);
+						double eastupper = spatial.getDouble(2);
+						double southlower = spatial.getDouble(1);
+						double northupper = spatial.getDouble(3);
+
+						if (polygonArrayLong < westlower) {
+							polygonArrayLong = westlower;
+						}
+
+						if (polygonArrayLong > eastupper) {
+							polygonArrayLong = eastupper;
+						}
+
+						if (polygonArrayLat > northupper) {
+							polygonArrayLat = northupper;
+						}
+
+						if (polygonArrayLat < southlower) {
+							polygonArrayLat = southlower;
+						}
+
+						SpatialReference src = new SpatialReference();
+						src.ImportFromEPSG(4326);
+						SpatialReference dst = new SpatialReference();
+						dst.ImportFromEPSG(srs);				
+
+						CoordinateTransformation tx = new CoordinateTransformation(src, dst);
+						double[] c1 = null;				
+						c1 = tx.TransformPoint(polygonArrayLong, polygonArrayLat);
+
+						polygonArrayLong = c1[0];
+						polygonArrayLat = c1[1];
+
+						log.debug("Polygon Long: "+ polygonArrayLat);
+						log.debug("Polygon Lat: "+ polygonArrayLat);
+						this.filtersPolygon.add(new Filter("Poly"+a, Double.toString(polygonArrayLong), Double.toString(polygonArrayLat)));
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -2130,7 +2242,47 @@ public class WCPSQueryFactory {
 				log.debug("Spat New Extent : " + processFilterArguments);
 				createBoundingBoxFilterFromArgs(processFilterArguments, srs, coll, false);
 			}
-		}		
+		}
+		
+		else if (processID.equals("filter_polygon")) {
+			String filterCollectionNodeKey = null;
+			String filterPolygonNodeKey = processNodeKey;
+			String filterPolygonfromNode = processNode.getJSONObject("arguments").getJSONObject("data").getString("from_node");			
+			filterCollectionNodeKey = getFilterCollectionNode(filterPolygonfromNode);
+			log.debug("Key Polygon is : " + filterCollectionNodeKey);
+			JSONObject loadCollectionNode = processGraph.getJSONObject(filterCollectionNodeKey).getJSONObject("arguments");			
+			String coll = (String) loadCollectionNode.get("id");
+			JSONObject processFilter = processGraph.getJSONObject(filterPolygonNodeKey);
+			JSONObject processFilterArguments = processFilter.getJSONObject("arguments").getJSONObject("polygons");
+
+			int srs = 0;
+			JSONObject jsonresp = null;
+			try {
+				jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
+			} catch (JSONException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			} catch (IOException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			}
+
+			srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");
+			
+			if (srs > 0) {
+				log.debug("Polygon Extent : " + processFilterArguments.getJSONArray("coordinates"));
+				createPolygonFilter(processFilterArguments, srs, coll);
+				log.debug("Filters are: " + filtersPolygon);
+			}
+		}
 	}
 
 	private String getFilterCollectionNode(String fromNode) {		
@@ -2424,7 +2576,7 @@ public class WCPSQueryFactory {
 							bottom = "" + extentObject.get(extentKeyStr);
 							bottomlower = Double.parseDouble(bottom);
 							if (bottomlower < southlower) {							
-								bottom = Double.toString(southlower).toString();
+								bottom = Double.toString(southlower);
 							}
 						}
 					}
@@ -2432,8 +2584,7 @@ public class WCPSQueryFactory {
 					SpatialReference src = new SpatialReference();
 					src.ImportFromEPSG(4326);
 					SpatialReference dst = new SpatialReference();
-					dst.ImportFromEPSG(srs);
-					log.debug(srs);
+					dst.ImportFromEPSG(srs);					
 
 					CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 					double[] c1 = null;
