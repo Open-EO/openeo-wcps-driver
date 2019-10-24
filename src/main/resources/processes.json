@@ -2352,6 +2352,71 @@
     ]
     },
     {
+    "id": "mask_colored",
+    "summary": "Apply a mask",
+    "description": "Applies a mask to a raster data cube. A mask can either be specified as:\n\n* **Raster data cube** for which parallel pixels among `data` and `mask` are compared and those pixels in `data` are replaced, which are non-zero (for numbers) or `true` (for boolean values) in `mask`.\n* **GeoJSON or vector data cube** containing one or more polygons. All pixels for which the point at the pixel center intersects with the corresponding polygon (as defined in the Simple Features standard by the OGC) are replaced.\n\nThe pixel values are replaced with the value specified for `replacement`, which defaults to `null` (no data). No data values will be left untouched by the masking operation.",
+    "categories": [
+        "masks"
+    ],
+    "parameter_order": ["data", "threshold with comparator", "red", "green", "blue"],
+    "parameters": {
+        "data": {
+            "description": "A raster data cube.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube"
+            },
+            "required": true
+        },
+        "thresholdCondition": {
+            "description": "The threshold used to replace non-zero and `true` values with.",
+            "schema": {
+                "type": ["string"],
+                "default": null
+            },
+            "required": true
+        },
+        "red": {
+            "description": "The value of color used to replace non-zero and `true` values with.",
+            "schema": {
+                "type": ["number"],
+                "default": null
+            },
+            "required": true
+        },
+        "green": {
+            "description": "The value of color used to replace non-zero and `true` values with.",
+            "schema": {
+                "type": ["number"],
+                "default": null
+            },
+            "required": true
+        },
+        "blue": {
+            "description": "The value of color used to replace non-zero and `true` values with.",
+            "schema": {
+                "type": ["number"],
+                "default": null
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The masked raster data cube.",
+        "schema": {
+            "type": "object",
+            "format": "raster-cube"
+        }
+    },
+    "links": [
+        {
+            "href": "http://www.opengeospatial.org/standards/sfa",
+            "rel": "about",
+            "title": "Simple Features standard by the OGC"
+    }
+    ]
+    },
+    {
     "id": "resample_spatial",
     "summary": "Resample and warp the spatial dimensions",
     "description": "Resamples the spatial dimensions (x,y) of the data cube to a specified resolution and/or warps the data cube to the target projection. At least `resolution` or `projection` must be specified.\n\nUse ``filter_bbox()`` to set the target spatial extent.",

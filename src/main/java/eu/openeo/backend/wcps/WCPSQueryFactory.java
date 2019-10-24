@@ -229,6 +229,27 @@ public class WCPSQueryFactory {
 				wcpsStringBuilder=wcpsStringBuilderFilterPayload.append(wcpsFilterpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterpayLoad.toString());
 			}
+			if (currentProcessID.equals("mask_colored")) {
+				StringBuilder wcpsFilterPolygonpayLoad = new StringBuilder("switch case(");
+				StringBuilder wcpsStringBuilderFilterPolygonPayload = basicWCPSStringBuilder();
+				String payLoad = null;
+				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
+				if (processArguments.get("data") instanceof JSONObject) {
+					for (String fromType : processArguments.getJSONObject("data").keySet()) {
+						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+							payLoad = wcpsPayLoad.toString();
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = processArguments.getJSONObject("data").getString("from_node");
+							log.debug("Stored PayLoad is : " + storedPayLoads);
+							payLoad = storedPayLoads.getString(dataNode);
+						}
+					}
+				}				
+				wcpsFilterPolygonpayLoad.append(payLoad + ")" + processArguments.getString("threshold with comparator") + " return {red:" + processArguments.get("red") + ", green:" + processArguments.get("green") + ", blue:" + processArguments.get("blue") + "} default return {red: 255; green: 0; blue: 0}");
+				wcpsStringBuilder=wcpsStringBuilderFilterPolygonPayload.append(wcpsFilterPolygonpayLoad.toString());
+				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterPolygonpayLoad.toString());
+			}
 			if (currentProcessID.equals("normalized_difference")) {
 				containsNormDiffProcess = true;
 				StringBuilder wcpsNormDiffpayLoad = new StringBuilder("((double)");
@@ -316,7 +337,7 @@ public class WCPSQueryFactory {
 					if (high != null && !(high.equals(low))) {
 						stringBuilderPoly.append(" ");
 						stringBuilderPoly.append(high);
-					}					
+					}
 					if (f < filtersPolygon.size() - 1) {
 						stringBuilderPoly.append(",");
 					}
@@ -2335,10 +2356,10 @@ public class WCPSQueryFactory {
 
 			if (templower != null && tempupper != null) {
 				log.debug("Temporal extent is: |" + templower + "|:|" + tempupper + "|");
-				if(LocalDateTime.parse(templower.replace("Z", "")).equals(LocalDateTime.parse(tempupper.replace("Z", "")))) {
-					tempupper = null;
-					log.debug("Dates are identical. To date is set to null!");
-				}			
+//				if(LocalDateTime.parse(templower.replace("Z", "")).equals(LocalDateTime.parse(tempupper.replace("Z", "")))) {
+//					tempupper = null;
+//					log.debug("Dates are identical. To date is set to null!");
+//				}			
 				Filter dateFilter = null;
 				for (Filter filter : this.filters) {
 					if (filter.getAxis().equals("DATE")) {
@@ -2392,10 +2413,10 @@ public class WCPSQueryFactory {
 			}
 			if (fromDate != null && toDate != null) {
 				log.debug("Temporal extent is: |" + fromDate + "|:|" + toDate + "|");
-				if(LocalDateTime.parse(fromDate.replace("Z", "")).equals(LocalDateTime.parse(toDate.replace("Z", "")))) {
-					toDate = null;
-					log.debug("Dates are identical. To date is set to null!");
-				}			
+//				if(LocalDateTime.parse(fromDate.replace("Z", "")).equals(LocalDateTime.parse(toDate.replace("Z", "")))) {
+//					toDate = null;
+//					log.debug("Dates are identical. To date is set to null!");
+//				}			
 				Filter dateFilter = null;
 				for (Filter filter : this.filters) {
 					if (filter.getAxis().equals("DATE")) {
@@ -2494,17 +2515,23 @@ public class WCPSQueryFactory {
 				Filter eastFilter = null;
 				Filter westFilter = null;
 				for (Filter filter : this.filters) {
-					if (filter.getAxis().equals("E")) {
+					if (filter.getAxis().equals("E") || filter.getAxis().equals("Long")) {
 						eastFilter = filter;
 					}
-					else if (filter.getAxis().equals("N")) {
+					else if (filter.getAxis().equals("N") || filter.getAxis().equals("Lat")) {
 						westFilter = filter;
 					}
 				}
 				this.filters.remove(eastFilter);
 				this.filters.remove(westFilter);
+				if (srs != 4326) {
 				this.filters.add(new Filter("E", left, right));
-				this.filters.add(new Filter("N", bottom, top));			
+				this.filters.add(new Filter("N", bottom, top));
+				}
+				if (srs==4326) {
+					this.filters.add(new Filter("Long", left, right));
+					this.filters.add(new Filter("Lat", bottom, top));
+					}
 			} else {
 				log.error("No spatial information could be found in process!");
 			}
@@ -2606,17 +2633,23 @@ public class WCPSQueryFactory {
 				Filter eastFilter = null;
 				Filter westFilter = null;
 				for (Filter filter : this.filters) {
-					if (filter.getAxis().equals("E")) {
+					if (filter.getAxis().equals("E") || filter.getAxis().equals("Long")) {
 						eastFilter = filter;
 					}
-					else if (filter.getAxis().equals("N")) {
+					else if (filter.getAxis().equals("N") || filter.getAxis().equals("Lat")) {
 						westFilter = filter;
 					}
 				}
 				this.filters.remove(eastFilter);
 				this.filters.remove(westFilter);
+				if (srs != 4326) {
 				this.filters.add(new Filter("E", left, right));
-				this.filters.add(new Filter("N", bottom, top));			
+				this.filters.add(new Filter("N", bottom, top));
+				}
+				if (srs==4326) {
+				this.filters.add(new Filter("Long", left, right));
+				this.filters.add(new Filter("Lat", bottom, top));
+				}
 			} else {
 				log.error("No spatial information could be found in process!");
 			}			

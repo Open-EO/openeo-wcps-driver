@@ -145,7 +145,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 					dimObjects[1].put("type", "spatial");
 					dimObjects[1].put("reference_system", Long.parseLong(srsDescription));
 				}
-				if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
+				if(axis[a].equals("DATE")  || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
 					temporalExtent.put(minValues[a].replaceAll("\"", ""));
 					temporalExtent.put(maxValues[a].replaceAll("\"", ""));
 					dimObjects[2] = new JSONObject();
@@ -566,7 +566,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 					if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
 						yIndex=a;
 					}
-					if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
+					if(axis[a].equals("DATE")  || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
 						temporalExtent.put(minValues[a].replaceAll("\"", ""));
 						temporalExtent.put(maxValues[a].replaceAll("\"", ""));
 					}
