@@ -134,14 +134,14 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long")){
 					xIndex=a;
 					dimObjects[0] = new JSONObject();
-					dimObjects[0].put("axis", "x");
+					dimObjects[0].put("axis", axis[a]);
 					dimObjects[0].put("type", "spatial");
 					dimObjects[0].put("reference_system", Long.parseLong(srsDescription));
 				}
 				if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
 					yIndex=a;
 					dimObjects[1] = new JSONObject();
-					dimObjects[1].put("axis", "y");
+					dimObjects[1].put("axis", axis[a]);
 					dimObjects[1].put("type", "spatial");
 					dimObjects[1].put("reference_system", Long.parseLong(srsDescription));
 				}
@@ -149,7 +149,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 					temporalExtent.put(minValues[a].replaceAll("\"", ""));
 					temporalExtent.put(maxValues[a].replaceAll("\"", ""));
 					dimObjects[2] = new JSONObject();
-					dimObjects[2].put("axis", "temporal");
+					dimObjects[2].put("axis", axis[a]);
 					dimObjects[2].put("type", "temporal");
 					dimObjects[2].put("extent", temporalExtent);
 					dimObjects[2].put("step", JSONObject.NULL);

@@ -2350,7 +2350,7 @@ public class WCPSQueryFactory {
 			extent = jsonresp.getJSONObject("extent");
 			JSONArray temporal = extent.getJSONArray("temporal");
 			String templower = temporal.get(0).toString();
-			String tempupper = temporal.get(1).toString();
+			String tempupper = temporal.get(1).toString();			
 
 			log.debug("Temporal extent is: " + temporal);
 
@@ -2362,12 +2362,18 @@ public class WCPSQueryFactory {
 //				}			
 				Filter dateFilter = null;
 				for (Filter filter : this.filters) {
-					if (filter.getAxis().equals("DATE")) {
+					if (filter.getAxis().equals("DATE") || filter.getAxis().equals("TIME") || filter.getAxis().equals("ANSI") || filter.getAxis().equals("Date") || filter.getAxis().equals("Time") || filter.getAxis().equals("Ansi") || filter.getAxis().equals("date") || filter.getAxis().equals("time") || filter.getAxis().equals("ansi") || filter.getAxis().equals("UNIX") || filter.getAxis().equals("Unix") || filter.getAxis().equals("unix")) {
 						dateFilter = filter;
 					}
 				}
 				this.filters.remove(dateFilter);
-				this.filters.add(new Filter("DATE", templower, tempupper));
+				String tempAxis = null;
+				for (String tempAxis1 : jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").keySet()) {
+					if (tempAxis1.contentEquals("DATE") || tempAxis1.contentEquals("TIME") || tempAxis1.contentEquals("ANSI") || tempAxis1.contentEquals("Date") || tempAxis1.contentEquals("Time") || tempAxis1.contentEquals("Ansi") || tempAxis1.contentEquals("date") || tempAxis1.contentEquals("time") || tempAxis1.contentEquals("ansi") || tempAxis1.contentEquals("UNIX") || tempAxis1.contentEquals("Unix") || tempAxis1.contentEquals("unix")) {
+						tempAxis = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(tempAxis1).getString("axis");
+					}
+				}
+				this.filters.add(new Filter(tempAxis, templower, tempupper));
 			}
 		}
 
@@ -2397,7 +2403,6 @@ public class WCPSQueryFactory {
 			JSONArray temporal = extent.getJSONArray("temporal");
 			String templower = temporal.get(0).toString();
 			String tempupper = temporal.get(1).toString();
-
 			log.debug("Temporal extent is: " + temporal);
 			if (extentlower.compareTo(templower) < 0) {
 				fromDate = temporal.get(0).toString();
@@ -2419,12 +2424,18 @@ public class WCPSQueryFactory {
 //				}			
 				Filter dateFilter = null;
 				for (Filter filter : this.filters) {
-					if (filter.getAxis().equals("DATE")) {
+					if (filter.getAxis().equals("DATE") || filter.getAxis().equals("TIME") || filter.getAxis().equals("ANSI") || filter.getAxis().equals("Date") || filter.getAxis().equals("Time") || filter.getAxis().equals("Ansi") || filter.getAxis().equals("date") || filter.getAxis().equals("time") || filter.getAxis().equals("ansi") || filter.getAxis().equals("UNIX") || filter.getAxis().equals("Unix") || filter.getAxis().equals("unix")) {
 						dateFilter = filter;
 					}
 				}			
 				this.filters.remove(dateFilter);
-				this.filters.add(new Filter("DATE", fromDate, toDate));
+				String tempAxis = null;
+				for (String tempAxis1 : jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").keySet()) {
+					if (tempAxis1.contentEquals("DATE") || tempAxis1.contentEquals("TIME") || tempAxis1.contentEquals("ANSI") || tempAxis1.contentEquals("Date") || tempAxis1.contentEquals("Time") || tempAxis1.contentEquals("Ansi") || tempAxis1.contentEquals("date") || tempAxis1.contentEquals("time") || tempAxis1.contentEquals("ansi") || tempAxis1.contentEquals("UNIX") || tempAxis1.contentEquals("Unix") || tempAxis1.contentEquals("unix")) {
+						tempAxis = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(tempAxis1).getString("axis");
+					}
+				}
+				this.filters.add(new Filter(tempAxis, fromDate, toDate));
 			}
 		}
 	}
@@ -2496,7 +2507,7 @@ public class WCPSQueryFactory {
 			SpatialReference dst = new SpatialReference();
 			dst.ImportFromEPSG(srs);
 			log.debug(srs);
-
+			
 			CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 			double[] c1 = null;
 			double[] c2 = null;
@@ -2510,34 +2521,41 @@ public class WCPSQueryFactory {
 			log.debug("SOUTH: "+bottom);
 			log.debug("EAST: "+right);
 			log.debug("NORTH: "+top);
-
+			String spatAxisX = null;
+			String spatAxisY = null;
+			
 			if (left != null && right != null && top != null && bottom != null) {
 				Filter eastFilter = null;
 				Filter westFilter = null;
 				for (Filter filter : this.filters) {
-					if (filter.getAxis().equals("E") || filter.getAxis().equals("Long")) {
+					if (filter.getAxis().equals("E") || filter.getAxis().equals("Long") || filter.getAxis().equals("X")) {
 						eastFilter = filter;
 					}
-					else if (filter.getAxis().equals("N") || filter.getAxis().equals("Lat")) {
+					else if (filter.getAxis().equals("N") || filter.getAxis().equals("Lat") || filter.getAxis().equals("Y")) {
 						westFilter = filter;
 					}
 				}
 				this.filters.remove(eastFilter);
 				this.filters.remove(westFilter);
-				if (srs != 4326) {
-				this.filters.add(new Filter("E", left, right));
-				this.filters.add(new Filter("N", bottom, top));
-				}
-				if (srs==4326) {
-					this.filters.add(new Filter("Long", left, right));
-					this.filters.add(new Filter("Lat", bottom, top));
+				for (String spatAxis : jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").keySet()) {	
+					if (spatAxis.contentEquals("E") || spatAxis.contentEquals("Long") || spatAxis.contentEquals("X")) {
+						spatAxisX = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(spatAxis).getString("axis");
 					}
+					else if (spatAxis.contentEquals("N") || spatAxis.contentEquals("Lat") || spatAxis.contentEquals("Y")) {
+						spatAxisY = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(spatAxis).getString("axis");
+					}				
+				}
+				this.filters.add(new Filter(spatAxisX, left, right));
+				this.filters.add(new Filter(spatAxisY, bottom, top));
 			} else {
 				log.error("No spatial information could be found in process!");
 			}
 		}
 
 		else {
+			JSONObject jsonresp = null;
+			String spatAxisX = null;
+			String spatAxisY = null;
 			for (Object argsKey : argsObject.keySet()) {
 				String argsKeyStr = (String) argsKey;
 				if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
@@ -2546,7 +2564,7 @@ public class WCPSQueryFactory {
 					for (Object extentKey : extentObject.keySet()) {
 						String extentKeyStr = extentKey.toString();
 						JSONObject extent;
-						JSONObject jsonresp = null;
+						
 						try {
 							jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + coll);
 						} catch (JSONException e) {
@@ -2567,6 +2585,7 @@ public class WCPSQueryFactory {
 
 						extent = jsonresp.getJSONObject("extent");
 						JSONArray spatial = extent.getJSONArray("spatial");
+						
 						double westlower = spatial.getDouble(0);
 						double eastupper = spatial.getDouble(2);
 						double southlower = spatial.getDouble(1);
@@ -2633,23 +2652,26 @@ public class WCPSQueryFactory {
 				Filter eastFilter = null;
 				Filter westFilter = null;
 				for (Filter filter : this.filters) {
-					if (filter.getAxis().equals("E") || filter.getAxis().equals("Long")) {
+					if (filter.getAxis().equals("E") || filter.getAxis().equals("Long") || filter.getAxis().equals("X")) {
 						eastFilter = filter;
 					}
-					else if (filter.getAxis().equals("N") || filter.getAxis().equals("Lat")) {
+					else if (filter.getAxis().equals("N") || filter.getAxis().equals("Lat") || filter.getAxis().equals("Y")) {
 						westFilter = filter;
 					}
 				}
 				this.filters.remove(eastFilter);
 				this.filters.remove(westFilter);
-				if (srs != 4326) {
-				this.filters.add(new Filter("E", left, right));
-				this.filters.add(new Filter("N", bottom, top));
+				for (String spatAxis : jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").keySet()) {	
+					if (spatAxis.contentEquals("E") || spatAxis.contentEquals("Long") || spatAxis.contentEquals("X")) {
+						spatAxisX = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(spatAxis).getString("axis");
+					}
+					else if (spatAxis.contentEquals("N") || spatAxis.contentEquals("Lat") || spatAxis.contentEquals("Y")) {
+						spatAxisY = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(spatAxis).getString("axis");
+					}
 				}
-				if (srs==4326) {
-				this.filters.add(new Filter("Long", left, right));
-				this.filters.add(new Filter("Lat", bottom, top));
-				}
+				this.filters.add(new Filter(spatAxisX, left, right));
+				this.filters.add(new Filter(spatAxisY, bottom, top));
+				
 			} else {
 				log.error("No spatial information could be found in process!");
 			}			
