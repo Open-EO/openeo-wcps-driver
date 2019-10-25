@@ -246,7 +246,7 @@ public class WCPSQueryFactory {
 						}
 					}
 				}				
-				wcpsFilterPolygonpayLoad.append(payLoad + ")" + processArguments.getString("threshold with comparator") + " return {red:" + processArguments.get("red") + ", green:" + processArguments.get("green") + ", blue:" + processArguments.get("blue") + "} default return {red: 255; green: 0; blue: 0}");
+				wcpsFilterPolygonpayLoad.append(payLoad + ") " + processArguments.getString("threshold with comparator") + " return {red:" + processArguments.get("red") + "; green:" + processArguments.get("green") + "; blue:" + processArguments.get("blue") + "} default return {red: 255; green: 0; blue: 0}");
 				wcpsStringBuilder=wcpsStringBuilderFilterPolygonPayload.append(wcpsFilterPolygonpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterPolygonpayLoad.toString());
 			}
@@ -2356,10 +2356,10 @@ public class WCPSQueryFactory {
 
 			if (templower != null && tempupper != null) {
 				log.debug("Temporal extent is: |" + templower + "|:|" + tempupper + "|");
-//				if(LocalDateTime.parse(templower.replace("Z", "")).equals(LocalDateTime.parse(tempupper.replace("Z", "")))) {
-//					tempupper = null;
-//					log.debug("Dates are identical. To date is set to null!");
-//				}			
+				if(LocalDateTime.parse(templower.replace("Z", "")).equals(LocalDateTime.parse(tempupper.replace("Z", "")))) {
+					tempupper = null;
+					log.debug("Dates are identical. To date is set to null!");
+				}			
 				Filter dateFilter = null;
 				for (Filter filter : this.filters) {
 					if (filter.getAxis().equals("DATE") || filter.getAxis().equals("TIME") || filter.getAxis().equals("ANSI") || filter.getAxis().equals("Date") || filter.getAxis().equals("Time") || filter.getAxis().equals("Ansi") || filter.getAxis().equals("date") || filter.getAxis().equals("time") || filter.getAxis().equals("ansi") || filter.getAxis().equals("UNIX") || filter.getAxis().equals("Unix") || filter.getAxis().equals("unix")) {
@@ -2418,10 +2418,10 @@ public class WCPSQueryFactory {
 			}
 			if (fromDate != null && toDate != null) {
 				log.debug("Temporal extent is: |" + fromDate + "|:|" + toDate + "|");
-//				if(LocalDateTime.parse(fromDate.replace("Z", "")).equals(LocalDateTime.parse(toDate.replace("Z", "")))) {
-//					toDate = null;
-//					log.debug("Dates are identical. To date is set to null!");
-//				}			
+				if(LocalDateTime.parse(fromDate.replace("Z", "")).equals(LocalDateTime.parse(toDate.replace("Z", "")))) {
+					toDate = null;
+					log.debug("Dates are identical. To date is set to null!");
+				}
 				Filter dateFilter = null;
 				for (Filter filter : this.filters) {
 					if (filter.getAxis().equals("DATE") || filter.getAxis().equals("TIME") || filter.getAxis().equals("ANSI") || filter.getAxis().equals("Date") || filter.getAxis().equals("Time") || filter.getAxis().equals("Ansi") || filter.getAxis().equals("date") || filter.getAxis().equals("time") || filter.getAxis().equals("ansi") || filter.getAxis().equals("UNIX") || filter.getAxis().equals("Unix") || filter.getAxis().equals("unix")) {
