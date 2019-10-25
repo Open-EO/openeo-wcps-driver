@@ -230,7 +230,7 @@ public class WCPSQueryFactory {
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterpayLoad.toString());
 			}
 			if (currentProcessID.equals("mask_colored")) {
-				StringBuilder wcpsFilterPolygonpayLoad = new StringBuilder("switch case(");
+				StringBuilder wcpsFilterPolygonpayLoad = new StringBuilder("switch case ");
 				StringBuilder wcpsStringBuilderFilterPolygonPayload = basicWCPSStringBuilder();
 				String payLoad = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
@@ -246,7 +246,7 @@ public class WCPSQueryFactory {
 						}
 					}
 				}				
-				wcpsFilterPolygonpayLoad.append(payLoad + ") " + processArguments.getString("threshold with comparator") + " return {red:" + processArguments.get("red") + "; green:" + processArguments.get("green") + "; blue:" + processArguments.get("blue") + "} default return {red: 255; green: 0; blue: 0}");
+				wcpsFilterPolygonpayLoad.append(processArguments.getString("lowerThreshold") + " < (" + payLoad + ") > " + processArguments.getString("upperThreshold") + " return {red:" + processArguments.get("red") + "; green:" + processArguments.get("green") + "; blue:" + processArguments.get("blue") + "} default return {red: 230; green: 240; blue: 255}");
 				wcpsStringBuilder=wcpsStringBuilderFilterPolygonPayload.append(wcpsFilterPolygonpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterPolygonpayLoad.toString());
 			}

@@ -2358,7 +2358,7 @@
     "categories": [
         "masks"
     ],
-    "parameter_order": ["data", "threshold with comparator", "red", "green", "blue"],
+    "parameter_order": ["data", "lowerThreshold", "upperThreshold", "red", "green", "blue"],
     "parameters": {
         "data": {
             "description": "A raster data cube.",
@@ -2368,7 +2368,15 @@
             },
             "required": true
         },
-        "thresholdCondition": {
+        "lowerThreshold": {
+            "description": "The threshold used to replace non-zero and `true` values with.",
+            "schema": {
+                "type": ["string"],
+                "default": null
+            },
+            "required": true
+        },
+        "upperThreshold": {
             "description": "The threshold used to replace non-zero and `true` values with.",
             "schema": {
                 "type": ["string"],
