@@ -172,6 +172,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -213,6 +214,7 @@
                 "items": {
                     "type": [
                         "boolean",
+                        "object",
                         "null"
                     ]
                 }
@@ -254,6 +256,7 @@
                 "items": {
                     "type": [
                         "boolean",
+                        "object",
                         "null"
                     ]
                 }
@@ -295,6 +298,7 @@
                 "items": {
                     "type": [
                         "boolean",
+                        "object",
                         "null"
                     ]
                 }
@@ -332,6 +336,7 @@
             "schema": {
                 "type": [
                     "boolean",
+                    "object",
                     "null"
                 ]
             },
@@ -362,6 +367,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -372,6 +378,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -413,6 +420,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -442,6 +450,44 @@
     ]
     },
     {
+    "id": "sqrt",
+    "summary": "Square root",
+    "description": "Computes the square root of a real number `x`. This process is an alias for `x` to the power of *0.5*: `power(x, 0.5)`.\n\nA square root of x is a number a such that *a^2^ = x*. Therefore, the square root is the inverse function of a to the power of 2, but only for *a >= 0*.\n\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math",
+        "math > exponential & logarithmic"
+    ],
+    "parameters": {
+        "x": {
+            "description": "A number.",
+            "schema": {
+                "type": [
+                    "number",
+                    "object",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed square root.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/SquareRoot.html",
+            "title": "Square root explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
     "id": "power",
     "summary": "Exponentiation",
     "description": "Computes the exponentiation for the base `base` raised to the power of `p`.\n\nThe no-data value `null` is passed through and therefore gets propagated if any of the arguments is `null`.",
@@ -456,6 +502,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -466,6 +513,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -502,6 +550,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -588,6 +637,9 @@
                         "type": "number"
                     },
                     {
+                        "type": "object"
+                    },
+                    {
                         "type": "null"
                     },
                     {
@@ -612,6 +664,9 @@
                 "anyOf": [
                     {
                         "type": "number"
+                    },
+                    {
+                        "type": "object"
                     },
                     {
                         "type": "null"
@@ -667,6 +722,9 @@
                         "type": "number"
                     },
                     {
+                        "type": "object"
+                    },
+                    {
                         "type": "null"
                     },
                     {
@@ -691,6 +749,9 @@
                 "anyOf": [
                     {
                         "type": "number"
+                    },
+                    {
+                        "type": "object"
                     },
                     {
                         "type": "null"
@@ -747,6 +808,9 @@
                         "type": "number"
                     },
                     {
+                        "type": "object"
+                    },
+                    {
                         "type": "boolean"
                     },
                     {
@@ -777,6 +841,9 @@
                 "anyOf": [
                     {
                         "type": "number"
+                    },
+                    {
+                        "type": "object"
                     },
                     {
                         "type": "boolean"
@@ -852,6 +919,9 @@
                         "type": "number"
                     },
                     {
+                        "type": "object"
+                    },
+                    {
                         "type": "null"
                     },
                     {
@@ -876,6 +946,9 @@
                 "anyOf": [
                     {
                         "type": "number"
+                    },
+                    {
+                        "type": "object"
                     },
                     {
                         "type": "null"
@@ -931,6 +1004,9 @@
                         "type": "number"
                     },
                     {
+                        "type": "object"
+                    },
+                    {
                         "type": "null"
                     },
                     {
@@ -955,6 +1031,9 @@
                 "anyOf": [
                     {
                         "type": "number"
+                    },
+                    {
+                        "type": "object"
                     },
                     {
                         "type": "null"
@@ -1011,6 +1090,9 @@
                         "type": "number"
                     },
                     {
+                        "type": "object"
+                    },
+                    {
                         "type": "boolean"
                     },
                     {
@@ -1041,6 +1123,9 @@
                 "anyOf": [
                     {
                         "type": "number"
+                    },
+                    {
+                        "type": "object"
                     },
                     {
                         "type": "boolean"
@@ -1112,6 +1197,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -1148,6 +1234,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -1184,6 +1271,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -1220,6 +1308,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -1256,6 +1345,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -1292,6 +1382,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -1328,6 +1419,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -1364,6 +1456,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -1400,6 +1493,7 @@
             "schema": {
                 "type": [
                     "number",
+                    "object",
                     "null"
                 ]
             },
@@ -1435,7 +1529,7 @@
         "data": {
             "description": "An array.",
             "schema": {
-                "type": "array",
+                "type": ["array", "object"],
                 "items": {
                     "description": "Any data type is allowed."
                 }
@@ -1486,6 +1580,7 @@
                 "items": {
                     "type": [
                         "number",
+                        "object",
                         "null"
                     ]
                 }
@@ -1532,6 +1627,7 @@
                 "items": {
                     "type": [
                         "number",
+                        "object",
                         "null"
                     ]
                 },
@@ -1591,6 +1687,7 @@
                 "items": {
                     "type": [
                         "number",
+                        "object",
                         "null"
                     ]
                 },
@@ -1650,6 +1747,7 @@
                 "items": {
                     "type": [
                         "number",
+                        "object",
                         "null"
                     ]
                 },
@@ -1705,10 +1803,11 @@
         "data": {
             "description": "An array of numbers. An empty array resolves always with `null`.",
             "schema": {
-                "type": "array",
+                "type": ["array", "object"],
                 "items": {
                     "type": [
                         "number",
+                        "object",
                         "null"
                     ]
                 }
@@ -1753,10 +1852,11 @@
         "data": {
             "description": "An array of numbers. An empty array resolves always with `null`.",
             "schema": {
-                "type": "array",
+                "type": ["array", "object"],
                 "items": {
                     "type": [
                         "number",
+                        "object",
                         "null"
                     ]
                 }
@@ -1801,10 +1901,11 @@
         "data": {
             "description": "An array of numbers. An empty array resolves always with `null`.",
             "schema": {
-                "type": "array",
+                "type": ["array", "object"],
                 "items": {
                     "type": [
                         "number",
+                        "object",
                         "null"
                     ]
                 }
@@ -1898,6 +1999,7 @@
 				"schema": {
 					"type": [
 						"number",
+						"object",
 						"null"
 					]
 				},
@@ -3031,141 +3133,6 @@
 				"rel": "about",
 				"href": "https://open-eo.github.io/openeo-api/processes/#openeo-specific-formats",
 				"title": "Information about the supported temporal formats."
-			}
-		]
-	},
-	{
-		"id": "resample_spatial",
-		"summary": "Resample and warp the spatial dimensions",
-		"description": "Resamples the spatial dimensions (x,y) of the data cube to a specified resolution and/or warps the data cube to the target projection. At least `resolution` or `projection` must be specified.\n\nUse ``filter_bbox()`` to set the target spatial extent.",
-		"categories": [
-			"cubes",
-			"aggregate & resample"
-		],
-		"parameter_order": [
-			"data",
-			"resolution",
-			"projection",
-			"method",
-			"align"
-		],
-		"parameters": {
-			"data": {
-				"description": "A raster data cube.",
-				"schema": {
-					"type": "object",
-					"format": "raster-cube"
-				},
-				"required": true
-			},
-			"resolution": {
-				"description": "Resamples the data cube to the target resolution, which can be specified either as separate values for x and y or as a single value for both axes. Specified in the units of the target projection. Doesn't change the resolution by default (`0`).",
-				"schema": {
-					"anyOf": [
-						{
-							"description": "A single number used as resolution for both x and y.",
-							"type": "number",
-							"minimum": 0
-						},
-						{
-							"description": "A two-element array to specify separate resolutions for x (first element) and y (second element).",
-							"type": "array",
-							"minItems": 2,
-							"maxItems": 2,
-							"items": {
-								"type": "number",
-								"minimum": 0
-							}
-						}
-					],
-					"default": 0
-				}
-			},
-			"projection": {
-				"description": "Warps the data cube to the target projection. Target projection specified as [EPSG](http://www.epsg.org) code or [PROJ](https://proj4.org) definition. Doesn't change the projection by default (`null`).",
-				"schema": {
-					"anyOf": [
-						{
-							"title": "EPSG Code",
-							"type": "integer",
-							"format": "epsg-code",
-							"examples": [
-								7099
-							]
-						},
-						{
-							"title": "PROJ definition",
-							"type": "string",
-							"format": "proj-definition",
-							"examples": [
-								"+proj=moll +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
-							]
-						},
-						{
-							"title": "Don't change projection",
-							"type": "null"
-						}
-					],
-					"default": null
-				}
-			},
-			"method": {
-				"description": "Resampling method. Methods are inspired by GDAL, see [gdalwarp](https://www.gdal.org/gdalwarp.html) for more information.",
-				"schema": {
-					"type": "string",
-					"default": "near",
-					"enum": [
-						"near",
-						"bilinear",
-						"cubic",
-						"cubicspline",
-						"lanczos",
-						"average",
-						"mode",
-						"max",
-						"min",
-						"med",
-						"q1",
-						"q3"
-					]
-				}
-			},
-			"align": {
-				"description": "Specifies to which corner of the spatial extent the new resampled data is aligned to.",
-				"schema": {
-					"type": "string",
-					"enum": [
-						"lower-left",
-						"upper-left",
-						"lower-right",
-						"upper-right"
-					],
-					"default": "lower-left"
-				}
-			}
-		},
-		"returns": {
-			"description": "A raster data cube with values warped onto the new projection.",
-			"schema": {
-				"type": "object",
-				"format": "raster-cube"
-			}
-		},
-		"links": [
-			{
-				"rel": "about",
-				"href": "https://proj4.org/usage/projections.html",
-				"title": "PROJ parameters for cartographic projections"
-			},
-			{
-				"rel": "about",
-				"href": "http://www.epsg-registry.org",
-				"title": "Official EPSG code registry"
-			},
-			{
-				"rel": "about",
-				"href": "http://www.epsg.io",
-				"title": "Unofficial EPSG code database"
 			}
 		]
 	}

@@ -572,7 +572,19 @@ public class WCPSQueryFactory {
 				JSONObject arrayData =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				int arrayIndex = arrayData.getInt("index");
 				if ( arrayData.get("data") instanceof JSONObject) {
-					reduceBuilderExtend = createBandWCPSString(arrayIndex, reduceNodeKey, filterString, collName);
+					for (String fromType : arrayData.getJSONObject("data").keySet()) {
+						if (fromType.equals("from_argument") && arrayData.getJSONObject("data").getString("from_argument").equals("data")) {
+							String dataNode = processGraph.getJSONObject(reduceNodeKey).getJSONObject("arguments").getJSONObject("data").getString("from_node");
+							String loadCollNode = getFilterCollectionNode();
+							if (dataNode.equals(loadCollNode)) {
+								reduceBuilderExtend = createBandWCPSString(arrayIndex, reduceNodeKey, filterString, collName);
+							}
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = arrayData.getJSONObject("data").getString("from_node");
+
+						}
+					}
 				}
 				else {
 					reduceBuilderExtend = arrayData.getJSONArray("data").getString(arrayIndex);
@@ -698,13 +710,13 @@ public class WCPSQueryFactory {
 				String x = null;
 				JSONObject logNArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				for (String argType : logNArguments.keySet()) {
-					if (argType.equals("data")) {
-						for (String fromType : logNArguments.getJSONObject("data").keySet()) {
-							if (fromType.equals("from_argument") && logNArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+					if (argType.equals("x")) {
+						for (String fromType : logNArguments.getJSONObject("x").keySet()) {
+							if (fromType.equals("from_argument") && logNArguments.getJSONObject("x").getString("from_argument").equals("data")) {
 								x = payLoad;
 							}
 							else if (fromType.equals("from_node")) {
-								String dataNode = logNArguments.getJSONObject("data").getString("from_node");
+								String dataNode = logNArguments.getJSONObject("x").getString("from_node");
 								String logNPayLoad = reducerPayLoads.getString(dataNode);
 								x = logNPayLoad;
 							}						
@@ -721,13 +733,13 @@ public class WCPSQueryFactory {
 				String x = null;
 				JSONObject logArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				for (String argType : logArguments.keySet()) {
-					if (argType.equals("data")) {
-						for (String fromType : logArguments.getJSONObject("data").keySet()) {
-							if (fromType.equals("from_argument") && logArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+					if (argType.equals("x")) {
+						for (String fromType : logArguments.getJSONObject("x").keySet()) {
+							if (fromType.equals("from_argument") && logArguments.getJSONObject("x").getString("from_argument").equals("data")) {
 								x = payLoad;
 							}
 							else if (fromType.equals("from_node")) {
-								String dataNode = logArguments.getJSONObject("data").getString("from_node");
+								String dataNode = logArguments.getJSONObject("x").getString("from_node");
 								String logPayLoad = reducerPayLoads.getString(dataNode);
 								x = logPayLoad;
 							}						
@@ -744,13 +756,13 @@ public class WCPSQueryFactory {
 				String p = null;
 				JSONObject expArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				for (String argType : expArguments.keySet()) {
-					if (argType.equals("data")) {
-						for (String fromType : expArguments.getJSONObject("data").keySet()) {
-							if (fromType.equals("from_argument") && expArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+					if (argType.equals("p")) {
+						for (String fromType : expArguments.getJSONObject("p").keySet()) {
+							if (fromType.equals("from_argument") && expArguments.getJSONObject("p").getString("from_argument").equals("data")) {
 								p = payLoad;
 							}
 							else if (fromType.equals("from_node")) {
-								String dataNode = expArguments.getJSONObject("data").getString("from_node");
+								String dataNode = expArguments.getJSONObject("p").getString("from_node");
 								String expPayLoad = reducerPayLoads.getString(dataNode);
 								p = expPayLoad;
 							}
@@ -767,13 +779,13 @@ public class WCPSQueryFactory {
 				String base = null;
 				JSONObject powArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				for (String argType : powArguments.keySet()) {
-					if (argType.equals("data")) {
-						for (String fromType : powArguments.getJSONObject("data").keySet()) {
-							if (fromType.equals("from_argument") && powArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+					if (argType.equals("base")) {
+						for (String fromType : powArguments.getJSONObject("base").keySet()) {
+							if (fromType.equals("from_argument") && powArguments.getJSONObject("base").getString("from_argument").equals("data")) {
 								base = payLoad;
 							}
 							else if (fromType.equals("from_node")) {
-								String dataNode = powArguments.getJSONObject("data").getString("from_node");
+								String dataNode = powArguments.getJSONObject("base").getString("from_node");
 								String powPayLoad = reducerPayLoads.getString(dataNode);
 								base = powPayLoad;
 							}						
@@ -790,13 +802,13 @@ public class WCPSQueryFactory {
 				String x = null;
 				JSONObject sqrtArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				for (String argType : sqrtArguments.keySet()) {
-					if (argType.equals("data")) {
-						for (String fromType : sqrtArguments.getJSONObject("data").keySet()) {
-							if (fromType.equals("from_argument") && sqrtArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+					if (argType.equals("x")) {
+						for (String fromType : sqrtArguments.getJSONObject("x").keySet()) {
+							if (fromType.equals("from_argument") && sqrtArguments.getJSONObject("x").getString("from_argument").equals("data")) {
 								x = payLoad;
 							}
 							else if (fromType.equals("from_node")) {
-								String dataNode = sqrtArguments.getJSONObject("data").getString("from_node");
+								String dataNode = sqrtArguments.getJSONObject("x").getString("from_node");
 								String sqrtPayLoad = reducerPayLoads.getString(dataNode);
 								x = sqrtPayLoad;
 							}						
@@ -814,7 +826,7 @@ public class WCPSQueryFactory {
 				JSONObject notArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				if (notArguments.get("expression") instanceof JSONObject) {
 					for (String fromType : notArguments.getJSONObject("expression").keySet()) {
-						if (fromType.equals("from_argument") && notArguments.getJSONObject("x").getString("from_argument").equals("data")) {
+						if (fromType.equals("from_argument") && notArguments.getJSONObject("expression").getString("from_argument").equals("data")) {
 							x = payLoad;
 						}
 						else if (fromType.equals("from_node")) {
@@ -1056,8 +1068,8 @@ public class WCPSQueryFactory {
 				String x = null;
 				JSONObject trigArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				for (String argType : trigArguments.keySet()) {
-					if (argType.equals("data")) {
-						for (String fromType : trigArguments.getJSONObject("data").keySet()) {
+					if (argType.equals("x") && trigArguments.get(argType) instanceof JSONObject) {
+						for (String fromType : trigArguments.getJSONObject("x").keySet()) {
 							if (fromType.equals("from_argument") && trigArguments.getJSONObject("x").getString("from_argument").equals("data")) {
 								x = payLoad;
 							}
@@ -2317,6 +2329,23 @@ public class WCPSQueryFactory {
 			else if (argumentsKey.contentEquals("data")) {			  
 				String filterfromNode = loadCollectionNodeKeyArguments.getJSONObject("data").getString("from_node");			  
 				filterCollectionNodeKey = getFilterCollectionNode(filterfromNode);
+			}
+		}		
+		return filterCollectionNodeKey;
+	}
+	
+	private String getFilterCollectionNode() {
+		String filterCollectionNodeKey = null;
+		for (String argumentsKey : processGraph.keySet()) {
+			JSONObject args = processGraph.getJSONObject(argumentsKey).getJSONObject("arguments");
+			for (String argsKey : args.keySet()) {
+				if (argsKey.contentEquals("id")) {
+					filterCollectionNodeKey = argumentsKey;
+				}
+				else if (argsKey.contentEquals("data")) {
+					String filterfromNode = processGraph.getJSONObject(argumentsKey).getJSONObject("arguments").getJSONObject("data").getString("from_node");			  
+					filterCollectionNodeKey = getFilterCollectionNode(filterfromNode);
+				}
 			}
 		}		
 		return filterCollectionNodeKey;
