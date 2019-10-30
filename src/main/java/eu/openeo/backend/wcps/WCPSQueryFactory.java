@@ -245,7 +245,7 @@ public class WCPSQueryFactory {
 							payLoad = storedPayLoads.getString(dataNode);
 						}
 					}
-				}				
+				}
 				wcpsFilterPolygonpayLoad.append(processArguments.getString("lowerThreshold") + " < (" + payLoad + ") > " + processArguments.getString("upperThreshold") + " return {red:" + processArguments.get("red") + "; green:" + processArguments.get("green") + "; blue:" + processArguments.get("blue") + "} default return {red: 230; green: 240; blue: 255}");
 				wcpsStringBuilder=wcpsStringBuilderFilterPolygonPayload.append(wcpsFilterPolygonpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterPolygonpayLoad.toString());
@@ -577,16 +577,16 @@ public class WCPSQueryFactory {
 					if ((argType.equals("x") || argType.equals("data")) && linearScaleRangeArguments.get(argType) instanceof JSONObject) {
 						for (String fromType : linearScaleRangeArguments.getJSONObject(argType).keySet()) {
 							if (fromType.equals("from_argument") && linearScaleRangeArguments.getJSONObject(argType).getString("from_argument").equals("x")) {
-								x = payLoad;
+								x = payLoad;								
 							}
 							else if (fromType.equals("from_node")) {
 								String dataNode = linearScaleRangeArguments.getJSONObject(argType).getString("from_node");
 								String linearScaleRangePayLoad = applyPayLoads.getString(dataNode);
 								x = linearScaleRangePayLoad;
-							}						
+							}
 						}
 					}
-					else {
+					else if (argType.equals("x") && linearScaleRangeArguments.get(argType) instanceof Double) {						
 						x = String.valueOf(linearScaleRangeArguments.getDouble("x"));
 					}
 				}
@@ -610,7 +610,7 @@ public class WCPSQueryFactory {
 							}						
 						}
 					}
-					else {
+					else if (argType.equals("x") && absArguments.get(argType) instanceof Double) {
 						x = String.valueOf(absArguments.getDouble("x"));
 					}
 				}
@@ -635,7 +635,7 @@ public class WCPSQueryFactory {
 					}
 				}
 				
-				else {
+				else if (argType.equals("x") && notArguments.get(argType) instanceof Boolean) {
 					x = String.valueOf(notArguments.getBoolean("expression"));
 				}
 				applyBuilderExtend = createNotWCPSString(x);
@@ -659,7 +659,7 @@ public class WCPSQueryFactory {
 							}						
 						}
 					}
-					else {
+					else if (argType.equals("x") && logArguments.get(argType) instanceof Double) {
 						x = String.valueOf(logArguments.getDouble("x"));
 					}
 				}
@@ -683,7 +683,7 @@ public class WCPSQueryFactory {
 							}						
 						}
 					}
-					else {
+					else if (argType.equals("x") && logNArguments.get(argType) instanceof Double) {
 						x = String.valueOf(logNArguments.getDouble("x"));
 					}
 				}
@@ -707,7 +707,7 @@ public class WCPSQueryFactory {
 							}						
 						}
 					}
-					else {
+					else if (argType.equals("x") && sqrtArguments.get(argType) instanceof Double) {
 						x = String.valueOf(sqrtArguments.getDouble("x"));
 					}
 				}
@@ -731,7 +731,7 @@ public class WCPSQueryFactory {
 							}						
 						}
 					}
-					else {
+					else if (argType.equals("x") && powArguments.get(argType) instanceof Double) {
 						base = String.valueOf(powArguments.getDouble("base"));
 					}
 				}
@@ -755,7 +755,7 @@ public class WCPSQueryFactory {
 							}
 						}
 					}
-					else {
+					else if (argType.equals("x") && expArguments.get(argType) instanceof Double) {
 						p = String.valueOf(expArguments.getDouble("p"));
 					}
 				}
@@ -788,7 +788,7 @@ public class WCPSQueryFactory {
 							}
 						}
 					}
-					else {
+					else if (argType.equals("x") && trigArguments.get(argType) instanceof Double) {
 						x = String.valueOf(trigArguments.getDouble("x"));
 					}
 				}
@@ -812,7 +812,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (gteArguments.get("x") instanceof Double) {
 					x = String.valueOf(gteArguments.getDouble("x"));
 				}
 				if (gteArguments.get("y") instanceof JSONObject) {
@@ -827,7 +827,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (gteArguments.get("y") instanceof Double) {
 					y = String.valueOf(gteArguments.getDouble("y"));
 				}
 				applyBuilderExtend = createGreatThanEqWCPSString(x, y);
@@ -850,7 +850,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (gtArguments.get("x") instanceof Double) {
 					x = String.valueOf(gtArguments.getDouble("x"));
 				}
 				if (gtArguments.get("y") instanceof JSONObject) {
@@ -865,7 +865,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (gtArguments.get("y") instanceof Double) {
 					y = String.valueOf(gtArguments.getDouble("y"));
 				}
 				applyBuilderExtend = createGreatThanWCPSString(x, y);
@@ -888,7 +888,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (lteArguments.get("x") instanceof Double) {
 					x = String.valueOf(lteArguments.getDouble("x"));
 				}
 				if (lteArguments.get("y") instanceof JSONObject) {
@@ -903,7 +903,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (lteArguments.get("y") instanceof Double) {
 					y = String.valueOf(lteArguments.getDouble("y"));
 				}
 				applyBuilderExtend = createLessThanEqWCPSString(x, y);
@@ -926,7 +926,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (ltArguments.get("x") instanceof Double) {
 					x = String.valueOf(ltArguments.getDouble("x"));
 				}
 				if (ltArguments.get("y") instanceof JSONObject) {
@@ -941,7 +941,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (ltArguments.get("y") instanceof Double) {
 					y = String.valueOf(ltArguments.getDouble("y"));
 				}
 				applyBuilderExtend = createLessThanWCPSString(x, y);
@@ -964,7 +964,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (neqArguments.get("x") instanceof Double) {
 					x = String.valueOf(neqArguments.getDouble("x"));
 				}
 				if (neqArguments.get("y") instanceof JSONObject) {
@@ -979,7 +979,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (neqArguments.get("y") instanceof Double) {
 					y = String.valueOf(neqArguments.getDouble("y"));
 				}
 				applyBuilderExtend = createNotEqWCPSString(x, y);
@@ -1002,7 +1002,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (eqArguments.get("x") instanceof Double) {
 					x = String.valueOf(eqArguments.getDouble("x"));
 				}
 				if (eqArguments.get("y") instanceof JSONObject) {
@@ -1017,7 +1017,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else {
+				else if (eqArguments.get("y") instanceof Double) {
 					y = String.valueOf(eqArguments.getDouble("y"));
 				}
 				applyBuilderExtend = createEqWCPSString(x, y);
