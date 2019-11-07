@@ -1219,10 +1219,8 @@ public class WCPSQueryFactory {
 				else {
 					reduceBuilderExtend = arrayData.getJSONArray("data").getString(arrayIndex);
 				}
-				log.debug("NodeKey is : " + nodeKey + "  " + reduceBuilderExtend);
-				log.debug("NodeKey is : " + reducerPayLoads);
-				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
 				
+				reducerPayLoads.put(nodeKey, reduceBuilderExtend);				
 				log.debug("Array Element Process PayLoad is : ");
 				log.debug(reducerPayLoads.get(nodeKey));
 			}
