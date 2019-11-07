@@ -1206,20 +1206,23 @@ public class WCPSQueryFactory {
 						if (fromType.equals("from_argument") && arrayData.getJSONObject("data").getString("from_argument").equals("data")) {
 							String dataNode = processGraph.getJSONObject(reduceNodeKey).getJSONObject("arguments").getJSONObject("data").getString("from_node");
 							String loadCollNode = getFilterCollectionNode();
-							if (dataNode.equals(loadCollNode)) {
+							//if (dataNode.equals(loadCollNode)) {
 								reduceBuilderExtend = createBandWCPSString(arrayIndex, reduceNodeKey, filterString, collName);
-							}
+								
+							//}
 						}
 						else if (fromType.equals("from_node")) {
 							String dataNode = arrayData.getJSONObject("data").getString("from_node");
-
 						}
 					}
 				}
 				else {
 					reduceBuilderExtend = arrayData.getJSONArray("data").getString(arrayIndex);
 				}
+				log.debug("NodeKey is : " + nodeKey + "  " + reduceBuilderExtend);
+				log.debug("NodeKey is : " + reducerPayLoads);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
+				
 				log.debug("Array Element Process PayLoad is : ");
 				log.debug(reducerPayLoads.get(nodeKey));
 			}
