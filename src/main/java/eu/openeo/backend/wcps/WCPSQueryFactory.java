@@ -171,7 +171,91 @@ public class WCPSQueryFactory {
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsPayLoad.toString());
 				log.debug("Load Collection PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
-			}			
+			}
+			if (currentProcessID.equals("run_udf")) {
+				StringBuilder wcpsUDFpayLoad = new StringBuilder("");
+				StringBuilder wcpsStringBuilderUDFPayload = basicWCPSStringBuilder();
+				String payLoad = null;
+				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
+				String saveUDFPayload = wcpsStringBuilder.toString();
+				StringBuilder wcpsStringBuilderSaveUDFResult = new StringBuilder("");
+				wcpsStringBuilderSaveUDFResult.append(createUDFReturnResultWCPSString(saveUDFPayload));
+				//wcpsStringBuilder = wcpsStringBuilderSaveResult;
+				String udf = processArguments.getString("udf");
+				if (processArguments.getString("runtime").equals("python")) {
+					if (processArguments.get("data") instanceof JSONObject) {
+						for (String fromType : processArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+								payLoad = wcpsPayLoad.toString();
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = processArguments.getJSONObject("data").getString("from_node");
+								payLoad = storedPayLoads.getString(dataNode);
+							}
+						}
+					}
+				}
+				if (processArguments.getString("runtime").equals("R")) {
+					if (processArguments.get("data") instanceof JSONObject) {
+						for (String fromType : processArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+								payLoad = wcpsPayLoad.toString();
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = processArguments.getJSONObject("data").getString("from_node");
+								payLoad = storedPayLoads.getString(dataNode);
+							}
+						}
+					}
+				}
+				wcpsUDFpayLoad.append(payLoad);
+				wcpsStringBuilder=wcpsStringBuilderUDFPayload.append(wcpsUDFpayLoad.toString());
+				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsUDFpayLoad.toString());
+				log.debug("UDF Process PayLoad is : ");
+				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
+			}
+			if (currentProcessID.equals("run_udf_externally")) {
+				StringBuilder wcpsUDFpayLoad = new StringBuilder("");
+				StringBuilder wcpsStringBuilderUDFPayload = basicWCPSStringBuilder();
+				String payLoad = null;
+				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
+				String saveUDFPayload = wcpsStringBuilder.toString();
+				StringBuilder wcpsStringBuilderSaveUDFResult = new StringBuilder("");
+				wcpsStringBuilderSaveUDFResult.append(createUDFReturnResultWCPSString(saveUDFPayload));
+				//wcpsStringBuilder = wcpsStringBuilderSaveResult;
+				String udf = processArguments.getString("udf");
+				if (processArguments.getString("runtime").equals("python")) {
+					if (processArguments.get("data") instanceof JSONObject) {
+						for (String fromType : processArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+								payLoad = wcpsPayLoad.toString();
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = processArguments.getJSONObject("data").getString("from_node");
+								payLoad = storedPayLoads.getString(dataNode);
+							}
+						}
+					}
+				}
+				if (processArguments.getString("runtime").equals("R")) {
+					if (processArguments.get("data") instanceof JSONObject) {
+						for (String fromType : processArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+								payLoad = wcpsPayLoad.toString();
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = processArguments.getJSONObject("data").getString("from_node");
+								payLoad = storedPayLoads.getString(dataNode);
+							}
+						}
+					}
+				}
+				wcpsUDFpayLoad.append(payLoad);
+				wcpsStringBuilder=wcpsStringBuilderUDFPayload.append(wcpsUDFpayLoad.toString());
+				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsUDFpayLoad.toString());
+				log.debug("UDF Process PayLoad is : ");
+				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
+			}
 			if (currentProcessID.equals("filter_bbox")) {
 				StringBuilder wcpsFilterBboxpayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderFilterBboxPayload = basicWCPSStringBuilder();
@@ -206,7 +290,7 @@ public class WCPSQueryFactory {
 						}
 						else if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("data").getString("from_node");							
-							payLoad = storedPayLoads.getString(dataNode);							
+							payLoad = storedPayLoads.getString(dataNode);
 						}
 					}
 				}
@@ -229,7 +313,7 @@ public class WCPSQueryFactory {
 						}
 						else if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("data").getString("from_node");
-							payLoad = storedPayLoads.getString(dataNode);							
+							payLoad = storedPayLoads.getString(dataNode);
 						}
 					}
 				}
@@ -237,15 +321,15 @@ public class WCPSQueryFactory {
 				filterString = filterString.substring(collName.length());
 				JSONArray currentProcessBands = currentProcessArguments.getJSONArray("bands");
 				String bandName = currentProcessBands.getString(0);
-				wcpsFilterpayLoad.append(createBandSubsetString(collName, bandName, filterString));				
+				wcpsFilterpayLoad.append(createBandSubsetString(collName, bandName, filterString));
 				wcpsStringBuilder=wcpsStringBuilderFilterPayload.append(wcpsFilterpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterpayLoad.toString());
 				log.debug("Filter Bands Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}
 			if (currentProcessID.equals("mask_colored")) {
-				StringBuilder wcpsFilterPolygonpayLoad = new StringBuilder("switch case ");
-				StringBuilder wcpsStringBuilderFilterPolygonPayload = basicWCPSStringBuilder();
+				StringBuilder wcpsMaskColorpayLoad = new StringBuilder("switch case ");
+				StringBuilder wcpsStringBuilderMaskColorPayload = basicWCPSStringBuilder();
 				String payLoad = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
 				if (processArguments.get("data") instanceof JSONObject) {
@@ -259,9 +343,9 @@ public class WCPSQueryFactory {
 						}
 					}
 				}
-				wcpsFilterPolygonpayLoad.append(processArguments.getString("lowerThreshold") + " < (" + payLoad + ") > " + processArguments.getString("upperThreshold") + " return {red:" + processArguments.get("red") + "; green:" + processArguments.get("green") + "; blue:" + processArguments.get("blue") + "} default return {red: 230; green: 240; blue: 255}");
-				wcpsStringBuilder=wcpsStringBuilderFilterPolygonPayload.append(wcpsFilterPolygonpayLoad.toString());
-				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterPolygonpayLoad.toString());
+				wcpsMaskColorpayLoad.append(processArguments.getString("lowerThreshold") + " < (" + payLoad + ") > " + processArguments.getString("upperThreshold") + " return {red:" + processArguments.get("red") + "; green:" + processArguments.get("green") + "; blue:" + processArguments.get("blue") + "} default return {red: 230; green: 240; blue: 255}");
+				wcpsStringBuilder=wcpsStringBuilderMaskColorPayload.append(wcpsMaskColorpayLoad.toString());
+				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMaskColorpayLoad.toString());
 				log.debug("Mask Colored Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}
@@ -1583,7 +1667,7 @@ public class WCPSQueryFactory {
 		String stretchString = null;		
 		StringBuilder stretchBuilder = new StringBuilder("");
 		stretchBuilder.append("sqrt(" + payLoad + ")");
-		stretchString = stretchBuilder.toString();			
+		stretchString = stretchBuilder.toString();
 
 		return stretchString;
 	}
@@ -1592,7 +1676,7 @@ public class WCPSQueryFactory {
 		String stretchString = null;
 		StringBuilder stretchBuilder = new StringBuilder("");
 		stretchBuilder.append("abs(" + payLoad + ")");
-		stretchString = stretchBuilder.toString();			
+		stretchString = stretchBuilder.toString();
 
 		return stretchString;
 	}
@@ -1606,7 +1690,7 @@ public class WCPSQueryFactory {
 	}
 
 	private String createBandWCPSString(int arrayIndex, String reduceNodeKey, String filterString, String collName) {
-		StringBuilder stretchBuilder = new StringBuilder("");		
+		StringBuilder stretchBuilder = new StringBuilder("");
 		String fromNodeOfReduce = processGraph.getJSONObject(reduceNodeKey).getJSONObject("arguments").getJSONObject("data").getString("from_node");
 		fromNodeOfReduce = getFilterCollectionNode(fromNodeOfReduce);
 		JSONObject fromProcess = processGraph.getJSONObject(fromNodeOfReduce);
@@ -1701,7 +1785,7 @@ public class WCPSQueryFactory {
 	private String createMaxWCPSString(String maxNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collName) {
 		String stretchString = null;
 		StringBuilder stretchBuilder = new StringBuilder("");
-		if (dimension.equals("spectral") || dimension.equals("bands")) {
+		if (dimension.contains("spectral") || dimension.contains("bands")) {
 			stretchBuilder.append("max(" + payLoad + ")");    	    
 			stretchString = stretchBuilder.toString();
 		}
@@ -1724,7 +1808,7 @@ public class WCPSQueryFactory {
 	private String createMinWCPSString(String minNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collName) {
 		String stretchString = null;
 		StringBuilder stretchBuilder = new StringBuilder("");		
-		if (dimension.equals("spectral") || dimension.equals("bands")) {
+		if (dimension.contains("spectral") || dimension.contains("bands")) {
 			stretchBuilder.append("min(" + payLoad + ")");
 			stretchString = stretchBuilder.toString();
 		}
@@ -1759,6 +1843,14 @@ public class WCPSQueryFactory {
 		resultBuilder.append(payload);
 		resultBuilder.append(", \"" + this.outputFormat + "\" )");
 		log.debug("Save payload : ");
+		log.debug(resultBuilder);
+		return resultBuilder.toString();
+	}
+	private String createUDFReturnResultWCPSString(String payload) {
+		StringBuilder resultBuilder = new StringBuilder("");
+		resultBuilder.append(payload);
+		resultBuilder.append(", \"" + "gml+xml" + "\" )");
+		log.debug("Save UDF payload : ");
 		log.debug(resultBuilder);
 		return resultBuilder.toString();
 	}
