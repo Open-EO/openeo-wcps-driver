@@ -223,9 +223,9 @@ public class WCPSQueryFactory {
 				StringBuilder wcpsStringBuilderSaveUDFResult = new StringBuilder("");
 				wcpsStringBuilderSaveUDFResult.append(createUDFReturnResultWCPSString(saveUDFPayload));
 				//wcpsStringBuilder = wcpsStringBuilderSaveResult;
-				String udf = processArguments.getString("udf");
-				if (processArguments.getString("runtime").equals("python")) {
-					if (processArguments.get("data") instanceof JSONObject) {
+				String udfCode = processArguments.getJSONObject("data").getJSONObject("code").getString("source");
+				if (processArguments.getJSONObject("data").getJSONObject("code").getString("language").equals("python")) {
+					if (processArguments.getJSONObject("data").getJSONObject("data") instanceof JSONObject) {
 						for (String fromType : processArguments.getJSONObject("data").keySet()) {
 							if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
 								payLoad = wcpsPayLoad.toString();
@@ -237,8 +237,8 @@ public class WCPSQueryFactory {
 						}
 					}
 				}
-				if (processArguments.getString("runtime").equals("R")) {
-					if (processArguments.get("data") instanceof JSONObject) {
+				if (processArguments.getJSONObject("data").getJSONObject("code").getString("language").equals("R")) {
+					if (processArguments.getJSONObject("data").getJSONObject("data") instanceof JSONObject) {
 						for (String fromType : processArguments.getJSONObject("data").keySet()) {
 							if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
 								payLoad = wcpsPayLoad.toString();
