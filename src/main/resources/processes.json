@@ -442,6 +442,43 @@
     ]
     },
     {
+    "id": "sqrt",
+    "summary": "Square root",
+    "description": "Computes the square root of a real number `x`. This process is an alias for `x` to the power of *0.5*: `power(x, 0.5)`.\n\nA square root of x is a number a such that *a^2^ = x*. Therefore, the square root is the inverse function of a to the power of 2, but only for *a >= 0*.\n\nThe no-data value `null` is passed through and therefore gets propagated.",
+    "categories": [
+        "math",
+        "math > exponential & logarithmic"
+    ],
+    "parameters": {
+        "x": {
+            "description": "A number.",
+            "schema": {
+                "type": [
+                    "number",
+                    "null"
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The computed square root.",
+        "schema": {
+            "type": [
+                "number",
+                "null"
+            ]
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "http://mathworld.wolfram.com/SquareRoot.html",
+            "title": "Square root explained by Wolfram MathWorld"
+        }
+    ]
+    },
+    {
     "id": "power",
     "summary": "Exponentiation",
     "description": "Computes the exponentiation for the base `base` raised to the power of `p`.\n\nThe no-data value `null` is passed through and therefore gets propagated if any of the arguments is `null`.",
@@ -1843,10 +1880,7 @@
 		"categories": [
 			"cubes"
 		],
-		"parameter_order": [
-			"data",
-			"process"
-		],
+		"parameter_order": ["data",	"process"],
 		"parameters": {
 			"data": {
 				"description": "A data cube.",
@@ -2303,6 +2337,128 @@
 		]
 	},
 	{
+    "id": "filter_polygon",
+    "summary": "Spatial filter using polygons",
+    "description": "Limits the data cube over the spatial dimensions to the specified polygons.\n\nThe filter retains a pixel in the data cube if the point at the pixel center intersects with at least one of the polygons (as defined in the Simple Features standard by the OGC).",
+    "categories": [
+        "filter"
+    ],
+    "parameter_order": ["data", "polygons"],
+    "parameters": {
+        "data": {
+            "description": "A data cube.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube"
+            },
+            "required": true
+        },
+        "polygons": {
+            "description": "One or more polygons used for filtering, either specified as GeoJSON or vector data cube.\n\nFor GeoJSON this can be one of the following GeoJSON types:\n\n* A `Polygon` geometry,\n* a `GeometryCollection` containing Polygons,\n* a `Feature` with a `Polygon` geometry or\n* a `FeatureCollection` containing `Feature`s with a `Polygon` geometry.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "type": "object",
+                        "format": "geojson"
+                    },
+                    {
+                        "type": "object",
+                        "format": "vector-cube"
+                    }
+                ]
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "A data cube restricted to the specified polygons. Therefore, the cardinality is potentially lower, but the resolution and the number of dimensions are the same as for the original data cube.",
+        "schema": {
+            "type": "object",
+            "format": "raster-cube"
+        }
+    },
+    "links": [
+        {
+            "href": "http://www.opengeospatial.org/standards/sfa",
+            "rel": "about",
+            "title": "Simple Features standard by the OGC"
+        }
+    ]
+    },
+    {
+    "id": "mask_colored",
+    "summary": "Apply a mask",
+    "description": "Applies a mask to a raster data cube. A mask can either be specified as:\n\n* **Raster data cube** for which parallel pixels among `data` and `mask` are compared and those pixels in `data` are replaced, which are non-zero (for numbers) or `true` (for boolean values) in `mask`.\n* **GeoJSON or vector data cube** containing one or more polygons. All pixels for which the point at the pixel center intersects with the corresponding polygon (as defined in the Simple Features standard by the OGC) are replaced.\n\nThe pixel values are replaced with the value specified for `replacement`, which defaults to `null` (no data). No data values will be left untouched by the masking operation.",
+    "categories": [
+        "masks"
+    ],
+    "parameter_order": ["data", "lowerThreshold", "upperThreshold", "red", "green", "blue"],
+    "parameters": {
+        "data": {
+            "description": "A raster data cube.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube"
+            },
+            "required": true
+        },
+        "lowerThreshold": {
+            "description": "The threshold used to replace non-zero and `true` values with.",
+            "schema": {
+                "type": ["string"],
+                "default": null
+            },
+            "required": true
+        },
+        "upperThreshold": {
+            "description": "The threshold used to replace non-zero and `true` values with.",
+            "schema": {
+                "type": ["string"],
+                "default": null
+            },
+            "required": true
+        },
+        "red": {
+            "description": "The value of color used to replace non-zero and `true` values with.",
+            "schema": {
+                "type": ["number"],
+                "default": null
+            },
+            "required": true
+        },
+        "green": {
+            "description": "The value of color used to replace non-zero and `true` values with.",
+            "schema": {
+                "type": ["number"],
+                "default": null
+            },
+            "required": true
+        },
+        "blue": {
+            "description": "The value of color used to replace non-zero and `true` values with.",
+            "schema": {
+                "type": ["number"],
+                "default": null
+            },
+            "required": true
+        }
+    },
+    "returns": {
+        "description": "The masked raster data cube.",
+        "schema": {
+            "type": "object",
+            "format": "raster-cube"
+        }
+    },
+    "links": [
+        {
+            "href": "http://www.opengeospatial.org/standards/sfa",
+            "rel": "about",
+            "title": "Simple Features standard by the OGC"
+    }
+    ]
+    },
+    {
     "id": "resample_spatial",
     "summary": "Resample and warp the spatial dimensions",
     "description": "Resamples the spatial dimensions (x,y) of the data cube to a specified resolution and/or warps the data cube to the target projection. At least `resolution` or `projection` must be specified.\n\nUse ``filter_bbox()`` to set the target spatial extent.",
@@ -2909,141 +3065,6 @@
 				"rel": "about",
 				"href": "https://open-eo.github.io/openeo-api/processes/#openeo-specific-formats",
 				"title": "Information about the supported temporal formats."
-			}
-		]
-	},
-	{
-		"id": "resample_spatial",
-		"summary": "Resample and warp the spatial dimensions",
-		"description": "Resamples the spatial dimensions (x,y) of the data cube to a specified resolution and/or warps the data cube to the target projection. At least `resolution` or `projection` must be specified.\n\nUse ``filter_bbox()`` to set the target spatial extent.",
-		"categories": [
-			"cubes",
-			"aggregate & resample"
-		],
-		"parameter_order": [
-			"data",
-			"resolution",
-			"projection",
-			"method",
-			"align"
-		],
-		"parameters": {
-			"data": {
-				"description": "A raster data cube.",
-				"schema": {
-					"type": "object",
-					"format": "raster-cube"
-				},
-				"required": true
-			},
-			"resolution": {
-				"description": "Resamples the data cube to the target resolution, which can be specified either as separate values for x and y or as a single value for both axes. Specified in the units of the target projection. Doesn't change the resolution by default (`0`).",
-				"schema": {
-					"anyOf": [
-						{
-							"description": "A single number used as resolution for both x and y.",
-							"type": "number",
-							"minimum": 0
-						},
-						{
-							"description": "A two-element array to specify separate resolutions for x (first element) and y (second element).",
-							"type": "array",
-							"minItems": 2,
-							"maxItems": 2,
-							"items": {
-								"type": "number",
-								"minimum": 0
-							}
-						}
-					],
-					"default": 0
-				}
-			},
-			"projection": {
-				"description": "Warps the data cube to the target projection. Target projection specified as [EPSG](http://www.epsg.org) code or [PROJ](https://proj4.org) definition. Doesn't change the projection by default (`null`).",
-				"schema": {
-					"anyOf": [
-						{
-							"title": "EPSG Code",
-							"type": "integer",
-							"format": "epsg-code",
-							"examples": [
-								7099
-							]
-						},
-						{
-							"title": "PROJ definition",
-							"type": "string",
-							"format": "proj-definition",
-							"examples": [
-								"+proj=moll +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
-							]
-						},
-						{
-							"title": "Don't change projection",
-							"type": "null"
-						}
-					],
-					"default": null
-				}
-			},
-			"method": {
-				"description": "Resampling method. Methods are inspired by GDAL, see [gdalwarp](https://www.gdal.org/gdalwarp.html) for more information.",
-				"schema": {
-					"type": "string",
-					"default": "near",
-					"enum": [
-						"near",
-						"bilinear",
-						"cubic",
-						"cubicspline",
-						"lanczos",
-						"average",
-						"mode",
-						"max",
-						"min",
-						"med",
-						"q1",
-						"q3"
-					]
-				}
-			},
-			"align": {
-				"description": "Specifies to which corner of the spatial extent the new resampled data is aligned to.",
-				"schema": {
-					"type": "string",
-					"enum": [
-						"lower-left",
-						"upper-left",
-						"lower-right",
-						"upper-right"
-					],
-					"default": "lower-left"
-				}
-			}
-		},
-		"returns": {
-			"description": "A raster data cube with values warped onto the new projection.",
-			"schema": {
-				"type": "object",
-				"format": "raster-cube"
-			}
-		},
-		"links": [
-			{
-				"rel": "about",
-				"href": "https://proj4.org/usage/projections.html",
-				"title": "PROJ parameters for cartographic projections"
-			},
-			{
-				"rel": "about",
-				"href": "http://www.epsg-registry.org",
-				"title": "Official EPSG code registry"
-			},
-			{
-				"rel": "about",
-				"href": "http://www.epsg.io",
-				"title": "Unofficial EPSG code database"
 			}
 		]
 	}

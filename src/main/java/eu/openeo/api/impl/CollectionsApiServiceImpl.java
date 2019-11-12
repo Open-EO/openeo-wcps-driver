@@ -83,7 +83,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 		    }catch(Exception e) {
 			log.error("Error in parsing bands :" + e.getMessage());
 		    }
-		
+			
 			List<Element> bandsList = null;
 			Boolean bandsMeta = false;
 			try {
@@ -134,22 +134,22 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long")){
 					xIndex=a;
 					dimObjects[0] = new JSONObject();
-					dimObjects[0].put("axis", "x");
+					dimObjects[0].put("axis", axis[a]);
 					dimObjects[0].put("type", "spatial");
 					dimObjects[0].put("reference_system", Long.parseLong(srsDescription));
 				}
 				if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
 					yIndex=a;
 					dimObjects[1] = new JSONObject();
-					dimObjects[1].put("axis", "y");
+					dimObjects[1].put("axis", axis[a]);
 					dimObjects[1].put("type", "spatial");
 					dimObjects[1].put("reference_system", Long.parseLong(srsDescription));
 				}
-				if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
+				if(axis[a].equals("DATE")  || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
 					temporalExtent.put(minValues[a].replaceAll("\"", ""));
 					temporalExtent.put(maxValues[a].replaceAll("\"", ""));
 					dimObjects[2] = new JSONObject();
-					dimObjects[2].put("axis", "temporal");
+					dimObjects[2].put("axis", axis[a]);
 					dimObjects[2].put("type", "temporal");
 					dimObjects[2].put("extent", temporalExtent);
 					dimObjects[2].put("step", JSONObject.NULL);
@@ -270,8 +270,13 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 					bandArray.put(product);
 				}
 			}
-			dimObjects[3].put("values", bandValues);
 			
+			try {
+			dimObjects[3].put("values", bandValues);
+		    }catch(Exception e) {
+			log.error("Error in Band values :" + e.getMessage());
+		    }
+		
 			JSONArray epsg_values = new JSONArray();
 			epsg_values.put(Double.parseDouble(srsDescription));
 			JSONObject epsgvalues = new JSONObject();
@@ -301,9 +306,13 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			JSONObject cloud_cover_extent = new JSONObject();			
 			JSONObject cube_dimensions = new JSONObject();
 			
+			try {
 			for(JSONObject dim: dimObjects) {
 				cube_dimensions.put(dim.getString("axis"), dim);
-			}			
+			}
+			}catch(Exception e) {
+				log.error("Error in parsing Band Values :" + e.getMessage());
+			    }
 			
 			List<Element> slices = null;
 			try {
@@ -557,7 +566,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 					if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
 						yIndex=a;
 					}
-					if(axis[a].equals("DATE")  || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
+					if(axis[a].equals("DATE")  || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
 						temporalExtent.put(minValues[a].replaceAll("\"", ""));
 						temporalExtent.put(maxValues[a].replaceAll("\"", ""));
 					}
