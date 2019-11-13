@@ -24,7 +24,7 @@ public class UdfRuntimesApiServiceImpl extends UdfRuntimesApiService {
     	udfPython.put("description", "Python programming language");
     	udfPython.put("docker", "openeo/udf");
     	udfPython.put("default", "latest");
-    	udfPythonLink1.put("href", "");
+    	udfPythonLink1.put("href", "https://github.com/Open-EO/openeo-udf");
     	udfPythonLinks.put(udfPythonLink1);
     	udfPythonTags.put("latest");
     	udfPythonTags.put("3.7.1");
@@ -41,8 +41,6 @@ public class UdfRuntimesApiServiceImpl extends UdfRuntimesApiService {
     	JSONObject udfRLibrariesV2Rmarkdown = new JSONObject();
     	JSONObject udfRLibrariesV1_1 = new JSONObject();
     	JSONObject udfRLibrariesV2_1 = new JSONObject();
-//    	JSONObject udfRLibrariesV1RmarkdownVers = new JSONObject();
-//    	JSONObject udfRLibrariesV2RmarkdownVers = new JSONObject();
     	JSONArray udfRLibrariesV1RcppLinks = new JSONArray();
     	JSONArray udfRLibrariesV2RcppLinks = new JSONArray();
     	JSONArray udfRLibrariesV1RmarkdownLinks = new JSONArray();
