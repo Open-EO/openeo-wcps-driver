@@ -78,8 +78,7 @@ Logger log = Logger.getLogger(this.getClass());
 	}
 	
 	@Override
-    public Response processesGet(SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
+    public Response processesGet(SecurityContext securityContext) throws NotFoundException {        
     	
 		JSONObject processes = new JSONObject();
 		JSONArray processArray = new JSONArray();
@@ -105,8 +104,7 @@ Logger log = Logger.getLogger(this.getClass());
 			processArray.put(process);
 			processes.put("processes", processArray);
 			
-		}
-		
+		}		
 		
 		for(String key : this.links.keySet()){
 			JSONObject links = new JSONObject();
@@ -121,8 +119,7 @@ Logger log = Logger.getLogger(this.getClass());
 			processes.put("links", linksArray);
 			
 		}
-		
-		
+				
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);

@@ -67,7 +67,7 @@ public class WCPSQueryFactory {
 		for (int c = 1; c <= collectionIDs.size(); c++) {
 			basicWCPS.append(collectionIDs.get(c - 1).getName() + " ");
 		}
-		basicWCPS.append(") return encode ( ");	
+		basicWCPS.append(") return encode ( ");
 		return basicWCPS;
 	}	
 
@@ -156,7 +156,7 @@ public class WCPSQueryFactory {
 		boolean containsApplyProcess = false;
 		boolean containsResampleProcess = false;
 
-		for(int i = 0; i < nodesSortedArray.length(); i++) {
+		myLoop:		for(int i = 0; i < nodesSortedArray.length(); i++) {
 			String nodeKeyOfCurrentProcess = nodesSortedArray.getString(i);
 			JSONObject currentProcess = processGraph.getJSONObject(nodeKeyOfCurrentProcess);
 			String currentProcessID = currentProcess.getString("process_id");
@@ -176,11 +176,8 @@ public class WCPSQueryFactory {
 				StringBuilder wcpsUDFpayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderUDFPayload = basicWCPSStringBuilder();
 				String payLoad = null;
-				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
-				String saveUDFPayload = wcpsStringBuilder.toString();
-				StringBuilder wcpsStringBuilderSaveUDFResult = new StringBuilder("");
-				wcpsStringBuilderSaveUDFResult.append(createUDFReturnResultWCPSString(saveUDFPayload));
-				//wcpsStringBuilder = wcpsStringBuilderSaveResult;
+				JSONObject processArguments = processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
+				
 				String udf = processArguments.getString("udf");
 				if (processArguments.getString("runtime").equals("python")) {
 					if (processArguments.get("data") instanceof JSONObject) {
@@ -209,20 +206,22 @@ public class WCPSQueryFactory {
 					}
 				}
 				wcpsUDFpayLoad.append(payLoad);
-				wcpsStringBuilder=wcpsStringBuilderUDFPayload.append(wcpsUDFpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsUDFpayLoad.toString());
+				String saveUDFPayload = wcpsStringBuilderUDFPayload.append(wcpsUDFpayLoad.toString()).toString();
+				StringBuilder wcpsStringBuilderSaveUDFResult = new StringBuilder("");
+				wcpsStringBuilderSaveUDFResult.append(createUDFReturnResultWCPSString(saveUDFPayload));
+				wcpsStringBuilder = wcpsStringBuilderSaveUDFResult;
+				
 				log.debug("UDF Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
+				break myLoop;
 			}
 			if (currentProcessID.equals("run_udf_externally")) {
 				StringBuilder wcpsUDFpayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderUDFPayload = basicWCPSStringBuilder();
 				String payLoad = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
-				String saveUDFPayload = wcpsStringBuilder.toString();
-				StringBuilder wcpsStringBuilderSaveUDFResult = new StringBuilder("");
-				wcpsStringBuilderSaveUDFResult.append(createUDFReturnResultWCPSString(saveUDFPayload));
-				//wcpsStringBuilder = wcpsStringBuilderSaveResult;
+				
 				String udfCode = processArguments.getJSONObject("data").getJSONObject("code").getString("source");
 				if (processArguments.getJSONObject("data").getJSONObject("code").getString("language").equals("python")) {
 					if (processArguments.getJSONObject("data").getJSONObject("data") instanceof JSONObject) {
@@ -250,11 +249,16 @@ public class WCPSQueryFactory {
 						}
 					}
 				}
-				wcpsUDFpayLoad.append(payLoad);
-				wcpsStringBuilder=wcpsStringBuilderUDFPayload.append(wcpsUDFpayLoad.toString());
+				wcpsUDFpayLoad.append(payLoad);				
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsUDFpayLoad.toString());
+				String saveUDFPayload = wcpsStringBuilderUDFPayload.append(wcpsUDFpayLoad.toString()).toString();
+				StringBuilder wcpsStringBuilderSaveUDFResult = new StringBuilder("");
+				wcpsStringBuilderSaveUDFResult.append(createUDFReturnResultWCPSString(saveUDFPayload));
+				wcpsStringBuilder = wcpsStringBuilderSaveUDFResult;
+				
 				log.debug("UDF Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
+				break;
 			}
 			if (currentProcessID.equals("filter_bbox")) {
 				StringBuilder wcpsFilterBboxpayLoad = new StringBuilder("");
@@ -273,6 +277,7 @@ public class WCPSQueryFactory {
 					}
 				}
 				wcpsFilterBboxpayLoad.append(payLoad);
+				wcpsPayLoad=wcpsFilterBboxpayLoad;
 				wcpsStringBuilder=wcpsStringBuilderFilterBboxPayload.append(wcpsFilterBboxpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterBboxpayLoad.toString());
 				log.debug("Filter Bounding Box Process PayLoad is : ");
@@ -295,6 +300,7 @@ public class WCPSQueryFactory {
 					}
 				}
 				wcpsFilterDatepayLoad.append(payLoad);
+				wcpsPayLoad=wcpsFilterDatepayLoad;
 				wcpsStringBuilder=wcpsStringBuilderFilterDatePayload.append(wcpsFilterDatepayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterDatepayLoad.toString());
 				log.debug("Filter Temporal Process PayLoad is : ");
@@ -322,6 +328,7 @@ public class WCPSQueryFactory {
 				JSONArray currentProcessBands = currentProcessArguments.getJSONArray("bands");
 				String bandName = currentProcessBands.getString(0);
 				wcpsFilterpayLoad.append(createBandSubsetString(collName, bandName, filterString));
+				wcpsPayLoad=wcpsFilterpayLoad;
 				wcpsStringBuilder=wcpsStringBuilderFilterPayload.append(wcpsFilterpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterpayLoad.toString());
 				log.debug("Filter Bands Process PayLoad is : ");
@@ -344,6 +351,7 @@ public class WCPSQueryFactory {
 					}
 				}
 				wcpsMaskColorpayLoad.append(processArguments.getString("lowerThreshold") + " < (" + payLoad + ") > " + processArguments.getString("upperThreshold") + " return {red:" + processArguments.get("red") + "; green:" + processArguments.get("green") + "; blue:" + processArguments.get("blue") + "} default return {red: 230; green: 240; blue: 255}");
+				wcpsPayLoad=wcpsMaskColorpayLoad;
 				wcpsStringBuilder=wcpsStringBuilderMaskColorPayload.append(wcpsMaskColorpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMaskColorpayLoad.toString());
 				log.debug("Mask Colored Process PayLoad is : ");
@@ -378,7 +386,8 @@ public class WCPSQueryFactory {
 						}
 					}
 				}
-				wcpsNormDiffpayLoad.append(band2 + " - " + band1 + ") / ((double)" + band2 + " + " + band1 + ")");				
+				wcpsNormDiffpayLoad.append(band2 + " - " + band1 + ") / ((double)" + band2 + " + " + band1 + ")");
+				wcpsPayLoad=wcpsNormDiffpayLoad;
 				wcpsStringBuilder=wcpsStringBuilderNormDiff.append(wcpsNormDiffpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsNormDiffpayLoad.toString());
 				log.debug("Normalized Difference Process PayLoad is : ");
@@ -403,7 +412,8 @@ public class WCPSQueryFactory {
 				}
 				for (int a = 0; a < aggregates.size(); a++) {
 					if (aggregates.get(a).getOperator().equals("NDVI")) {
-						wcpsNDVIpayLoad.append(createNDVIWCPSString(payLoad, collName, aggregates.get(a)));						
+						wcpsNDVIpayLoad.append(createNDVIWCPSString(payLoad, collName, aggregates.get(a)));
+						wcpsPayLoad=wcpsNDVIpayLoad;
 						wcpsStringBuilder=wcpsStringBuilderNDVI.append(wcpsNDVIpayLoad.toString());
 						storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsNDVIpayLoad.toString());
 						log.debug("NDVI Process PayLoad is : ");
@@ -444,6 +454,7 @@ public class WCPSQueryFactory {
 				}
 				stringBuilderPoly.append("))");
 				wcpsFilterPolygonpayLoad.append(payLoad + "," + stringBuilderPoly.toString() + ")");
+				wcpsPayLoad=wcpsFilterPolygonpayLoad;
 				wcpsStringBuilder=wcpsStringBuilderFilterPolygonPayload.append(wcpsFilterPolygonpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsFilterPolygonpayLoad.toString());
 				log.debug("Filter Polygon Process PayLoad is : ");
@@ -474,6 +485,7 @@ public class WCPSQueryFactory {
 						StringBuilder wcpsAggBuilderMod = new StringBuilder("");
 						wcpsAggBuilderMod.append(replaceDate);
 						wcpsTempAggpayLoad.append(wcpsAggBuilderMod);
+						wcpsPayLoad=wcpsTempAggpayLoad;
 						wcpsStringBuilder=wcpsStringBuilderTempAgg.append(wcpsTempAggpayLoad.toString());
 						storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsTempAggpayLoad.toString());
 						log.debug("Max/Min Time Process PayLoad is : ");
@@ -502,6 +514,7 @@ public class WCPSQueryFactory {
 				String filterString = payLoad;
 				filterString = filterString.substring(collName.length());
 				wcpsReducepayLoad.append(createReduceWCPSString(nodeKeyOfCurrentProcess, payLoad, filterString, collName, dimension));
+				wcpsPayLoad=wcpsReducepayLoad;
 				wcpsStringBuilder = wcpsStringBuilderReduce.append(wcpsReducepayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsReducepayLoad.toString());
 				log.debug("Reduce Process PayLoad is : ");
@@ -525,6 +538,7 @@ public class WCPSQueryFactory {
 					}
 				}
 				wcpsScalepayLoad.append(createLinearScaleCubeWCPSString(nodeKeyOfCurrentProcess, payLoad));
+				wcpsPayLoad=wcpsScalepayLoad;
 				wcpsStringBuilder = wcpsStringBuilderScale.append(wcpsScalepayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsScalepayLoad.toString());
 				log.debug("Linear Scale Cube Process PayLoad is : ");
@@ -548,6 +562,7 @@ public class WCPSQueryFactory {
 					}
 				}
 				wcpsStretchpayLoad.append(createLinearStretchCubeWCPSString(nodeKeyOfCurrentProcess, payLoad));
+				wcpsPayLoad=wcpsStretchpayLoad;
 				wcpsStringBuilder = wcpsStringBuilderStretch.append(wcpsStretchpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsStretchpayLoad.toString());
 				log.debug("Linear Stretch Cube Process PayLoad is : ");
@@ -595,6 +610,7 @@ public class WCPSQueryFactory {
 					}
 				}
 				wcpsResamplepayLoad.append(createResampleWCPSString(nodeKeyOfCurrentProcess, payLoad));
+				wcpsPayLoad=wcpsResamplepayLoad;
 				wcpsStringBuilder = wcpsStringBuilderResample.append(wcpsResamplepayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsResamplepayLoad.toString());
 				log.debug("Resample Spatial Process PayLoad is : ");
@@ -1849,7 +1865,7 @@ public class WCPSQueryFactory {
 	private String createUDFReturnResultWCPSString(String payload) {
 		StringBuilder resultBuilder = new StringBuilder("");
 		resultBuilder.append(payload);
-		resultBuilder.append(", \"" + "gml+xml" + "\" )");
+		resultBuilder.append(", \"" + "json" + "\" )");
 		log.debug("Save UDF payload : ");
 		log.debug(resultBuilder);
 		return resultBuilder.toString();
