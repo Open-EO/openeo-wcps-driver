@@ -222,9 +222,21 @@ public class WCPSQueryFactory {
 				String payLoad = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
 				
-				String udfCode = processArguments.getJSONObject("data").getJSONObject("code").getString("source");
-				if (processArguments.getJSONObject("data").getJSONObject("code").getString("language").equals("python")) {
-					if (processArguments.getJSONObject("data").getJSONObject("data") instanceof JSONObject) {
+				String udfCode = processArguments.getString("url");
+				
+					if (processArguments.getJSONObject("data") instanceof JSONObject) {
+						for (String fromType : processArguments.getJSONObject("data").keySet()) {
+							if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+								payLoad = wcpsPayLoad.toString();
+							}
+							else if (fromType.equals("from_node")) {
+								String dataNode = processArguments.getJSONObject("data").getString("from_node");
+								payLoad = storedPayLoads.getString(dataNode);
+							}
+						}
+					}				
+				
+					if (processArguments.getJSONObject("data") instanceof JSONObject) {
 						for (String fromType : processArguments.getJSONObject("data").keySet()) {
 							if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
 								payLoad = wcpsPayLoad.toString();
@@ -235,21 +247,8 @@ public class WCPSQueryFactory {
 							}
 						}
 					}
-				}
-				if (processArguments.getJSONObject("data").getJSONObject("code").getString("language").equals("R")) {
-					if (processArguments.getJSONObject("data").getJSONObject("data") instanceof JSONObject) {
-						for (String fromType : processArguments.getJSONObject("data").keySet()) {
-							if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
-								payLoad = wcpsPayLoad.toString();
-							}
-							else if (fromType.equals("from_node")) {
-								String dataNode = processArguments.getJSONObject("data").getString("from_node");
-								payLoad = storedPayLoads.getString(dataNode);
-							}
-						}
-					}
-				}
-				wcpsUDFpayLoad.append(payLoad);				
+				
+				wcpsUDFpayLoad.append(payLoad);
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsUDFpayLoad.toString());
 				String saveUDFPayload = wcpsStringBuilderUDFPayload.append(wcpsUDFpayLoad.toString()).toString();
 				StringBuilder wcpsStringBuilderSaveUDFResult = new StringBuilder("");
