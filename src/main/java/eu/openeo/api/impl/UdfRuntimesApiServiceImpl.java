@@ -72,7 +72,7 @@ public class UdfRuntimesApiServiceImpl extends UdfRuntimesApiService {
     	udfRLibrariesV2_1.put("Rmarkdown", udfRLibrariesV2Rmarkdown);
     	udfRLibrariesV1.put("libraries", udfRLibrariesV1_1);
     	udfRLibrariesV2.put("libraries", udfRLibrariesV1_1);
-    	udfRVersions.put("3.1.0", udfRLibrariesV1);
+    	udfRVersions.put("3.4.4", udfRLibrariesV1);
     	udfRVersions.put("3.5.2", udfRLibrariesV2);
     	udfR.put("description", "R programming language with Rcpp and Rmarkdown.");
     	udfR.put("default", "3.5.2");

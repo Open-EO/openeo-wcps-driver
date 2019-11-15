@@ -160,7 +160,7 @@ public class WCPSQueryFactory {
 			String nodeKeyOfCurrentProcess = nodesSortedArray.getString(i);
 			JSONObject currentProcess = processGraph.getJSONObject(nodeKeyOfCurrentProcess);
 			String currentProcessID = currentProcess.getString("process_id");
-			JSONObject currentProcessArguments = currentProcess.getJSONObject("arguments");			
+			JSONObject currentProcessArguments = currentProcess.getJSONObject("arguments");
 			log.debug("Building WCPS Query for : " + currentProcessID);
 			
 			if (currentProcessID.equals("load_collection")) {
@@ -532,7 +532,7 @@ public class WCPSQueryFactory {
 						}
 						else if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("data").getString("from_node");
-							payLoad = storedPayLoads.getString(dataNode);							
+							payLoad = storedPayLoads.getString(dataNode);
 						}
 					}
 				}
@@ -604,7 +604,7 @@ public class WCPSQueryFactory {
 						}
 						else if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("data").getString("from_node");
-							payLoad = storedPayLoads.getString(dataNode);							
+							payLoad = storedPayLoads.getString(dataNode);
 						}
 					}
 				}
