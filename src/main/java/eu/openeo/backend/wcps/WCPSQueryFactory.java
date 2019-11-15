@@ -96,11 +96,11 @@ public class WCPSQueryFactory {
 		
 		for (int n = 0; n < nodesArray.length(); n++) {
 			for (int a = 0; a < nodesArray.getJSONArray(n).length(); a++) {
-				JSONArray fromNodeOfReducers = getFromNodeOfCurrentKey(nodesArray.getJSONArray(n).getString(a));
-				if (fromNodeOfReducers.length()>0) {
-					nodesArray.put(fromNodeOfReducers);
+				JSONArray fromNodeOfProcess = getFromNodeOfCurrentKey(nodesArray.getJSONArray(n).getString(a));
+				if (fromNodeOfProcess.length()>0) {
+					nodesArray.put(fromNodeOfProcess);
 				}
-				else if (fromNodeOfReducers.length()==0) {
+				else if (fromNodeOfProcess.length()==0) {
 					nodesSortedArray.put(nodesArray.getJSONArray(n).getString(a));
 				}
 			}
@@ -206,11 +206,13 @@ public class WCPSQueryFactory {
 					}
 				}
 				wcpsUDFpayLoad.append(payLoad);
-				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsUDFpayLoad.toString());
+				wcpsPayLoad=wcpsUDFpayLoad;
+				
 				String saveUDFPayload = wcpsStringBuilderUDFPayload.append(wcpsUDFpayLoad.toString()).toString();
 				StringBuilder wcpsStringBuilderSaveUDFResult = new StringBuilder("");
 				wcpsStringBuilderSaveUDFResult.append(createUDFReturnResultWCPSString(saveUDFPayload));
 				wcpsStringBuilder = wcpsStringBuilderSaveUDFResult;
+				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsUDFpayLoad.toString());
 				
 				log.debug("UDF Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
@@ -257,7 +259,7 @@ public class WCPSQueryFactory {
 				
 				log.debug("UDF Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
-				break;
+				break myLoop;
 			}
 			if (currentProcessID.equals("filter_bbox")) {
 				StringBuilder wcpsFilterBboxpayLoad = new StringBuilder("");
@@ -2194,7 +2196,7 @@ public class WCPSQueryFactory {
 		return wcpsStringBuilder.toString();
 	}
 
-	private String getSaveNode() {		
+	private String getSaveNode() {
 		for (String processNodeKey : processGraph.keySet()) {			
 			JSONObject processNode = processGraph.getJSONObject(processNodeKey);
 			String processID = processNode.getString("process_id");
@@ -2516,7 +2518,7 @@ public class WCPSQueryFactory {
 			}
 		}
 		
-		for(int a = 0; a<nodesSortedArray.length()-1; a++) {			
+		for(int a = 0; a<nodesSortedArray.length()-1; a++) {
 			String nodeKeyOfCurrentProcess = nodesSortedArray.getString(a);
 			String currentProcessID = processGraph.getJSONObject(nodeKeyOfCurrentProcess).getString("process_id");
 			log.debug("Executing Process : " + currentProcessID);
