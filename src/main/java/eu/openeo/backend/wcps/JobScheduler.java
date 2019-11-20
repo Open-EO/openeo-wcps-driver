@@ -4,12 +4,14 @@ import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.Date;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,12 +79,17 @@ public class JobScheduler implements JobEventListener{
 			}
 						
 			if (processesSequence.toString().contains("run_udf")) {
-				URL url2;
 				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
-				wcpsFactory.setOutputFormat("gml");
-				url2 = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
+				wcpsFactory.setOutputFormat("gml");			
+				
+				URL url = new URL(ConvenienceHelper.readProperties("wcps-endpoint") + "?SERVICE=WCS" + "&VERSION=2.0.1"
+						+ "&REQUEST=ProcessCoverages" + "&QUERY="
 						+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
-				executeWCPS(url2, job, wcpsFactory);
+				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+				conn.setRequestMethod("GET");
+				
+				JSONObject hyperCube = new HyperCubeFactory().getHyperCubeFromGML(conn.getInputStream());
+				
 				String udfNode = getUDFNode();
 				int udfNodeIndex = 0;
 
@@ -91,6 +98,11 @@ public class JobScheduler implements JobEventListener{
 						udfNodeIndex=j;
 					}
 				}
+				
+				//TODO get json from process node to get all parameters
+				//TODO pass hypercube and other necessary parameters to UDF call via REST
+				//TODO receive resulting json object from UDF container
+				//TODO import resulting UDF object into rasdaman			
 
 				String udfCubeCoverageID = "udf_"; // Get ID from Rasdaman where UDF generated Cube is stored
 				JSONObject loadUDFCube = new JSONObject();
@@ -117,11 +129,11 @@ public class JobScheduler implements JobEventListener{
 			}
 			
 			else {
-				URL url1;
+				URL url;
 				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
-				url1 = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
+				url = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
 						+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
-				executeWCPS(url1, job, wcpsFactory);
+				executeWCPS(url, job, wcpsFactory);
 				}
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
