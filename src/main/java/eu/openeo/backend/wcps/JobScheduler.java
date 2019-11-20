@@ -78,7 +78,7 @@ public class JobScheduler implements JobEventListener{
 						
 			if (processesSequence.toString().contains("run_udf")) {
 				URL url2;
-				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphAfterUDF);
+				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
 				url2 = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
 						+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
 				executeWCPS(url2, job, wcpsFactory);
@@ -89,7 +89,7 @@ public class JobScheduler implements JobEventListener{
 					if (nodesSortedArray.getString(j).equals(udfNode)) {
 						udfNodeIndex=j;
 					}
-				}					
+				}
 
 				String udfCubeCoverageID = "udf_"; // Get ID from Rasdaman where UDF generated Cube is stored
 				JSONObject loadUDFCube = new JSONObject();
