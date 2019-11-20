@@ -100,6 +100,8 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 
 				loadUDFCube.put("process_id", "load_collection");
 				loadUDFCube.put("arguments", loadUDFCubearguments);
+				
+				processGraphAfterUDF = new JSONObject();
 
 				processGraphAfterUDF.put(udfNodeKey, loadUDFCube);
 
@@ -116,11 +118,12 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 				conn.setRequestMethod("GET");
 				
-				JSONObject hyperCube = new HyperCubeFactory().getHyperCubeFromGML(conn.getInputStream());
+				//TODO uncomment when implemented
+				//JSONObject hyperCube = new HyperCubeFactory().getHyperCubeFromGML(conn.getInputStream());
 				
 				JSONObject udfNode = processGraphJSON.getJSONObject(nodesSortedArray.getString(udfNodeIndex));
 				
-				String runtime = udfNode.getString("runtime");
+				String runtime = udfNode.getJSONObject("arguments").getString("runtime");
 				//TODO pass hypercube and other necessary parameters to UDF call via REST
 				//TODO receive resulting json object from UDF container
 				if(runtime.toLowerCase().equals("python")) {
