@@ -53,6 +53,10 @@ public class WCPSQueryFactory {
 	public String getOutputFormat() {
 		return outputFormat;
 	}
+	
+	public void setOutputFormat(String outputFormat) {
+		this.outputFormat =  outputFormat;
+	}
 
 	private StringBuilder basicWCPSStringBuilder() {
 		StringBuilder basicWCPS;
@@ -1866,7 +1870,7 @@ public class WCPSQueryFactory {
 	private String createUDFReturnResultWCPSString(String payload) {
 		StringBuilder resultBuilder = new StringBuilder("");
 		resultBuilder.append(payload);
-		resultBuilder.append(", \"" + "json" + "\" )");
+		resultBuilder.append(", \"" + "gml" + "\" )");
 		log.debug("Save UDF payload : ");
 		log.debug(resultBuilder);
 		return resultBuilder.toString();

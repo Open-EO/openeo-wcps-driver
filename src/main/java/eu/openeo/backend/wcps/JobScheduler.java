@@ -79,6 +79,7 @@ public class JobScheduler implements JobEventListener{
 			if (processesSequence.toString().contains("run_udf")) {
 				URL url2;
 				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
+				wcpsFactory.setOutputFormat("gml");
 				url2 = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
 						+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
 				executeWCPS(url2, job, wcpsFactory);
