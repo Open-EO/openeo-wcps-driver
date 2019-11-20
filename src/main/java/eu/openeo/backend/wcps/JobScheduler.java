@@ -87,11 +87,12 @@ public class JobScheduler implements JobEventListener{
 					}
 				}					
 
-				String udfCubeCoverageID = null; // Get ID from Rasdaman where UDF generated Cube is stored
+				String udfCubeCoverageID = "udf_"; // Get ID from Rasdaman where UDF generated Cube is stored
 				JSONObject loadUDFCube = new JSONObject();
 				JSONObject loadUDFCubearguments = new JSONObject();
 
-				loadUDFCubearguments.put("id", udfCubeCoverageID);
+				loadUDFCubearguments.put("id", udfCubeCoverageID + job.getId());
+				udfCubeCoverageID = loadUDFCubearguments.getString("id");
 				loadUDFCubearguments.put("spatial_extent", JSONObject.NULL);
 				loadUDFCubearguments.put("temporal_extent", JSONObject.NULL);
 
