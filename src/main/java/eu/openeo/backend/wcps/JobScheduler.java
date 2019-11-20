@@ -90,16 +90,27 @@ public class JobScheduler implements JobEventListener{
 				
 				JSONObject hyperCube = new HyperCubeFactory().getHyperCubeFromGML(conn.getInputStream());
 				
-				String udfNode = getUDFNode();
+				String udfNodeKey = getUDFNode();
 				int udfNodeIndex = 0;
 
 				for(int j = 0; j < nodesSortedArray.length(); j++) {
-					if (nodesSortedArray.getString(j).equals(udfNode)) {
+					if (nodesSortedArray.getString(j).equals(udfNodeKey)) {
 						udfNodeIndex=j;
 					}
 				}
 				
-				//TODO get json from process node to get all parameters
+				JSONObject udfNode = processGraphJSON.getJSONObject(nodesSortedArray.getString(udfNodeIndex));
+				
+				String runtime = udfNode.getString("runtime");
+				if(runtime.toLowerCase().equals("python")) {
+					
+				}else if(runtime.toLowerCase().equals("r")) {
+					
+				}else {
+					log.error("The requested runtime is not available!");
+					return;
+				}
+				
 				//TODO pass hypercube and other necessary parameters to UDF call via REST
 				//TODO receive resulting json object from UDF container
 				//TODO import resulting UDF object into rasdaman			
@@ -116,7 +127,7 @@ public class JobScheduler implements JobEventListener{
 				loadUDFCube.put("process_id", "load_collection");
 				loadUDFCube.put("arguments", loadUDFCubearguments);
 
-				processGraphAfterUDF.put(udfNode, loadUDFCube);
+				processGraphAfterUDF.put(udfNodeKey, loadUDFCube);
 
 				for(int k = udfNodeIndex+1; k < nodesSortedArray.length(); k++) {
 					processGraphAfterUDF.put(nodesSortedArray.getString(k), processGraphJSON.getJSONObject(nodesSortedArray.getString(k)));
