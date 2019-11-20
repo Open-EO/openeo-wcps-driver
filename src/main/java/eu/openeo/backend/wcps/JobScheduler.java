@@ -67,8 +67,7 @@ public class JobScheduler implements JobEventListener{
 				log.error("A job with the specified identifier is not available.");
 			}
 			log.debug("The following job was retrieved: \n" + job.toString());
-			
-			URL url;
+						
 			processGraphJSON = (JSONObject) job.getProcessGraph();
 			JSONArray nodesSortedArray = getProcessesNodesSequence();
 			JSONArray processesSequence = new JSONArray();
@@ -78,6 +77,11 @@ public class JobScheduler implements JobEventListener{
 			}
 						
 			if (processesSequence.toString().contains("run_udf")) {
+				URL url2;
+				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphAfterUDF);
+				url2 = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
+						+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
+				executeWCPS(url2, job, wcpsFactory);
 				String udfNode = getUDFNode();
 				int udfNodeIndex = 0;
 
@@ -104,49 +108,20 @@ public class JobScheduler implements JobEventListener{
 				for(int k = udfNodeIndex+1; k < nodesSortedArray.length(); k++) {
 					processGraphAfterUDF.put(nodesSortedArray.getString(k), processGraphJSON.getJSONObject(nodesSortedArray.getString(k)));
 				}
-				
+				URL urlUDF;
 				WCPSQueryFactory wcpsFactoryUDF = new WCPSQueryFactory(processGraphAfterUDF);
-				
+				urlUDF = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
+						+ URLEncoder.encode(wcpsFactoryUDF.getWCPSString(), "UTF-8").replace("+", "%20"));
+				executeWCPS(urlUDF, job, wcpsFactoryUDF);
 			}
 			
 			else {
-				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);			
-				job.setUpdated(new Date());
-				jobDao.update(job);
-
-				url = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
+				URL url1;
+				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
+				url1 = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
 						+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
-
-				JSONObject linkProcessGraph = new JSONObject();
-				linkProcessGraph.put("job_id", job.getId());
-				linkProcessGraph.put("updated", job.getUpdated());
-
-				String filePath = ConvenienceHelper.readProperties("temp-dir");
-				String fileName = job.getId() + "." + wcpsFactory.getOutputFormat();
-				log.debug("The output file will be saved here: \n" + (filePath + fileName).toString());		
-
-				try (BufferedInputStream in = new BufferedInputStream(url.openStream());
-						FileOutputStream fileOutputStream = new FileOutputStream(filePath + fileName)) {
-					byte dataBuffer[] = new byte[1024];
-					int bytesRead;
-					while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-						fileOutputStream.write(dataBuffer, 0, bytesRead);
-					}
-					log.debug("File saved correctly");
-				} catch (IOException e) {
-					log.error("\"An error occured when downloading the file of the current job: " + e.getMessage());
-					StringBuilder builder = new StringBuilder();
-					for (StackTraceElement element : e.getStackTrace()) {
-						builder.append(element.toString() + "\n");
-					}
-					log.error(builder.toString());
+				executeWCPS(url1, job, wcpsFactory);
 				}
-
-				job.setStatus(Status.FINISHED);
-				job.setUpdated(new Date());
-				jobDao.update(job);
-				log.debug("The following job was set to status finished: \n" + job.toString());
-			}
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 			StringBuilder builder = new StringBuilder();
@@ -170,6 +145,58 @@ public class JobScheduler implements JobEventListener{
 	public void jobExecuted(JobEvent jobEvent) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private void executeWCPS(URL url, BatchJobResponse job, WCPSQueryFactory wcpsQuery) {
+					
+		job.setUpdated(new Date());
+		try {
+			jobDao.update(job);
+		} catch (SQLException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+
+		JSONObject linkProcessGraph = new JSONObject();
+		linkProcessGraph.put("job_id", job.getId());
+		linkProcessGraph.put("updated", job.getUpdated());
+
+		String filePath = null;
+		try {
+			filePath = ConvenienceHelper.readProperties("temp-dir");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		String fileName = job.getId() + "." + wcpsQuery.getOutputFormat();
+		log.debug("The output file will be saved here: \n" + (filePath + fileName).toString());		
+
+		try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+				FileOutputStream fileOutputStream = new FileOutputStream(filePath + fileName)) {
+			byte dataBuffer[] = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+				fileOutputStream.write(dataBuffer, 0, bytesRead);
+			}
+			log.debug("File saved correctly");
+		} catch (IOException e) {
+			log.error("\"An error occured when downloading the file of the current job: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		}
+
+		job.setStatus(Status.FINISHED);
+		job.setUpdated(new Date());
+		try {
+			jobDao.update(job);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		log.debug("The following job was set to status finished: \n" + job.toString());
 	}
 	
 	private JSONArray getProcessesNodesSequence() {
