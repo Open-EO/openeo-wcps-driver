@@ -18,14 +18,14 @@ public class TestUDFR {
 	void justAnExample() {
 		try {
 			byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/udfR.json"));
-			URL url = new URL ("http://10.8.246.140:5000/udf");
+			URL url = new URL ("http://10.8.246.128:5555/udf");
 			HttpURLConnection con = (HttpURLConnection)url.openConnection();
 			con.setRequestMethod("POST");
 			con.setRequestProperty("Content-Type", "application/json; utf-8");
 			con.setRequestProperty("Accept", "application/json");
 			con.setDoOutput(true);
 			try(OutputStream os = con.getOutputStream()) {
-			    os.write(encoded, 0, encoded.length);           
+			    os.write(encoded, 0, encoded.length);
 			}
 			try(BufferedReader br = new BufferedReader(
 					  new InputStreamReader(con.getInputStream(), "utf-8"))) {
