@@ -1,6 +1,8 @@
 package eu.openeo.backend.wcps;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -124,8 +126,24 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				JSONObject udfNode = processGraphJSON.getJSONObject(nodesSortedArray.getString(udfNodeIndex));
 				
 				String runtime = udfNode.getJSONObject("arguments").getString("runtime");
+				
+				String udf = udfNode.getJSONObject("arguments").getString("udf");
+				
+				if(udf.startsWith("http")) {
+					String relativeFileLocation = udf.substring(udf.indexOf("files")+6);
+					String fileToDownloadPath = ConvenienceHelper.readProperties("temp-dir") + relativeFileLocation;
+	    			log.debug("File to download: " + fileToDownloadPath);
+	    			
+	    			File file = new File(fileToDownloadPath);
+					byte[] bytesArray = new byte[(int) file.length()]; 
+		
+					FileInputStream fis = new FileInputStream(file);
+					fis.read(bytesArray);
+					fis.close();
+					udf = new String(bytesArray);
+				}
 				//TODO pass hypercube and other necessary parameters to UDF call via REST
-				//TODO receive resulting json object from UDF container
+				
 				if(runtime.toLowerCase().equals("python")) {
 					
 				}else if(runtime.toLowerCase().equals("r")) {
@@ -358,7 +376,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				log.error("A job with the specified identifier is not available.");
 			}
 			log.debug("The following job was retrieved: \n" + job.toString());
-			
+			//TODO receive resulting json object from UDF container
 			//TODO import resulting UDF object into rasdaman
 			
 			WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphAfterUDF);
