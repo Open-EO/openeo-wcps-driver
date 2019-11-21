@@ -182,7 +182,7 @@ public class HyperCubeFactory {
 		    		dataStringtoArray.put(data);		    		
 		    	}
 		    	dataArray.put(dataStringtoArray);
-		    }
+		    }		    
 		    
 		    JSONArray hyperCubeData1 = new JSONArray();
 		    JSONArray hyperCubeData2 = new JSONArray();
@@ -203,15 +203,15 @@ public class HyperCubeFactory {
 		    }
 		    hyperCubeData5.put(hyperCubeData4);
 		    hyperCubeArguments[0].put("dimensions", dimsArray);
-		    hyperCubeArguments[1].put("data", dataElement);
+		    hyperCubeArguments[1].put("data", hyperCubeData5);
 		    
 		    JSONArray hyperCubesArray = new JSONArray();
-		    JSONObject hyperCubesObject = new JSONObject();		    
+    
 		    hyperCubesArray.put(hyperCubeArguments);
 		    
-		    hyperCubesObject.put("id", "hypercube_example");
-		    hyperCubesObject.put("proj", srsDescription);
-		    hyperCubesObject.put("hypercubes", hyperCubesArray);
+		    resultJSON.put("id", "hypercube_example");
+		    resultJSON.put("proj", srsDescription);
+		    resultJSON.put("hypercubes", hyperCubesArray);
 		
 		} catch (JDOMException e) {
 			log.error("Error when parsing XML");
