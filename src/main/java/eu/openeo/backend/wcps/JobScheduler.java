@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -12,7 +13,6 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.j256.ormlite.dao.Dao;
@@ -22,10 +22,12 @@ import com.j256.ormlite.support.ConnectionSource;
 
 import eu.openeo.backend.wcps.events.JobEvent;
 import eu.openeo.backend.wcps.events.JobEventListener;
+import eu.openeo.backend.wcps.events.UDFEvent;
+import eu.openeo.backend.wcps.events.UDFEventListener;
 import eu.openeo.model.BatchJobResponse;
 import eu.openeo.model.Status;
 
-public class JobScheduler implements JobEventListener{
+public class JobScheduler implements JobEventListener, UDFEventListener{
 	
 	Logger log = Logger.getLogger(this.getClass());
 	
@@ -77,21 +79,16 @@ public class JobScheduler implements JobEventListener{
 			}
 						
 			if (processesSequence.toString().contains("run_udf")) {
-				URL url2;
-				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
-				wcpsFactory.setOutputFormat("gml");
-				url2 = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
-						+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
-				executeWCPS(url2, job, wcpsFactory);
-				String udfNode = getUDFNode();
+				
+				String udfNodeKey = getUDFNode();
 				int udfNodeIndex = 0;
 
 				for(int j = 0; j < nodesSortedArray.length(); j++) {
-					if (nodesSortedArray.getString(j).equals(udfNode)) {
+					if (nodesSortedArray.getString(j).equals(udfNodeKey)) {
 						udfNodeIndex=j;
 					}
 				}
-
+				
 				String udfCubeCoverageID = "udf_"; // Get ID from Rasdaman where UDF generated Cube is stored
 				JSONObject loadUDFCube = new JSONObject();
 				JSONObject loadUDFCubearguments = new JSONObject();
@@ -103,25 +100,47 @@ public class JobScheduler implements JobEventListener{
 
 				loadUDFCube.put("process_id", "load_collection");
 				loadUDFCube.put("arguments", loadUDFCubearguments);
+				
+				processGraphAfterUDF = new JSONObject();
 
-				processGraphAfterUDF.put(udfNode, loadUDFCube);
+				processGraphAfterUDF.put(udfNodeKey, loadUDFCube);
 
 				for(int k = udfNodeIndex+1; k < nodesSortedArray.length(); k++) {
 					processGraphAfterUDF.put(nodesSortedArray.getString(k), processGraphJSON.getJSONObject(nodesSortedArray.getString(k)));
-				}
-				URL urlUDF;
-				WCPSQueryFactory wcpsFactoryUDF = new WCPSQueryFactory(processGraphAfterUDF);
-				urlUDF = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
-						+ URLEncoder.encode(wcpsFactoryUDF.getWCPSString(), "UTF-8").replace("+", "%20"));
-				executeWCPS(urlUDF, job, wcpsFactoryUDF);
+				}			
+				
+				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
+				wcpsFactory.setOutputFormat("gml");			
+				
+				URL url = new URL(ConvenienceHelper.readProperties("wcps-endpoint") + "?SERVICE=WCS" + "&VERSION=2.0.1"
+						+ "&REQUEST=ProcessCoverages" + "&QUERY="
+						+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
+				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+				conn.setRequestMethod("GET");
+				
+				//TODO uncomment when implemented
+				//JSONObject hyperCube = new HyperCubeFactory().getHyperCubeFromGML(conn.getInputStream());
+				
+				JSONObject udfNode = processGraphJSON.getJSONObject(nodesSortedArray.getString(udfNodeIndex));
+				
+				String runtime = udfNode.getJSONObject("arguments").getString("runtime");
+				//TODO pass hypercube and other necessary parameters to UDF call via REST
+				//TODO receive resulting json object from UDF container
+				if(runtime.toLowerCase().equals("python")) {
+					
+				}else if(runtime.toLowerCase().equals("r")) {
+					
+				}else {
+					log.error("The requested runtime is not available!");
+					return;
+				}		
 			}
 			
 			else {
-				URL url1;
 				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
-				url1 = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
+				URL url = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
 						+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
-				executeWCPS(url1, job, wcpsFactory);
+				executeWCPS(url, job, wcpsFactory);
 				}
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
@@ -328,6 +347,42 @@ public class JobScheduler implements JobEventListener{
 			}
 		}
 		return fromNodes;		
+	}
+
+	@Override
+	public void udfExecuted(UDFEvent jobEvent) {
+		BatchJobResponse job = null;
+		try {
+			job = jobDao.queryForId(jobEvent.getJobId());
+			if(job == null) {
+				log.error("A job with the specified identifier is not available.");
+			}
+			log.debug("The following job was retrieved: \n" + job.toString());
+			
+			//TODO import resulting UDF object into rasdaman
+			
+			WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphAfterUDF);
+			URL urlUDF = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
+					+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
+			executeWCPS(urlUDF, job, wcpsFactory);
+		}catch (SQLException sqle) {
+			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: sqle.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 	}
 
 }
