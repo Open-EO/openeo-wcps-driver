@@ -105,91 +105,112 @@ public class HyperCubeFactory {
 			int resY = 0;
 		    JSONObject[] dimObjects = new JSONObject[axis.length+1];
 		    JSONArray dimsArray = new JSONArray();
+		    JSONArray axesOrderArray = new JSONArray();
 		    for(int a = 0; a < axis.length; a++) {
 		    	log.debug(axis[a]);
-				if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long")){
-					
+				if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long") || axis[a].equals("Lon")){					
 					for(int c = 0; c < gridAxisElementList.size(); c++) {
 						Element gridAxis = gridAxisElementList.get(c);
 						if (gridAxis.getName().contains("generalGridAxis") && gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
 							String[] resXString = gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("offsetVector", gmlrgridNS).getValue().split(" ");
 							resX = Integer.parseInt(resXString[a]);
 						}
-					}
-					
-					
+					}										
 					for(int c = Integer.parseInt(minValues[a]); c <= Integer.parseInt(maxValues[a]); c=c+resX) {
 						longExtent.put(c);						
 					}					
-					
-					dimObjects[2] = new JSONObject();
-					dimObjects[2].put("name", axis[a]);
-					dimObjects[2].put("coordinates", longExtent);
+					dimObjects[a] = new JSONObject();
+					dimObjects[a].put("name", axis[a]);
+					dimObjects[a].put("coordinates", longExtent);
+					axesOrderArray.put(longExtent);
 					}
-				if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
-					
+				if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){					
 					for(int c = 0; c < gridAxisElementList.size(); c++) {
 						Element gridAxis = gridAxisElementList.get(c);
 						if (gridAxis.getName().contains("generalGridAxis") && gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
 							String[] resXString = gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("offsetVector", gmlrgridNS).getValue().split(" ");
 							resY = Integer.parseInt(resXString[a]);
 						}
-					}
-					
+					}					
 					for(int c = Integer.parseInt(minValues[a]); c <= Integer.parseInt(maxValues[a]); c=c+resY) {
 						latExtent.put(c);						
+					}					
+					dimObjects[a] = new JSONObject();
+					dimObjects[a].put("name", axis[a]);
+					dimObjects[a].put("coordinates", latExtent);
+					axesOrderArray.put(latExtent);
 					}
-					
-					dimObjects[1] = new JSONObject();
-					dimObjects[1].put("name", axis[a]);
-					dimObjects[1].put("coordinates", latExtent);
-					}
-				if(axis[a].equals("DATE")  || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
+				if(axis[a].equals("DATE") || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
 //					temporalExtent.put(minValues[a].replaceAll("\"", ""));
-//					temporalExtent.put(maxValues[a].replaceAll("\"", ""));
-					
+//					temporalExtent.put(maxValues[a].replaceAll("\"", ""));					
 					for(int c = 0; c < gridAxisElementList.size(); c++) {
 						Element gridAxis = gridAxisElementList.get(c);
 						if (gridAxis.getName().contains("generalGridAxis") && gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
 							String[] timeStamps = gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("coefficients", gmlrgridNS).getValue().split(" ");
-							for(int t = 0; t < axis.length; t++) {
-								timeExtent.put(axis[t]);
+							for(int t = 0; t < timeStamps.length; t++) {
+								timeExtent.put(timeStamps[t]);
 							}
 						}
-					}
-					
-					dimObjects[0] = new JSONObject();
-					dimObjects[0].put("name", axis[a]);
-					dimObjects[0].put("coordinates", timeExtent);
+					}					
+					dimObjects[a] = new JSONObject();
+					dimObjects[a].put("name", axis[a]);
+					dimObjects[a].put("coordinates", timeExtent);
+					axesOrderArray.put(timeExtent);
 				}
 		    }
 		    JSONArray bandsArray = new JSONArray();
-		    for(int c = 0; c < bandsList.size(); c++) {
-				JSONObject product = new JSONObject();				
-				String bandWave = null;
-				Element band = bandsList.get(c);
-				String bandId = band.getName();
-			    bandsArray.put(bandId);
-				
+		    for(int c = 0; c < bandsListSwe.size(); c++) {
+				Element band = bandsListSwe.get(c);
+				String bandId = band.getAttributeValue("name");
+			    bandsArray.put(bandId);				
 		    }
-		    dimObjects[0] = new JSONObject();
-			dimObjects[0].put("name", "band");
-			dimObjects[0].put("coordinates", bandsArray);
+		    dimObjects[axis.length] = new JSONObject();
+			dimObjects[axis.length].put("name", "band");
+			dimObjects[axis.length].put("coordinates", bandsArray);
 		    dimsArray.put(dimObjects);
-		    JSONObject[] hyperCubeArguments = new JSONObject[2];		    
+		    JSONObject[] hyperCubeArguments = new JSONObject[2];
 		    JSONArray hyperCubeData = new JSONArray();
 		    
 		    String[] dataElement = rootNode.getChild("rangeSet", gmlNS).getChild("DataBlock", gmlNS).getChildText("tupleList", gmlNS).split(",");
+		    JSONArray dataArray = new JSONArray();
+		    String[] dataString;		    
+		    JSONArray dataStringtoArray = new JSONArray();
+		    for(int a = 0; a < dataElement.length; a++) {
+		    	dataString = dataElement[a].split(" ");		    	
+		    	for(int p = 0; p < bandsArray.length(); p++) {
+		    		double data= Double.parseDouble(dataString[p]);
+		    		dataStringtoArray.put(data);		    		
+		    	}
+		    	dataArray.put(dataStringtoArray);
+		    }
 		    
+		    JSONArray hyperCubeData1 = new JSONArray();
+		    JSONArray hyperCubeData2 = new JSONArray();
+		    JSONArray hyperCubeData3 = new JSONArray();
+		    JSONArray hyperCubeData4 = new JSONArray();
+		    JSONArray hyperCubeData5 = new JSONArray();
+		    for(int x = 0; x < bandsArray.length(); x++) {
+		    	for(int a = 0; a < axesOrderArray.getJSONArray(0).length(); a++) {
+		    		for(int b = 0; b < axesOrderArray.getJSONArray(1).length(); b++) {
+		    			for(int d = 0; d < axesOrderArray.getJSONArray(2).length(); d++) {
+		    				hyperCubeData1.put(dataArray.getJSONArray(a+b+d).get(x));
+		    			}
+		    			hyperCubeData2.put(hyperCubeData1);	
+		    		}
+		    		hyperCubeData3.put(hyperCubeData2);
+		    	}
+		    	hyperCubeData4.put(hyperCubeData3);		    	
+		    }
+		    hyperCubeData5.put(hyperCubeData4);
 		    hyperCubeArguments[0].put("dimensions", dimsArray);
-		    hyperCubeArguments[1].put("array", dataElement);
+		    hyperCubeArguments[1].put("data", dataElement);
 		    
 		    JSONArray hyperCubesArray = new JSONArray();
-		    JSONObject hyperCubesObject = new JSONObject();
-		    
+		    JSONObject hyperCubesObject = new JSONObject();		    
 		    hyperCubesArray.put(hyperCubeArguments);
 		    
 		    hyperCubesObject.put("id", "hypercube_example");
+		    hyperCubesObject.put("proj", srsDescription);
 		    hyperCubesObject.put("hypercubes", hyperCubesArray);
 		
 		} catch (JDOMException e) {
