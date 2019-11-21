@@ -9,7 +9,7 @@
     "hypercubes": [
       {
         "id": "test_data",
-        "dimension": [
+        "dimensions": [
           {
             "name": "band" ,
             "coordinates": [
