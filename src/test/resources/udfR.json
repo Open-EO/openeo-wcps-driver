@@ -1,0 +1,66 @@
+{
+  "code": {
+    "source": "all_dim = names(dim(data))\n  ndvi_result = st_apply(data, FUN = function(X,...) {\n    (X[2]-X[1])/(X[2]+X[1])\n  }, MARGIN = all_dim[-which(all_dim==\"band\")])\n  \n  all_dim = names(dim(ndvi_result))\n  min_ndvi = st_apply(ndvi_result,FUN = min, MARGIN = all_dim[-which(all_dim==\"time\")])\n  min_ndvi" ,
+    "language": "r"
+  } ,
+  "data": {
+    "id": "hyper-cube example",
+    "proj": "EPSG:4326",
+    "hypercubes": [
+      {
+        "id": "test_data",
+        "dimension": [
+          {
+            "name": "band" ,
+            "coordinates": [
+              "4" ,
+              "8"
+            ]
+          } ,
+		  {
+            "name": "time" ,
+            "coordinates": [
+              "2019-11-21"
+            ]
+          },
+          {
+            "name": "x" ,
+            "coordinates": [
+              50.0 ,
+              60.0
+            ]
+          } ,
+          {
+            "name": "y" ,
+            "coordinates": [
+              40.0 ,
+              50.0
+            ]
+          }
+        ],
+        "data": [
+          [
+            [[
+              0.0 ,
+              0.1
+            ] ,
+            [
+              0.2 ,
+              0.3
+            ]]
+          ] ,
+          [
+            [[
+              0.0 ,
+              0.1
+            ] ,
+            [
+              0.2 ,
+              0.3
+            ]]
+          ]
+        ]
+      }
+    ]
+  }
+}
