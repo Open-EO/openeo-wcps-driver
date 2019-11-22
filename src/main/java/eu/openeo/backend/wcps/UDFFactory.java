@@ -5,12 +5,12 @@ import org.json.JSONObject;
 public class UDFFactory {
 	
 	private String udfCode;
-	private String udfData;
+	private JSONObject udfData;
 	private String udfLanguage;
 	
 	private JSONObject udfDescriptor;
 	
-	public UDFFactory(String udfLanString, String udfCode, String crs, String id, String udfData) {
+	public UDFFactory(String udfLanString, String udfCode, String crs, String id, JSONObject udfData) {
 		this.udfDescriptor = new JSONObject();
 		JSONObject codeBlock = new JSONObject();
 		codeBlock.put("language", udfLanString);
@@ -20,7 +20,7 @@ public class UDFFactory {
 		JSONObject dataBlock = new JSONObject();
 		dataBlock.put("proj", crs);
 		dataBlock.put("id", id);
-		dataBlock.put("hypercubes", new JSONObject(udfData).getJSONArray("hypercubes"));
+		dataBlock.put("hypercubes", udfData.getJSONArray("hypercubes"));
 		this.udfDescriptor.put("data", dataBlock);
 	}
 
@@ -32,11 +32,11 @@ public class UDFFactory {
 		this.udfCode = udfCode;
 	}
 
-	public String getUdfData() {
+	public JSONObject getUdfData() {
 		return udfData;
 	}
 
-	public void setUdfData(String udfData) {
+	public void setUdfData(JSONObject udfData) {
 		this.udfData = udfData;
 	}
 
