@@ -1,0 +1,40 @@
+{
+  "1": {
+    "process_id": "load_collection",
+    "arguments": {
+      "id": "S2_L2A_T32TPS_10M",
+      "spatial_extent": {
+        "east": 11.338266134262085,
+        "south": 46.50121343180268,
+        "north": 46.50638274103821,
+        "west": 11.32489800453186
+      },
+      "temporal_extent": [
+        "2016-08-01T00:00:00Z",
+        "2016-08-31T23:59:59Z"
+      ]
+    }
+  },
+  "2": {
+    "process_id": "run_udf",
+    "arguments": {
+      "data": {
+        "from_node": "1"
+      },
+      "udf": "https://10.8.244.137:8443/files/guest/hypercube_ndvi.py",
+      "runtime": "python",
+      "context": {}
+    }
+  },
+  "3": {
+    "process_id": "save_result",
+    "arguments": {
+      "data": {
+        "from_node": "2"
+      },
+      "format": "JSON",
+      "options": {}
+    },
+    "result": true
+  }
+}

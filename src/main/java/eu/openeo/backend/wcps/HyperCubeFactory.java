@@ -117,7 +117,7 @@ public class HyperCubeFactory {
 							resX = Math.abs(Integer.parseInt(resXString[a]));
 						}
 					}
-					for(double c = Math.ceil(Double.parseDouble(minValues[a])); c <= Double.parseDouble(maxValues[a]); c=c+resX) {
+					for(double c = Double.parseDouble(minValues[a])+resX; c <= Double.parseDouble(maxValues[a]); c=c+resX) {
 						longExtent.put(c);						
 					}					
 					JSONObject dimObjects = new JSONObject();
@@ -138,7 +138,7 @@ public class HyperCubeFactory {
 							resY = Math.abs(Integer.parseInt(resYString[a]));
 						}
 					}
-					for(double c = Math.ceil(Double.parseDouble(minValues[a])); c <= Double.parseDouble(maxValues[a]); c=c+resY) {
+					for(double c = Double.parseDouble(minValues[a])+resY; c <= Double.parseDouble(maxValues[a]); c=c+resY) {
 						latExtent.put(c);						
 					}					
 					JSONObject dimObjects = new JSONObject();
