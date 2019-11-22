@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -132,9 +133,9 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				
 				String udf = udfNode.getJSONObject("arguments").getString("udf");
 				
-				byte[] dataBlob = null;
 				byte[] codeBlob = null;
-				
+				log.debug("runtime: " + runtime);
+				log.debug("udf: " + udf);
 				if(udf.startsWith("http")) {
 					String relativeFileLocation = udf.substring(udf.indexOf("files")+6);
 					String fileToDownloadPath = ConvenienceHelper.readProperties("temp-dir") + relativeFileLocation;
@@ -149,8 +150,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				}else {
 					codeBlob = udf.getBytes(StandardCharsets.UTF_8);
 				}
-				
-				dataBlob = hyperCube.toString().getBytes(StandardCharsets.UTF_8);
+				log.debug("code blob: " + new String(codeBlob, StandardCharsets.UTF_8));
 				
 				String service_url = null;
 				
@@ -168,11 +168,10 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 						new String(codeBlob, StandardCharsets.UTF_8), 
 						"EPSG:32734",
 						"Test_HyperCube", 
-						new String(dataBlob, StandardCharsets.UTF_8));
+						hyperCube);
 				
 				JSONObject udfDescriptor = udfFactory.getUdfDescriptor();
 
-				byte[] udfBlob = udfDescriptor.toString().getBytes(StandardCharsets.UTF_8);
 				
 				URL udfServiceEndpoint = null;
 				try {
@@ -202,6 +201,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				}
 
 				try (OutputStream os = con.getOutputStream()) {
+					byte[] udfBlob = udfDescriptor.toString().getBytes(StandardCharsets.UTF_8);
 					os.write(udfBlob, 0, udfBlob.length);
 				} catch (IOException e) {
 					log.error("\"An error occured when posting to udf service endpoint: " + e.getMessage());
@@ -222,7 +222,20 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					JSONArray hyperCubes = udfResponse.getJSONArray("hypercubes");
 					JSONObject firstHyperCube = hyperCubes.getJSONObject(0);
 					//TODO import hyper cube back into rasdaman here!
-					
+					byte[] firstHyperCubeBlob = firstHyperCube.toString(2).getBytes(StandardCharsets.UTF_8);
+					File firstHyperCubeFile = new File(ConvenienceHelper.readProperties("temp-dir")+"udf_result_" + job.getId() + ".json");
+					FileOutputStream firstHyperCubeStream;
+					try {
+						firstHyperCubeStream = new FileOutputStream(firstHyperCubeFile);
+						firstHyperCubeStream.write(firstHyperCubeBlob, 0, firstHyperCubeBlob.length);
+						firstHyperCubeStream.flush();
+						firstHyperCubeStream.close();
+						//TODO fire udf finished event here!
+					} catch (FileNotFoundException e1) {
+						e1.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				} catch (UnsupportedEncodingException e) {
 					log.error("\"An error occured when encoding response of udf service endpoint " + e.getMessage());
 					StringBuilder builder = new StringBuilder();

@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.gdal.osr.CoordinateTransformation;
-import org.gdal.osr.SpatialReference;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -13,8 +11,6 @@ import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import io.jsonwebtoken.io.IOException;
 
 public class HyperCubeFactory {
 	
@@ -98,12 +94,11 @@ public class HyperCubeFactory {
 			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");			
 			
 			String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
-		    JSONArray longExtent = new JSONArray();			
-			JSONArray latExtent = new JSONArray();
-			JSONArray timeExtent = new JSONArray();		
+		    		
+			
+					
 			int resX = 0;
 			int resY = 0;
-		    JSONObject dimObjects = new JSONObject();
 //		    JSONObject dimLatObjects = new JSONObject();
 //		    JSONObject dimtimeObjects = new JSONObject();
 //		    JSONObject dimBandsObjects = new JSONObject();
@@ -113,7 +108,8 @@ public class HyperCubeFactory {
 		    for(int a = 0; a < axis.length; a++) {
 		    	log.debug(axis[a]);
 		    	
-				if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long") || axis[a].equals("Lon")){					
+				if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long") || axis[a].equals("Lon")){
+					JSONArray longExtent = new JSONArray();	
 					for(int c = 0; c < gridAxisElementList.size(); c++) {
 						Element gridAxis = gridAxisElementList.get(c);
 						if (gridAxis.getName().contains("generalGridAxis") && gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
@@ -124,7 +120,7 @@ public class HyperCubeFactory {
 					for(double c = Math.ceil(Double.parseDouble(minValues[a])); c <= Double.parseDouble(maxValues[a]); c=c+resX) {
 						longExtent.put(c);						
 					}					
-					dimObjects = new JSONObject();
+					JSONObject dimObjects = new JSONObject();
 					dimObjects.put("name", axis[a]);
 					dimObjects.put("coordinates", longExtent);
 					log.debug(resX);
@@ -133,7 +129,8 @@ public class HyperCubeFactory {
 					dimsArray.put(dimObjects);
 //					axesOrderArray.put(longExtent);
 					}
-				if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){					
+				if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){	
+					JSONArray latExtent = new JSONArray();
 					for(int c = 0; c < gridAxisElementList.size(); c++) {
 						Element gridAxis = gridAxisElementList.get(c);
 						if (gridAxis.getName().contains("generalGridAxis") && gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
@@ -144,7 +141,7 @@ public class HyperCubeFactory {
 					for(double c = Math.ceil(Double.parseDouble(minValues[a])); c <= Double.parseDouble(maxValues[a]); c=c+resY) {
 						latExtent.put(c);						
 					}					
-					dimObjects = new JSONObject();
+					JSONObject dimObjects = new JSONObject();
 					dimObjects.put("name", axis[a]);
 					dimObjects.put("coordinates", latExtent);
 					log.debug(resY);
@@ -154,6 +151,7 @@ public class HyperCubeFactory {
 //					axesOrderArray.put(latExtent);
 					}
 				if(axis[a].equals("DATE") || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
+					JSONArray timeExtent = new JSONArray();
 //					temporalExtent.put(minValues[a].replaceAll("\"", ""));
 //					temporalExtent.put(maxValues[a].replaceAll("\"", ""));					
 					for(int c = 0; c < gridAxisElementList.size(); c++) {
@@ -165,7 +163,7 @@ public class HyperCubeFactory {
 							}
 						}
 					}					
-					dimObjects = new JSONObject();
+					JSONObject dimObjects = new JSONObject();
 					dimObjects.put("name", axis[a]);
 					dimObjects.put("coordinates", timeExtent);					
 //					log.debug(timeExtent);
@@ -180,7 +178,7 @@ public class HyperCubeFactory {
 				String bandId = band.getAttributeValue("name");
 			    bandsArray.put(bandId);				
 		    }
-		    dimObjects = new JSONObject();
+		    JSONObject dimObjects = new JSONObject();
 		    dimObjects.put("name", "band");
 		    dimObjects.put("coordinates", bandsArray);
 			
@@ -192,10 +190,10 @@ public class HyperCubeFactory {
 		    
 		    String[] dataElement = rootNode.getChild("rangeSet", gmlNS).getChild("DataBlock", gmlNS).getChildText("tupleList", gmlNS).split(",");
 		    JSONArray dataArray = new JSONArray();
-		    String[] dataString;
-		    JSONArray dataStringtoArray = new JSONArray();
+		    
 		    for(int a = 0; a < dataElement.length; a++) {
-		    	dataString = dataElement[a].split(" ");		    	
+		    	JSONArray dataStringtoArray = new JSONArray();
+		    	String[] dataString = dataElement[a].split(" ");		    	
 		    	for(int p = 0; p < bandsArray.length(); p++) {
 		    		double data= Double.parseDouble(dataString[p]);
 		    		dataStringtoArray.put(data);		    		
