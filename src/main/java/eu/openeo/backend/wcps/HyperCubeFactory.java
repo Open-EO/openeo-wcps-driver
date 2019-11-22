@@ -184,26 +184,26 @@ public class HyperCubeFactory {
 		    	dataArray.put(dataStringtoArray);
 		    }		    
 		    
-		    JSONArray hyperCubeData1 = new JSONArray();
-		    JSONArray hyperCubeData2 = new JSONArray();
-		    JSONArray hyperCubeData3 = new JSONArray();
-		    JSONArray hyperCubeData4 = new JSONArray();
-		    JSONArray hyperCubeData5 = new JSONArray();
-		    for(int x = 0; x < bandsArray.length(); x++) {
-		    	for(int a = 0; a < axesOrderArray.getJSONArray(0).length(); a++) {
-		    		for(int b = 0; b < axesOrderArray.getJSONArray(1).length(); b++) {
-		    			for(int d = 0; d < axesOrderArray.getJSONArray(2).length(); d++) {
-		    				hyperCubeData1.put(dataArray.getJSONArray(a+b+d).get(x));
-		    			}
-		    			hyperCubeData2.put(hyperCubeData1);	
-		    		}
-		    		hyperCubeData3.put(hyperCubeData2);
-		    	}
-		    	hyperCubeData4.put(hyperCubeData3);		    	
-		    }
-		    hyperCubeData5.put(hyperCubeData4);
+//		    JSONArray hyperCubeData1 = new JSONArray();
+//		    JSONArray hyperCubeData2 = new JSONArray();
+//		    JSONArray hyperCubeData3 = new JSONArray();
+//		    JSONArray hyperCubeData4 = new JSONArray();
+//		    JSONArray hyperCubeData5 = new JSONArray();
+//		    for(int x = 0; x < bandsArray.length(); x++) {
+//		    	for(int a = 0; a < axesOrderArray.getJSONArray(0).length(); a++) {
+//		    		for(int b = 0; b < axesOrderArray.getJSONArray(1).length(); b++) {
+//		    			for(int d = 0; d < axesOrderArray.getJSONArray(2).length(); d++) {
+//		    				hyperCubeData1.put(dataArray.getJSONArray(a+b+d).get(x));
+//		    			}
+//		    			hyperCubeData2.put(hyperCubeData1);	
+//		    		}
+//		    		hyperCubeData3.put(hyperCubeData2);
+//		    	}
+//		    	hyperCubeData4.put(hyperCubeData3);		    	
+//		    }
+//		    hyperCubeData5.put(hyperCubeData4);
 		    hyperCubeArguments[0].put("dimensions", dimsArray);
-		    hyperCubeArguments[1].put("data", hyperCubeData5);
+		    hyperCubeArguments[1].put("data", dataArray);
 		    
 		    JSONArray hyperCubesArray = new JSONArray();
     
