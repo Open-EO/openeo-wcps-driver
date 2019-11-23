@@ -13,13 +13,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class HyperCubeFactory {
-	
+
 	Logger log = Logger.getLogger(this.getClass());
-	
+
 	public HyperCubeFactory() {
-		
+
 	}
-	
+
 	public JSONObject getHyperCubeFromGML(InputStream inputStream) {
 		JSONObject resultJSON = new JSONObject();
 		SAXBuilder saxBuilder = new SAXBuilder();
@@ -28,211 +28,170 @@ public class HyperCubeFactory {
 			List<Namespace> namespaces = capabilititesDoc.getNamespacesIntroduced();
 			Element rootNode = capabilititesDoc.getRootElement();
 			Namespace defaultNS = rootNode.getNamespace();
-			//TODO do the parsing to fill HyperCube JSON object with information from GML
 			Namespace gmlNS = null;
 			Namespace sweNS = null;
-			Namespace gmlCovNS =  null;
+			Namespace gmlCovNS = null;
 			Namespace gmlrgridNS = null;
 			Namespace rasdamanNS = null;
 			for (int n = 0; n < namespaces.size(); n++) {
 				Namespace current = namespaces.get(n);
-				if(current.getPrefix().equals("swe")) {
+				if (current.getPrefix().equals("swe")) {
 					sweNS = current;
 				}
-				if(current.getPrefix().equals("gmlcov")) {
+				if (current.getPrefix().equals("gmlcov")) {
 					gmlCovNS = current;
 				}
-				if(current.getPrefix().equals("gml")) {
+				if (current.getPrefix().equals("gml")) {
 					gmlNS = current;
 				}
-				if(current.getPrefix().equals("gmlrgrid")) {
+				if (current.getPrefix().equals("gmlrgrid")) {
 					gmlrgridNS = current;
 				}
-				if(current.getPrefix().equals("rasdaman")) {
+				if (current.getPrefix().equals("rasdaman")) {
 					rasdamanNS = current;
 				}
-			}			
-			log.debug("root node info: " + rootNode.getName());		
-					
+			}
+			log.debug("root node info: " + rootNode.getName());
+
 			Element boundedByElement = rootNode.getChild("boundedBy", gmlNS);
 			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
-			List<Element> gridAxisElementList = rootNode.getChild("domainSet", gmlNS).getChild("ReferenceableGridByVectors", gmlrgridNS).getChildren();
-//			Element metadataElement = null;
-//			try {
-//			metadataElement = rootNode.getChild("metadata", gmlCovNS).getChild("Extension", gmlCovNS).getChild("covMetadata", rasdamanNS);
-//		    }catch(Exception e) {
-//			log.error("Error in parsing Metadata :" + e.getMessage());
-//		    }
-			
-//			List<Element> bandsList = null;
-//			Boolean bandsMeta = false;
-//			try {
-//			bandsList = metadataElement.getChild("bands", gmlNS).getChildren();
-//			bandsMeta = true;
-//		    }catch(Exception e) {
-//			log.error("Error in parsing bands :" + e.getMessage());
-//		    }
-			List<Element> bandsListSwe = rootNode.getChild("rangeType", gmlCovNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
-			
-			//metadataObj = new JSONObject(metadataString1);
-			//String metadataString2 = metadataString1.replaceAll("\\n","");
-			//String metadataString3 = metadataString2.replaceAll("\"\"","\"");
-			//metadataObj = new JSONObject(metadataString3);
-			//JSONArray slices = metadataObj.getJSONArray("slices");
-			
+			List<Element> gridAxisElementList = rootNode.getChild("domainSet", gmlNS)
+					.getChild("ReferenceableGridByVectors", gmlrgridNS).getChildren();
+
+			List<Element> bandsListSwe = rootNode.getChild("rangeType", gmlCovNS).getChild("DataRecord", sweNS)
+					.getChildren("field", sweNS);
+
 			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
 			try {
-				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
-				srsDescription = srsDescription.replaceAll("EPSG:","");
-				
-			}catch(StringIndexOutOfBoundsException e) {
+				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&"))
+						.replace("/0/", ":");
+				srsDescription = srsDescription.replaceAll("EPSG:", "");
+
+			} catch (StringIndexOutOfBoundsException e) {
 				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
-				srsDescription = srsDescription.replaceAll("EPSG:","");							
-			}			
-			
-            String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
-			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");			
-			
+				srsDescription = srsDescription.replaceAll("EPSG:", "");
+			}
+
+			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
+			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
+
 			String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
-		    		
-			
-					
+
 			int resX = 0;
 			int resY = 0;
-//		    JSONObject dimLatObjects = new JSONObject();
-//		    JSONObject dimtimeObjects = new JSONObject();
-//		    JSONObject dimBandsObjects = new JSONObject();
-		    log.debug(axis.length);
-		    JSONArray dimsArray = new JSONArray();
-//		    JSONArray axesOrderArray = new JSONArray();
-		    for(int a = 0; a < axis.length; a++) {
-		    	log.debug(axis[a]);
-		    	
-				if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long") || axis[a].equals("Lon")){
-					JSONArray longExtent = new JSONArray();	
-					for(int c = 0; c < gridAxisElementList.size(); c++) {
+			log.debug(axis.length);
+			JSONArray dimsArray = new JSONArray();
+			for (int a = 0; a < axis.length; a++) {
+				log.debug(axis[a]);
+
+				if (axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long") || axis[a].equals("Lon")) {
+					JSONArray longExtent = new JSONArray();
+					for (int c = 0; c < gridAxisElementList.size(); c++) {
 						Element gridAxis = gridAxisElementList.get(c);
-						if (gridAxis.getName().contains("generalGridAxis") && gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
-							String[] resXString = gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("offsetVector", gmlrgridNS).getValue().split(" ");
+						if (gridAxis.getName().contains("generalGridAxis")
+								&& gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+										.getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
+							String[] resXString = gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+									.getChild("offsetVector", gmlrgridNS).getValue().split(" ");
 							resX = Math.abs(Integer.parseInt(resXString[a]));
 						}
 					}
-					for(double c = Double.parseDouble(minValues[a])+resX; c <= Double.parseDouble(maxValues[a]); c=c+resX) {
-						longExtent.put(c);						
-					}					
+					for (double c = Double.parseDouble(minValues[a]) + resX; c <= Double
+							.parseDouble(maxValues[a]); c = c + resX) {
+						longExtent.put(c);
+					}
 					JSONObject dimObjects = new JSONObject();
 					dimObjects.put("name", axis[a]);
 					dimObjects.put("coordinates", longExtent);
-					log.debug(resX);
-//					log.debug(longExtent);
-//					log.debug(dimObjects[a]);
 					dimsArray.put(dimObjects);
-//					axesOrderArray.put(longExtent);
-					}
-				if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){	
+				}
+				if (axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")) {
 					JSONArray latExtent = new JSONArray();
-					for(int c = 0; c < gridAxisElementList.size(); c++) {
+					for (int c = 0; c < gridAxisElementList.size(); c++) {
 						Element gridAxis = gridAxisElementList.get(c);
-						if (gridAxis.getName().contains("generalGridAxis") && gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
-							String[] resYString = gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("offsetVector", gmlrgridNS).getValue().split(" ");
+						if (gridAxis.getName().contains("generalGridAxis")
+								&& gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+										.getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
+							String[] resYString = gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+									.getChild("offsetVector", gmlrgridNS).getValue().split(" ");
 							resY = Math.abs(Integer.parseInt(resYString[a]));
 						}
 					}
-					for(double c = Double.parseDouble(minValues[a])+resY; c <= Double.parseDouble(maxValues[a]); c=c+resY) {
-						latExtent.put(c);						
-					}					
+					for (double c = Double.parseDouble(minValues[a]) + resY; c <= Double
+							.parseDouble(maxValues[a]); c = c + resY) {
+						latExtent.put(c);
+					}
 					JSONObject dimObjects = new JSONObject();
 					dimObjects.put("name", axis[a]);
 					dimObjects.put("coordinates", latExtent);
-					log.debug(resY);
-//					log.debug(latExtent);
-//					log.debug(dimObjects[a]);
 					dimsArray.put(dimObjects);
-//					axesOrderArray.put(latExtent);
-					}
-				if(axis[a].equals("DATE") || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
+				}
+				if (axis[a].equals("DATE") || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time")
+						|| axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi")
+						|| axis[a].equals("date") || axis[a].equals("unix")) {
 					JSONArray timeExtent = new JSONArray();
-//					temporalExtent.put(minValues[a].replaceAll("\"", ""));
-//					temporalExtent.put(maxValues[a].replaceAll("\"", ""));					
-					for(int c = 0; c < gridAxisElementList.size(); c++) {
+					for (int c = 0; c < gridAxisElementList.size(); c++) {
 						Element gridAxis = gridAxisElementList.get(c);
-						if (gridAxis.getName().contains("generalGridAxis") && gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
-							String[] timeStamps = gridAxis.getChild("GeneralGridAxis", gmlrgridNS).getChild("coefficients", gmlrgridNS).getValue().split(" ");
-							for(int t = 0; t < timeStamps.length; t++) {
+						if (gridAxis.getName().contains("generalGridAxis")
+								&& gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+										.getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
+							String[] timeStamps = gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+									.getChild("coefficients", gmlrgridNS).getValue().split(" ");
+							for (int t = 0; t < timeStamps.length; t++) {
 								timeExtent.put(timeStamps[t]);
 							}
 						}
-					}					
+					}
 					JSONObject dimObjects = new JSONObject();
 					dimObjects.put("name", axis[a]);
-					dimObjects.put("coordinates", timeExtent);					
-//					log.debug(timeExtent);
-//					log.debug(dimObjects[a]);
+					dimObjects.put("coordinates", timeExtent);
 					dimsArray.put(dimObjects);
-//					axesOrderArray.put(timeExtent);
 				}
-		    }
-		    JSONArray bandsArray = new JSONArray();
-		    for(int c = 0; c < bandsListSwe.size(); c++) {
+			}
+			JSONArray bandsArray = new JSONArray();
+			for (int c = 0; c < bandsListSwe.size(); c++) {
 				Element band = bandsListSwe.get(c);
 				String bandId = band.getAttributeValue("name");
-			    bandsArray.put(bandId);				
-		    }
-		    JSONObject dimObjects = new JSONObject();
-		    dimObjects.put("name", "band");
-		    dimObjects.put("coordinates", bandsArray);
-			
+				bandsArray.put(bandId);
+			}
+			JSONObject dimObjects = new JSONObject();
+			dimObjects.put("name", "band");
+			dimObjects.put("coordinates", bandsArray);
+
 			log.debug(bandsArray);
-//			log.debug(dimObjects[axis.length]);
 			dimsArray.put(dimObjects);
-		    JSONObject hyperCubeArguments = new JSONObject();
-//		    JSONArray hyperCubeData = new JSONArray();
-		    
-		    String[] dataElement = rootNode.getChild("rangeSet", gmlNS).getChild("DataBlock", gmlNS).getChildText("tupleList", gmlNS).split(",");
-		    JSONArray dataArray = new JSONArray();
-		    
-		    for(int a = 0; a < dataElement.length; a++) {
-		    	JSONArray dataStringtoArray = new JSONArray();
-		    	String[] dataString = dataElement[a].split(" ");		    	
-		    	for(int p = 0; p < bandsArray.length(); p++) {
-		    		double data= Double.parseDouble(dataString[p]);
-		    		dataStringtoArray.put(data);		    		
-		    	}
-		    	dataArray.put(dataStringtoArray);
-		    }		    
-		    
-//		    JSONArray hyperCubeData1 = new JSONArray();
-//		    JSONArray hyperCubeData2 = new JSONArray();
-//		    JSONArray hyperCubeData3 = new JSONArray();
-//		    JSONArray hyperCubeData4 = new JSONArray();
-//		    JSONArray hyperCubeData5 = new JSONArray();
-//		    for(int x = 0; x < bandsArray.length(); x++) {
-//		    	for(int a = 0; a < axesOrderArray.getJSONArray(0).length(); a++) {
-//		    		for(int b = 0; b < axesOrderArray.getJSONArray(1).length(); b++) {
-//		    			for(int d = 0; d < axesOrderArray.getJSONArray(2).length(); d++) {
-//		    				hyperCubeData1.put(dataArray.getJSONArray(a+b+d).get(x));
-//		    			}
-//		    			hyperCubeData2.put(hyperCubeData1);	
-//		    		}
-//		    		hyperCubeData3.put(hyperCubeData2);
-//		    	}
-//		    	hyperCubeData4.put(hyperCubeData3);		    	
-//		    }
-//		    hyperCubeData5.put(hyperCubeData4);
-		    hyperCubeArguments.put("id", "hyperCube1");		    
-		    hyperCubeArguments.put("dimensions", dimsArray);
-		    hyperCubeArguments.put("data", dataArray);
-		    
-		    JSONArray hyperCubesArray = new JSONArray();
-    
-		    hyperCubesArray.put(hyperCubeArguments);
-		    
-		    resultJSON.put("id", "hypercube_example");
-		    resultJSON.put("proj", "EPSG:"+srsDescription);
-		    resultJSON.put("hypercubes", hyperCubesArray);
-		    log.debug(resultJSON);
-		    
-		
+			JSONObject hyperCubeArguments = new JSONObject();
+
+			String[] dataElement = rootNode.getChild("rangeSet", gmlNS).getChild("DataBlock", gmlNS)
+					.getChildText("tupleList", gmlNS).split(",");
+			JSONArray dataArray = new JSONArray();
+			
+			
+			//TODO fix data array to correctly represent format as described above
+			
+			for (int a = 0; a < dataElement.length; a++) {
+				JSONArray dataStringtoArray = new JSONArray();
+				String[] dataString = dataElement[a].split(" ");
+				for (int p = 0; p < bandsArray.length(); p++) {
+					double data = Double.parseDouble(dataString[p]);
+					dataStringtoArray.put(data);
+				}
+				dataArray.put(dataStringtoArray);
+			}
+
+			hyperCubeArguments.put("id", "hyperCube1");
+			hyperCubeArguments.put("dimensions", dimsArray);
+			hyperCubeArguments.put("data", dataArray);
+
+			JSONArray hyperCubesArray = new JSONArray();
+
+			hyperCubesArray.put(hyperCubeArguments);
+
+			resultJSON.put("id", "hypercube_example");
+			resultJSON.put("proj", "EPSG:" + srsDescription);
+			resultJSON.put("hypercubes", hyperCubesArray);
+			log.debug(resultJSON);
+
 		} catch (JDOMException e) {
 			log.error("Error when parsing XML");
 			StringBuilder builder = new StringBuilder();
@@ -250,5 +209,5 @@ public class HyperCubeFactory {
 		}
 		return resultJSON;
 	}
-	
+
 }
