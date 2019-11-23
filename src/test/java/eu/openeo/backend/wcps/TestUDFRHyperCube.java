@@ -36,7 +36,7 @@ public class TestUDFRHyperCube {
 			return;
 		}
 		UDFFactory udfFactory = new UDFFactory("r", new String(codeBlob, StandardCharsets.UTF_8), "EPSG:32734",
-				"Test_HyperCube", new String(dataBlob, StandardCharsets.UTF_8));
+				"Test_HyperCube", new JSONObject( new String(dataBlob, StandardCharsets.UTF_8)));
 
 		JSONObject udfDescriptor = udfFactory.getUdfDescriptor();
 

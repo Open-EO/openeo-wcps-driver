@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,34 +22,34 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
-public class TestUDFPythonHyperCube {
+public class TestUDFPythonWithDynamicHyperCube {
 
 	@Test
 	void testHyperCubeProcessingWithPythonUDF() {
-		byte[] codeBlob;
-		byte[] dataBlob;
+		
+		JSONObject udfDescriptor = null;
+
 		try {
-			codeBlob = Files.readAllBytes(Paths.get("src/test/resources/hypercube_ndvi.py"));
-			dataBlob = Files.readAllBytes(Paths.get("src/test/resources/hypercube.json"));
+			byte[] codeBlob = Files.readAllBytes(Paths.get("src/test/resources/dynamic_hypercube_ndvi.py"));
+			JSONObject hyperCube = new HyperCubeFactory().getHyperCubeFromGML(new FileInputStream("src/test/resources/test.gml"));
+			
+			UDFFactory udfFactory = new UDFFactory("python", new String(codeBlob, StandardCharsets.UTF_8), "EPSG:32734",
+					"Test_HyperCube", hyperCube);
+			
+			udfDescriptor = udfFactory.getUdfDescriptor();
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail();
 			return;
-		}
-		UDFFactory udfFactory = new UDFFactory("python", new String(codeBlob, StandardCharsets.UTF_8), "EPSG:32734",
-				"Test_HyperCube", new JSONObject( new String(dataBlob, StandardCharsets.UTF_8)));
-
-		JSONObject udfDescriptor = udfFactory.getUdfDescriptor();
+		}		
 
 		byte[] udfBlob = udfDescriptor.toString(4).getBytes(StandardCharsets.UTF_8);
 
 		System.out.println("Size of UDF blob = " + udfBlob.length);
 
-		File file = new File("src/test/resources/udf_example_hypercube_ndvi.json");
-
-		FileOutputStream fis;
 		try {
-			fis = new FileOutputStream(file);
+			File file = new File("src/test/resources/udf_example_dynamic_hypercube_ndvi.json");
+			FileOutputStream fis = new FileOutputStream(file);
 			fis.write(udfBlob, 0, udfBlob.length);
 			fis.flush();
 			fis.close();
