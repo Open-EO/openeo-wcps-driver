@@ -229,7 +229,7 @@ public class HyperCubeFactory {
 	private JSONArray createDataArray(int[] dimSizes, int[] dimPosi, JSONArray dataArray, int currentDimIndex, int currentDimSize, String[] values) {
 		String dimPosiString = "";
 		int[] dimPosiLocal = new int[dimPosi.length];
-		for(int d = 1; d < dimSizes.length-1; d++) {
+		for(int d = 0; d < dimSizes.length-1; d++) {
 			dimPosiLocal[d] = dimPosi[d];
 			dimPosiString += dimPosiLocal[d] + " ";
 		}
@@ -237,7 +237,11 @@ public class HyperCubeFactory {
 		if(currentDimIndex == dimSizes.length -1) {
 			int valueIndex = 0;
 			for(int d = 1; d < dimSizes.length-1; d++) {
-				valueIndex *=(dimPosiLocal[d]+dimSizes[d]*dimPosiLocal[d-1]);
+				int multiplier=1;
+				for(int m = d; m > 0; m-- ) {
+					multiplier*=dimSizes[m];
+				}
+				valueIndex += (dimPosiLocal[d-1]+dimPosiLocal[d]*multiplier);
 			}
 //			System.out.println(valueIndex);
 			for(int s = 0; s < currentDimSize; s++) {				
