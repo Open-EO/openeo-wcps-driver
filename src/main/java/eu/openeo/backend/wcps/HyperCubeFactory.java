@@ -227,23 +227,29 @@ public class HyperCubeFactory {
 	
 	
 	private JSONArray createDataArray(int[] dimSizes, int[] dimPosi, JSONArray dataArray, int currentDimIndex, int currentDimSize, String[] values) {
-		System.out.println("index: " + currentDimIndex + " size: " + currentDimSize);
+		String dimPosiString = "";
+		int[] dimPosiLocal = new int[dimPosi.length];
+		for(int d = 1; d < dimSizes.length-1; d++) {
+			dimPosiLocal[d] = dimPosi[d];
+			dimPosiString += dimPosiLocal[d] + " ";
+		}
+		log.debug("index: " + currentDimIndex + " size: " + currentDimSize + "posis: " +dimPosiString);
 		if(currentDimIndex == dimSizes.length -1) {
 			int valueIndex = 0;
 			for(int d = 1; d < dimSizes.length-1; d++) {
-				valueIndex *=(dimPosi[d]+dimSizes[d]*dimPosi[d-1]);
+				valueIndex *=(dimPosiLocal[d]+dimSizes[d]*dimPosiLocal[d-1]);
 			}
-			System.out.println(valueIndex);
+//			System.out.println(valueIndex);
 			for(int s = 0; s < currentDimSize; s++) {				
 				dataArray.put(values[valueIndex].split(" ")[s]);
-				System.out.print (values[valueIndex]);
+//				System.out.print (values[valueIndex]);
 			}
-			System.out.println();
+//			System.out.println();
 		}else {
 			for(int index = 0; index < currentDimSize; index++) {
-				dimPosi[currentDimIndex] = index;
+				dimPosiLocal[currentDimIndex] = index;
 				JSONArray subDataArray = new JSONArray();
-				dataArray.put(createDataArray(dimSizes, dimPosi, subDataArray, currentDimIndex+1, dimSizes[currentDimIndex+1], values));
+				dataArray.put(createDataArray(dimSizes, dimPosiLocal, subDataArray, currentDimIndex+1, dimSizes[currentDimIndex+1], values));
 			}
 		}
 		return dataArray;
