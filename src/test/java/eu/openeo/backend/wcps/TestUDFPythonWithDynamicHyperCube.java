@@ -31,7 +31,7 @@ public class TestUDFPythonWithDynamicHyperCube {
 
 		try {
 			byte[] codeBlob = Files.readAllBytes(Paths.get("src/test/resources/dynamic_hypercube_ndvi.py"));
-			JSONObject hyperCube = new HyperCubeFactory().getHyperCubeFromGML(new FileInputStream("src/test/resources/test.gml"));
+			JSONObject hyperCube = new HyperCubeFactory().getHyperCubeFromGML(new FileInputStream("src/test/resources/test.xml"));
 			
 			UDFFactory udfFactory = new UDFFactory("python", new String(codeBlob, StandardCharsets.UTF_8), "EPSG:32734",
 					"Test_HyperCube", hyperCube);

@@ -101,7 +101,7 @@ public class HyperCubeFactory {
 						longExtent.put(c);
 					}
 					JSONObject dimObjects = new JSONObject();
-					dimObjects.put("name", axis[a]);
+					dimObjects.put("name", "x");
 					dimObjects.put("coordinates", longExtent);
 					dimsArray.put(dimObjects);
 				}
@@ -122,7 +122,7 @@ public class HyperCubeFactory {
 						latExtent.put(c);
 					}
 					JSONObject dimObjects = new JSONObject();
-					dimObjects.put("name", axis[a]);
+					dimObjects.put("name", "y");
 					dimObjects.put("coordinates", latExtent);
 					dimsArray.put(dimObjects);
 				}
@@ -143,7 +143,7 @@ public class HyperCubeFactory {
 						}
 					}
 					JSONObject dimObjects = new JSONObject();
-					dimObjects.put("name", axis[a]);
+					dimObjects.put("name", "t");
 					dimObjects.put("coordinates", timeExtent);
 					dimsArray.put(dimObjects);
 				}
@@ -164,20 +164,35 @@ public class HyperCubeFactory {
 
 			String[] dataElement = rootNode.getChild("rangeSet", gmlNS).getChild("DataBlock", gmlNS)
 					.getChildText("tupleList", gmlNS).split(",");
-			JSONArray dataArray = new JSONArray();
-			
+			int valueSize = 0;
 			
 			//TODO fix data array to correctly represent format as described above
-			
-			for (int a = 0; a < dataElement.length; a++) {
-				JSONArray dataStringtoArray = new JSONArray();
-				String[] dataString = dataElement[a].split(" ");
-				for (int p = 0; p < bandsArray.length(); p++) {
-					double data = Double.parseDouble(dataString[p]);
-					dataStringtoArray.put(data);
-				}
-				dataArray.put(dataStringtoArray);
+			int[] dimSizes = new int[dimsArray.length()];
+			int[] dimPosi = new int[dimsArray.length()];
+			for(int d = 0; d < dimsArray.length(); d++) {
+				dimSizes[d] = dimsArray.getJSONObject(d).getJSONArray("coordinates").length();
+				valueSize *= dimSizes[d];
+				dimPosi[d] = 0;
 			}
+
+//			for (int a = 0; a < axis.length+1; a++) {
+//				dataArray.put(new JSONArray(bandsArray.length()));
+//			}
+			
+			JSONArray dataArray = new JSONArray();
+			
+			dataArray = createDataArray(dimSizes, dimPosi, dataArray, dimPosi[0], dimSizes[0], dataElement);
+			
+//			for (int a = 0; a < dataElement.length; a++) {
+//				JSONArray dataStringtoArray = new JSONArray();
+//				String[] dataString = dataElement[a].split(" ");
+//				
+//				for (int p = 0; p < bandsArray.length(); p++) {
+//					double data = Double.parseDouble(dataString[p]);
+//					dataStringtoArray.put(data);
+//				}
+//				dataArray.put(dataStringtoArray);
+//			}
 
 			hyperCubeArguments.put("id", "hyperCube1");
 			hyperCubeArguments.put("dimensions", dimsArray);
@@ -208,6 +223,30 @@ public class HyperCubeFactory {
 			log.error(builder.toString());
 		}
 		return resultJSON;
+	}
+	
+	
+	private JSONArray createDataArray(int[] dimSizes, int[] dimPosi, JSONArray dataArray, int currentDimIndex, int currentDimSize, String[] values) {
+		System.out.println("index: " + currentDimIndex + " size: " + currentDimSize);
+		if(currentDimIndex == dimSizes.length -1) {
+			int valueIndex = 0;
+			for(int d = 1; d < dimSizes.length-1; d++) {
+				valueIndex *=(dimPosi[d]+dimSizes[d]*dimPosi[d-1]);
+			}
+			System.out.println(valueIndex);
+			for(int s = 0; s < currentDimSize; s++) {				
+				dataArray.put(values[valueIndex].split(" ")[s]);
+				System.out.print (values[valueIndex]);
+			}
+			System.out.println();
+		}else {
+			for(int index = 0; index < currentDimSize; index++) {
+				dimPosi[currentDimIndex] = index;
+				JSONArray subDataArray = new JSONArray();
+				dataArray.put(createDataArray(dimSizes, dimPosi, subDataArray, currentDimIndex+1, dimSizes[currentDimIndex+1], values));
+			}
+		}
+		return dataArray;
 	}
 
 }
