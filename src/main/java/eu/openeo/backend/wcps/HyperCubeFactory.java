@@ -166,33 +166,18 @@ public class HyperCubeFactory {
 					.getChildText("tupleList", gmlNS).split(",");
 			int valueSize = 0;
 			
-			//TODO fix data array to correctly represent format as described above
 			int[] dimSizes = new int[dimsArray.length()];
 			int[] dimPosi = new int[dimsArray.length()];
 			for(int d = 0; d < dimsArray.length(); d++) {
 				dimSizes[d] = dimsArray.getJSONObject(d).getJSONArray("coordinates").length();
 				valueSize *= dimSizes[d];
 				dimPosi[d] = 0;
+				log.debug("Dimenson: " + dimsArray.getJSONObject(d).getString("name") + " Size: " + dimSizes[d]);
 			}
-
-//			for (int a = 0; a < axis.length+1; a++) {
-//				dataArray.put(new JSONArray(bandsArray.length()));
-//			}
 			
 			JSONArray dataArray = new JSONArray();
 			
-			dataArray = createDataArray(dimSizes, dimPosi, dataArray, dimPosi[0], dimSizes[0], dataElement);
-			
-//			for (int a = 0; a < dataElement.length; a++) {
-//				JSONArray dataStringtoArray = new JSONArray();
-//				String[] dataString = dataElement[a].split(" ");
-//				
-//				for (int p = 0; p < bandsArray.length(); p++) {
-//					double data = Double.parseDouble(dataString[p]);
-//					dataStringtoArray.put(data);
-//				}
-//				dataArray.put(dataStringtoArray);
-//			}
+			dataArray = createDataArray(dimPosi, dimSizes, dataArray, 0, dataElement);
 
 			hyperCubeArguments.put("id", "hyperCube1");
 			hyperCubeArguments.put("dimensions", dimsArray);
@@ -226,34 +211,25 @@ public class HyperCubeFactory {
 	}
 	
 	
-	private JSONArray createDataArray(int[] dimSizes, int[] dimPosi, JSONArray dataArray, int currentDimIndex, int currentDimSize, String[] values) {
-		String dimPosiString = "";
-		int[] dimPosiLocal = new int[dimPosi.length];
-		for(int d = 0; d < dimSizes.length-1; d++) {
-			dimPosiLocal[d] = dimPosi[d];
-			dimPosiString += dimPosiLocal[d] + " ";
-		}
-		log.debug("index: " + currentDimIndex + " size: " + currentDimSize + "posis: " +dimPosiString);
+	private JSONArray createDataArray(int[] dimPosi, int[] dimSizes, JSONArray dataArray, int currentDimIndex, String[] values) {
 		if(currentDimIndex == dimSizes.length -1) {
 			int valueIndex = 0;
-			for(int d = 1; d < dimSizes.length-1; d++) {
+			for(int d = 0; d < dimSizes.length-1; d++) {
 				int multiplier=1;
-				for(int m = d; m > 0; m-- ) {
+				for(int m = d+1; m < dimSizes.length-1; m++ ) {
 					multiplier*=dimSizes[m];
 				}
-				valueIndex += (dimPosiLocal[d-1]+dimPosiLocal[d]*multiplier);
+				valueIndex += dimPosi[d]*multiplier;
 			}
-//			System.out.println(valueIndex);
-			for(int s = 0; s < currentDimSize; s++) {				
+			log.debug(valueIndex + " - " + values.length);
+			for(int s = 0; s < dimSizes[currentDimIndex]; s++) {				
 				dataArray.put(values[valueIndex].split(" ")[s]);
-//				System.out.print (values[valueIndex]);
 			}
-//			System.out.println();
 		}else {
-			for(int index = 0; index < currentDimSize; index++) {
-				dimPosiLocal[currentDimIndex] = index;
+			for(int index = 0; index < dimSizes[currentDimIndex]; index++) {
+				dimPosi[currentDimIndex] = index;
 				JSONArray subDataArray = new JSONArray();
-				dataArray.put(createDataArray(dimSizes, dimPosiLocal, subDataArray, currentDimIndex+1, dimSizes[currentDimIndex+1], values));
+				dataArray.put(createDataArray(dimPosi, dimSizes, subDataArray, currentDimIndex+1, values));
 			}
 		}
 		return dataArray;
