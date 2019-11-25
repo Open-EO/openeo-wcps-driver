@@ -223,7 +223,7 @@ public class HyperCubeFactory {
 			}
 			log.debug(valueIndex + " - " + values.length);
 			for(int s = 0; s < dimSizes[currentDimIndex]; s++) {				
-				dataArray.put(values[valueIndex].split(" ")[s]);
+				dataArray.put(Double.parseDouble(values[valueIndex].split(" ")[s]));
 			}
 		}else {
 			for(int index = 0; index < dimSizes[currentDimIndex]; index++) {
