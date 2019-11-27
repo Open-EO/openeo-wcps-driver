@@ -1,6 +1,13 @@
 package eu.openeo.backend.wcps;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
+
+import com.nimbusds.jose.util.StandardCharset;
 
 public class UDFFactory {
 	
@@ -22,6 +29,20 @@ public class UDFFactory {
 		dataBlock.put("id", id);
 		dataBlock.put("hypercubes", udfData.getJSONArray("hypercubes"));
 		this.udfDescriptor.put("data", dataBlock);
+	}
+	
+	public UDFFactory(String udfLanString, InputStream codeStream, InputStream dataStream) throws IOException {
+		this.udfDescriptor = new JSONObject();
+		
+		byte[] codeBlob = IOUtils.toByteArray(codeStream);
+		JSONObject codeBlock = new JSONObject();
+		codeBlock.put("language", udfLanString);
+		codeBlock.put("source", new String(codeBlob, StandardCharset.UTF_8));	
+		this.udfDescriptor.put("code", codeBlock);
+		
+		JSONObject hyperCube = new HyperCubeFactory().getHyperCubeFromGML(dataStream);
+		this.udfDescriptor.put("data", hyperCube);
+		
 	}
 
 	public String getUdfCode() {

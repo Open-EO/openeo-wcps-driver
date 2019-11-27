@@ -2,11 +2,13 @@ package eu.openeo.backend.wcps;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -96,6 +98,13 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					}
 				}
 				
+				JSONObject udfNode = processGraphJSON.getJSONObject(nodesSortedArray.getString(udfNodeIndex));
+				
+				String runtime = udfNode.getJSONObject("arguments").getString("runtime");
+				String udf = udfNode.getJSONObject("arguments").getString("udf");
+				log.debug("runtime: " + runtime);
+				log.debug("udf: " + udf);
+				
 				String udfCubeCoverageID = "udf_"; // Get ID from Rasdaman where UDF generated Cube is stored
 				JSONObject loadUDFCube = new JSONObject();
 				JSONObject loadUDFCubearguments = new JSONObject();
@@ -114,43 +123,43 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 
 				for(int k = udfNodeIndex+1; k < nodesSortedArray.length(); k++) {
 					processGraphAfterUDF.put(nodesSortedArray.getString(k), processGraphJSON.getJSONObject(nodesSortedArray.getString(k)));
-				}			
+				}		
 				
-				WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
-				wcpsFactory.setOutputFormat("gml");			
+				JSONObject udfDescriptor = null;
 				
-				URL url = new URL(ConvenienceHelper.readProperties("wcps-endpoint") + "?SERVICE=WCS" + "&VERSION=2.0.1"
-						+ "&REQUEST=ProcessCoverages" + "&QUERY="
-						+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
-				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-				conn.setRequestMethod("GET");
-				
-				JSONObject hyperCube = new HyperCubeFactory().getHyperCubeFromGML(conn.getInputStream());
-				
-				JSONObject udfNode = processGraphJSON.getJSONObject(nodesSortedArray.getString(udfNodeIndex));
-				
-				String runtime = udfNode.getJSONObject("arguments").getString("runtime");
-				
-				String udf = udfNode.getJSONObject("arguments").getString("udf");
-				
-				byte[] codeBlob = null;
-				log.debug("runtime: " + runtime);
-				log.debug("udf: " + udf);
-				if(udf.startsWith("http")) {
-					String relativeFileLocation = udf.substring(udf.indexOf("files")+6);
-					String fileToDownloadPath = ConvenienceHelper.readProperties("temp-dir") + relativeFileLocation;
-	    			log.debug("File to download: " + fileToDownloadPath);
-	    			
-	    			File file = new File(fileToDownloadPath);
-	    			codeBlob = new byte[(int) file.length()]; 
-		
-					FileInputStream fis = new FileInputStream(file);
-					fis.read(codeBlob);
-					fis.close();
-				}else {
-					codeBlob = udf.getBytes(StandardCharsets.UTF_8);
+				try {					
+					//Get code block for UDF
+					InputStream codeStream = null;					
+					if(udf.startsWith("http")) {
+						String relativeFileLocation = udf.substring(udf.indexOf("files")+6);
+						String fileToDownloadPath = ConvenienceHelper.readProperties("temp-dir") + relativeFileLocation;
+		    			log.debug("Grepping code from udf object from uploaded file resource: " + fileToDownloadPath);		    			
+		    			codeStream = new FileInputStream(fileToDownloadPath);		    			
+					}else {
+						log.debug("Grepping code from udf object as byte array.");
+						codeStream = new ByteArrayInputStream(udf.getBytes(StandardCharsets.UTF_8));
+					}
+					//Get data block for UDF
+					WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
+					wcpsFactory.setOutputFormat("gml");			
+					
+					URL url = new URL(ConvenienceHelper.readProperties("wcps-endpoint") + "?SERVICE=WCS" + "&VERSION=2.0.1"
+							+ "&REQUEST=ProcessCoverages" + "&QUERY="
+							+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
+					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+					conn.setRequestMethod("GET");
+					//Compile code and data into one common JSON object.
+					UDFFactory udfFactory = new UDFFactory(runtime, codeStream, conn.getInputStream()); 
+					udfDescriptor = udfFactory.getUdfDescriptor();
+					log.debug("UDF JSON: " + udfDescriptor.toString(2));
+				}catch (IOException e) {
+					log.error("An error occured when streaming in input to UDF: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for (StackTraceElement element : e.getStackTrace()) {
+						builder.append(element.toString() + "\n");
+					}
+					log.error(builder.toString());
 				}
-				log.debug("code blob: " + new String(codeBlob, StandardCharsets.UTF_8));
 				
 				String service_url = null;
 				
@@ -163,21 +172,13 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				}else {
 					log.error("The requested runtime is not available!");
 				}
-				
-				UDFFactory udfFactory = new UDFFactory(runtime, 
-						new String(codeBlob, StandardCharsets.UTF_8), 
-						"EPSG:32734",
-						"Test_HyperCube", 
-						hyperCube);
-				
-				JSONObject udfDescriptor = udfFactory.getUdfDescriptor();
 
 				
 				URL udfServiceEndpoint = null;
 				try {
 					udfServiceEndpoint = new URL(service_url + "/udf");
 				} catch (MalformedURLException e) {
-					log.error("\"An error occured when generating udf service endpoint url: " + e.getMessage());
+					log.error("An error occured when generating udf service endpoint url: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
 					for (StackTraceElement element : e.getStackTrace()) {
 						builder.append(element.toString() + "\n");
@@ -192,7 +193,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					con.setRequestProperty("Accept", "application/json");
 					con.setDoOutput(true);
 				} catch (IOException e) {
-					log.error("\"An error occured when connecting to udf service endpoint: " + e.getMessage());
+					log.error("An error occured when connecting to udf service endpoint: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
 					for (StackTraceElement element : e.getStackTrace()) {
 						builder.append(element.toString() + "\n");
@@ -237,14 +238,14 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 						e.printStackTrace();
 					}
 				} catch (UnsupportedEncodingException e) {
-					log.error("\"An error occured when encoding response of udf service endpoint " + e.getMessage());
+					log.error("An error occured when encoding response of udf service endpoint " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
 					for (StackTraceElement element : e.getStackTrace()) {
 						builder.append(element.toString() + "\n");
 					}
 					log.error(builder.toString());
 				} catch (IOException e) {
-					log.error("\"An error occured during execution of UDF: " + e.getMessage());
+					log.error("An error occured during execution of UDF: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
 					for (StackTraceElement element : e.getStackTrace()) {
 						builder.append(element.toString() + "\n");
@@ -261,14 +262,14 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 						JSONObject responseJSON = new JSONObject(response.toString());
 						log.debug(responseJSON.toString(4));
 					} catch (UnsupportedEncodingException e1) {
-						log.error("\"An error occured when encoding response of udf service endpoint " + e.getMessage());
+						log.error("An error occured when encoding response of udf service endpoint " + e.getMessage());
 						StringBuilder builderNested = new StringBuilder();
 						for (StackTraceElement element : e.getStackTrace()) {
 							builderNested.append(element.toString() + "\n");
 						}
 						log.error(builderNested.toString());
 					} catch (IOException e1) {
-						log.error("\"An error occured when receiving error stream from udf service endpoint " + e.getMessage());
+						log.error("An error occured when receiving error stream from udf service endpoint " + e.getMessage());
 						StringBuilder builderNested = new StringBuilder();
 						for (StackTraceElement element : e.getStackTrace()) {
 							builderNested.append(element.toString() + "\n");
@@ -311,7 +312,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 		try {
 			jobDao.update(job);
 		} catch (SQLException e) {
-			log.error("\"An error occured when updating job in database: " + e.getMessage());
+			log.error("An error occured when updating job in database: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
 			for (StackTraceElement element : e.getStackTrace()) {
 				builder.append(element.toString() + "\n");
@@ -327,7 +328,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 		try {
 			filePath = ConvenienceHelper.readProperties("temp-dir");
 		} catch (IOException e) {
-			log.error("\"An error occured when reading properties file " + e.getMessage());
+			log.error("An error occured when reading properties file " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
 			for (StackTraceElement element : e.getStackTrace()) {
 				builder.append(element.toString() + "\n");
@@ -346,7 +347,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 			}
 			log.debug("File saved correctly");
 		} catch (IOException e) {
-			log.error("\"An error occured when downloading the file of the current job: " + e.getMessage());
+			log.error("An error occured when downloading the file of the current job: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
 			for (StackTraceElement element : e.getStackTrace()) {
 				builder.append(element.toString() + "\n");

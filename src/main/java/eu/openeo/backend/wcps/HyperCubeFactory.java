@@ -179,7 +179,7 @@ public class HyperCubeFactory {
 			
 			dataArray = createDataArray(dimPosi, dimSizes, dataArray, 0, dataElement);
 
-			hyperCubeArguments.put("id", "hyperCube1");
+			hyperCubeArguments.put("id", "hyper_cube");
 			hyperCubeArguments.put("dimensions", dimsArray);
 			hyperCubeArguments.put("data", dataArray);
 
@@ -193,7 +193,7 @@ public class HyperCubeFactory {
 			log.debug(resultJSON);
 
 		} catch (JDOMException e) {
-			log.error("Error when parsing XML");
+			log.error("Error when parsing XML: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
 			for (StackTraceElement element : e.getStackTrace()) {
 				builder.append(element.toString() + "\n");
@@ -221,7 +221,6 @@ public class HyperCubeFactory {
 				}
 				valueIndex += dimPosi[d]*multiplier;
 			}
-			log.debug(valueIndex + " - " + values.length);
 			for(int s = 0; s < dimSizes[currentDimIndex]; s++) {				
 				dataArray.put(Double.parseDouble(values[valueIndex].split(" ")[s]));
 			}
