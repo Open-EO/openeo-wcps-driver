@@ -55,7 +55,7 @@ public class OptionalTokenFilter implements ContainerRequestFilter {
 
 		String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
 		if (authHeader == null ) {
-			log.debug("Authorization header not present. Workflow continues without authorization.");
+			log.warn("Authorization header not present. Workflow continues without authorization.");
 			return;
 		}
 		if (!authHeader.startsWith("Bearer ")) {
@@ -82,10 +82,10 @@ public class OptionalTokenFilter implements ContainerRequestFilter {
 		}
 		
 		if(kid != null) {
-			log.debug("token will be verified using external token provider");
+			log.info("token will be verified using external token provider");
 			verifyOIDCToken(requestContext, token, kid);
 		}else {
-			log.debug("token will be verified using internal token provider");
+			log.info("token will be verified using internal token provider");
 			verifyBasicToken(requestContext, token);
 		}
 	}
@@ -122,10 +122,10 @@ public class OptionalTokenFilter implements ContainerRequestFilter {
                 public boolean isUserInRole(String role) {
                     String roles = verifiedClaims.getBody().get("scope", String.class);
                     if(roles.contains(role)) {
-                    	log.debug("User has confirmed to be part of: " + role);
+                    	log.info("User has confirmed to be part of: " + role);
                     	return true;
                     }else {
-                    	log.error("User is not part of: " + role);
+                    	log.warn("User is not part of: " + role);
                     	return false;
                     }
                 }
@@ -190,10 +190,10 @@ public class OptionalTokenFilter implements ContainerRequestFilter {
 	                public boolean isUserInRole(String role) {
 	                    String roles = verifiedClaims.getBody().get("roles", String.class);
 	                    if(roles != null && roles.contains(role)) {
-	                    	log.debug("User has confirmed to be part of: " + role);
+	                    	log.info("User has confirmed to be part of: " + role);
 	                    	return true;
 	                    }else {
-	                    	log.error("User is not part of: " + role);
+	                    	log.warn("User is not part of: " + role);
 	                    	return false;
 	                    }
 	                }

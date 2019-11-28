@@ -80,7 +80,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			try {
 			metadataElement = rootNode.getChild("CoverageDescription", defaultNS).getChild("metadata", gmlNS).getChild("Extension", gmlNS).getChild("covMetadata", gmlNS);
 		    }catch(Exception e) {
-			log.error("Error in parsing bands :" + e.getMessage());
+			log.warn("Error in parsing bands :" + e.getMessage());
 		    }
 			
 			List<Element> bandsList = null;
@@ -89,7 +89,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			bandsList = metadataElement.getChild("bands", gmlNS).getChildren();
 			bandsMeta = true;
 		    }catch(Exception e) {
-			log.error("Error in parsing bands :" + e.getMessage());
+			log.warn("Error in parsing bands :" + e.getMessage());
 		    }
 			List<Element> bandsListSwe = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
 			
@@ -238,12 +238,12 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 						try {
 							bandWave = band.getChildText("WAVELENGTH");
 						}catch(Exception e) {
-							log.error("Error in parsing band wave-lenght:" + e.getMessage());
+							log.warn("Error in parsing band wave-lenght:" + e.getMessage());
 						}
 						try {
 							product.put("common_name", band.getChildText("common_name"));
 						}catch(Exception e) {
-							log.error("Error in parsing band common name:" + e.getMessage());
+							log.warn("Error in parsing band common name:" + e.getMessage());
 						}				
 						product.put("name", bandId);
 						product.put("center_wavelength", bandWave);
@@ -251,12 +251,12 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 						try {
 							product.put("gsd", band.getChildText("gsd"));
 						}catch(Exception e) {
-							log.error("Error in parsing band gsd:" + e.getMessage());
+							log.warn("Error in parsing band gsd:" + e.getMessage());
 						}
 						bandArray.put(product);
 					}
 				}catch(Exception e) {
-					log.error("Error in parsing bands :" + e.getMessage());
+					log.warn("Error in parsing bands :" + e.getMessage());
 				}
 			}
 			else {
@@ -271,9 +271,9 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			}
 			
 			try {
-			dimObjects[3].put("values", bandValues);
+				dimObjects[3].put("values", bandValues);
 		    }catch(Exception e) {
-			log.error("Error in Band values :" + e.getMessage());
+		    	log.warn("Error in Band values :" + e.getMessage());
 		    }
 		
 			JSONArray epsg_values = new JSONArray();
@@ -293,12 +293,12 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			try {
 			title = metadataElement.getChildText("Project", gmlNS);
 		    }catch(Exception e) {
-			log.error("Error in parsing Project Name :" + e.getMessage());
+		    	log.warn("Error in parsing Project Name :" + e.getMessage());
 		    }
 		    try {
 			description = metadataElement.getChildText("Title", gmlNS);
             }catch(Exception e) {
-		    log.error("Error in parsing Title :" + e.getMessage());
+            	log.warn("Error in parsing Title :" + e.getMessage());
 	        }
 		    
 			JSONArray cloud_cover = new JSONArray();
@@ -310,38 +310,38 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				cube_dimensions.put(dim.getString("axis"), dim);
 			}
 			}catch(Exception e) {
-				log.error("Error in parsing Band Values :" + e.getMessage());
-			    }
+				log.warn("Error in parsing Band Values :" + e.getMessage());
+			}
 			
 			List<Element> slices = null;
 			try {
-			slices = metadataElement.getChild("slices", gmlNS).getChildren();
+				slices = metadataElement.getChild("slices", gmlNS).getChildren();
 		    }catch(Exception e) {
-			log.error("Error in parsing metadata slices:" + e.getMessage());
+		    	log.warn("Error in parsing metadata slices:" + e.getMessage());
 		    }
 			
 			Element props = null;
 			try {
 				props = slices.get(0);
 		    }catch(Exception e) {
-			log.error("Error in parsing metadata slice :" + e.getMessage());
+		    	log.warn("Error in parsing metadata slice :" + e.getMessage());
 		    }
 			try {
 				properties.put("sci:citation", props.getChildText("CITATION"));
 			}catch(Exception e) {
-				log.error("Error in parsing Constellation:" + e.getMessage());
+				log.warn("Error in parsing Constellation:" + e.getMessage());
 			}
 
 			try {
 				properties.put("eo:constellation", props.getChildText("CONSTELLATON"));
 			}catch(Exception e) {
-				log.error("Error in parsing Constellation:" + e.getMessage());
+				log.warn("Error in parsing Constellation:" + e.getMessage());
 			}				
 
 			try {				
 				properties.put("eo:instrument", props.getChildText("INSTRUMENT"));
 			}catch(Exception e) {
-				log.error("Error in parsing Instrument:" + e.getMessage());
+				log.warn("Error in parsing Instrument:" + e.getMessage());
 			}
 
 			JSONArray cloudCovArray = new JSONArray();
@@ -352,35 +352,35 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 					double cloudCov = Double.parseDouble(slices.get(c).getChildText("CLOUD_COVERAGE_ASSESSMENT"));
 					cloudCovArray.put(cloudCov);					
 				}catch(Exception e) {
-					log.error("Error in parsing Cloud Coverage:" + e.getMessage());
+					log.warn("Error in parsing Cloud Coverage:" + e.getMessage());
 				}				
 			}
 		    }catch(Exception e) {
-			log.error("Error in parsing metadata slice :" + e.getMessage());
+		    	log.warn("Error in parsing metadata slice :" + e.getMessage());
 		    }
 			
 			double maxCCValue = 0;
 			double minCCValue = 0;	
 			Boolean cloudCoverFlag = false;
 			try {
-			maxCCValue = cloudCovArray.getDouble(0);
-			minCCValue = cloudCovArray.getDouble(0);
-			cloudCoverFlag = true;
+				maxCCValue = cloudCovArray.getDouble(0);
+				minCCValue = cloudCovArray.getDouble(0);
+				cloudCoverFlag = true;
 		    }catch(Exception e) {
-			log.error("Error in parsing cloud cover Extents :" + e.getMessage());
+		    	log.warn("Error in parsing cloud cover Extents :" + e.getMessage());
 		    }
 			
 			try {
-			for(int i=1;i < cloudCovArray.length();i++){
-				if(cloudCovArray.getDouble(i) > maxCCValue){
-					maxCCValue = cloudCovArray.getDouble(i); 
+				for(int i=1;i < cloudCovArray.length();i++){
+					if(cloudCovArray.getDouble(i) > maxCCValue){
+						maxCCValue = cloudCovArray.getDouble(i); 
+					}
+					if(cloudCovArray.getDouble(i) < minCCValue){
+						minCCValue = cloudCovArray.getDouble(i);
+					}
 				}
-				if(cloudCovArray.getDouble(i) < minCCValue){
-					minCCValue = cloudCovArray.getDouble(i);
-				}
-			}
 		    }catch(Exception e) {
-			log.error("Error in parsing cloud cover array :" + e.getMessage());
+		    	log.error("Error in parsing cloud cover array :" + e.getMessage());
 		    }
 			
 			cloud_cover.put(minCCValue);
