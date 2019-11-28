@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+    <appender name="fout" class="org.apache.log4j.FileAppender">
+        <param name="File" value="logs/openeo_0.4.2.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%p	%d{ISO8601}	%r	%c	[%t]	%m%n"/>
+        </layout>
+    </appender>
+    <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%p	%d{ISO8601}	%r	%c	[%t]	%m%n"/>
+        </layout>
+    </appender>
+    <logger name="com.j256.ormlite">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo">
+        <level value="DEBUG"/>
+    </logger>
+    <logger name="eu.openeo.api.ApiOriginFilter">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.api.impl.CollectionsApiServiceImpl">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.api.impl.CredentialsApiServiceImpl">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.api.impl.DefaultApiServiceImpl">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.api.impl.FilesApiServiceImpl">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.api.impl.JobsApiServiceImpl">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.api.impl.MeApiServiceImpl">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.api.impl.ProcessesApiServiceImpl">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.api.impl.WellKnownApiServiceImpl">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.backend.auth.filter.OptionalTokenFilter">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.backend.auth.filter.RequireTokenFilter">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.backend.wcps.JobResultDeletion">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.backend.wcps.JobResultScheduler">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.dao.JSONObjectPersister">
+        <level value="ERROR"/>
+    </logger>
+    <logger name="eu.openeo.model.BatchJobResponse">
+        <level value="ERROR"/>
+    </logger>
+    <root>
+        <level value="ERROR"/>
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="fout"/>
+    </root>
+</log4j:configuration>
