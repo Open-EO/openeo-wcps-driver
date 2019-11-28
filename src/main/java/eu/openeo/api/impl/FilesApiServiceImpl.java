@@ -15,7 +15,7 @@ import javax.validation.constraints.Pattern;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import eu.openeo.api.FilesApiService;
@@ -25,7 +25,7 @@ import eu.openeo.backend.wcps.ConvenienceHelper;
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class FilesApiServiceImpl extends FilesApiService {
 	
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 //	log.debug("Is this user part of Eurac?: " + securityContext.isUserInRole("EURAC"));
 //	log.error("No information on authentication found on request for jobs!!!");
 //	return Response.status(404).entity(new String("A job with the specified identifier is not available."))

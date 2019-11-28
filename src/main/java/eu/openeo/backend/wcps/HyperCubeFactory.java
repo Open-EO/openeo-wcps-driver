@@ -3,7 +3,7 @@ package eu.openeo.backend.wcps;
 import java.io.InputStream;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -14,7 +14,7 @@ import org.json.JSONObject;
 
 public class HyperCubeFactory {
 
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 
 	public HyperCubeFactory() {
 

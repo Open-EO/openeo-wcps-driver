@@ -10,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,7 +34,7 @@ import eu.openeo.model.UpdateStoredProcessGraphRequest;
 public class ProcessGraphsApiServiceImpl extends ProcessGraphsApiService {
 	
 	
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 	private ConnectionSource connection = null;
 	private Dao<StoredProcessGraphResponse, String> graphDao = null;
 	

@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Date;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -38,7 +38,7 @@ import eu.openeo.model.Status;
 
 public class JobScheduler implements JobEventListener, UDFEventListener{
 	
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 	
 	private Dao<BatchJobResponse,String> jobDao = null;
 	private ConnectionSource connection = null;

@@ -16,7 +16,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -44,7 +45,7 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
 	private Dao<AuthKeys, String> authDao = null;
 	private Dao<User, String> userDao =  null;
 	
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 	
 	public CredentialsApiServiceImpl() {
 		try {

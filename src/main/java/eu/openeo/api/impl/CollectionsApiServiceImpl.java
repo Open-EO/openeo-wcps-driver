@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.validation.constraints.Pattern;
@@ -12,8 +11,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import org.apache.log4j.Logger;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.gdal.gdal.gdal;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 import org.jdom2.Document;
@@ -23,7 +23,6 @@ import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.gdal.gdal.gdal;
 
 import eu.openeo.api.ApiResponseMessage;
 import eu.openeo.api.CollectionsApiService;
@@ -32,7 +31,7 @@ import eu.openeo.backend.wcps.ConvenienceHelper;
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class CollectionsApiServiceImpl extends CollectionsApiService {
 	
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 	
 	public CollectionsApiServiceImpl() {
 		gdal.AllRegister();

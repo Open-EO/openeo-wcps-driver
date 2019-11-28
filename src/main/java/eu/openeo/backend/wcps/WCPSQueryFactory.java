@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 import org.json.JSONArray;
@@ -33,7 +33,7 @@ public class WCPSQueryFactory {
 	private String outputFormat = "json";
 	private JSONObject processGraph;
 
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 
 	/**
 	 * Creates WCPS query from openEO process Graph
