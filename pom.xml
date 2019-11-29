@@ -239,7 +239,26 @@
 			<artifactId>oauth2-oidc-sdk</artifactId>
 			<version>5.24.1</version>
 		</dependency>
+		<dependency>
+		  <groupId>edu.ucar</groupId>
+		  <artifactId>cdm-core</artifactId>
+		  <version>${netcdfJavaVersion}</version>
+		  <scope>compile</scope>
+		</dependency>
+		<dependency>
+		  <groupId>edu.ucar</groupId>
+		  <artifactId>netcdf4</artifactId>
+		  <version>${netcdfJavaVersion}</version>
+		  <scope>runtime</scope>
+		</dependency>
 	</dependencies>
+	<repositories>
+	    <repository>
+	        <id>unidata-all</id>
+	        <name>Unidata All</name>
+	        <url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>
+	    </repository>
+	</repositories>
 	<properties>
 		<java.version>1.8</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
@@ -256,5 +275,6 @@
 		<servlet-api-version>3.0.1</servlet-api-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<gdal.path>/usr/share/java/gdal.jar</gdal.path>
+		<netcdfJavaVersion>5.2.0</netcdfJavaVersion>
 	</properties>
 </project>
