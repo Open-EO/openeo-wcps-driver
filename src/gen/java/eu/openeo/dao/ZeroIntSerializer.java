@@ -2,7 +2,7 @@ package eu.openeo.dao;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 public class ZeroIntSerializer extends StdSerializer<Integer> {
 	
 	private static final long serialVersionUID = -4795613131607443358L;
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 
 	public ZeroIntSerializer() {
 		this(null);

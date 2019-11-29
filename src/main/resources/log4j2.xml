@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Appenders>
+  	<File name="FILE" fileName="logs/openeo_0.4.2.log" append="true">
+      <PatternLayout pattern="%p %d{ISO8601} [%t] %r %c %m%n"/>
+    </File>
+    <Console name="STDOUT" target="SYSTEM_OUT">
+      <PatternLayout pattern="%p %d{ISO8601} [%t] %r %c %m%n"/>
+    </Console>
+  </Appenders>
+  <Loggers>   
+    <Logger name="eu.openeo.backend.auth" level="warn" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>
+    <Logger name="eu.openeo.backend.wcps.JobResultDeletion" level="error" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>
+    <Logger name="eu.openeo.backend.wcps.JobResultScheduler" level="error" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>
+    <Logger name="eu.openeo.api.impl" level="error" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>   
+    <Logger name="eu.openeo.api.ApiOriginFilter" level="error" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>
+    <Logger name="eu.openeo.dao" level="error" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>
+    <Logger name="eu.openeo.model" level="error" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>
+    <Logger name="eu.openeo" level="info" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>
+    <Logger name="com.j256.ormlite" level="warn" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>
+    <Root level="warn">
+      <AppenderRef ref="STDOUT"/>
+      <AppenderRef ref="FILE"/>
+    </Root>  
+  </Loggers>
+</Configuration>

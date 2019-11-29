@@ -8,13 +8,13 @@ import java.util.Properties;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ConvenienceHelper {
 
-	private static Logger log = Logger.getLogger(ConvenienceHelper.class);
+	private static Logger log = LogManager.getLogger();
 
 	public static String readProperties(String key) throws IOException {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

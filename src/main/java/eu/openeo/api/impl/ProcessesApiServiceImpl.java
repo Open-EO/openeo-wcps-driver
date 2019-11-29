@@ -30,14 +30,14 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 import eu.openeo.model.Process;
 import eu.openeo.model.Link;
 
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class ProcessesApiServiceImpl extends ProcessesApiService {
     
-Logger log = Logger.getLogger(this.getClass());
+Logger log = LogManager.getLogger();
 	
 	private Map<String, Process> processes = null;
 	private Map<String, Link> links = null;

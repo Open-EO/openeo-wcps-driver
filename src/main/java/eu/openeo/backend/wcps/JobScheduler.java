@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Date;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -38,7 +38,7 @@ import eu.openeo.model.Status;
 
 public class JobScheduler implements JobEventListener, UDFEventListener{
 	
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 	
 	private Dao<BatchJobResponse,String> jobDao = null;
 	private ConnectionSource connection = null;
@@ -88,7 +88,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 			}
 						
 			if (processesSequence.toString().contains("run_udf")) {
-				
+				log.info("Found process_graph containing udf");
 				String udfNodeKey = getUDFNode();
 				int udfNodeIndex = 0;
 
@@ -187,6 +187,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				}
 				HttpURLConnection con = null;
 				try {
+					log.info("Sending UDF to UDF endpoint.");
 					con = (HttpURLConnection) udfServiceEndpoint.openConnection();
 					con.setRequestMethod("POST");
 					con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -219,6 +220,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 						    while ((responseLine = br.readLine()) != null) {
 						        response.append(responseLine.trim());
 						    }
+				    log.info("Received result from UDF endpoint.");
 					JSONObject udfResponse = new JSONObject(response.toString());
 					JSONArray hyperCubes = udfResponse.getJSONArray("hypercubes");
 					JSONObject firstHyperCube = hyperCubes.getJSONObject(0);

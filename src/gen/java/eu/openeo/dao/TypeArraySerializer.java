@@ -2,7 +2,7 @@ package eu.openeo.dao;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -14,7 +14,7 @@ public class TypeArraySerializer extends StdSerializer<String[]> {
 	 * 
 	 */
 	private static final long serialVersionUID = -7438951486864108308L;
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 
 	public TypeArraySerializer() {
 		this(null);

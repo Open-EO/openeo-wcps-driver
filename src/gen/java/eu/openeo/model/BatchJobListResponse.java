@@ -15,10 +15,8 @@ package eu.openeo.model;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import eu.openeo.model.BatchJobMetadata;
 import eu.openeo.model.Link;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +29,12 @@ import javax.validation.Valid;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class BatchJobListResponse  implements Serializable {
-  @JsonProperty("jobs")
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1743076669526458333L;
+
+@JsonProperty("jobs")
   private List<BatchJobMetadata> jobs = new ArrayList<BatchJobMetadata>();
 
   @JsonProperty("links")
