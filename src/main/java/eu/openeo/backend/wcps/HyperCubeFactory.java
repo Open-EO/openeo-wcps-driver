@@ -289,7 +289,8 @@ public class HyperCubeFactory {
 			}
 			Variable values = writer.addVariable(hyperCube.getString("id"), DataType.DOUBLE, dims);
 			
-			writer.addGroupAttribute(null, new Attribute("EPSG", 32632));
+			writer.addGlobalAttribute(new Attribute("EPSG", 32632));
+			writer.addGlobalAttribute(new Attribute("JOB", path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'))));
 			
 			writer.create();
 			writer.flush();
