@@ -120,7 +120,7 @@ public class CredentialsApiServiceImpl extends CredentialsApiService {
     @Override
     public Response credentialsBasicGet(SecurityContext securityContext) throws NotFoundException {
     	String authenticatedUser = securityContext.getUserPrincipal().getName();
-    	log.debug("The following user authenticated successfully: " + authenticatedUser);
+    	log.info("The following user authenticated successfully: " + authenticatedUser);
 		String token = issueToken(authenticatedUser);
 		if(token != null) {
 		    JSONObject authObject = new JSONObject();
