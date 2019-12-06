@@ -2,16 +2,14 @@ package eu.openeo.backend.wcps;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -25,6 +23,7 @@ import ucar.ma2.ArrayLong;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
@@ -268,7 +267,8 @@ public class HyperCubeFactory {
 				List<Dimension> currentDim = new ArrayList<Dimension>();
 				currentDim.add(dimension);
 				if(dimensionDescriptor.getString("name").equals("t")) {
-					dimVars.put(dimensionDescriptor.getString("name"), writer.addVariable(dimensionDescriptor.getString("name"), DataType.LONG, currentDim));
+					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.LONG, currentDim);
+					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
 					ArrayLong dataArray = new ArrayLong(new int[] {dimension.getLength()}, false);
 					for(int i = 0; i < dimension.getLength(); i++) {
 						String timeLabel = coordinateLables.getString(i).replace('"', ' ').trim();
@@ -277,7 +277,9 @@ public class HyperCubeFactory {
 					}
 					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
 				}else {					
-					dimVars.put(dimensionDescriptor.getString("name"), writer.addVariable(dimensionDescriptor.getString("name"), DataType.DOUBLE, currentDim));
+					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.DOUBLE, currentDim);
+					dimVar.addAttribute(new Attribute("resolution", new Double(coordinateLables.getDouble(1) -coordinateLables.getDouble(0))));
+					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
 					ArrayDouble dataArray = new ArrayDouble(new int[] {dimension.getLength()});
 					for(int i = 0; i < dimension.getLength(); i++) {
 						dataArray.setDouble(i, coordinateLables.getDouble(i));
@@ -286,6 +288,8 @@ public class HyperCubeFactory {
 				}
 			}
 			Variable values = writer.addVariable(hyperCube.getString("id"), DataType.DOUBLE, dims);
+			
+			writer.addGroupAttribute(null, new Attribute("EPSG", 32632));
 			
 			writer.create();
 			writer.flush();

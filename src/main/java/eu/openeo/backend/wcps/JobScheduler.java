@@ -225,20 +225,21 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					JSONArray hyperCubes = udfResponse.getJSONArray("hypercubes");
 					JSONObject firstHyperCube = hyperCubes.getJSONObject(0);
 					//TODO import hyper cube back into rasdaman here!
-					byte[] firstHyperCubeBlob = firstHyperCube.toString(2).getBytes(StandardCharsets.UTF_8);
-					File firstHyperCubeFile = new File(ConvenienceHelper.readProperties("temp-dir")+"udf_result_" + job.getId() + ".json");
-					FileOutputStream firstHyperCubeStream;
-					try {
-						firstHyperCubeStream = new FileOutputStream(firstHyperCubeFile);
-						firstHyperCubeStream.write(firstHyperCubeBlob, 0, firstHyperCubeBlob.length);
-						firstHyperCubeStream.flush();
-						firstHyperCubeStream.close();
-						//TODO fire udf finished event here!
-					} catch (FileNotFoundException e1) {
-						e1.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					new HyperCubeFactory().writeHyperCubeToNetCDF(firstHyperCube, ConvenienceHelper.readProperties("temp-dir")+"udf_result/" + job.getId() + ".nc");
+//					byte[] firstHyperCubeBlob = firstHyperCube.toString(2).getBytes(StandardCharsets.UTF_8);
+//					File firstHyperCubeFile = new File(ConvenienceHelper.readProperties("temp-dir")+"udf_result_" + job.getId() + ".json");
+//					FileOutputStream firstHyperCubeStream;
+//					try {
+//						firstHyperCubeStream = new FileOutputStream(firstHyperCubeFile);
+//						firstHyperCubeStream.write(firstHyperCubeBlob, 0, firstHyperCubeBlob.length);
+//						firstHyperCubeStream.flush();
+//						firstHyperCubeStream.close();
+//						//TODO fire udf finished event here!
+//					} catch (FileNotFoundException e1) {
+//						e1.printStackTrace();
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
 				} catch (UnsupportedEncodingException e) {
 					log.error("An error occured when encoding response of udf service endpoint " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
