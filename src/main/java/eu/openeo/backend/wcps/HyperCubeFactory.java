@@ -275,12 +275,11 @@ public class HyperCubeFactory {
 			
 			for (long index1D = 0; index1D < values.getSize(); index1D++) {				
 				JSONArray subDimArray = hyperCube.getJSONArray("data");
-				long divider = values.getSize();
-				for(int n = shape.length-2; n >= 0; n--) {
+				long divider = index1D;
+				for(int n = shape.length-1; n >= 0; n--) {
+					indexND[n] =  (int) (divider % shape[n]);
 					divider /= shape[n];
-					indexND[n] =  (int) (index1D / divider);				
 				}
-				indexND[shape.length-1] =  (int) (index1D % divider);
 				String indexS = "";
 				for(int k = 0; k < shape.length-1; k++) {
 					subDimArray = subDimArray.getJSONArray(indexND[k]);
