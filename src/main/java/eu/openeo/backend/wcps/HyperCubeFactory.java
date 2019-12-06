@@ -2,7 +2,12 @@ package eu.openeo.backend.wcps;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ucar.ma2.ArrayDouble;
+import ucar.ma2.ArrayLong;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -251,14 +257,33 @@ public class HyperCubeFactory {
 			
 			JSONArray dimensionsArray = hyperCube.getJSONArray("dimensions");
 			List<Dimension> dims = new ArrayList<Dimension>();
-//			List<Variable> dimVars =  new ArrayList<Variable>();
+			HashMap<String, Variable> dimVars =  new HashMap<String, Variable>();
+			HashMap<String, Object> coordinateArray = new HashMap<String,Object>();
 			Iterator iterator = dimensionsArray.iterator();
 			while(iterator.hasNext()) {
 				JSONObject dimensionDescriptor = (JSONObject) iterator.next();
 				JSONArray coordinateLables = dimensionDescriptor.getJSONArray("coordinates");
 				Dimension dimension = writer.addDimension(dimensionDescriptor.getString("name"), coordinateLables.length());
 				dims.add(dimension);
-//				dimVars.add(writer.addVariable(dimensionDescriptor.getString("name"), DataType.DOUBLE, dimension));
+				List<Dimension> currentDim = new ArrayList<Dimension>();
+				currentDim.add(dimension);
+				if(dimensionDescriptor.getString("name").equals("t")) {
+					dimVars.put(dimensionDescriptor.getString("name"), writer.addVariable(dimensionDescriptor.getString("name"), DataType.LONG, currentDim));
+					ArrayLong dataArray = new ArrayLong(new int[] {dimension.getLength()}, false);
+					for(int i = 0; i < dimension.getLength(); i++) {
+						String timeLabel = coordinateLables.getString(i).replace('"', ' ').trim();
+						Long epoch = ZonedDateTime.parse(timeLabel).toEpochSecond();
+						dataArray.setLong(i, epoch);
+					}
+					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+				}else {					
+					dimVars.put(dimensionDescriptor.getString("name"), writer.addVariable(dimensionDescriptor.getString("name"), DataType.DOUBLE, currentDim));
+					ArrayDouble dataArray = new ArrayDouble(new int[] {dimension.getLength()});
+					for(int i = 0; i < dimension.getLength(); i++) {
+						dataArray.setDouble(i, coordinateLables.getDouble(i));
+					}
+					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+				}
 			}
 			Variable values = writer.addVariable(hyperCube.getString("id"), DataType.DOUBLE, dims);
 			
@@ -267,6 +292,15 @@ public class HyperCubeFactory {
 						
 			int[] shape = values.getShape();
 			int[] indexND =  new int[shape.length];
+			for(String key: coordinateArray.keySet()) {
+				if(key.equals("t")) {
+					ArrayLong dataArray = (ArrayLong) coordinateArray.get(key);
+					writer.write(dimVars.get(key), new int[shape.length], dataArray);
+				}else {
+					ArrayDouble dataArray = (ArrayDouble) coordinateArray.get(key);
+					writer.write(dimVars.get(key), new int[shape.length], dataArray);
+				}
+			}
 			
 			log.debug("Number of dimensions: " + shape.length);
 			
