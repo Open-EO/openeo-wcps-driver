@@ -1,5 +1,162 @@
 [
 	{
+    "id": "resample_cube_spatial",
+    "summary": "Resample the spatial dimensions to a target data cube",
+    "description": "Resamples the spatial dimensions (x,y) from a source data cube to a target data cube and return the results as a new data cube.",
+    "categories": [
+        "cubes",
+        "aggregate & resample"
+    ],
+    "parameter_order": ["data", "target", "method"],
+    "parameters": {
+        "data": {
+            "description": "A data cube.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube"
+            },
+            "required": true
+        },
+        "target": {
+            "description": "A data cube that describes the spatial target resolution.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube"
+            },
+            "required": true
+        },
+        "method": {
+            "description": "Resampling method. Methods are inspired by GDAL, see [gdalwarp](https://www.gdal.org/gdalwarp.html) for more information.",
+            "schema": {
+                "type": "string",
+                "default": "near",
+                "enum": [
+                    "near",
+                    "bilinear",
+                    "cubic",
+                    "cubicspline",
+                    "lanczos",
+                    "average",
+                    "mode",
+                    "max",
+                    "min",
+                    "med",
+                    "q1",
+                    "q3"
+                ]
+            }
+        }
+    },
+    "returns": {
+        "description": "A data cube with potentially lower spatial resolution and potentially lower cardinality, but the same number of dimensions as the original data cube.",
+        "schema": {
+            "type": "object",
+            "format": "raster-cube"
+        }
+    },
+    "links": [
+        {
+            "href": "https://open-eo.github.io/openeo-api/glossary/#aggregation-and-resampling",
+            "rel": "about",
+            "title": "Resampling explained in the openEO glossary"
+        }
+    ]
+    },    
+    {
+    "id": "merge_cubes",
+    "summary": "Merging two data cubes",
+    "description": "The data cubes have to be compatible. A merge is the inverse of a split if there is no overlap. If data overlaps the parameter `overlap_resolver` must be specified to resolve the overlap. It doesn't add dimensions.",
+    "categories": [
+        "cubes"
+    ],
+    "parameter_order": ["cube1", "cube2", "overlap_resolver", "binary"],
+    "parameters": {
+        "cube1": {
+            "description": "The first data cube.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube"
+            },
+            "required": true
+        },
+        "cube2": {
+            "description": "The second data cube.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube"
+            },
+            "required": true
+        },
+        "overlap_resolver": {
+            "description": "A reducer that resolves the conflict if the data overlaps. The reducer must be a callable process (or a set of processes as process graph) such as ``mean()`` that accepts by default array as input. The process can also work on two values by setting the parameter `binary` to `true`. The reducer must return a value of the same data type as the input values in the array. `null` (default) can be specified if no overlap resolver is required.",
+            "schema": {
+                "anyOf": [
+                    {
+                        "title": "Unary behaviour",
+                        "description": "Passes an array to the reducer.",
+                        "type": "object",
+                        "format": "callback",
+                        "parameters": {
+                            "data": {
+                                "description": "An array with elements of any data type.",
+                                "type": "array",
+                                "items": {
+                                    "description": "Any data type."
+                                }
+                            }
+                        } 
+                    },
+                    {
+                        "title": "Binary behaviour",
+                        "description": "Passes two values to the reducer.",
+                        "type": "object",
+                        "format": "callback",
+                        "parameters": {
+                            "x": {
+                                "description": "The first value. Any data type could be passed."
+                            },
+                            "y": {
+                                "description": "The second value. Any data type could be passed."
+                            }
+                        } 
+                    },
+                    {
+                        "title": "No overlap resolver",
+                        "type": "null"
+                    }
+                ],
+                "default": null
+            }
+        },
+        "binary": {
+            "description": "Specifies whether the process should pass two values to the reducer or a list of values (default).\n\nIf the process passes two values, the reducer must be both associative and commutative as the execution may be executed in parallel and therefore the order of execution is arbitrary.\n\nThis parameter is especially useful for UDFs passed as reducers. Back-ends may still optimize and parallelize processes that work on list of values.",
+            "schema": {
+                "type": "boolean",
+                "default": false
+            }
+        }
+    },
+    "returns": {
+        "description": "The merged data cube.",
+        "schema": {
+            "type": "object",
+            "format": "raster-cube"
+        }
+    },
+    "exceptions": {
+        "OverlapResolverMissing": {
+            "message": "Two data cubes with overlap but without an overlap resolver have been specified."
+        }
+    },
+    "links": [
+        {
+            "rel": "about",
+            "href": "https://en.wikipedia.org/wiki/Reduction_Operator",
+            "title": "Background information on reduction operators (binary reducers) by Wikipedia"
+        }
+    ]
+    },
+	{
     "id": "reduce",
     "summary": "Reduce dimensions",
     "description": "Applies a reducer to a data cube dimension by collapsing all the input values along the specified dimension into an output value computed by the reducer.\n\nThe reducer must be a callable process (or a set of processes as process graph) that accepts by default array as input. The process can also work on two values by setting the parameter `binary` to `true`. The reducer must compute a single or multiple return values of the same type as the input values were. Multiple values must be wrapped in an array. An example for a process returning a single value is ``median()``. In this case the specified dimension would be removed. If a callback such as ``extrema()`` returns multiple values, a new dimension with the specified name in `target_dimension` is created (see the description of the parameter for more information).\n\nA special case is that the reducer can be set to `null`, which is the default if no reducer is specified. It acts as a no-operation reducer so that the remaining value is treated like a reduction result and the dimension gets dropped. This only works on dimensions with a single dimension value left (e.g. after filtering for a single band), otherwise the process fails with a `TooManyDimensionValues` error.\n\nNominal values can be reduced too, but need to be mapped. For example date strings to numeric timestamps since 1970 etc.",
@@ -103,83 +260,7 @@
             "title": "Background information on reduction operators (binary reducers) by Wikipedia"
         }
     ]
-    },
-    {
-    "id": "run_udf_externally",
-    "summary": "Run an externally hosted UDF container",
-    "description": "Runs a compatible UDF container that is either externally hosted by a service provider or running on a local machine of the user. The UDF container must follow the [openEO UDF specification](https://open-eo.github.io/openeo-udf/).\n\nThe referenced UDF service can be executed in several processes such as ``aggregate_temporal()``, ``apply()``, ``apply_dimension()``, ``filter()`` and ``reduce()``. In this case an array is passed instead of a raster data cube. The user must ensure that the data is properly passed as an array so that the UDF can make sense of it.",
-    "categories": [
-        "import",
-        "udf"
-    ],
-    "parameter_order": ["data", "url", "context"],
-    "parameters": {
-        "data": {
-            "description": "The data to be passed to the UDF as array or raster data cube.",
-            "schema": {
-                "anyOf": [
-                    {
-                        "title": "Raster data cube",
-                        "type": "object",
-                        "format": "raster-cube"
-                    },
-                    {
-                        "title": "Array",
-                        "type": "array",
-                        "minItems": 1,
-                        "items": {
-                            "description": "Any data type."
-                        }
-                    }
-                ]
-            },
-            "required": true
-        },
-        "url": {
-            "description": "URL to a remote UDF service.",
-            "schema": {
-                "type": "string",
-                "format": "uri"
-            },
-            "required": true
-        },
-        "context": {
-            "description": "Additional data such as configuration options that should be passed to the UDF.",
-            "schema": {
-                "type": "object",
-                "default": {}
-            }
-        }
-    },
-    "returns": {
-        "description": "The data processed by the UDF service. Returns a raster data cube if a raster data cube was passed for `data`. If an array was passed for `data`, the returned value is defined by the context and is exactly what the UDF returned.",
-        "schema": {
-            "anyOf": [
-                {
-                    "title": "Raster data cube",
-                    "type": "object",
-                    "format": "raster-cube"
-                },
-                {
-                    "title": "Any",
-                    "description": "Any data type."
-                }
-            ]
-        }
-    },
-    "links": [
-        {
-            "rel": "about",
-            "href": "https://open-eo.github.io/openeo-udf/",
-            "title": "openEO UDF specification"
-        },
-        {
-            "rel": "about",
-            "href": "https://github.com/Open-EO/openeo-udf",
-            "title": "openEO UDF repository"
-        }
-    ]
-    },
+    },    
     {
     "id": "run_udf",
     "summary": "Run an UDF",
