@@ -32,6 +32,7 @@ public class WCPSQueryFactory {
 	private Vector<Aggregate> aggregates;
 	private String outputFormat = "json";
 	private JSONObject processGraph;
+	private boolean withUDF = false;
 
 	Logger log = LogManager.getLogger();
 
@@ -56,6 +57,10 @@ public class WCPSQueryFactory {
 	
 	public void setOutputFormat(String outputFormat) {
 		this.outputFormat =  outputFormat;
+	}
+
+	public boolean isWithUDF() {
+		return withUDF;
 	}
 
 	private StringBuilder basicWCPSStringBuilder() {
@@ -177,6 +182,7 @@ public class WCPSQueryFactory {
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}
 			if (currentProcessID.equals("run_udf")) {
+				this.withUDF =  true;
 				StringBuilder wcpsUDFpayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderUDFPayload = basicWCPSStringBuilder();
 				String payLoad = null;

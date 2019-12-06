@@ -1,6 +1,9 @@
 package eu.openeo.backend.wcps;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
@@ -11,6 +14,14 @@ import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import ucar.ma2.ArrayDouble;
+import ucar.ma2.DataType;
+import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
 
 public class HyperCubeFactory {
 
@@ -200,7 +211,7 @@ public class HyperCubeFactory {
 			}
 			log.error(builder.toString());
 		} catch (java.io.IOException e) {
-			log.error("Error when receiving input stream");
+			log.error("Error when receiving input stream" + e.getMessage());
 			StringBuilder builder = new StringBuilder();
 			for (StackTraceElement element : e.getStackTrace()) {
 				builder.append(element.toString() + "\n");
@@ -232,6 +243,77 @@ public class HyperCubeFactory {
 			}
 		}
 		return dataArray;
+	}
+	
+	public int writeHyperCubeToNetCDF(JSONObject hyperCube, String path) {
+		try {
+			NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, path, null);
+			
+			JSONArray dimensionsArray = hyperCube.getJSONArray("dimensions");
+			List<Dimension> dims = new ArrayList<Dimension>();
+//			List<Variable> dimVars =  new ArrayList<Variable>();
+			Iterator iterator = dimensionsArray.iterator();
+			while(iterator.hasNext()) {
+				JSONObject dimensionDescriptor = (JSONObject) iterator.next();
+				JSONArray coordinateLables = dimensionDescriptor.getJSONArray("coordinates");
+				Dimension dimension = writer.addDimension(dimensionDescriptor.getString("name"), coordinateLables.length());
+				dims.add(dimension);
+//				dimVars.add(writer.addVariable(dimensionDescriptor.getString("name"), DataType.DOUBLE, dimension));
+			}
+			Variable values = writer.addVariable(hyperCube.getString("id"), DataType.DOUBLE, dims);
+			
+			writer.create();
+			writer.flush();
+						
+			int[] shape = values.getShape();
+			int[] indexND =  new int[shape.length];
+			
+			log.debug("Number of dimensions: " + shape.length);
+			
+			ArrayDouble dataArray = new ArrayDouble(shape);
+			Index dataIndex = dataArray.getIndex();
+			
+			for (long index1D = 0; index1D < values.getSize(); index1D++) {				
+				JSONArray subDimArray = hyperCube.getJSONArray("data");
+				long divider = values.getSize();
+				for(int n = shape.length-2; n >= 0; n--) {
+					divider /= shape[n];
+					indexND[n] =  (int) (index1D / divider);				
+				}
+				indexND[shape.length-1] =  (int) (index1D % divider);
+				String indexS = "";
+				for(int k = 0; k < shape.length-1; k++) {
+					subDimArray = subDimArray.getJSONArray(indexND[k]);
+					indexS += indexND[k] + " ";
+				}
+				indexS += indexND[shape.length-1];				
+				double value = subDimArray.getDouble(indexND[shape.length-1]);
+				log.debug(index1D + " | " + indexS + " : " + value);
+				dataArray.setDouble(dataIndex.set(indexND), value);
+			}
+			
+			writer.write(values, new int[shape.length], dataArray);
+			writer.flush();
+			writer.close();
+			
+		} catch (IOException e) {
+			log.error("Error when writing hypercube to netcdf file: " + path + " " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+			return -1;
+		} catch (InvalidRangeException e) {
+			log.error("Error when writing hypercube to netcdf file: " + path + " " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+			return -1;
+		}
+		return 0;
 	}
 
 }
