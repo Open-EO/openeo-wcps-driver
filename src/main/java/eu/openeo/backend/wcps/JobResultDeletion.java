@@ -2,6 +2,7 @@ package eu.openeo.backend.wcps;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Date;
 
@@ -65,7 +66,7 @@ public class JobResultDeletion implements Runnable {
 			
 			for (int i=0; i<listFiles.length; i++) {
 				File currentFile = listFiles[i];
-				if(currentFile.isFile()) {
+				if(currentFile.isFile() && !Files.isSymbolicLink(currentFile.toPath())) {
 					if(differenceTimeMinutes(currentFile.lastModified()) > Integer.parseInt(ConvenienceHelper.readProperties("temp-file-expiry"))) {
 						currentFile.delete();
 						String jobId = currentFile.getName().substring(0, currentFile.getName().indexOf("."));
