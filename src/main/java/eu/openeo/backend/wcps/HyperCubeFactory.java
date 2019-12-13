@@ -18,8 +18,11 @@ import org.jdom2.input.SAXBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import ucar.ma2.ArrayChar;
 import ucar.ma2.ArrayDouble;
+import ucar.ma2.ArrayInt;
 import ucar.ma2.ArrayLong;
+import ucar.ma2.ArrayString;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -276,8 +279,18 @@ public class HyperCubeFactory {
 						dataArray.setLong(i, epoch);
 					}
 					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+				}else if(dimensionDescriptor.getString("name").equals("band")) {
+					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.STRING, currentDim);
+					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
+					ArrayLong dataArray = new ArrayLong(new int[] {dimension.getLength()}, false);
+					for(int i = 0; i < dimension.getLength(); i++) {
+						//TODO fix this to put the actual band name as string instead of integer ID of band
+						dataArray.setLong(i, (long)i+1);
+					}
+					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
 				}else {					
 					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.DOUBLE, currentDim);
+					log.debug(dimVar.getFullName());
 					dimVar.addAttribute(new Attribute("resolution", new Double(coordinateLables.getDouble(1) -coordinateLables.getDouble(0))));
 					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
 					ArrayDouble dataArray = new ArrayDouble(new int[] {dimension.getLength()});
@@ -301,7 +314,10 @@ public class HyperCubeFactory {
 				if(key.equals("t")) {
 					ArrayLong dataArray = (ArrayLong) coordinateArray.get(key);
 					writer.write(dimVars.get(key), new int[shape.length], dataArray);
-				}else {
+				}else if(key.equals("band")) {
+					ArrayLong dataArray = (ArrayLong) coordinateArray.get(key);
+					writer.write(dimVars.get(key), new int[shape.length], dataArray);
+				}else{
 					ArrayDouble dataArray = (ArrayDouble) coordinateArray.get(key);
 					writer.write(dimVars.get(key), new int[shape.length], dataArray);
 				}

@@ -20,7 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Date;
 
-import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -224,7 +225,20 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					JSONObject udfResponse = new JSONObject(response.toString());
 					JSONArray hyperCubes = udfResponse.getJSONArray("hypercubes");
 					JSONObject firstHyperCube = hyperCubes.getJSONObject(0);
-					
+					byte[] firstHyperCubeBlob = firstHyperCube.toString(2).getBytes(StandardCharsets.UTF_8);
+					File firstHyperCubeFile = new File(ConvenienceHelper.readProperties("temp-dir")+"udf_result_" + job.getId() + ".json");
+					FileOutputStream firstHyperCubeStream;
+					try {
+						firstHyperCubeStream = new FileOutputStream(firstHyperCubeFile);
+						firstHyperCubeStream.write(firstHyperCubeBlob, 0, firstHyperCubeBlob.length);
+						firstHyperCubeStream.flush();
+						firstHyperCubeStream.close();
+						//TODO fire udf finished event here!
+					} catch (FileNotFoundException e1) {
+						e1.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 					//TODO import hyper cube back into rasdaman here!
 					String netCDFPath = ConvenienceHelper.readProperties("temp-dir")+"udf_result/" + job.getId() + ".nc";
 					new HyperCubeFactory().writeHyperCubeToNetCDF(firstHyperCube, netCDFPath);
@@ -281,20 +295,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					URL urlUDF = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
 							+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
 					executeWCPS(urlUDF, job, wcpsFactory);
-//					byte[] firstHyperCubeBlob = firstHyperCube.toString(2).getBytes(StandardCharsets.UTF_8);
-//					File firstHyperCubeFile = new File(ConvenienceHelper.readProperties("temp-dir")+"udf_result_" + job.getId() + ".json");
-//					FileOutputStream firstHyperCubeStream;
-//					try {
-//						firstHyperCubeStream = new FileOutputStream(firstHyperCubeFile);
-//						firstHyperCubeStream.write(firstHyperCubeBlob, 0, firstHyperCubeBlob.length);
-//						firstHyperCubeStream.flush();
-//						firstHyperCubeStream.close();
-//						//TODO fire udf finished event here!
-//					} catch (FileNotFoundException e1) {
-//						e1.printStackTrace();
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//					}
+
 				} catch (UnsupportedEncodingException e) {
 					log.error("An error occured when encoding response of udf service endpoint " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
