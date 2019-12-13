@@ -57,6 +57,9 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		JSONArray processesIDMethods = new JSONArray();
 		processesIDMethods.put(new String("GET"));
 		
+		JSONArray udfRuntimesMethods = new JSONArray();
+	    udfRuntimesMethods.put(new String("GET"));
+		
 		JSONArray processGraphsMethods = new JSONArray();
 		processGraphsMethods.put(new String("GET"));
 		processGraphsMethods.put(new String("POST"));
@@ -106,6 +109,10 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		JSONObject collectionsEndpoint = new JSONObject();
 		collectionsEndpoint.put("path", "/collections");
 		collectionsEndpoint.put("methods", collectionsMethods);
+		
+		JSONObject udfRuntimesEndpoint = new JSONObject();
+		udfRuntimesEndpoint.put("path", "/udf_runtimes");
+		udfRuntimesEndpoint.put("methods", udfRuntimesMethods);
 		
 		JSONObject collectionIdEndpoint = new JSONObject();
 		collectionIdEndpoint.put("path", "/collections/{collection_id}");
@@ -159,6 +166,7 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		endpointList.put(meEndpoint);
 		endpointList.put(outputFormatsEndpoint);
 		endpointList.put(collectionsEndpoint);
+		endpointList.put(udfRuntimesEndpoint);		
 		endpointList.put(collectionIdEndpoint);
 		endpointList.put(processesEndpoint);
 		endpointList.put(jobsEndpoint);
@@ -186,15 +194,12 @@ public class DefaultApiServiceImpl extends DefaultApiService {
 		link1.put("title", "Homepage of the service provider");
 		
 		JSONArray link = new JSONArray();
-		link.put(link1);
-		
+		link.put(link1);		
 		
 		JSONObject billing = new JSONObject();
 		billing.put("currency", "EUR");
 		billing.put("default_plan", "free");
-		billing.put("plans", plan);
-		
-		
+		billing.put("plans", plan);			
 		
 		JSONObject mainObj = new JSONObject();
 		mainObj.put("api_version", "0.4.2");
