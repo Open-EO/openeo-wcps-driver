@@ -2,10 +2,11 @@ package eu.openeo.backend.wcps;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Date;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -17,7 +18,7 @@ import eu.openeo.model.Status;
 
 public class JobResultDeletion implements Runnable {
 	
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 	private ConnectionSource connection = null;
 	private Dao<BatchJobResponse, String> jobDao = null;
 	
@@ -65,7 +66,7 @@ public class JobResultDeletion implements Runnable {
 			
 			for (int i=0; i<listFiles.length; i++) {
 				File currentFile = listFiles[i];
-				if(currentFile.isFile()) {
+				if(currentFile.isFile() && !Files.isSymbolicLink(currentFile.toPath())) {
 					if(differenceTimeMinutes(currentFile.lastModified()) > Integer.parseInt(ConvenienceHelper.readProperties("temp-file-expiry"))) {
 						currentFile.delete();
 						String jobId = currentFile.getName().substring(0, currentFile.getName().indexOf("."));

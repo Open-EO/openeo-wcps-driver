@@ -1,0 +1,53 @@
+{
+  "code": {
+    "source": "data.del_raster_collection_tiles()",
+    "language": "python"
+  },
+  "data": {
+    "proj": "EPSG:4326",
+    "raster_collection_tiles": [
+      {
+        "data": [
+          [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ]
+        ],
+        "extent": {
+          "top": 53,
+          "bottom": 52,
+          "right": 30,
+          "left": 28,
+          "height": 1,
+          "width": 1
+        },
+        "end_times": [
+          "2001-01-02T00:00:00",
+          "2001-01-03T00:00:00"
+        ],
+        "start_times": [
+          "2001-01-01T00:00:00",
+          "2001-01-02T00:00:00"
+        ],
+        "id": "test_data",
+        "wavelength": 420
+      }
+    ]
+  }
+}

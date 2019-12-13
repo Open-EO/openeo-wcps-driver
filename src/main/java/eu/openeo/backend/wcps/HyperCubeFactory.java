@@ -1,0 +1,373 @@
+package eu.openeo.backend.wcps;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
+import org.jdom2.input.SAXBuilder;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import ucar.ma2.ArrayChar;
+import ucar.ma2.ArrayDouble;
+import ucar.ma2.ArrayInt;
+import ucar.ma2.ArrayLong;
+import ucar.ma2.ArrayString;
+import ucar.ma2.DataType;
+import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
+
+public class HyperCubeFactory {
+
+	Logger log = LogManager.getLogger();
+
+	public HyperCubeFactory() {
+
+	}
+
+	public JSONObject getHyperCubeFromGML(InputStream inputStream) {
+		JSONObject resultJSON = new JSONObject();
+		SAXBuilder saxBuilder = new SAXBuilder();
+		try {
+			Document capabilititesDoc = (Document) saxBuilder.build(inputStream);
+			List<Namespace> namespaces = capabilititesDoc.getNamespacesIntroduced();
+			Element rootNode = capabilititesDoc.getRootElement();
+			Namespace defaultNS = rootNode.getNamespace();
+			Namespace gmlNS = null;
+			Namespace sweNS = null;
+			Namespace gmlCovNS = null;
+			Namespace gmlrgridNS = null;
+			Namespace rasdamanNS = null;
+			for (int n = 0; n < namespaces.size(); n++) {
+				Namespace current = namespaces.get(n);
+				if (current.getPrefix().equals("swe")) {
+					sweNS = current;
+				}
+				if (current.getPrefix().equals("gmlcov")) {
+					gmlCovNS = current;
+				}
+				if (current.getPrefix().equals("gml")) {
+					gmlNS = current;
+				}
+				if (current.getPrefix().equals("gmlrgrid")) {
+					gmlrgridNS = current;
+				}
+				if (current.getPrefix().equals("rasdaman")) {
+					rasdamanNS = current;
+				}
+			}
+			log.debug("root node info: " + rootNode.getName());
+
+			Element boundedByElement = rootNode.getChild("boundedBy", gmlNS);
+			Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
+			List<Element> gridAxisElementList = rootNode.getChild("domainSet", gmlNS)
+					.getChild("ReferenceableGridByVectors", gmlrgridNS).getChildren();
+
+			List<Element> bandsListSwe = rootNode.getChild("rangeType", gmlCovNS).getChild("DataRecord", sweNS)
+					.getChildren("field", sweNS);
+
+			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
+			try {
+				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&"))
+						.replace("/0/", ":");
+				srsDescription = srsDescription.replaceAll("EPSG:", "");
+
+			} catch (StringIndexOutOfBoundsException e) {
+				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
+				srsDescription = srsDescription.replaceAll("EPSG:", "");
+			}
+
+			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
+			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
+
+			String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
+
+			int resX = 0;
+			int resY = 0;
+			log.debug(axis.length);
+			JSONArray dimsArray = new JSONArray();
+			for (int a = 0; a < axis.length; a++) {
+				log.debug(axis[a]);
+
+				if (axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long") || axis[a].equals("Lon")) {
+					JSONArray longExtent = new JSONArray();
+					for (int c = 0; c < gridAxisElementList.size(); c++) {
+						Element gridAxis = gridAxisElementList.get(c);
+						if (gridAxis.getName().contains("generalGridAxis")
+								&& gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+										.getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
+							String[] resXString = gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+									.getChild("offsetVector", gmlrgridNS).getValue().split(" ");
+							resX = Math.abs(Integer.parseInt(resXString[a]));
+						}
+					}
+					for (double c = Double.parseDouble(minValues[a]) + resX; c <= Double
+							.parseDouble(maxValues[a]); c = c + resX) {
+						longExtent.put(c);
+					}
+					JSONObject dimObjects = new JSONObject();
+					dimObjects.put("name", "x");
+					dimObjects.put("coordinates", longExtent);
+					dimsArray.put(dimObjects);
+				}
+				if (axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")) {
+					JSONArray latExtent = new JSONArray();
+					for (int c = 0; c < gridAxisElementList.size(); c++) {
+						Element gridAxis = gridAxisElementList.get(c);
+						if (gridAxis.getName().contains("generalGridAxis")
+								&& gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+										.getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
+							String[] resYString = gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+									.getChild("offsetVector", gmlrgridNS).getValue().split(" ");
+							resY = Math.abs(Integer.parseInt(resYString[a]));
+						}
+					}
+					for (double c = Double.parseDouble(minValues[a]) + resY; c <= Double
+							.parseDouble(maxValues[a]); c = c + resY) {
+						latExtent.put(c);
+					}
+					JSONObject dimObjects = new JSONObject();
+					dimObjects.put("name", "y");
+					dimObjects.put("coordinates", latExtent);
+					dimsArray.put(dimObjects);
+				}
+				if (axis[a].equals("DATE") || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time")
+						|| axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi")
+						|| axis[a].equals("date") || axis[a].equals("unix")) {
+					JSONArray timeExtent = new JSONArray();
+					for (int c = 0; c < gridAxisElementList.size(); c++) {
+						Element gridAxis = gridAxisElementList.get(c);
+						if (gridAxis.getName().contains("generalGridAxis")
+								&& gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+										.getChild("gridAxesSpanned", gmlrgridNS).getValue().equals(axis[a])) {
+							String[] timeStamps = gridAxis.getChild("GeneralGridAxis", gmlrgridNS)
+									.getChild("coefficients", gmlrgridNS).getValue().split(" ");
+							for (int t = 0; t < timeStamps.length; t++) {
+								timeExtent.put(timeStamps[t]);
+							}
+						}
+					}
+					JSONObject dimObjects = new JSONObject();
+					dimObjects.put("name", "t");
+					dimObjects.put("coordinates", timeExtent);
+					dimsArray.put(dimObjects);
+				}
+			}
+			JSONArray bandsArray = new JSONArray();
+			for (int c = 0; c < bandsListSwe.size(); c++) {
+				Element band = bandsListSwe.get(c);
+				String bandId = band.getAttributeValue("name");
+				bandsArray.put(bandId);
+			}
+			JSONObject dimObjects = new JSONObject();
+			dimObjects.put("name", "band");
+			dimObjects.put("coordinates", bandsArray);
+
+			log.debug(bandsArray);
+			dimsArray.put(dimObjects);
+			JSONObject hyperCubeArguments = new JSONObject();
+
+			String[] dataElement = rootNode.getChild("rangeSet", gmlNS).getChild("DataBlock", gmlNS)
+					.getChildText("tupleList", gmlNS).split(",");
+			int valueSize = 0;
+			
+			int[] dimSizes = new int[dimsArray.length()];
+			int[] dimPosi = new int[dimsArray.length()];
+			for(int d = 0; d < dimsArray.length(); d++) {
+				dimSizes[d] = dimsArray.getJSONObject(d).getJSONArray("coordinates").length();
+				valueSize *= dimSizes[d];
+				dimPosi[d] = 0;
+				log.debug("Dimenson: " + dimsArray.getJSONObject(d).getString("name") + " Size: " + dimSizes[d]);
+			}
+			
+			JSONArray dataArray = new JSONArray();
+			
+			dataArray = createDataArray(dimPosi, dimSizes, dataArray, 0, dataElement);
+
+			hyperCubeArguments.put("id", "hyper_cube");
+			hyperCubeArguments.put("dimensions", dimsArray);
+			hyperCubeArguments.put("data", dataArray);
+
+			JSONArray hyperCubesArray = new JSONArray();
+
+			hyperCubesArray.put(hyperCubeArguments);
+
+			resultJSON.put("id", "hypercube_example");
+			resultJSON.put("proj", "EPSG:" + srsDescription);
+			resultJSON.put("hypercubes", hyperCubesArray);
+			log.debug(resultJSON);
+
+		} catch (JDOMException e) {
+			log.error("Error when parsing XML: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		} catch (java.io.IOException e) {
+			log.error("Error when receiving input stream" + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		}
+		return resultJSON;
+	}
+	
+	
+	private JSONArray createDataArray(int[] dimPosi, int[] dimSizes, JSONArray dataArray, int currentDimIndex, String[] values) {
+		if(currentDimIndex == dimSizes.length -1) {
+			int valueIndex = 0;
+			for(int d = 0; d < dimSizes.length-1; d++) {
+				int multiplier=1;
+				for(int m = d+1; m < dimSizes.length-1; m++ ) {
+					multiplier*=dimSizes[m];
+				}
+				valueIndex += dimPosi[d]*multiplier;
+			}
+			for(int s = 0; s < dimSizes[currentDimIndex]; s++) {				
+				dataArray.put(Double.parseDouble(values[valueIndex].split(" ")[s]));
+			}
+		}else {
+			for(int index = 0; index < dimSizes[currentDimIndex]; index++) {
+				dimPosi[currentDimIndex] = index;
+				JSONArray subDataArray = new JSONArray();
+				dataArray.put(createDataArray(dimPosi, dimSizes, subDataArray, currentDimIndex+1, values));
+			}
+		}
+		return dataArray;
+	}
+	
+	public int writeHyperCubeToNetCDF(JSONObject hyperCube, String path) {
+		try {
+			NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, path, null);
+			
+			JSONArray dimensionsArray = hyperCube.getJSONArray("dimensions");
+			List<Dimension> dims = new ArrayList<Dimension>();
+			HashMap<String, Variable> dimVars =  new HashMap<String, Variable>();
+			HashMap<String, Object> coordinateArray = new HashMap<String,Object>();
+			Iterator iterator = dimensionsArray.iterator();
+			while(iterator.hasNext()) {
+				JSONObject dimensionDescriptor = (JSONObject) iterator.next();
+				JSONArray coordinateLables = dimensionDescriptor.getJSONArray("coordinates");
+				Dimension dimension = writer.addDimension(dimensionDescriptor.getString("name"), coordinateLables.length());
+				dims.add(dimension);
+				List<Dimension> currentDim = new ArrayList<Dimension>();
+				currentDim.add(dimension);
+				if(dimensionDescriptor.getString("name").equals("t")) {
+					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.LONG, currentDim);
+					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
+					ArrayLong dataArray = new ArrayLong(new int[] {dimension.getLength()}, false);
+					for(int i = 0; i < dimension.getLength(); i++) {
+						String timeLabel = coordinateLables.getString(i).replace('"', ' ').trim();
+						Long epoch = ZonedDateTime.parse(timeLabel).toEpochSecond();
+						dataArray.setLong(i, epoch);
+					}
+					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+				}else if(dimensionDescriptor.getString("name").equals("band")) {
+					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.STRING, currentDim);
+					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
+					ArrayLong dataArray = new ArrayLong(new int[] {dimension.getLength()}, false);
+					for(int i = 0; i < dimension.getLength(); i++) {
+						//TODO fix this to put the actual band name as string instead of integer ID of band
+						dataArray.setLong(i, (long)i+1);
+					}
+					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+				}else {					
+					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.DOUBLE, currentDim);
+					log.debug(dimVar.getFullName());
+					dimVar.addAttribute(new Attribute("resolution", new Double(coordinateLables.getDouble(1) -coordinateLables.getDouble(0))));
+					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
+					ArrayDouble dataArray = new ArrayDouble(new int[] {dimension.getLength()});
+					for(int i = 0; i < dimension.getLength(); i++) {
+						dataArray.setDouble(i, coordinateLables.getDouble(i));
+					}
+					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+				}
+			}
+			Variable values = writer.addVariable(hyperCube.getString("id"), DataType.DOUBLE, dims);
+			
+			writer.addGlobalAttribute(new Attribute("EPSG", 32632));
+			writer.addGlobalAttribute(new Attribute("JOB", path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'))));
+			
+			writer.create();
+			writer.flush();
+						
+			int[] shape = values.getShape();
+			int[] indexND =  new int[shape.length];
+			for(String key: coordinateArray.keySet()) {
+				if(key.equals("t")) {
+					ArrayLong dataArray = (ArrayLong) coordinateArray.get(key);
+					writer.write(dimVars.get(key), new int[shape.length], dataArray);
+				}else if(key.equals("band")) {
+					ArrayLong dataArray = (ArrayLong) coordinateArray.get(key);
+					writer.write(dimVars.get(key), new int[shape.length], dataArray);
+				}else{
+					ArrayDouble dataArray = (ArrayDouble) coordinateArray.get(key);
+					writer.write(dimVars.get(key), new int[shape.length], dataArray);
+				}
+			}
+			
+			log.debug("Number of dimensions: " + shape.length);
+			
+			ArrayDouble dataArray = new ArrayDouble(shape);
+			Index dataIndex = dataArray.getIndex();
+			
+			for (long index1D = 0; index1D < values.getSize(); index1D++) {				
+				JSONArray subDimArray = hyperCube.getJSONArray("data");
+				long divider = index1D;
+				for(int n = shape.length-1; n >= 0; n--) {
+					indexND[n] =  (int) (divider % shape[n]);
+					divider /= shape[n];
+				}
+				String indexS = "";
+				for(int k = 0; k < shape.length-1; k++) {
+					subDimArray = subDimArray.getJSONArray(indexND[k]);
+					indexS += indexND[k] + " ";
+				}
+				indexS += indexND[shape.length-1];				
+				double value = subDimArray.getDouble(indexND[shape.length-1]);
+				log.debug(index1D + " | " + indexS + " : " + value);
+				dataArray.setDouble(dataIndex.set(indexND), value);
+			}
+			
+			writer.write(values, new int[shape.length], dataArray);
+			writer.flush();
+			writer.close();
+			
+		} catch (IOException e) {
+			log.error("Error when writing hypercube to netcdf file: " + path + " " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+			return -1;
+		} catch (InvalidRangeException e) {
+			log.error("Error when writing hypercube to netcdf file: " + path + " " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+			return -1;
+		}
+		return 0;
+	}
+
+}

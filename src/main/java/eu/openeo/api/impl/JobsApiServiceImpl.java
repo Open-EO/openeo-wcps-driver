@@ -16,7 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,7 +45,7 @@ import eu.openeo.model.UpdateBatchJobRequest;
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class JobsApiServiceImpl extends JobsApiService {
 
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 
 	private ConnectionSource connection = null;
 	private Dao<BatchJobResponse, String> jobDao = null;
@@ -320,6 +320,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 	@Override
 	public Response jobsPost(BatchJobResponse storeBatchJobRequest, SecurityContext securityContext)
 			throws NotFoundException {
+		boolean isWithEurac = securityContext.isUserInRole("EURAC");
 		UUID jobID = UUID.randomUUID();
 		storeBatchJobRequest.setId(jobID.toString());
 		storeBatchJobRequest.setStatus(Status.SUBMITTED);
@@ -331,13 +332,21 @@ public class JobsApiServiceImpl extends JobsApiService {
 		processGraphJSON = (JSONObject) storeBatchJobRequest.getProcessGraph();
 
 		WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
-
-		log.debug("Graph of job successfully parsed and job saved with ID: " + jobID);
+		log.info("Graph of job successfully parsed and job saved with ID: " + jobID);
+		if(wcpsFactory.isWithUDF()) {
+			if(isWithEurac) {
+				log.info("Eurac User has permission to use udf: " + securityContext.getUserPrincipal().getName());
+			}else {
+				log.warn("An unauthorized user tried to send job containing UDF: " + securityContext.getUserPrincipal().getName());
+				return Response.status(403).entity("An unauthorized user tried to send job containing UDF: " + securityContext.getUserPrincipal().getName()).build();
+			}
+		}
+		
 		log.debug("WCPS query: " + wcpsFactory.getWCPSString());
 
 		try {
 			jobDao.create(storeBatchJobRequest);
-			log.debug("job saved to database: " + storeBatchJobRequest.getId());
+			log.info("job saved to database: " + storeBatchJobRequest.getId());
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 			return Response.serverError().entity("An error occured while performing an SQL-query: " + sqle.getMessage())

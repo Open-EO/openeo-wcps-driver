@@ -122,4 +122,7 @@
   <security-role>
     <role-name>EURAC</role-name>
   </security-role>
+  <security-role>
+    <role-name>PUBLIC</role-name>
+  </security-role>
 </web-app>

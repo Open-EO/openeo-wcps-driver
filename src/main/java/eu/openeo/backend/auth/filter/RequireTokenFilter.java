@@ -23,7 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,7 +49,7 @@ import io.jsonwebtoken.security.SignatureException;
 @RequireToken
 public class RequireTokenFilter implements ContainerRequestFilter {
 	
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -83,10 +83,10 @@ public class RequireTokenFilter implements ContainerRequestFilter {
 		}
 		
 		if(kid != null) {
-			log.debug("token will be verified using external token provider");
+			log.info("token will be verified using external token provider");
 			verifyOIDCToken(requestContext, token, kid);
 		}else {
-			log.debug("token will be verified using internal token provider");
+			log.info("token will be verified using internal token provider");
 			verifyBasicToken(requestContext, token);
 		}
 	}
@@ -123,10 +123,10 @@ public class RequireTokenFilter implements ContainerRequestFilter {
                 public boolean isUserInRole(String role) {
                     String roles = verifiedClaims.getBody().get("scope", String.class);
                     if(roles.contains(role)) {
-                    	log.debug("User has confirmed to be part of: " + role);
+                    	log.info("User has confirmed to be part of: " + role);
                     	return true;
                     }else {
-                    	log.error("User is not part of: " + role);
+                    	log.warn("User is not part of: " + role);
                     	return false;
                     }
                 }
@@ -192,10 +192,10 @@ public class RequireTokenFilter implements ContainerRequestFilter {
 	                public boolean isUserInRole(String role) {
 	                    String roles = verifiedClaims.getBody().get("roles", String.class);
 	                    if(roles != null && roles.contains(role)) {
-	                    	log.debug("User has confirmed to be part of: " + role);
+	                    	log.info("User has confirmed to be part of: " + role);
 	                    	return true;
 	                    }else {
-	                    	log.error("User is not part of: " + role);
+	                    	log.warn("User is not part of: " + role);
 	                    	return false;
 	                    }
 	                }

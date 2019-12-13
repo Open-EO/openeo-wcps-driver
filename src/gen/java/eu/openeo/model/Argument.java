@@ -13,17 +13,19 @@
 
 package eu.openeo.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Serializable;
-import javax.validation.constraints.*;
+import java.util.Objects;
+
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Describes a general argument for various entities.
@@ -31,7 +33,12 @@ import javax.validation.Valid;
 @ApiModel(description = "Describes a general argument for various entities.")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
 public class Argument  implements Serializable {
-  @JsonProperty("description")
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1684023512492337064L;
+
+@JsonProperty("description")
   private String description;
 
   @JsonProperty("required")

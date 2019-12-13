@@ -11,7 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
 
 /**
  * Servlet implementation class JobResultScheduler
@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 public class JobResultScheduler extends GenericServlet {
 	private static final long serialVersionUID = 1L;
 	
-	Logger log = Logger.getLogger(this.getClass());
+	Logger log = LogManager.getLogger();
 	private ScheduledExecutorService scheduler;
        
     /**
