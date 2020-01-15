@@ -7,7 +7,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
@@ -811,7 +815,7 @@ public class WCPSQueryFactory {
 							yAxis = axis.replace("_"+ collectionID, "");
 						}
 						if (axisUpperCase.equals("E") || axisUpperCase.equals("X") || axisUpperCase.equals("LONG")) {
-							yAxis = axis.replace("_"+ collectionID, "");
+							xAxis = axis.replace("_"+ collectionID, "");
 						}
 					}
 				}				
@@ -2348,6 +2352,7 @@ public class WCPSQueryFactory {
 			String axisUpperCase = filter.getAxis().replace("_"+ collectionID, "").toUpperCase();
 			if (axisUpperCase.equals("DATE") || axisUpperCase.equals("TIME") || axisUpperCase.equals("ANSI") || axisUpperCase.equals("UNIX")) {
 				tempFilter = filter;
+				log.debug("TempHigh"+tempFilter.getUpperBound());
 				log.debug("Temporal Axis is : ");
 				log.debug(tempFilter);
 			}
@@ -2795,8 +2800,7 @@ public class WCPSQueryFactory {
 				}
 			}
 		}
-		
-		
+				
 		nodesArray.remove(nodesArray.length()-1);		
 		
 		for (int i = nodesArray.length()-1; i>0; i--) {
@@ -3068,10 +3072,10 @@ public class WCPSQueryFactory {
 			JSONArray temporal = extent.getJSONArray("temporal");
 			String templower = temporal.get(0).toString();
 			String tempupper = temporal.get(1).toString();
-
+			
 			log.debug("Temporal Extent is: ");
 			log.debug(temporal);
-
+			
 			if (templower != null && tempupper != null) {
 				log.debug("Temporal Extent is: |" + templower + "|:|" + tempupper + "|");
 				if(LocalDateTime.parse(templower.replace("Z", "")).equals(LocalDateTime.parse(tempupper.replace("Z", "")))) {
@@ -3093,7 +3097,7 @@ public class WCPSQueryFactory {
 						tempAxis = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(tempAxis1).getString("axis");
 					}
 				}
-				this.filters.add(new Filter(tempAxis+"_"+collectionID, templower, tempupper));
+				this.filters.add(new Filter(tempAxis+"_"+collectionID, templower, tempupper));				
 			}
 		}
 		
@@ -3131,11 +3135,22 @@ public class WCPSQueryFactory {
 			else {
 				fromDate = extentArray.get(0).toString();
 			}
-			if ( extentupper.compareTo(tempupper) > 0) {
-				toDate = temporal.get(1).toString();
-			}
+			if (extentupper.compareTo(tempupper) > 0) {
+				toDate = temporal.get(1).toString();				
+			}			
 			else {
 				toDate = extentArray.get(1).toString();
+				DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+				Date toDateNew;			
+				try {
+					toDateNew = toDateNewFormat.parse(toDate);
+					toDateNew.setTime(toDateNew.getTime() - 1);
+					toDate = toDateNewFormat.format(toDateNew);
+					log.debug("To Date"+toDate);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			if (fromDate != null && toDate != null) {
 				log.debug("Temporal Extent is: |" + fromDate + "|:|" + toDate + "|");
@@ -3149,7 +3164,7 @@ public class WCPSQueryFactory {
 					if (axisUpperCase.equals("DATE") || axisUpperCase.equals("TIME") || axisUpperCase.equals("ANSI") || axisUpperCase.equals("UNIX")) {
 						dateFilter = filter;
 					}
-				}			
+				}
 				this.filters.remove(dateFilter);
 				String tempAxis = null;
 				for (String tempAxis1 : jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").keySet()) {
@@ -3158,7 +3173,9 @@ public class WCPSQueryFactory {
 						tempAxis = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(tempAxis1).getString("axis");
 					}
 				}
+				log.debug("To Date  "+toDate);
 				this.filters.add(new Filter(tempAxis+"_"+collectionID, fromDate, toDate));
+				
 			}
 		}
 	}
