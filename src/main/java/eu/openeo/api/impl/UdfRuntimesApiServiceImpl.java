@@ -16,24 +16,38 @@ public class UdfRuntimesApiServiceImpl extends UdfRuntimesApiService {
     @Override
     public Response udfRuntimesGet(SecurityContext securityContext) throws NotFoundException {
     	JSONObject udfRuntimes = new JSONObject();
-    	JSONObject udfPython = new JSONObject();    	
+    	JSONObject udfPython = new JSONObject();
+    	JSONObject udfPythonCandela = new JSONObject();
     	JSONArray udfPythonTags = new JSONArray();
     	JSONArray udfPythonLinks = new JSONArray();
-    	JSONObject udfPythonLink1 = new JSONObject();    	
+    	JSONObject udfPythonLink1 = new JSONObject();
+    	JSONArray udfPythonCandelaTags = new JSONArray();
+    	JSONArray udfPythonCandelaLinks = new JSONArray();
+    	JSONObject udfPythonCandelaLink1 = new JSONObject();
+    	
+    	udfPythonCandela.put("description", "Python programming language");
+    	udfPythonCandela.put("docker", "candela");
+    	udfPythonCandela.put("default", "3.6.8");
+    	udfPythonCandelaLink1.put("href", "https://github.com/Open-EO/openeo-udf");
+    	udfPythonCandelaLinks.put(udfPythonCandelaLink1);
+    	udfPythonCandelaTags.put("latest");
+    	udfPythonCandelaTags.put("3.6.8");
+    	udfPythonCandela.put("tags", udfPythonCandelaTags);
+    	udfPythonCandela.put("links", udfPythonCandelaLinks);
     	
     	udfPython.put("description", "Python programming language");
-    	udfPython.put("docker", "openeo/udf");
-    	udfPython.put("default", "latest");
+    	udfPython.put("docker", "openeo");
+    	udfPython.put("default", "3.6.8");
     	udfPythonLink1.put("href", "https://github.com/Open-EO/openeo-udf");
     	udfPythonLinks.put(udfPythonLink1);
     	udfPythonTags.put("latest");
-    	udfPythonTags.put("3.7.1");
+    	udfPythonTags.put("3.6.8");
     	udfPython.put("tags", udfPythonTags);
     	udfPython.put("links", udfPythonLinks);
     	
     	JSONObject udfR = new JSONObject();
     	JSONObject udfRVersions = new JSONObject();
-    	// JSONObject udfRLibrariesV1 = new JSONObject();   	
+    	// JSONObject udfRLibrariesV1 = new JSONObject();
     	// JSONObject udfRLibrariesV1_1 = new JSONObject();
     	JSONObject udfRLibrariesV2 = new JSONObject();
     	JSONObject udfRLibrariesV2_1 = new JSONObject();
@@ -126,6 +140,7 @@ public class UdfRuntimesApiServiceImpl extends UdfRuntimesApiService {
     	udfR.put("versions", udfRVersions);
     	
     	udfRuntimes.put("Python", udfPython);
+    	udfRuntimes.put("Python", udfPythonCandela);
     	udfRuntimes.put("R", udfR);
     	return Response.ok(udfRuntimes.toString(4), MediaType.APPLICATION_JSON).build();
     }

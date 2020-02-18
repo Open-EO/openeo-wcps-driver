@@ -340,7 +340,7 @@ public class WCPSQueryFactory {
 				JSONObject processArguments = processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
 				
 				//String udfCode = processArguments.getString("udf");
-				if (processArguments.getString("runtime").equals("python") || processArguments.getString("runtime").equals("Python")) {
+				if (processArguments.getString("runtime").toLowerCase().equals("python")) {
 					if (processArguments.get("data") instanceof JSONObject) {
 						for (String fromType : processArguments.getJSONObject("data").keySet()) {
 							if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
@@ -353,7 +353,7 @@ public class WCPSQueryFactory {
 						}
 					}
 				}
-				if (processArguments.getString("runtime").equals("R") || processArguments.getString("runtime").equals("r")) {
+				if (processArguments.getString("runtime").toLowerCase().equals("r")) {
 					if (processArguments.get("data") instanceof JSONObject) {
 						for (String fromType : processArguments.getJSONObject("data").keySet()) {
 							if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
