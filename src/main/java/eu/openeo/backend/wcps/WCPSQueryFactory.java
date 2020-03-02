@@ -15,7 +15,8 @@ import java.util.Date;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 import org.json.JSONArray;
@@ -367,7 +368,7 @@ public class WCPSQueryFactory {
 					}
 				}
 				wcpsUDFpayLoad.append(payLoad);
-				wcpsPayLoad=wcpsUDFpayLoad;				
+				wcpsPayLoad=wcpsUDFpayLoad;
 				String saveUDFPayload = wcpsStringBuilderUDFPayload.append(wcpsUDFpayLoad.toString()).toString();
 				StringBuilder wcpsStringBuilderSaveUDFResult = new StringBuilder("");
 				wcpsStringBuilderSaveUDFResult.append(createUDFReturnResultWCPSString(saveUDFPayload));
@@ -490,7 +491,38 @@ public class WCPSQueryFactory {
 				String filterString = payLoad;
 				filterString = filterString.substring(collectionVar.length());
 				JSONArray currentProcessBands = currentProcessArguments.getJSONArray("bands");
-				String bandName = currentProcessBands.getString(0);
+				String bandfromIndex = currentProcessBands.getString(0);
+				String bandName = null;
+				JSONObject collectionSTACMetdata = null;
+				try {
+					collectionSTACMetdata = readJsonFromUrl(
+							ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collectionID);
+				} catch (JSONException e) {
+					log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				} catch (IOException e) {
+					log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				}
+				JSONArray bandsArray = ((JSONObject) collectionSTACMetdata.get("properties")).getJSONArray("eo:bands");		
+				for(int c = 0; c < bandsArray.length(); c++) {
+					String bandCommon = bandsArray.getJSONObject(c).getString("common_name");
+					if (bandCommon.equals(bandfromIndex)) {
+						bandName = bandsArray.getJSONObject(c).getString("name");
+						break;
+					}
+					else {
+						bandName = bandfromIndex;
+					}
+			    }
 				wcpsFilterpayLoad.append(createBandSubsetString(collectionVar, bandName, filterString));
 				wcpsPayLoad=wcpsFilterpayLoad;
 				wcpsStringBuilder=wcpsStringBuilderFilterPayload.append(wcpsFilterpayLoad.toString());
@@ -1517,7 +1549,7 @@ public class WCPSQueryFactory {
 							String dataNode = processGraph.getJSONObject(reduceNodeKey).getJSONObject("arguments").getJSONObject("data").getString("from_node");
 							String loadCollNode = getFilterCollectionNode();
 							//if (dataNode.equals(loadCollNode)) {
-								reduceBuilderExtend = createBandWCPSString(arrayIndex, reduceNodeKey, filterString, collectionVar);
+								reduceBuilderExtend = createBandWCPSString(collectionID, arrayIndex, reduceNodeKey, filterString, collectionVar);
 								
 							//}
 						}
@@ -1546,7 +1578,7 @@ public class WCPSQueryFactory {
 							String dataNode = countArguments.getJSONObject("data").getString("from_node");
 							String countPayLoad = reducerPayLoads.getString(dataNode);
 							x = countPayLoad;
-						}						
+						}
 					}
 				}
 				else {
@@ -1915,14 +1947,46 @@ public class WCPSQueryFactory {
 		return String.valueOf(Math.E);
 	}
 
-	private String createBandWCPSString(int arrayIndex, String reduceNodeKey, String filterString, String collName) {
+	private String createBandWCPSString(String collectionID, int arrayIndex, String reduceNodeKey, String filterString, String collectionVar) {
 		StringBuilder stretchBuilder = new StringBuilder("");
 		String fromNodeOfReduce = processGraph.getJSONObject(reduceNodeKey).getJSONObject("arguments").getJSONObject("data").getString("from_node");
 		fromNodeOfReduce = getFilterCollectionNode(fromNodeOfReduce);
 		JSONObject fromProcess = processGraph.getJSONObject(fromNodeOfReduce);
 		if (fromProcess.getString("process_id").equals("load_collection")) {
-			String bandName = fromProcess.getJSONObject("arguments").getJSONArray("bands").getString(arrayIndex);
-			stretchBuilder.append(createBandSubsetString(collName, bandName, filterString));
+			String bandfromIndex = fromProcess.getJSONObject("arguments").getJSONArray("bands").getString(arrayIndex);
+			String bandName = null;
+			JSONObject collectionSTACMetdata = null;
+			try {
+				collectionSTACMetdata = readJsonFromUrl(
+						ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collectionID);
+				log.debug(collectionVar);
+			} catch (JSONException e) {
+				log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for( StackTraceElement element: e.getStackTrace()) {
+					builder.append(element.toString()+"\n");
+				}
+				log.error(builder.toString());
+			} catch (IOException e) {
+				log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for( StackTraceElement element: e.getStackTrace()) {
+					builder.append(element.toString()+"\n");
+				}
+				log.error(builder.toString());
+			}
+			JSONArray bandsArray = ((JSONObject) collectionSTACMetdata.get("properties")).getJSONArray("eo:bands");
+			for(int c = 0; c < bandsArray.length(); c++) {
+				String bandCommon = bandsArray.getJSONObject(c).getString("common_name");	
+				if (bandCommon.equals(bandfromIndex)) {
+					bandName = bandsArray.getJSONObject(c).getString("name");
+					break;
+				}
+				else {
+					bandName = bandfromIndex;
+				}
+			}
+			stretchBuilder.append(createBandSubsetString(collectionVar, bandName, filterString));		
 		}
 		return stretchBuilder.toString();
 	}
