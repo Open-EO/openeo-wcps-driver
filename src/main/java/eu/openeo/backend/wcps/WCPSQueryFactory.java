@@ -2360,7 +2360,19 @@ public class WCPSQueryFactory {
 			axis = axis.replace("_"+ collectionID, "");
 			String axisUpperCase = axis.toUpperCase();
 			String low = filter.getLowerBound();
-			String high = filter.getUpperBound();
+			String toDate = filter.getUpperBound();
+			DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			Date toDateNew;			
+			try {
+				toDateNew = toDateNewFormat.parse(toDate);
+				toDateNew.setTime(toDateNew.getTime() - 1);
+				toDate = toDateNewFormat.format(toDateNew);
+				log.debug("To Date"+toDate);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String high = toDate;
 			stringBuilder.append(axis + "(");
 			if ((axisUpperCase.contains("DATE") || axisUpperCase.contains("TIME") || axisUpperCase.contains("ANSI") || axisUpperCase.contains("UNIX")) && !low.contains("$")) {
 				stringBuilder.append("\"");
@@ -3200,8 +3212,8 @@ public class WCPSQueryFactory {
 				fromDate = extentArray.get(0).toString();
 			}
 			if (extentupper.compareTo(tempupper) > 0) {
-				toDate = temporal.get(1).toString();				
-			}			
+				toDate = temporal.get(1).toString();
+			}
 			else {
 				toDate = extentArray.get(1).toString();
 				DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
