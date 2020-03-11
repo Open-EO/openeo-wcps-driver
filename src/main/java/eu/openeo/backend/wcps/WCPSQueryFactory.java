@@ -263,7 +263,7 @@ public class WCPSQueryFactory {
 				String yHigh = null;
 				for (int f = 0; f < filters.size(); f++) {
 					Filter filter = filters.get(f);
-					String axis = filter.getAxis();			
+					String axis = filter.getAxis();
 					if(axis.contains(collectionID)) {
 						String axisUpperCase = filter.getAxis().replace("_"+ collectionID, "").toUpperCase();
 						if (axisUpperCase.equals("N") || axisUpperCase.equals("Y") || axisUpperCase.equals("LAT")) {
@@ -2075,6 +2075,33 @@ public class WCPSQueryFactory {
 	private String createMaxWCPSString(String maxNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collectionVar, String collectionID) {
 		String stretchString = null;
 		StringBuilder stretchBuilder = new StringBuilder("");
+		JSONObject jsonresp = null;
+		try {
+			jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collectionID);
+		} catch (JSONException e) {
+			log.error("An error occured: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		} catch (IOException e) {
+			log.error("An error occured: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		}
+		
+		String temporalAxis = null;
+		for (String tempAxis1 : jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").keySet()) {
+			String tempAxis1UpperCase = tempAxis1.toUpperCase();
+			if (tempAxis1UpperCase.contentEquals("DATE") || tempAxis1UpperCase.contentEquals("TIME") || tempAxis1UpperCase.contentEquals("ANSI") || tempAxis1UpperCase.contentEquals("UNIX")) {
+				temporalAxis = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(tempAxis1).getString("axis");
+			}
+		}
+		
 		if (dimension.contains("spectral") || dimension.contains("bands")) {
 			stretchBuilder.append("max(" + payLoad + ")");    	    
 			stretchString = stretchBuilder.toString();
@@ -2108,7 +2135,34 @@ public class WCPSQueryFactory {
 
 	private String createMinWCPSString(String minNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collectionVar, String collectionID) {
 		String stretchString = null;
-		StringBuilder stretchBuilder = new StringBuilder("");
+		StringBuilder stretchBuilder = new StringBuilder("");		
+		JSONObject jsonresp = null;
+		try {
+			jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collectionID);
+		} catch (JSONException e) {
+			log.error("An error occured: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		} catch (IOException e) {
+			log.error("An error occured: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		}
+		
+		String temporalAxis = null;
+		for (String tempAxis1 : jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").keySet()) {
+			String tempAxis1UpperCase = tempAxis1.toUpperCase();
+			if (tempAxis1UpperCase.contentEquals("DATE") || tempAxis1UpperCase.contentEquals("TIME") || tempAxis1UpperCase.contentEquals("ANSI") || tempAxis1UpperCase.contentEquals("UNIX")) {
+				temporalAxis = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(tempAxis1).getString("axis");
+			}
+		}
+		
 		if (dimension.contains("spectral") || dimension.contains("bands")) {
 			stretchBuilder.append("min(" + payLoad + ")");
 			stretchString = stretchBuilder.toString();
@@ -2117,7 +2171,7 @@ public class WCPSQueryFactory {
 			String tempAxis = null;
 			for (int f = 0; f < filters.size(); f++) {
 				Filter filter = filters.get(f);
-				String axis = filter.getAxis();			
+				String axis = filter.getAxis();
 				if(axis.contains(collectionID)) {
 					String axisUpperCase = filter.getAxis().replace("_"+ collectionID, "").toUpperCase();				
 					if (axisUpperCase.equals("DATE") || axisUpperCase.equals("TIME") || axisUpperCase.equals("ANSI") || axisUpperCase.equals("UNIX")) {
@@ -2188,12 +2242,12 @@ public class WCPSQueryFactory {
 	}
 	
 	private String createResampleSpatialCubeWCPSString(String resampleNodeKey, String payload, String resSource, String resTarget, String xAxis, String xLow, String xHigh, String yAxis, String yLow, String yHigh) {
-		int projectionEPSGCode = 0;
 		double res = Double.parseDouble(resSource)/Double.parseDouble(resTarget);
 		log.debug(xHigh+xLow);
 		log.debug(yHigh+yLow);
 		double xScale = (double)((Double.parseDouble(xHigh)-Double.parseDouble(xLow))*res)+Double.parseDouble(xLow);
 		double yScale = (double)((Double.parseDouble(yHigh)-Double.parseDouble(yLow))*res)+Double.parseDouble(yLow);
+		int projectionEPSGCode = 0;
 //		try {
 //			projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getInt("projection");
 //		}catch(JSONException e) {
@@ -2977,6 +3031,32 @@ public class WCPSQueryFactory {
 			String fromNode = processNode.getJSONObject("arguments").getJSONObject("data").getString("from_node");
 			String collectionNodeKey = getFilterCollectionNode(fromNode);
 			String collectionID = processGraph.getJSONObject(collectionNodeKey).getJSONObject("arguments").getString("id");
+			JSONObject jsonresp = null;
+			try {
+				jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collectionID);
+			} catch (JSONException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			} catch (IOException e) {
+				log.error("An error occured: " + e.getMessage());
+				StringBuilder builder = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					builder.append(element.toString() + "\n");
+				}
+				log.error(builder.toString());
+			}
+			
+			String temporalAxis = null;
+			for (String tempAxis1 : jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").keySet()) {
+				String tempAxis1UpperCase = tempAxis1.toUpperCase();
+				if (tempAxis1UpperCase.contentEquals("DATE") || tempAxis1UpperCase.contentEquals("TIME") || tempAxis1UpperCase.contentEquals("ANSI") || tempAxis1UpperCase.contentEquals("UNIX")) {
+					temporalAxis = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(tempAxis1).getString("axis");
+				}
+			}
 			if (dimension.equals("temporal")) {
 				JSONObject reducer = processNode.getJSONObject("arguments").getJSONObject("reducer").getJSONObject("callback");
 				for (String nodeKey : reducer.keySet()) {
@@ -3323,7 +3403,7 @@ public class WCPSQueryFactory {
 			src.ImportFromEPSG(4326);
 			SpatialReference dst = new SpatialReference();
 			dst.ImportFromEPSG(srs);
-			log.debug("SRS is :" + srs);			
+			log.debug("SRS is :" + srs);
 			
 			CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 			double[] c1 = null;
@@ -3363,7 +3443,7 @@ public class WCPSQueryFactory {
 					}
 					else if (spatAxisUpperCase.contentEquals("N") || spatAxisUpperCase.contentEquals("LAT") || spatAxisUpperCase.equals("LATITUDE") || spatAxisUpperCase.contentEquals("Y")) {
 						spatAxisY = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(spatAxis).getString("axis");
-					}				
+					}
 				}
 				this.filters.add(new Filter(spatAxisX+"_"+collectionID, left, right));
 				this.filters.add(new Filter(spatAxisY+"_"+collectionID, bottom, top));
@@ -3421,24 +3501,21 @@ public class WCPSQueryFactory {
 						if (extentKeyStr.equals("west")) {
 							left = "" + extentObject.get(extentKeyStr).toString();
 							leftlower = Double.parseDouble(left);
-							if (leftlower < westlower) {							
+							if (leftlower < westlower) {
 								left = Double.toString(westlower);
-							}
-
+							}							
 						} else if (extentKeyStr.equals("east")) {
 							right = "" + extentObject.get(extentKeyStr).toString();
 							rightupper = Double.parseDouble(right);
 							if (rightupper > eastupper) {							
 								right = Double.toString(eastupper);
 							}
-
 						} else if (extentKeyStr.equals("north")) {
 							top = "" + extentObject.get(extentKeyStr).toString();
 							topupper = Double.parseDouble(top);
 							if (topupper > northupper) {							
 								top = Double.toString(northupper);
 							}
-
 						} else if (extentKeyStr.equals("south")) {
 							bottom = "" + extentObject.get(extentKeyStr);
 							bottomlower = Double.parseDouble(bottom);
