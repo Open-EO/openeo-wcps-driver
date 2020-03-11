@@ -23,6 +23,7 @@ import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.j256.ormlite.dao.Dao;
@@ -102,7 +103,12 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				JSONObject udfNode = processGraphJSON.getJSONObject(nodesSortedArray.getString(udfNodeIndex));
 				
 				String runtime = udfNode.getJSONObject("arguments").getString("runtime");
-				String version = udfNode.getJSONObject("arguments").getString("version");
+				String version = "";
+				try {
+					version = udfNode.getJSONObject("arguments").getString("version");
+				}catch(JSONException e) {
+					
+				}
 				String udf = udfNode.getJSONObject("arguments").getString("udf");
 				log.debug("runtime: " + runtime);
 				log.debug("udf: " + udf);
