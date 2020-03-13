@@ -1590,24 +1590,23 @@ public class WCPSQueryFactory {
 				log.debug(reducerPayLoads.get(nodeKey));
 			}
 			if (name.equals("mean")) {
-				String x = null;
+				String meanPayLoad = null;
 				JSONObject meanArguments =  reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				if (meanArguments.get("data") instanceof JSONObject) {
 					for (String fromType : meanArguments.getJSONObject("data").keySet()) {
 						if (fromType.equals("from_argument") && meanArguments.getJSONObject("data").getString("from_argument").equals("data")) {
-							x = payLoad;
+							meanPayLoad = payLoad;
 						}
 						else if (fromType.equals("from_node")) {
 							String dataNode = meanArguments.getJSONObject("data").getString("from_node");
-							String meanPayLoad = reducerPayLoads.getString(dataNode);
-							x = meanPayLoad;
+							meanPayLoad = reducerPayLoads.getString(dataNode);
 						}						
 					}
 				}
-				else {
-					x = String.valueOf(meanArguments.getJSONArray("data"));
+				else if (meanArguments.get("data") instanceof JSONArray) {
+					meanPayLoad = String.valueOf(meanArguments.getJSONArray("data"));
 				}
-				reduceBuilderExtend = createMeanWCPSString(x);
+				reduceBuilderExtend = createMeanWCPSString(nodeKey, meanPayLoad, reduceProcesses, dimension, collectionVar, collectionID);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
 				log.debug("Mean Process PayLoad is : ");
 				log.debug(reducerPayLoads.get(nodeKey));
@@ -1615,14 +1614,13 @@ public class WCPSQueryFactory {
 			if (name.equals("min")) {
 				String minPayLoad = null;
 				JSONObject minArguments = reduceProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
-				String dataNode = null;
 				if (minArguments.get("data") instanceof JSONObject) {
 					for (String fromType : minArguments.getJSONObject("data").keySet()) {
 						if (fromType.equals("from_argument") && minArguments.getJSONObject("data").getString("from_argument").equals("data")) {							
 							minPayLoad = payLoad;
 						}
 						else if (fromType.equals("from_node")) {
-							dataNode = minArguments.getJSONObject("data").getString("from_node");
+							String dataNode = minArguments.getJSONObject("data").getString("from_node");
 							minPayLoad = reducerPayLoads.getString(dataNode);
 						}
 					}
@@ -2063,12 +2061,63 @@ public class WCPSQueryFactory {
 		return stretchString;
 	}
 
-	private String createMeanWCPSString(String payLoad) {
+	private String createMeanWCPSString(String meanNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collectionVar, String collectionID) {
 		String stretchString = null;
-		StringBuilder stretchBuilder = new StringBuilder("avg(");
-		stretchBuilder.append(payLoad + ")");
-		stretchString = stretchBuilder.toString();
+		StringBuilder stretchBuilder = new StringBuilder("");
+		JSONObject jsonresp = null;
+		try {
+			jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collectionID);
+		} catch (JSONException e) {
+			log.error("An error occured: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		} catch (IOException e) {
+			log.error("An error occured: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+		}
 		
+		String temporalAxis = null;
+		for (String tempAxis1 : jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").keySet()) {
+			String tempAxis1UpperCase = tempAxis1.toUpperCase();
+			if (tempAxis1UpperCase.contentEquals("DATE") || tempAxis1UpperCase.contentEquals("TIME") || tempAxis1UpperCase.contentEquals("ANSI") || tempAxis1UpperCase.contentEquals("UNIX")) {
+				temporalAxis = jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").getJSONObject(tempAxis1).getString("axis");
+			}
+		}
+		
+		if (dimension.contains("spectral") || dimension.contains("bands")) {
+			stretchBuilder.append("avg(" + payLoad + ")");    	    
+			stretchString = stretchBuilder.toString();
+		}
+		else if (dimension.equals("temporal")) {
+			String tempAxis = null;
+			for (int f = 0; f < filters.size(); f++) {
+				Filter filter = filters.get(f);
+				String axis = filter.getAxis();			
+				if(axis.contains(collectionID)) {
+					String axisUpperCase = filter.getAxis().replace("_"+ collectionID, "").toUpperCase();				
+					if (axisUpperCase.equals("DATE") || axisUpperCase.equals("TIME") || axisUpperCase.equals("ANSI") || axisUpperCase.equals("UNIX")) {
+						tempAxis = axis.replace("_"+ collectionID, "");
+					}
+				}
+			}
+			for (int a = 0; a < aggregates.size(); a++) {
+				if (aggregates.get(a).getAxis().equals(tempAxis+"_"+collectionID)) {
+					stretchBuilder.append(createMeanTempAggWCPSString(collectionVar, collectionID, aggregates.get(a), payLoad, tempAxis));
+//					String replaceDate = wcpsPayLoad.toString().replaceAll(tempAxis+"\\(.*?\\)", tempAxis+"\\(\\$pm\\)");
+//					StringBuilder wcpsAggBuilderMod = new StringBuilder("");
+//					wcpsAggBuilderMod.append(meanDateRange1);
+//					stretchBuilder.append(wcpsAggBuilderMod);
+					stretchString=stretchBuilder.toString();
+				}
+			}
+		}
 		return stretchString;
 	}
 
@@ -2496,6 +2545,50 @@ public class WCPSQueryFactory {
 			stringBuilder.append(operator + " over $pm t (imageCrsDomain(");
 			stringBuilder.append(createFilteredCollectionString(collectionVar, collectionID, tempFilter) + ",");
 			stringBuilder.append(axis.replace("_"+ collectionID, "") + ")) using ");
+			//this.filters.remove(tempFilter);
+			//this.filters.add(new Filter(axis, "$pm"));
+			return stringBuilder.toString();
+		} else {
+			for (Filter filter : this.filters) {
+				System.err.println(filter.getAxis());
+			}
+			// TODO this error needs to be communicated to end user
+			// meaning no appropriate filter found for running the condense operator in
+			// temporal axis.
+			return "";
+		}
+	}
+	
+	private String createMeanTempAggWCPSString(String collectionVar, String collectionID, Aggregate tempAggregate, String payLoad, String tempAxis) {
+		String axis = tempAggregate.getAxis();
+		String operator = tempAggregate.getOperator();
+		Filter tempFilter = null;
+		for (Filter filter : this.filters) {
+			log.debug("Filter Axis is : ");
+			log.debug(filter.getAxis());
+			log.debug("Collection ID is : ");
+			log.debug(collectionID);
+			String axisUpperCase = filter.getAxis().replace("_"+ collectionID, "").toUpperCase();
+			if (axisUpperCase.equals("DATE") || axisUpperCase.equals("TIME") || axisUpperCase.equals("ANSI") || axisUpperCase.equals("UNIX")) {
+				tempFilter = filter;
+				log.debug("TempHigh"+tempFilter.getUpperBound());
+				log.debug("Temporal Axis is : ");
+				log.debug(tempFilter);
+			}
+		}
+		log.debug("Filters are : ");
+		log.debug(filters);
+		log.debug("Temporal filter is : ");
+		log.debug(tempFilter);
+		if (tempFilter != null) {
+			StringBuilder stringBuilder = new StringBuilder("condense + ");
+			stringBuilder.append("over $pm t (imageCrsDomain(");
+			stringBuilder.append(createFilteredCollectionString(collectionVar, collectionID, tempFilter) + ",");
+			stringBuilder.append(axis.replace("_"+ collectionID, "") + ")) using ");
+			String meanDateRange1 = Pattern.compile(tempAxis+"\\(.*?\\)").matcher(payLoad).replaceAll(tempAxis+"\\(\\$pm\\)");
+			stringBuilder.append(meanDateRange1 + ")/( condense + over $pmm t (imageCrsDomain(" + payLoad + ",");
+			stringBuilder.append(axis.replace("_"+ collectionID, "") + ")) using 1");
+			
 			//this.filters.remove(tempFilter);
 			//this.filters.add(new Filter(axis, "$pm"));
 			return stringBuilder.toString();
