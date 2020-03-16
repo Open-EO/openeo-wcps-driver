@@ -514,7 +514,8 @@ public class WCPSQueryFactory {
 				}
 				JSONArray bandsArray = ((JSONObject) collectionSTACMetdata.get("properties")).getJSONArray("eo:bands");		
 				for(int c = 0; c < bandsArray.length(); c++) {
-					String bandCommon = bandsArray.getJSONObject(c).getString("common_name");
+//					String bandCommon = bandsArray.getJSONObject(c).getString("common_name");
+					String bandCommon = bandsArray.getJSONObject(c).getString("name");
 					if (bandCommon.equals(bandfromIndex)) {
 						bandName = bandsArray.getJSONObject(c).getString("name");
 						break;
@@ -696,9 +697,9 @@ public class WCPSQueryFactory {
 				}
 				for (int a = 0; a < aggregates.size(); a++) {
 					if (aggregates.get(a).getAxis().equals(tempAxis+"_"+collectionID)) {
-						wcpsTempAggpayLoad.append(createTempAggWCPSString(collectionVar, collectionID, aggregates.get(a)));
+						wcpsTempAggpayLoad.append(createTempAggWCPSString(nodeKeyOfCurrentProcess, collectionVar, collectionID, aggregates.get(a), tempAxis));
 						//String replaceDate = Pattern.compile(tempAxis+"\\(.*?\\)").matcher(wcpsPayLoad).replaceAll(tempAxis+"\\(\\$pm\\)");
-						String replaceDate = payLoad.replaceAll(tempAxis+"\\(.*?\\)", tempAxis+"\\(\\$pm\\)");
+						String replaceDate = payLoad.replaceAll(tempAxis+"\\(.*?\\)", tempAxis+"\\(\\$pm\\"+ nodeKeyOfCurrentProcess +")");
 						StringBuilder wcpsAggBuilderMod = new StringBuilder("");
 						wcpsAggBuilderMod.append(replaceDate);
 						wcpsTempAggpayLoad.append(wcpsAggBuilderMod);
@@ -1606,7 +1607,7 @@ public class WCPSQueryFactory {
 				else if (meanArguments.get("data") instanceof JSONArray) {
 					meanPayLoad = String.valueOf(meanArguments.getJSONArray("data"));
 				}
-				reduceBuilderExtend = createMeanWCPSString(nodeKey, meanPayLoad, reduceProcesses, dimension, collectionVar, collectionID);
+				reduceBuilderExtend = createMeanWCPSString(reduceNodeKey, meanPayLoad, reduceProcesses, dimension, collectionVar, collectionID);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
 				log.debug("Mean Process PayLoad is : ");
 				log.debug(reducerPayLoads.get(nodeKey));
@@ -1628,7 +1629,7 @@ public class WCPSQueryFactory {
 				else if (minArguments.get("data") instanceof JSONArray) {
 					minPayLoad = String.valueOf(minArguments.getJSONArray("data"));
 				}
-				reduceBuilderExtend = createMinWCPSString(nodeKey, minPayLoad, reduceProcesses, dimension, collectionVar, collectionID);
+				reduceBuilderExtend = createMinWCPSString(reduceNodeKey, minPayLoad, reduceProcesses, dimension, collectionVar, collectionID);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
 				log.debug("Min Process PayLoad is : ");
 				log.debug(reducerPayLoads.get(nodeKey));
@@ -1651,7 +1652,7 @@ public class WCPSQueryFactory {
 				else if (maxArguments.get("data") instanceof JSONArray) {
 					maxPayLoad = String.valueOf(maxArguments.getJSONArray("data"));
 				}
-				reduceBuilderExtend = createMaxWCPSString(nodeKey, maxPayLoad, reduceProcesses, dimension, collectionVar, collectionID);
+				reduceBuilderExtend = createMaxWCPSString(reduceNodeKey, maxPayLoad, reduceProcesses, dimension, collectionVar, collectionID);
 				reducerPayLoads.put(nodeKey, reduceBuilderExtend);
 				log.debug("Max Process PayLoad is : ");
 				log.debug(reducerPayLoads.get(nodeKey));
@@ -2061,7 +2062,7 @@ public class WCPSQueryFactory {
 		return stretchString;
 	}
 
-	private String createMeanWCPSString(String meanNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collectionVar, String collectionID) {
+	private String createMeanWCPSString(String reduceNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collectionVar, String collectionID) {
 		String stretchString = null;
 		StringBuilder stretchBuilder = new StringBuilder("");
 		JSONObject jsonresp = null;
@@ -2108,8 +2109,11 @@ public class WCPSQueryFactory {
 				}
 			}
 			for (int a = 0; a < aggregates.size(); a++) {
-				if (aggregates.get(a).getAxis().equals(tempAxis+"_"+collectionID)) {
-					stretchBuilder.append(createMeanTempAggWCPSString(collectionVar, collectionID, aggregates.get(a), payLoad, tempAxis));
+				log.debug("Aggregate is : ");
+				log.debug(aggregates.get(a).getAxis() + "Operator " + aggregates.get(a).getOperator());
+				log.debug("TempAxis " + tempAxis + " " + collectionID);
+				if (aggregates.get(a).getAxis().equals(tempAxis+"_"+collectionID+reduceNodeKey)) {
+					stretchBuilder.append(createMeanTempAggWCPSString(reduceNodeKey, collectionVar, collectionID, aggregates.get(a), payLoad, tempAxis));
 //					String replaceDate = wcpsPayLoad.toString().replaceAll(tempAxis+"\\(.*?\\)", tempAxis+"\\(\\$pm\\)");
 //					StringBuilder wcpsAggBuilderMod = new StringBuilder("");
 //					wcpsAggBuilderMod.append(meanDateRange1);
@@ -2121,7 +2125,7 @@ public class WCPSQueryFactory {
 		return stretchString;
 	}
 
-	private String createMaxWCPSString(String maxNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collectionVar, String collectionID) {
+	private String createMaxWCPSString(String reduceNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collectionVar, String collectionID) {
 		String stretchString = null;
 		StringBuilder stretchBuilder = new StringBuilder("");
 		JSONObject jsonresp = null;
@@ -2168,9 +2172,12 @@ public class WCPSQueryFactory {
 				}
 			}
 			for (int a = 0; a < aggregates.size(); a++) {
-				if (aggregates.get(a).getAxis().equals(tempAxis+"_"+collectionID)) {
-					stretchBuilder.append(createTempAggWCPSString(collectionVar, collectionID, aggregates.get(a)));
-					String replaceDate = Pattern.compile(tempAxis+"\\(.*?\\)").matcher(payLoad).replaceAll(tempAxis+"\\(\\$pm\\)");
+				log.debug("Aggregate Axis " + aggregates.get(a).getAxis());
+				log.debug("Aggregate Operator " + aggregates.get(a).getOperator());
+				log.debug("Reduce Node " + reduceNodeKey);
+				if (aggregates.get(a).getAxis().equals(tempAxis+"_"+collectionID+reduceNodeKey)) {
+					stretchBuilder.append(createTempAggWCPSString(reduceNodeKey, collectionVar, collectionID, aggregates.get(a), tempAxis));
+					String replaceDate = Pattern.compile(tempAxis+"\\(.*?\\)").matcher(payLoad).replaceAll(tempAxis+"\\(\\$pm\\"+ reduceNodeKey + ")");
 					//String replaceDate = wcpsPayLoad.toString().replaceAll(tempAxis+"\\(.*?\\)", tempAxis+"\\(\\$pm\\)");
 					StringBuilder wcpsAggBuilderMod = new StringBuilder("");
 					wcpsAggBuilderMod.append(replaceDate);
@@ -2182,7 +2189,7 @@ public class WCPSQueryFactory {
 		return stretchString;
 	}
 
-	private String createMinWCPSString(String minNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collectionVar, String collectionID) {
+	private String createMinWCPSString(String reduceNodeKey, String payLoad, JSONObject reduceProcesses, String dimension, String collectionVar, String collectionID) {
 		String stretchString = null;
 		StringBuilder stretchBuilder = new StringBuilder("");		
 		JSONObject jsonresp = null;
@@ -2229,9 +2236,12 @@ public class WCPSQueryFactory {
 				}
 			}
 			for (int a = 0; a < aggregates.size(); a++) {
-				if (aggregates.get(a).getAxis().equals(tempAxis+"_"+collectionID)) {
-					stretchBuilder.append(createTempAggWCPSString(collectionVar, collectionID, aggregates.get(a)));
-					String replaceDate = Pattern.compile(tempAxis+"\\(.*?\\)").matcher(payLoad).replaceAll(tempAxis+"\\(\\$pm\\)");
+				log.debug("Aggregate Axis " + aggregates.get(a).getAxis());
+				log.debug("Aggregate Operator " + aggregates.get(a).getOperator());
+				log.debug("Reduce Node " + reduceNodeKey);
+				if (aggregates.get(a).getAxis().equals(tempAxis+"_"+collectionID+reduceNodeKey)) {
+					stretchBuilder.append(createTempAggWCPSString(reduceNodeKey, collectionVar, collectionID, aggregates.get(a), tempAxis));
+					String replaceDate = Pattern.compile(tempAxis+"\\(.*?\\)").matcher(payLoad).replaceAll(tempAxis+"\\(\\$pm\\"+ reduceNodeKey + ")");
 					//String replaceDate = wcpsPayLoad.toString().replaceAll(tempAxis+"\\(.*?\\)", tempAxis+"\\(\\$pm\\)");
 					StringBuilder wcpsAggBuilderMod = new StringBuilder("");
 					wcpsAggBuilderMod.append(replaceDate);
@@ -2519,7 +2529,7 @@ public class WCPSQueryFactory {
 		return stringBuilder.toString();
 	}
 
-	private String createTempAggWCPSString(String collectionVar, String collectionID, Aggregate tempAggregate) {
+	private String createTempAggWCPSString(String reduceNodeKey, String collectionVar, String collectionID, Aggregate tempAggregate, String tempAxis) {
 		String axis = tempAggregate.getAxis();
 		String operator = tempAggregate.getOperator();
 		Filter tempFilter = null;
@@ -2542,9 +2552,9 @@ public class WCPSQueryFactory {
 		log.debug(tempFilter);
 		if (tempFilter != null) {
 			StringBuilder stringBuilder = new StringBuilder("condense ");
-			stringBuilder.append(operator + " over $pm t (imageCrsDomain(");
+			stringBuilder.append(operator + " over $pm" + reduceNodeKey + " t (imageCrsDomain(");
 			stringBuilder.append(createFilteredCollectionString(collectionVar, collectionID, tempFilter) + ",");
-			stringBuilder.append(axis.replace("_"+ collectionID, "") + ")) using ");
+			stringBuilder.append(tempAxis + ")) using ");
 			//this.filters.remove(tempFilter);
 			//this.filters.add(new Filter(axis, "$pm"));
 			return stringBuilder.toString();
@@ -2559,7 +2569,7 @@ public class WCPSQueryFactory {
 		}
 	}
 	
-	private String createMeanTempAggWCPSString(String collectionVar, String collectionID, Aggregate tempAggregate, String payLoad, String tempAxis) {
+	private String createMeanTempAggWCPSString(String reduceNodeKey, String collectionVar, String collectionID, Aggregate tempAggregate, String payLoad, String tempAxis) {
 		String axis = tempAggregate.getAxis();
 		String operator = tempAggregate.getOperator();
 		Filter tempFilter = null;
@@ -2573,7 +2583,7 @@ public class WCPSQueryFactory {
 				tempFilter = filter;
 				log.debug("TempHigh"+tempFilter.getUpperBound());
 				log.debug("Temporal Axis is : ");
-				log.debug(tempFilter);
+				log.debug(tempFilter.getAxis());
 			}
 		}
 		log.debug("Filters are : ");
@@ -2581,13 +2591,13 @@ public class WCPSQueryFactory {
 		log.debug("Temporal filter is : ");
 		log.debug(tempFilter);
 		if (tempFilter != null) {
-			StringBuilder stringBuilder = new StringBuilder("condense + ");
-			stringBuilder.append("over $pm t (imageCrsDomain(");
+			StringBuilder stringBuilder = new StringBuilder("(condense + ");
+			stringBuilder.append("over $pm" + reduceNodeKey + " t (imageCrsDomain(");
 			stringBuilder.append(createFilteredCollectionString(collectionVar, collectionID, tempFilter) + ",");
-			stringBuilder.append(axis.replace("_"+ collectionID, "") + ")) using ");
-			String meanDateRange1 = Pattern.compile(tempAxis+"\\(.*?\\)").matcher(payLoad).replaceAll(tempAxis+"\\(\\$pm\\)");
-			stringBuilder.append(meanDateRange1 + ")/( condense + over $pmm t (imageCrsDomain(" + payLoad + ",");
-			stringBuilder.append(axis.replace("_"+ collectionID, "") + ")) using 1");
+			stringBuilder.append(tempAxis + ")) using ");
+			String meanDateRange1 = Pattern.compile(tempAxis+"\\(.*?\\)").matcher(payLoad).replaceAll(tempAxis+"\\(\\$pm\\" + reduceNodeKey + ")");
+			stringBuilder.append(meanDateRange1 + ")/( condense + over $pmm" + reduceNodeKey + " t (imageCrsDomain(" + payLoad + ",");
+			stringBuilder.append(tempAxis + ")) using 1)");
 			
 			//this.filters.remove(tempFilter);
 			//this.filters.add(new Filter(axis, "$pm"));
@@ -3116,7 +3126,7 @@ public class WCPSQueryFactory {
 			String fromNode = processNode.getJSONObject("arguments").getJSONObject("data").getString("from_node");
 			String collectionNodeKey = getFilterCollectionNode(fromNode);
 			String collectionID = processGraph.getJSONObject(collectionNodeKey).getJSONObject("arguments").getString("id");
-			createTemporalAggregate(processID, collectionID);
+			createTemporalAggregate(processID, collectionID, processNodeKey);
 		}
 
 		else if (processID.contains("reduce")) {
@@ -3154,8 +3164,8 @@ public class WCPSQueryFactory {
 				JSONObject reducer = processNode.getJSONObject("arguments").getJSONObject("reducer").getJSONObject("callback");
 				for (String nodeKey : reducer.keySet()) {
 					
-					String name = reducer.getJSONObject(nodeKey).getString("process_id");
-					createReduceTemporalAggregate(name, collectionID);
+					String processName = reducer.getJSONObject(nodeKey).getString("process_id");
+					createReduceTemporalAggregate(processName, collectionID, processNodeKey);
 				}
 			}
 		}
@@ -3672,7 +3682,7 @@ public class WCPSQueryFactory {
 		}
 	}
 
-	private void createReduceTemporalAggregate(String processName, String collectionID) {
+	private void createReduceTemporalAggregate(String processName, String collectionID, String processNodeKey) {
 		String aggregateType = processName;
 		Vector<String> params = new Vector<String>();
 		String tempAxis = null;
@@ -3693,10 +3703,10 @@ public class WCPSQueryFactory {
 			}
 		}
 		log.debug("Temporal Aggregate added!");
-		aggregates.add(new Aggregate(new String(tempAxis+"_"+collectionID), aggregateType, params));
+		aggregates.add(new Aggregate(new String(tempAxis+"_"+collectionID+processNodeKey), aggregateType, params));
 	}
 
-	private void createTemporalAggregate(String processName, String collectionID) {
+	private void createTemporalAggregate(String processName, String collectionID, String processNodeKey) {
 		String aggregateType = processName.split("_")[0];
 		Vector<String> params = new Vector<String>();
 		String tempAxis = null;
@@ -3717,7 +3727,7 @@ public class WCPSQueryFactory {
 			}
 		}
 		log.debug("Temporal Aggregate added!");
-		aggregates.add(new Aggregate(new String(tempAxis+"_"+collectionID), aggregateType, params));
+		aggregates.add(new Aggregate(new String(tempAxis+"_"+collectionID+processNodeKey), aggregateType, params));
 	}
 
 	private void createNDVIAggregateFromProcess(JSONObject argsObject, String collectionID) {
