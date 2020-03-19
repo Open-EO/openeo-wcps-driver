@@ -23,6 +23,7 @@ import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.j256.ormlite.dao.Dao;
@@ -102,6 +103,12 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				JSONObject udfNode = processGraphJSON.getJSONObject(nodesSortedArray.getString(udfNodeIndex));
 				
 				String runtime = udfNode.getJSONObject("arguments").getString("runtime");
+				String version = "";
+				try {
+					version = udfNode.getJSONObject("arguments").getString("version");
+				}catch(JSONException e) {
+					
+				}
 				String udf = udfNode.getJSONObject("arguments").getString("udf");
 				log.debug("runtime: " + runtime);
 				log.debug("udf: " + udf);
@@ -164,16 +171,20 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				
 				String service_url = null;
 				
-				if(runtime.toLowerCase().equals("python")) {
+				if(runtime.toLowerCase().equals("python")&&version.toLowerCase().equals("openeo")) {
 					runtime = "python";
 					service_url = ConvenienceHelper.readProperties("python-udf-endpoint");
-				}else if(runtime.toLowerCase().equals("r")) {
+				}
+				else if(runtime.toLowerCase().equals("python")&&version.toLowerCase().equals("candela")) {
+					runtime = "python";
+					service_url = ConvenienceHelper.readProperties("candela-python-udf-endpoint");
+				}
+				else if(runtime.toLowerCase().equals("r")) {
 					runtime = "r";
 					service_url = ConvenienceHelper.readProperties("r-udf-endpoint");
 				}else {
 					log.error("The requested runtime is not available!");
 				}
-
 				
 				URL udfServiceEndpoint = null;
 				try {
@@ -186,6 +197,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					}
 					log.error(builder.toString());
 				}
+				log.info(udfServiceEndpoint);
 				HttpURLConnection con = null;
 				try {
 					log.info("Sending UDF to UDF endpoint.");
@@ -206,6 +218,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				try (OutputStream os = con.getOutputStream()) {
 					byte[] udfBlob = udfDescriptor.toString().getBytes(StandardCharsets.UTF_8);
 					os.write(udfBlob, 0, udfBlob.length);
+					log.info("Posting UDF to UDF Service endpoint.");
 				} catch (IOException e) {
 					log.error("\"An error occured when posting to udf service endpoint: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
@@ -244,12 +257,9 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					new HyperCubeFactory().writeHyperCubeToNetCDF(firstHyperCube, netCDFPath);
 					
 					try {
-						
-						ProcessBuilder importProcessBuilder = new ProcessBuilder();					
-						importProcessBuilder.command("bash", "-c", "/tmp/openeo/udf_result/import_udf.sh " + netCDFPath);
-						
+						ProcessBuilder importProcessBuilder = new ProcessBuilder();
+						importProcessBuilder.command("bash", "-c", "/tmp/openeo/udf_result/import_udf.sh " + netCDFPath);						
 						Process importProcess = importProcessBuilder.start();
-
 						StringBuilder importProcessLogger = new StringBuilder();
 
 						BufferedReader outReader = new BufferedReader(

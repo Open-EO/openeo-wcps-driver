@@ -275,6 +275,9 @@ public class HyperCubeFactory {
 					ArrayLong dataArray = new ArrayLong(new int[] {dimension.getLength()}, false);
 					for(int i = 0; i < dimension.getLength(); i++) {
 						String timeLabel = coordinateLables.getString(i).replace('"', ' ').trim();
+						if(!timeLabel.contains("T")) {
+							timeLabel =  timeLabel + "T00:00:00.000Z";
+						}
 						Long epoch = ZonedDateTime.parse(timeLabel).toEpochSecond();
 						dataArray.setLong(i, epoch);
 					}
