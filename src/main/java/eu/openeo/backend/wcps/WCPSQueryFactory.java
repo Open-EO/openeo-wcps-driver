@@ -553,6 +553,71 @@ public class WCPSQueryFactory {
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}
 			
+			if (currentProcessID.equals("if")) {
+				StringBuilder wcpsIFpayLoad = new StringBuilder("");
+				String payLoad = null;
+				int accept = 0;
+				int reject = 0;
+				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
+				
+				if (processArguments.get("value") instanceof JSONObject) {
+					for (String fromType : processArguments.getJSONObject("value").keySet()) {
+						if (fromType.equals("from_argument") && processArguments.getJSONObject("value").getString("from_argument").equals("data")) {
+							payLoad = wcpsPayLoad.toString();
+							accept = processArguments.getInt("accept");
+							reject = processArguments.getInt("reject");
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = processArguments.getJSONObject("value").getString("from_node");
+							payLoad = storedPayLoads.getString(dataNode);
+							log.debug("If Process : ");
+							accept = processArguments.getInt("accept");
+							reject = processArguments.getInt("reject");
+						}
+					}
+				}
+				
+				wcpsIFpayLoad.append("("+payLoad+"*"+accept+"+"+"(not "+payLoad+")*"+reject+")");
+				wcpsPayLoad=wcpsIFpayLoad;				
+				StringBuilder wcpsStringBuilderMaskThresPayload = basicWCPSStringBuilder(varPayLoad.toString());
+				wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsIFpayLoad.toString());
+				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsIFpayLoad.toString());
+				log.debug("IF Process PayLoad is : ");
+				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
+			}
+			
+			if (currentProcessID.equals("mask")) {
+				StringBuilder wcpsArrayFilterpayLoad = new StringBuilder("");
+				String payLoad = null;
+				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
+				
+				if (processArguments.get("data") instanceof JSONObject) {
+					for (String fromType : processArguments.getJSONObject("data").keySet()) {
+						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+							payLoad = wcpsPayLoad.toString();
+							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm") + " " + processArguments.getString("comparator") + " " + processArguments.getString("threshold")+",");
+							varPayLoad.append(" $payLoad"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$rm")+",");
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = processArguments.getJSONObject("data").getString("from_node");
+							payLoad = storedPayLoads.getString(dataNode);
+							log.debug("Array Filterd Process : ");
+							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm") + " " + processArguments.getString("comparator") + " " + processArguments.getString("threshold")+",");
+							varPayLoad.append(" $payLoad"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$rm")+",");
+						}
+					}
+				}
+				
+				wcpsArrayFilterpayLoad.append("(($filterArray"+nodeKeyOfCurrentProcess+")"+"*$payLoad"+nodeKeyOfCurrentProcess+")");
+				wcpsPayLoad=wcpsArrayFilterpayLoad;
+				
+				StringBuilder wcpsStringBuilderMaskThresPayload = basicWCPSStringBuilder(varPayLoad.toString());
+				wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsArrayFilterpayLoad.toString());
+				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsArrayFilterpayLoad.toString());
+				log.debug("Array Filterd Process PayLoad is : ");
+				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
+			}
+			
 			if (currentProcessID.equals("array_filter")) {
 				StringBuilder wcpsArrayFilterpayLoad = new StringBuilder("");
 				String payLoad = null;
@@ -1375,8 +1440,8 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (ltArguments.get("y") instanceof Double) {
-					y = String.valueOf(ltArguments.getDouble("y"));
+				else if (ltArguments.get("y") instanceof Integer) {
+					y = String.valueOf(ltArguments.getInt("y"));
 				}
 				applyBuilderExtend = createLessThanWCPSString(x, y);
 				applyPayLoads.put(nodeKey, applyBuilderExtend);
@@ -2782,6 +2847,30 @@ public class WCPSQueryFactory {
 				}
 				else if (currentNodeProcessArguments.get("data") instanceof JSONArray) {
 					JSONArray reduceData = currentNodeProcessArguments.getJSONArray("data");
+					for(int a = 0; a < reduceData.length(); a++) {
+						if (reduceData.get(a) instanceof JSONObject) {
+							for (String fromKey : reduceData.getJSONObject(a).keySet()) {
+								if (fromKey.contentEquals("from_node")) {
+									nextFromNode = reduceData.getJSONObject(a).getString("from_node");
+									fromNodes.put(nextFromNode);
+								}
+							}
+						}
+					}
+				}
+				nextNodeName.put(currentNode, fromNodes);				
+			}
+			else if (argumentsKey.contentEquals("value")) {
+				if (currentNodeProcessArguments.get("value") instanceof JSONObject) {
+					for (String fromKey : currentNodeProcessArguments.getJSONObject("value").keySet()) {
+						if (fromKey.contentEquals("from_node")) {
+							nextFromNode = currentNodeProcessArguments.getJSONObject("value").getString("from_node");
+							fromNodes.put(nextFromNode);
+						}
+					}
+				}
+				else if (currentNodeProcessArguments.get("value") instanceof JSONArray) {
+					JSONArray reduceData = currentNodeProcessArguments.getJSONArray("value");
 					for(int a = 0; a < reduceData.length(); a++) {
 						if (reduceData.get(a) instanceof JSONObject) {
 							for (String fromKey : reduceData.getJSONObject(a).keySet()) {
