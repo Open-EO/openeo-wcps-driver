@@ -256,7 +256,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					}
 					//TODO import hyper cube back into rasdaman here!
 					String netCDFPath = ConvenienceHelper.readProperties("temp-dir")+"udf_result/" + job.getId() + ".nc";
-					new HyperCubeFactory().writeHyperCubeToNetCDF(firstHyperCube, srs, netCDFPath);
+					new HyperCubeFactory().writeHyperCubeToNetCDFBandAsDimension(firstHyperCube, srs, netCDFPath);
 					JSONArray dimensionsArray = firstHyperCube.getJSONArray("dimensions");
 					Iterator iterator = dimensionsArray.iterator();
 					Boolean containsMultiBands = false;

@@ -254,7 +254,133 @@ public class HyperCubeFactory {
 		return dataArray;
 	}
 	
-	public int writeHyperCubeToNetCDF(JSONObject hyperCube, int srs, String path) {
+	public int writeHyperCubeToNetCDFBandAsDimension(JSONObject hyperCube, int srs, String path) {
+		try {
+			NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, path, null);
+			JSONArray bandsArray = new JSONArray();
+			JSONArray dimensionsArray = hyperCube.getJSONArray("dimensions");
+			List<Dimension> dims = new ArrayList<Dimension>();
+			HashMap<String, Variable> dimVars =  new HashMap<String, Variable>();
+			HashMap<String, Object> coordinateArray = new HashMap<String,Object>();
+			Iterator iterator = dimensionsArray.iterator();
+			while(iterator.hasNext()) {
+				JSONObject dimensionDescriptor = (JSONObject) iterator.next();
+				JSONArray coordinateLables = dimensionDescriptor.getJSONArray("coordinates");
+				Dimension dimension = writer.addDimension(dimensionDescriptor.getString("name"), coordinateLables.length());
+				dims.add(dimension);
+				List<Dimension> currentDim = new ArrayList<Dimension>();
+				currentDim.add(dimension);
+				if(dimensionDescriptor.getString("name").equals("t")) {
+					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.LONG, currentDim);
+					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
+					ArrayLong dataArray = new ArrayLong(new int[] {dimension.getLength()}, false);
+					for(int i = 0; i < dimension.getLength(); i++) {
+						String timeLabel = coordinateLables.getString(i).replace('"', ' ').trim();
+						if(!timeLabel.contains("T")) {
+							timeLabel =  timeLabel + "T00:00:00.000Z";
+						}
+						Long epoch = ZonedDateTime.parse(timeLabel).toEpochSecond();
+						dataArray.setLong(i, epoch);
+					}
+					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+				}else if(dimensionDescriptor.getString("name").equals("band")) {
+					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.LONG, currentDim);
+					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
+					ArrayLong dataArray = new ArrayLong(new int[] {dimension.getLength()}, false);
+					for(int i = 0; i < dimension.getLength(); i++) {
+						//TODO fix this to put the actual band name as string instead of integer ID of band
+						dataArray.setLong(i, (long)i+1);
+						bandsArray.put(coordinateLables.getString(i));
+					}
+					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+				}else {					
+					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.DOUBLE, currentDim);
+					log.debug(dimVar.getFullName());
+					dimVar.addAttribute(new Attribute("resolution", new Double(coordinateLables.getDouble(1) -coordinateLables.getDouble(0))));
+					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
+					ArrayDouble dataArray = new ArrayDouble(new int[] {dimension.getLength()});
+					for(int i = 0; i < dimension.getLength(); i++) {
+						dataArray.setDouble(i, coordinateLables.getDouble(i));
+					}
+					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+				}
+			}
+			Variable values = writer.addVariable(hyperCube.getString("id"), DataType.DOUBLE, dims);
+			
+			writer.addGlobalAttribute(new Attribute("EPSG", srs));
+			writer.addGlobalAttribute(new Attribute("JOB", path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'))));
+			log.debug(hyperCube);
+			log.debug(bandsArray);
+			log.debug(coordinateArray);
+			for(int i = 0; i < bandsArray.length(); i++) {
+				writer.addGlobalAttribute(new Attribute("BAND"+i+1, bandsArray.getString(i)));
+			}
+			writer.create();
+			writer.flush();
+						
+			int[] shape = values.getShape();
+			int[] indexND =  new int[shape.length];
+			for(String key: coordinateArray.keySet()) {
+				if(key.equals("t")) {
+					ArrayLong dataArray = (ArrayLong) coordinateArray.get(key);
+					writer.write(dimVars.get(key), new int[shape.length], dataArray);
+				}else if(key.equals("band")) {
+					ArrayLong dataArray = (ArrayLong) coordinateArray.get(key);
+					writer.write(dimVars.get(key), new int[shape.length], dataArray);
+				}else{
+					ArrayDouble dataArray = (ArrayDouble) coordinateArray.get(key);
+					writer.write(dimVars.get(key), new int[shape.length], dataArray);
+				}
+			}
+			
+			log.debug("Number of dimensions: " + shape.length);
+			
+			ArrayDouble dataArray = new ArrayDouble(shape);
+			Index dataIndex = dataArray.getIndex();
+			
+			for (long index1D = 0; index1D < values.getSize(); index1D++) {				
+				JSONArray subDimArray = hyperCube.getJSONArray("data");
+				long divider = index1D;
+				for(int n = shape.length-1; n >= 0; n--) {
+					indexND[n] =  (int) (divider % shape[n]);
+					divider /= shape[n];
+				}
+				String indexS = "";
+				for(int k = 0; k < shape.length-1; k++) {
+					subDimArray = subDimArray.getJSONArray(indexND[k]);
+					indexS += indexND[k] + " ";
+				}
+				indexS += indexND[shape.length-1];				
+				double value = subDimArray.getDouble(indexND[shape.length-1]);
+				//log.debug(index1D + " | " + indexS + " : " + value);
+				dataArray.setDouble(dataIndex.set(indexND), value);
+			}
+			
+			writer.write(values, new int[shape.length], dataArray);
+			writer.flush();
+			writer.close();
+			
+		} catch (IOException e) {
+			log.error("Error when writing hypercube to netcdf file: " + path + " " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+			return -1;
+		} catch (InvalidRangeException e) {
+			log.error("Error when writing hypercube to netcdf file: " + path + " " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builder.append(element.toString() + "\n");
+			}
+			log.error(builder.toString());
+			return -1;
+		}
+		return 0;
+	}
+	
+	public int writeHyperCubeToNetCDFBandAsVariable(JSONObject hyperCube, int srs, String path) {
 		try {
 			NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, path, null);
 			JSONArray bandsArray = new JSONArray();
