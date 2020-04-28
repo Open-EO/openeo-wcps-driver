@@ -383,19 +383,23 @@ public class HyperCubeFactory {
 	public int writeHyperCubeToNetCDFBandAsVariable(JSONObject hyperCube, int srs, String path) {
 		try {
 			NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, path, null);
-			JSONArray bandsArray = new JSONArray();
 			JSONArray dimensionsArray = hyperCube.getJSONArray("dimensions");
 			List<Dimension> dims = new ArrayList<Dimension>();
 			HashMap<String, Variable> dimVars =  new HashMap<String, Variable>();
+			HashMap<String, Integer> bandVars =  new HashMap<String, Integer>();
 			HashMap<String, Object> coordinateArray = new HashMap<String,Object>();
-			Iterator iterator = dimensionsArray.iterator();
-			while(iterator.hasNext()) {
-				JSONObject dimensionDescriptor = (JSONObject) iterator.next();
+			//Iterator iterator = dimensionsArray.iterator();
+			//Iterate over all dimensions in json representation of hypercube
+			Integer bandDimensionIndex = -1;
+			for( int d = 0; d<dimensionsArray.length(); d++) {
+			//while(iterator.hasNext()) {
+				//JSONObject dimensionDescriptor = (JSONObject) iterator.next();
+				JSONObject dimensionDescriptor = dimensionsArray.getJSONObject(d);
 				JSONArray coordinateLables = dimensionDescriptor.getJSONArray("coordinates");
 				Dimension dimension = writer.addDimension(dimensionDescriptor.getString("name"), coordinateLables.length());
-				dims.add(dimension);
 				List<Dimension> currentDim = new ArrayList<Dimension>();
 				currentDim.add(dimension);
+				//If it contains a temporal axis create a corresponding dimension for the outgoing netcdf file
 				if(dimensionDescriptor.getString("name").equals("t")) {
 					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.LONG, currentDim);
 					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
@@ -409,16 +413,14 @@ public class HyperCubeFactory {
 						dataArray.setLong(i, epoch);
 					}
 					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+					dims.add(dimension);
+				//If it contains a band axis create a corresponding variable for each band for the outgoing netcdf file
 				}else if(dimensionDescriptor.getString("name").equals("band")) {
-					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.LONG, currentDim);
-					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
-					ArrayLong dataArray = new ArrayLong(new int[] {dimension.getLength()}, false);
-					for(int i = 0; i < dimension.getLength(); i++) {
-						//TODO fix this to put the actual band name as string instead of integer ID of band
-						dataArray.setLong(i, (long)i+1);
-						bandsArray.put(coordinateLables.getString(i));
+					for(int i = 0; i < dimension.getLength(); i++) {						
+						bandVars.put(coordinateLables.getString(i), new Integer(i));
 					}
-					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+					bandDimensionIndex = new Integer(d);
+				//For any other axis just create it and add it as a dimension to the outgoing netcdf file
 				}else {					
 					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.DOUBLE, currentDim);
 					log.debug(dimVar.getFullName());
@@ -429,62 +431,71 @@ public class HyperCubeFactory {
 						dataArray.setDouble(i, coordinateLables.getDouble(i));
 					}
 					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
+					dims.add(dimension);
 				}
 			}
-			Variable values = writer.addVariable(hyperCube.getString("id"), DataType.DOUBLE, dims);
-			
+			// add metadata attributs to file concerning openEO job and crs
 			writer.addGlobalAttribute(new Attribute("EPSG", srs));
 			writer.addGlobalAttribute(new Attribute("JOB", path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'))));
-			log.debug(hyperCube);
-			log.debug(bandsArray);
-			log.debug(coordinateArray);
-			for(int i = 0; i < bandsArray.length(); i++) {
-				writer.addGlobalAttribute(new Attribute("BAND"+i+1, bandsArray.getString(i)));
-			}
+			// write header of netcdf file to disk.
 			writer.create();
 			writer.flush();
-						
-			int[] shape = values.getShape();
-			int[] indexND =  new int[shape.length];
+			
+			// write coordinate labels to netcdf file
 			for(String key: coordinateArray.keySet()) {
 				if(key.equals("t")) {
 					ArrayLong dataArray = (ArrayLong) coordinateArray.get(key);
-					writer.write(dimVars.get(key), new int[shape.length], dataArray);
-				}else if(key.equals("band")) {
-					ArrayLong dataArray = (ArrayLong) coordinateArray.get(key);
-					writer.write(dimVars.get(key), new int[shape.length], dataArray);
+					writer.write(dimVars.get(key), dataArray.getShape(), dataArray);
 				}else{
 					ArrayDouble dataArray = (ArrayDouble) coordinateArray.get(key);
-					writer.write(dimVars.get(key), new int[shape.length], dataArray);
+					writer.write(dimVars.get(key), dataArray.getShape(), dataArray);
 				}
-			}
-			
-			log.debug("Number of dimensions: " + shape.length);
-			
-			ArrayDouble dataArray = new ArrayDouble(shape);
-			Index dataIndex = dataArray.getIndex();
-			
-			for (long index1D = 0; index1D < values.getSize(); index1D++) {				
-				JSONArray subDimArray = hyperCube.getJSONArray("data");
-				long divider = index1D;
-				for(int n = shape.length-1; n >= 0; n--) {
-					indexND[n] =  (int) (divider % shape[n]);
-					divider /= shape[n];
-				}
-				String indexS = "";
-				for(int k = 0; k < shape.length-1; k++) {
-					subDimArray = subDimArray.getJSONArray(indexND[k]);
-					indexS += indexND[k] + " ";
-				}
-				indexS += indexND[shape.length-1];				
-				double value = subDimArray.getDouble(indexND[shape.length-1]);
-				//log.debug(index1D + " | " + indexS + " : " + value);
-				dataArray.setDouble(dataIndex.set(indexND), value);
-			}
-			
-			writer.write(values, new int[shape.length], dataArray);
+			}			
 			writer.flush();
-			writer.close();
+			
+			// now write data of each individual band to disk:
+			for(String bandName: bandVars.keySet()){
+				// First create variable for band
+				Variable bandVar = writer.addVariable(bandName, DataType.DOUBLE, dims);
+				Integer bandIndex = bandVars.get(bandName);
+				
+				int[] shape = bandVar.getShape();
+				int[] indexND =  new int[shape.length];
+				
+				
+				log.debug("Number of dimensions: " + shape.length);
+				
+				ArrayDouble dataArray = new ArrayDouble(shape);
+				Index dataIndex = dataArray.getIndex();
+				
+				for (long index1D = 0; index1D < bandVar.getSize(); index1D++) {				
+					JSONArray subDimArray = hyperCube.getJSONArray("data");
+					long divider = index1D;
+					for(int n = shape.length-1; n >= 0; n--) {
+						indexND[n] =  (int) (divider % shape[n]);
+						divider /= shape[n];
+					}
+					String indexS = "";
+					for(int k = 0; k < shape.length-1; k++) {
+						//FIXME not sure if this check will work in all cases
+						if(k == bandDimensionIndex) {
+							subDimArray = subDimArray.getJSONArray(bandIndex);
+							subDimArray = subDimArray.getJSONArray(indexND[k]);
+						}else {
+							subDimArray = subDimArray.getJSONArray(indexND[k]);
+						}						
+						indexS += indexND[k] + " ";
+					}
+					indexS += indexND[shape.length-1];				
+					double value = subDimArray.getDouble(indexND[shape.length-1]);
+					//log.debug(index1D + " | " + indexS + " : " + value);
+					dataArray.setDouble(dataIndex.set(indexND), value);
+				}
+				
+				writer.write(bandVar, new int[shape.length], dataArray);
+				writer.flush();
+				writer.close();
+			}
 			
 		} catch (IOException e) {
 			log.error("Error when writing hypercube to netcdf file: " + path + " " + e.getMessage());

@@ -108,7 +108,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				try {
 					version = udfNode.getJSONObject("arguments").getString("version");
 				}catch(JSONException e) {
-					
+					log.warn("no version for udf specified. Will fall back on default version of specified environment.");
 				}
 				String udf = udfNode.getJSONObject("arguments").getString("udf");
 				log.debug("runtime: " + runtime);
@@ -171,7 +171,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				}
 				
 				String service_url = null;
-				
+				// Select correct parameters for execution environment of UDF
 				if(runtime.toLowerCase().equals("python")&&version.toLowerCase().equals("openeo")) {
 					runtime = "python";
 					service_url = ConvenienceHelper.readProperties("python-udf-endpoint");
@@ -187,6 +187,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					log.error("The requested runtime is not available!");
 				}
 				
+				// Find correct udf engine endpoint based on selected execution environment
 				URL udfServiceEndpoint = null;
 				try {
 					udfServiceEndpoint = new URL(service_url + "/udf");
@@ -199,6 +200,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					log.error(builder.toString());
 				}
 				log.info(udfServiceEndpoint);
+				// open http connection to udf execution endpoint 
 				HttpURLConnection con = null;
 				try {
 					log.info("Sending UDF to UDF endpoint.");
@@ -215,7 +217,8 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					}
 					log.error(builder.toString());
 				}
-
+				
+				// stream UDF in form of json hypercube object to udf endpoint via http post method 
 				try (OutputStream os = con.getOutputStream()) {
 					byte[] udfBlob = udfDescriptor.toString().getBytes(StandardCharsets.UTF_8);
 					os.write(udfBlob, 0, udfBlob.length);
@@ -228,6 +231,8 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					}
 					log.error(builder.toString());
 				}
+				
+				// get result from udf endpoint in form of a json hypercube document.
 				try(BufferedReader br = new BufferedReader(
 						  new InputStreamReader(con.getInputStream(), "utf-8"))) {
 						    StringBuilder response = new StringBuilder();
@@ -243,6 +248,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					byte[] firstHyperCubeBlob = firstHyperCube.toString(2).getBytes(StandardCharsets.UTF_8);
 					File firstHyperCubeFile = new File(ConvenienceHelper.readProperties("temp-dir")+"udf_result_" + job.getId() + ".json");
 					FileOutputStream firstHyperCubeStream;
+					// store json hypercube as file on disk
 					try {
 						firstHyperCubeStream = new FileOutputStream(firstHyperCubeFile);
 						firstHyperCubeStream.write(firstHyperCubeBlob, 0, firstHyperCubeBlob.length);
@@ -254,9 +260,9 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-					//TODO import hyper cube back into rasdaman here!
+					// convert hypercube json object into netcdf file and save to tempory disk
 					String netCDFPath = ConvenienceHelper.readProperties("temp-dir")+"udf_result/" + job.getId() + ".nc";
-					new HyperCubeFactory().writeHyperCubeToNetCDFBandAsDimension(firstHyperCube, srs, netCDFPath);
+					new HyperCubeFactory().writeHyperCubeToNetCDFBandAsVariable(firstHyperCube, srs, netCDFPath);
 					JSONArray dimensionsArray = firstHyperCube.getJSONArray("dimensions");
 					Iterator iterator = dimensionsArray.iterator();
 					Boolean containsMultiBands = false;
@@ -266,6 +272,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 							containsMultiBands = true;
 						}
 					}
+					// Re-import result from UDF in rasdaman using wcst_import tool
 					try {
 						ProcessBuilder importProcessBuilder = new ProcessBuilder();
 						if (containsMultiBands) {
@@ -316,6 +323,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 						}
 						log.error(builder.toString());
 					}
+					// continue processing of process_graph after the UDF
 					WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphAfterUDF);
 					URL urlUDF = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
 							+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
