@@ -162,18 +162,18 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
 			c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));				
 			
-			spatialExtent.put(c1[0]);
 			spatialExtent.put(c1[1]);
-			spatialExtent.put(c2[0]);
+			spatialExtent.put(c1[0]);
 			spatialExtent.put(c2[1]);
+			spatialExtent.put(c2[0]);
 			
 			JSONArray xExtent = new JSONArray();
-			xExtent.put(c1[0]);
-			xExtent.put(c2[0]);
+			xExtent.put(c1[1]);
+			xExtent.put(c2[1]);
 			dimObjects[0].put("extent", xExtent);
 			JSONArray yExtent = new JSONArray();
-			yExtent.put(c1[1]);
-			yExtent.put(c2[1]);
+			yExtent.put(c1[0]);
+			yExtent.put(c2[0]);
 			dimObjects[1].put("extent", yExtent);			
 			
 			JSONArray links = new JSONArray();
@@ -263,7 +263,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				for(int c = 0; c < bandsListSwe.size(); c++) {
 					JSONObject product = new JSONObject();
 					String bandId = bandsListSwe.get(c).getAttributeValue("name");
-								
+					
 					product.put("name", bandId);					
 					bandValues.put(bandId);					
 					bandArray.put(product);
@@ -576,10 +576,10 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
 				c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));				
 				
-				spatialExtent.put(c1[0]);
 				spatialExtent.put(c1[1]);
-				spatialExtent.put(c2[0]);
-				spatialExtent.put(c2[1]);			
+				spatialExtent.put(c1[0]);
+				spatialExtent.put(c2[1]);
+				spatialExtent.put(c2[0]);			
 									
 				extentCollection.put("spatial", spatialExtent);
 				extentCollection.put("temporal", temporalExtent);

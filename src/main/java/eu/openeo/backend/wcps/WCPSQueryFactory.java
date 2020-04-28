@@ -2361,6 +2361,12 @@ public class WCPSQueryFactory {
 	private String createReturnResultWCPSString(String returnResultNodeKey, String payload) {
 		StringBuilder resultBuilder = new StringBuilder("");
 		resultBuilder.append(payload);
+//		if (this.outputFormat.equals("netcdf")) {
+//			resultBuilder.append(", \"" + this.outputFormat + "\" ," + "\"{ \\\"transpose\\\": [0,1] }\"" + ")");
+//		}
+//		else {
+//			resultBuilder.append(", \"" + this.outputFormat + "\" )");
+//		}
 		resultBuilder.append(", \"" + this.outputFormat + "\" )");
 		log.debug("Save payload : ");
 		log.debug(resultBuilder);
@@ -2779,7 +2785,7 @@ public class WCPSQueryFactory {
 
 						CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 						double[] c1 = null;				
-						c1 = tx.TransformPoint(polygonArrayLong, polygonArrayLat);
+						c1 = tx.TransformPoint(polygonArrayLat, polygonArrayLong);
 
 						polygonArrayLong = c1[0];
 						polygonArrayLat = c1[1];
@@ -3631,8 +3637,8 @@ public class WCPSQueryFactory {
 			CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 			double[] c1 = null;
 			double[] c2 = null;
-			c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(bottom));
-			c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(top));
+			c1 = tx.TransformPoint(Double.parseDouble(bottom), Double.parseDouble(left));
+			c2 = tx.TransformPoint(Double.parseDouble(top), Double.parseDouble(right));
 			left = Double.toString(c1[0]);
 			bottom = Double.toString(c1[1]);
 			right = Double.toString(c2[0]);
@@ -3757,8 +3763,8 @@ public class WCPSQueryFactory {
 					CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 					double[] c1 = null;
 					double[] c2 = null;
-					c1 = tx.TransformPoint(Double.parseDouble(left), Double.parseDouble(bottom));
-					c2 = tx.TransformPoint(Double.parseDouble(right), Double.parseDouble(top));
+					c1 = tx.TransformPoint(Double.parseDouble(bottom), Double.parseDouble(left));
+					c2 = tx.TransformPoint(Double.parseDouble(top), Double.parseDouble(right));
 					left = Double.toString(c1[0]);
 					bottom = Double.toString(c1[1]);
 					right = Double.toString(c2[0]);

@@ -179,6 +179,7 @@ public class HyperCubeFactory {
 
 			log.debug(bandsArray);
 			dimsArray.put(dimObjects);
+			log.debug(dimsArray);
 			JSONObject hyperCubeArguments = new JSONObject();
 
 			String[] dataElement = rootNode.getChild("rangeSet", gmlNS).getChild("DataBlock", gmlNS)
@@ -207,9 +208,9 @@ public class HyperCubeFactory {
 			hyperCubesArray.put(hyperCubeArguments);
 
 			resultJSON.put("id", "hypercube_example");
-			resultJSON.put("proj", "EPSG:" + srsDescription);
+			resultJSON.put("proj", srsDescription);
 			resultJSON.put("hypercubes", hyperCubesArray);
-			log.debug(resultJSON);
+			//log.debug(resultJSON);
 
 		} catch (JDOMException e) {
 			log.error("Error when parsing XML: " + e.getMessage());
@@ -253,10 +254,10 @@ public class HyperCubeFactory {
 		return dataArray;
 	}
 	
-	public int writeHyperCubeToNetCDF(JSONObject hyperCube, String path) {
+	public int writeHyperCubeToNetCDF(JSONObject hyperCube, int srs, String path) {
 		try {
 			NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, path, null);
-			
+			JSONArray bandsArray = new JSONArray();
 			JSONArray dimensionsArray = hyperCube.getJSONArray("dimensions");
 			List<Dimension> dims = new ArrayList<Dimension>();
 			HashMap<String, Variable> dimVars =  new HashMap<String, Variable>();
@@ -283,12 +284,13 @@ public class HyperCubeFactory {
 					}
 					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
 				}else if(dimensionDescriptor.getString("name").equals("band")) {
-					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.STRING, currentDim);
+					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.LONG, currentDim);
 					dimVars.put(dimensionDescriptor.getString("name"), dimVar);
 					ArrayLong dataArray = new ArrayLong(new int[] {dimension.getLength()}, false);
 					for(int i = 0; i < dimension.getLength(); i++) {
 						//TODO fix this to put the actual band name as string instead of integer ID of band
 						dataArray.setLong(i, (long)i+1);
+						bandsArray.put(coordinateLables.getString(i));
 					}
 					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
 				}else {					
@@ -305,9 +307,14 @@ public class HyperCubeFactory {
 			}
 			Variable values = writer.addVariable(hyperCube.getString("id"), DataType.DOUBLE, dims);
 			
-			writer.addGlobalAttribute(new Attribute("EPSG", 32632));
+			writer.addGlobalAttribute(new Attribute("EPSG", srs));
 			writer.addGlobalAttribute(new Attribute("JOB", path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'))));
-			
+			log.debug(hyperCube);
+			log.debug(bandsArray);
+			log.debug(coordinateArray);
+			for(int i = 0; i < bandsArray.length(); i++) {
+				writer.addGlobalAttribute(new Attribute("BAND"+i+1, bandsArray.getString(i)));
+			}
 			writer.create();
 			writer.flush();
 						
@@ -345,7 +352,7 @@ public class HyperCubeFactory {
 				}
 				indexS += indexND[shape.length-1];				
 				double value = subDimArray.getDouble(indexND[shape.length-1]);
-				log.debug(index1D + " | " + indexS + " : " + value);
+				//log.debug(index1D + " | " + indexS + " : " + value);
 				dataArray.setDouble(dataIndex.set(indexND), value);
 			}
 			

@@ -19,6 +19,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Iterator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -149,7 +150,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					}
 					//Get data block for UDF
 					WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
-					wcpsFactory.setOutputFormat("gml");			
+					wcpsFactory.setOutputFormat("gml");
 					
 					URL url = new URL(ConvenienceHelper.readProperties("wcps-endpoint") + "?SERVICE=WCS" + "&VERSION=2.0.1"
 							+ "&REQUEST=ProcessCoverages" + "&QUERY="
@@ -237,6 +238,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				    log.info("Received result from UDF endpoint.");
 					JSONObject udfResponse = new JSONObject(response.toString());
 					JSONArray hyperCubes = udfResponse.getJSONArray("hypercubes");
+					int srs = Integer.parseInt(udfResponse.getString("proj"));
 					JSONObject firstHyperCube = hyperCubes.getJSONObject(0);
 					byte[] firstHyperCubeBlob = firstHyperCube.toString(2).getBytes(StandardCharsets.UTF_8);
 					File firstHyperCubeFile = new File(ConvenienceHelper.readProperties("temp-dir")+"udf_result_" + job.getId() + ".json");
@@ -254,11 +256,24 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					}
 					//TODO import hyper cube back into rasdaman here!
 					String netCDFPath = ConvenienceHelper.readProperties("temp-dir")+"udf_result/" + job.getId() + ".nc";
-					new HyperCubeFactory().writeHyperCubeToNetCDF(firstHyperCube, netCDFPath);
-					
+					new HyperCubeFactory().writeHyperCubeToNetCDF(firstHyperCube, srs, netCDFPath);
+					JSONArray dimensionsArray = firstHyperCube.getJSONArray("dimensions");
+					Iterator iterator = dimensionsArray.iterator();
+					Boolean containsMultiBands = false;
+					while(iterator.hasNext()) {
+						JSONObject dimensionDescriptor = (JSONObject) iterator.next();
+						if(dimensionDescriptor.getString("name").equals("band")) {
+							containsMultiBands = true;
+						}
+					}
 					try {
 						ProcessBuilder importProcessBuilder = new ProcessBuilder();
-						importProcessBuilder.command("bash", "-c", "/tmp/openeo/udf_result/import_udf.sh " + netCDFPath);						
+						if (containsMultiBands) {
+							importProcessBuilder.command("bash", "-c", "/tmp/openeo/udf_result/import_udf_multi_band.sh " + netCDFPath);
+						}
+						else if (!containsMultiBands) {
+							importProcessBuilder.command("bash", "-c", "/tmp/openeo/udf_result/import_udf.sh " + netCDFPath);
+						}
 						Process importProcess = importProcessBuilder.start();
 						StringBuilder importProcessLogger = new StringBuilder();
 
