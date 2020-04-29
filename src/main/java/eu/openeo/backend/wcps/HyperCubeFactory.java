@@ -453,6 +453,7 @@ public class HyperCubeFactory {
 			}			
 			writer.flush();
 			
+			int noOfBands = bandVars.size();
 			// now write data of each individual band to disk:
 			for(String bandName: bandVars.keySet()){
 				// First create variable for band
@@ -468,26 +469,38 @@ public class HyperCubeFactory {
 				ArrayDouble dataArray = new ArrayDouble(shape);
 				Index dataIndex = dataArray.getIndex();
 				
+				// run loop over all pixels in band variable as one linear dimension
 				for (long index1D = 0; index1D < bandVar.getSize(); index1D++) {				
 					JSONArray subDimArray = hyperCube.getJSONArray("data");
 					long divider = index1D;
+					
+					// find mapping between the mapping of the linear representation and the n-dimensional array description
 					for(int n = shape.length-1; n >= 0; n--) {
 						indexND[n] =  (int) (divider % shape[n]);
 						divider /= shape[n];
 					}
 					String indexS = "";
-					for(int k = 0; k < shape.length-1; k++) {
-						//FIXME not sure if this check will work in all cases
+					
+					// find value in n-dimensional hypercube at current position in linear domain
+					int bandFoundSubstractor = 0;
+					for(int k = 0; k < noOfBands-1; k++) {
 						if(k == bandDimensionIndex) {
 							subDimArray = subDimArray.getJSONArray(bandIndex);
-							subDimArray = subDimArray.getJSONArray(indexND[k]);
+							indexS += bandIndex + " ";
+							bandFoundSubstractor = 1;
 						}else {
-							subDimArray = subDimArray.getJSONArray(indexND[k]);
-						}						
-						indexS += indexND[k] + " ";
+							subDimArray = subDimArray.getJSONArray(indexND[k - bandFoundSubstractor]);
+							indexS += indexND[k] + " ";
+						}					
 					}
-					indexS += indexND[shape.length-1];				
-					double value = subDimArray.getDouble(indexND[shape.length-1]);
+					Double value = null; 
+					if(noOfBands-1 == bandDimensionIndex) {
+						indexS += bandIndex;				
+						value = subDimArray.getDouble(bandIndex);
+					}else {
+						indexS += indexND[shape.length-1];				
+						value = subDimArray.getDouble(indexND[shape.length-1]);
+					}
 					//log.debug(index1D + " | " + indexS + " : " + value);
 					dataArray.setDouble(dataIndex.set(indexND), value);
 				}
