@@ -208,7 +208,9 @@ public class HyperCubeFactory {
 			hyperCubesArray.put(hyperCubeArguments);
 
 			resultJSON.put("id", "hypercube_example");
-			resultJSON.put("proj", srsDescription);
+			//TODO check if we want epsg: or not
+			resultJSON.put("proj", "EPSG:" + srsDescription);
+			//resultJSON.put("proj", srsDescription);
 			resultJSON.put("hypercubes", hyperCubesArray);
 			//log.debug(resultJSON);
 
@@ -254,7 +256,7 @@ public class HyperCubeFactory {
 		return dataArray;
 	}
 	
-	public int writeHyperCubeToNetCDFBandAsDimension(JSONObject hyperCube, int srs, String path) {
+	public int writeHyperCubeToNetCDFBandAsDimension(JSONObject hyperCube, String srs, String path) {
 		try {
 			NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, path, null);
 			JSONArray bandsArray = new JSONArray();
@@ -307,7 +309,7 @@ public class HyperCubeFactory {
 			}
 			Variable values = writer.addVariable(hyperCube.getString("id"), DataType.DOUBLE, dims);
 			
-			writer.addGlobalAttribute(new Attribute("EPSG", srs));
+			writer.addGlobalAttribute(new Attribute("EPSG", srs.replace("EPSG:", "")));
 			writer.addGlobalAttribute(new Attribute("JOB", path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'))));
 			log.debug(hyperCube);
 			log.debug(bandsArray);
@@ -380,7 +382,7 @@ public class HyperCubeFactory {
 		return 0;
 	}
 	
-	public int writeHyperCubeToNetCDFBandAsVariable(JSONObject hyperCube, int srs, String path) {
+	public int writeHyperCubeToNetCDFBandAsVariable(JSONObject hyperCube, String srs, String path) {
 		try {
 			NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, path, null);
 			JSONArray dimensionsArray = hyperCube.getJSONArray("dimensions");
@@ -435,7 +437,8 @@ public class HyperCubeFactory {
 				}
 			}
 			// add metadata attributs to file concerning openEO job and crs
-			writer.addGlobalAttribute(new Attribute("EPSG", srs));
+			//writer.addGlobalAttribute(new Attribute("EPSG", srs));
+			writer.addGlobalAttribute(new Attribute("EPSG", srs.replace("EPSG:", "")));
 			writer.addGlobalAttribute(new Attribute("JOB", path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'))));
 			// write header of netcdf file to disk.
 			writer.create();
