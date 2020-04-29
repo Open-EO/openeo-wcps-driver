@@ -160,7 +160,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					//Compile code and data into one common JSON object.
 					UDFFactory udfFactory = new UDFFactory(runtime, codeStream, conn.getInputStream()); 
 					udfDescriptor = udfFactory.getUdfDescriptor();
-					log.debug("UDF JSON: " + udfDescriptor.toString(2));
+					log.trace("UDF JSON: " + udfDescriptor.toString(2));
 				}catch (IOException e) {
 					log.error("An error occured when streaming in input to UDF: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();

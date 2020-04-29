@@ -100,7 +100,6 @@ public class TestUDFPythonWithDynamicHyperCubeNetCDF {
 				    }
 			JSONObject udfResponse = new JSONObject(response.toString());
 			JSONArray hyperCubes = udfResponse.getJSONArray("hypercubes");
-			int srs = Integer.parseInt(udfResponse.getString("proj"));
 			JSONObject firstHyperCube = hyperCubes.getJSONObject(0);
 			byte[] firstHyperCubeBlob = firstHyperCube.toString(2).getBytes(StandardCharsets.UTF_8);
 			File firstHyperCubeFile = new File("src/test/resources/udf_example_hypercube_ndvi_result.json");
@@ -120,7 +119,7 @@ public class TestUDFPythonWithDynamicHyperCubeNetCDF {
 				fail();
 				return;
 			}
-			new HyperCubeFactory().writeHyperCubeToNetCDF(firstHyperCube, srs, "src/test/resources/udf_example_hypercube_ndvi_result.nc");
+			new HyperCubeFactory().writeHyperCubeToNetCDFBandAsDimension(firstHyperCube, udfResponse.getString("proj"), "src/test/resources/udf_example_hypercube_ndvi_result.nc");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			System.err.println(e.getMessage());
