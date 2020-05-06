@@ -309,7 +309,7 @@ public class HyperCubeFactory {
 			}
 			Variable values = writer.addVariable(hyperCube.getString("id"), DataType.DOUBLE, dims);
 			
-			writer.addGlobalAttribute(new Attribute("EPSG", srs.replace("EPSG:", "")));
+			writer.addGlobalAttribute(new Attribute("EPSG", Integer.parseInt(srs.replace("EPSG:", ""))));
 			writer.addGlobalAttribute(new Attribute("JOB", path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'))));
 			log.debug(hyperCube);
 			log.debug(bandsArray);
@@ -446,14 +446,18 @@ public class HyperCubeFactory {
 				d++;
 			}
 			int[] shape = null;
+			int i=0;
 			for(String bandName: bandIndices.keySet()){
 				Variable bandVar = writer.addVariable(bandName, DataType.DOUBLE, dims);
 				bandVars.put(bandName, bandVar);
 				shape = bandVar.getShape();
+				writer.addGlobalAttribute(new Attribute("Band"+i, bandName));
+				i=i+1;
 			}
-			// add metadata attributs to file concerning openEO job and crs
+			// add metadata attributes to file concerning openEO job and crs
 			//writer.addGlobalAttribute(new Attribute("EPSG", srs));
-			writer.addGlobalAttribute(new Attribute("EPSG", srs.replace("EPSG:", "")));
+			writer.addGlobalAttribute(new Attribute("Bands", i));
+			writer.addGlobalAttribute(new Attribute("EPSG", Integer.parseInt(srs.replace("EPSG:", ""))));
 			writer.addGlobalAttribute(new Attribute("JOB", path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'))));
 			// write header of netcdf file to disk.
 			writer.create();
@@ -514,7 +518,7 @@ public class HyperCubeFactory {
 						}else {
 							subDimArray = subDimArray.getJSONArray(indexND[k - bandFoundSubstractor]);
 							indexS += indexND[k] + " ";
-						}					
+						}
 					}
 					Double value = null; 
 					if(noOfBands-1 == bandDimensionIndex) {

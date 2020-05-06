@@ -257,21 +257,12 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					JSONArray dimensionsArray = firstHyperCube.getJSONArray("dimensions");
 					Iterator iterator = dimensionsArray.iterator();
 					Boolean containsMultiBands = false;
-					while(iterator.hasNext()) {
-						JSONObject dimensionDescriptor = (JSONObject) iterator.next();
-						if(dimensionDescriptor.getString("name").equals("band")) {
-							containsMultiBands = true;
-						}
-					}
+					
 					// Re-import result from UDF in rasdaman using wcst_import tool
 					try {
 						ProcessBuilder importProcessBuilder = new ProcessBuilder();
-						if (containsMultiBands) {
-							importProcessBuilder.command("bash", "-c", "/tmp/openeo/udf_result/import_udf_multi_band.sh " + netCDFPath);
-						}
-						else if (!containsMultiBands) {
-							importProcessBuilder.command("bash", "-c", "/tmp/openeo/udf_result/import_udf.sh " + netCDFPath);
-						}
+						importProcessBuilder.command("bash", "-c", "/tmp/openeo/udf_result/import_udf_multi.sh " + netCDFPath);
+						
 						Process importProcess = importProcessBuilder.start();
 						StringBuilder importProcessLogger = new StringBuilder();
 
