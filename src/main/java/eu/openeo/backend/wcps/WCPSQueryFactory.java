@@ -3765,10 +3765,19 @@ public class WCPSQueryFactory {
 					double[] c2 = null;
 					c1 = tx.TransformPoint(Double.parseDouble(bottom), Double.parseDouble(left));
 					c2 = tx.TransformPoint(Double.parseDouble(top), Double.parseDouble(right));
-					left = Double.toString(c1[0]);
-					bottom = Double.toString(c1[1]);
-					right = Double.toString(c2[0]);
-					top = Double.toString(c2[1]);
+					
+					if (srs==3035) {
+						left = Double.toString(c1[1]);
+						bottom = Double.toString(c1[0]);
+						right = Double.toString(c2[1]);
+						top = Double.toString(c2[0]);
+					}
+					else {
+						left = Double.toString(c1[0]);
+						bottom = Double.toString(c1[1]);
+						right = Double.toString(c2[0]);
+						top = Double.toString(c2[1]);
+					}
 
 					log.debug("WEST: "+left);
 					log.debug("SOUTH: "+bottom);
