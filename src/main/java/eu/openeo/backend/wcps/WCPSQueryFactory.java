@@ -2361,12 +2361,12 @@ public class WCPSQueryFactory {
 	private String createReturnResultWCPSString(String returnResultNodeKey, String payload) {
 		StringBuilder resultBuilder = new StringBuilder("");
 		resultBuilder.append(payload);
-//		if (this.outputFormat.equals("netcdf")) {
-//			resultBuilder.append(", \"" + this.outputFormat + "\" ," + "\"{ \\\"transpose\\\": [0,1] }\"" + ")");
-//		}
-//		else {
-//			resultBuilder.append(", \"" + this.outputFormat + "\" )");
-//		}
+		if (this.outputFormat.equals("netcdf")) {
+			resultBuilder.append(", \"" + this.outputFormat + "\" ," + "\"{ \\\"transpose\\\": [1,2] }\"" + ")");
+		}
+		else {
+			resultBuilder.append(", \"" + this.outputFormat + "\" )");
+		}
 		resultBuilder.append(", \"" + this.outputFormat + "\" )");
 		log.debug("Save payload : ");
 		log.debug(resultBuilder);
