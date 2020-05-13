@@ -19,6 +19,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Iterator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -107,11 +108,11 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				try {
 					version = udfNode.getJSONObject("arguments").getString("version");
 				}catch(JSONException e) {
-					
+					log.warn("no version for udf specified. Will fall back on default version of specified environment.");
 				}
-				String udf = udfNode.getJSONObject("arguments").getString("udf");
+				String udfCode = udfNode.getJSONObject("arguments").getString("udf");
 				log.debug("runtime: " + runtime);
-				log.debug("udf: " + udf);
+				log.debug("udf: " + udfCode);
 				
 				String udfCubeCoverageID = "udfCube_"; // Get ID from Rasdaman where UDF generated Cube is stored
 				JSONObject loadUDFCube = new JSONObject();
@@ -138,18 +139,18 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				try {					
 					//Get code block for UDF
 					InputStream codeStream = null;					
-					if(udf.startsWith("http")) {
-						String relativeFileLocation = udf.substring(udf.indexOf("files")+6);
+					if(udfCode.startsWith("http")) {
+						String relativeFileLocation = udfCode.substring(udfCode.indexOf("files")+6);
 						String fileToDownloadPath = ConvenienceHelper.readProperties("temp-dir") + relativeFileLocation;
 		    			log.debug("Grepping code from udf object from uploaded file resource: " + fileToDownloadPath);		    			
 		    			codeStream = new FileInputStream(fileToDownloadPath);		    			
 					}else {
 						log.debug("Grepping code from udf object as byte array.");
-						codeStream = new ByteArrayInputStream(udf.getBytes(StandardCharsets.UTF_8));
+						codeStream = new ByteArrayInputStream(udfCode.getBytes(StandardCharsets.UTF_8));
 					}
 					//Get data block for UDF
 					WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
-					wcpsFactory.setOutputFormat("gml");			
+					wcpsFactory.setOutputFormat("gml");
 					
 					URL url = new URL(ConvenienceHelper.readProperties("wcps-endpoint") + "?SERVICE=WCS" + "&VERSION=2.0.1"
 							+ "&REQUEST=ProcessCoverages" + "&QUERY="
@@ -159,7 +160,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					//Compile code and data into one common JSON object.
 					UDFFactory udfFactory = new UDFFactory(runtime, codeStream, conn.getInputStream()); 
 					udfDescriptor = udfFactory.getUdfDescriptor();
-					log.debug("UDF JSON: " + udfDescriptor.toString(2));
+					log.trace("UDF JSON: " + udfDescriptor.toString(2));
 				}catch (IOException e) {
 					log.error("An error occured when streaming in input to UDF: " + e.getMessage());
 					StringBuilder builder = new StringBuilder();
@@ -170,7 +171,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				}
 				
 				String service_url = null;
-				
+				// Select correct parameters for execution environment of UDF
 				if(runtime.toLowerCase().equals("python")&&version.toLowerCase().equals("openeo")) {
 					runtime = "python";
 					service_url = ConvenienceHelper.readProperties("python-udf-endpoint");
@@ -186,6 +187,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					log.error("The requested runtime is not available!");
 				}
 				
+				// Find correct udf engine endpoint based on selected execution environment
 				URL udfServiceEndpoint = null;
 				try {
 					udfServiceEndpoint = new URL(service_url + "/udf");
@@ -198,6 +200,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					log.error(builder.toString());
 				}
 				log.info(udfServiceEndpoint);
+				// open http connection to udf execution endpoint 
 				HttpURLConnection con = null;
 				try {
 					log.info("Sending UDF to UDF endpoint.");
@@ -214,7 +217,11 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					}
 					log.error(builder.toString());
 				}
-
+				
+				String inputHyperCubeDebugPath = ConvenienceHelper.readProperties("temp-dir")+"udf_result/input_" + job.getId() + ".json";
+				saveHyperCubeToDisk(udfDescriptor, inputHyperCubeDebugPath);
+				
+				// stream UDF in form of json hypercube object to udf endpoint via http post method 
 				try (OutputStream os = con.getOutputStream()) {
 					byte[] udfBlob = udfDescriptor.toString().getBytes(StandardCharsets.UTF_8);
 					os.write(udfBlob, 0, udfBlob.length);
@@ -227,6 +234,8 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					}
 					log.error(builder.toString());
 				}
+				
+				// get result from udf endpoint in form of a json hypercube document.
 				try(BufferedReader br = new BufferedReader(
 						  new InputStreamReader(con.getInputStream(), "utf-8"))) {
 						    StringBuilder response = new StringBuilder();
@@ -237,28 +246,23 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				    log.info("Received result from UDF endpoint.");
 					JSONObject udfResponse = new JSONObject(response.toString());
 					JSONArray hyperCubes = udfResponse.getJSONArray("hypercubes");
+
 					JSONObject firstHyperCube = hyperCubes.getJSONObject(0);
-					byte[] firstHyperCubeBlob = firstHyperCube.toString(2).getBytes(StandardCharsets.UTF_8);
-					File firstHyperCubeFile = new File(ConvenienceHelper.readProperties("temp-dir")+"udf_result_" + job.getId() + ".json");
-					FileOutputStream firstHyperCubeStream;
-					try {
-						firstHyperCubeStream = new FileOutputStream(firstHyperCubeFile);
-						firstHyperCubeStream.write(firstHyperCubeBlob, 0, firstHyperCubeBlob.length);
-						firstHyperCubeStream.flush();
-						firstHyperCubeStream.close();
-						//TODO fire udf finished event here!
-					} catch (FileNotFoundException e1) {
-						e1.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					//TODO import hyper cube back into rasdaman here!
+
+					String outputHyperCubeDebugPath = ConvenienceHelper.readProperties("temp-dir")+"udf_result/output_" + job.getId() + ".json";
+					saveHyperCubeToDisk(firstHyperCube, outputHyperCubeDebugPath);
+					// convert hypercube json object into netcdf file and save to tempory disk
 					String netCDFPath = ConvenienceHelper.readProperties("temp-dir")+"udf_result/" + job.getId() + ".nc";
-					new HyperCubeFactory().writeHyperCubeToNetCDF(firstHyperCube, netCDFPath);
+					new HyperCubeFactory().writeHyperCubeToNetCDFBandAsVariable(firstHyperCube, udfResponse.getString("proj"), netCDFPath);
+					JSONArray dimensionsArray = firstHyperCube.getJSONArray("dimensions");
+					Iterator iterator = dimensionsArray.iterator();
+					Boolean containsMultiBands = false;
 					
+					// Re-import result from UDF in rasdaman using wcst_import tool
 					try {
 						ProcessBuilder importProcessBuilder = new ProcessBuilder();
-						importProcessBuilder.command("bash", "-c", "/tmp/openeo/udf_result/import_udf.sh " + netCDFPath);						
+						importProcessBuilder.command("bash", "-c", "/tmp/openeo/udf_result/import_udf_multi.sh " + netCDFPath);
+						
 						Process importProcess = importProcessBuilder.start();
 						StringBuilder importProcessLogger = new StringBuilder();
 
@@ -301,6 +305,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 						}
 						log.error(builder.toString());
 					}
+					// continue processing of process_graph after the UDF
 					WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphAfterUDF);
 					URL urlUDF = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
 							+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
@@ -607,6 +612,25 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 			}
 			log.error(builder.toString());
 		}		
+	}
+	
+	private void saveHyperCubeToDisk(JSONObject hyperCubeJSON, String filePath) {
+		log.debug("Saving hypercube to disk: " + filePath);
+		byte[] firstHyperCubeBlob = hyperCubeJSON.toString(2).getBytes(StandardCharsets.UTF_8);
+		File firstHyperCubeFile = new File(filePath);
+		FileOutputStream firstHyperCubeStream;
+		// store json hypercube as file on disk
+		try {
+			firstHyperCubeStream = new FileOutputStream(firstHyperCubeFile);
+			firstHyperCubeStream.write(firstHyperCubeBlob, 0, firstHyperCubeBlob.length);
+			firstHyperCubeStream.flush();
+			firstHyperCubeStream.close();
+			//TODO fire udf finished event here!
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

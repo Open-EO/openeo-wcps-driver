@@ -87,7 +87,16 @@ public class JobsApiServiceImpl extends JobsApiService {
 		try {
 			storedBatchJobs = jobDao.queryForAll();
 			for (BatchJobResponse storedBatchJob : storedBatchJobs) {
-				jobs.put(new JSONObject((String) storedBatchJob.toString()));
+				try {
+					jobs.put(new JSONObject((String) storedBatchJob.toString()));
+				}catch(Exception e1) {
+					log.error("An error occured while serializing job to json: " + e1.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for (StackTraceElement element : e1.getStackTrace()) {
+						builder.append(element.toString() + "\n");
+					}
+					log.error(builder.toString());
+				}				
 			}
 			JSONObject linkSelf = new JSONObject();
 			linkSelf.put("href", ConvenienceHelper.readProperties("openeo-endpoint") + "/jobs/");

@@ -117,7 +117,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			src.ImportFromEPSG(Integer.parseInt(srsDescription));
 
 			SpatialReference dst = new SpatialReference();
-			dst.ImportFromEPSG(4326);			
+			dst.ImportFromEPSG(4326);
 			
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");			
@@ -157,23 +157,66 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 		    
 			log.debug(srsDescription);
 			
+//			log.debug("xIndex : " + xIndex);
+//			log.debug("yIndex : " + yIndex);
+//			
+//			SpatialReference src1 = new SpatialReference();
+//			src1.ImportFromEPSG(3035);
+//
+//			SpatialReference dst1 = new SpatialReference();
+//			dst1.ImportFromEPSG(4326);
+//			
+//			CoordinateTransformation tx1 = new CoordinateTransformation(src1, dst1);
+//			
+//			SpatialReference src2 = new SpatialReference();
+//			src2.ImportFromEPSG(32632);
+//
+//			SpatialReference dst2 = new SpatialReference();
+//			dst2.ImportFromEPSG(4326);
+//			
+//			CoordinateTransformation tx2 = new CoordinateTransformation(src2, dst2);
+//			
+//			double[] cc1 = tx1.TransformPoint(2261160, 4065180);
+//			double[] cc2 = tx1.TransformPoint(4065180, 2261160);
+//			double[] cc3 = tx2.TransformPoint(600000, 5090220);
+//			
+//			log.debug("Transform 3035  : " + cc1[1] + " " + cc1[0]);
+//			log.debug("Transform 3035  : " + cc2[1] + " " + cc2[0]);
+//			log.debug("Transform 32632 : " + cc3[1] + " " + cc3[0]);
+//			log.debug(cc1.length);
+			
+//			double[] c1 = null;
+//			double[] c2 = null;
+//			c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
+//			c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));
+			
 			double[] c1 = null;
 			double[] c2 = null;
-			c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
-			c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));				
+			int j = 0;
 			
-			spatialExtent.put(c1[0]);
+			for(int a = 0; a < axis.length; a++) {
+		    	log.debug(axis[a]);
+				if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long") || axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
+					j = a;
+					break;
+				}
+			}
+			log.debug(j);
+			
+			c1 = tx.TransformPoint(Double.parseDouble(minValues[j]), Double.parseDouble(minValues[j+1]));
+			c2 = tx.TransformPoint(Double.parseDouble(maxValues[j]), Double.parseDouble(maxValues[j+1]));
 			spatialExtent.put(c1[1]);
-			spatialExtent.put(c2[0]);
+			spatialExtent.put(c1[0]);
 			spatialExtent.put(c2[1]);
+			spatialExtent.put(c2[0]);
 			
 			JSONArray xExtent = new JSONArray();
-			xExtent.put(c1[0]);
-			xExtent.put(c2[0]);
+			xExtent.put(c1[1]);
+			xExtent.put(c2[1]);
 			dimObjects[0].put("extent", xExtent);
 			JSONArray yExtent = new JSONArray();
-			yExtent.put(c1[1]);
-			yExtent.put(c2[1]);
+			yExtent.put(c1[0]);
+			yExtent.put(c2[0]);
 			dimObjects[1].put("extent", yExtent);			
 			
 			JSONArray links = new JSONArray();
@@ -263,7 +306,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				for(int c = 0; c < bandsListSwe.size(); c++) {
 					JSONObject product = new JSONObject();
 					String bandId = bandsListSwe.get(c).getAttributeValue("name");
-								
+					
 					product.put("name", bandId);					
 					bandValues.put(bandId);					
 					bandArray.put(product);
@@ -571,15 +614,31 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 					}
 			    }
 			    
-				double[] c1 = null;
-				double[] c2 = null;
-				c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
-				c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));				
+//				double[] c1 = null;
+//				double[] c2 = null;
+//				c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
+//				c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));
 				
-				spatialExtent.put(c1[0]);
+			    double[] c1 = null;
+				double[] c2 = null;
+				int j = 0;
+				
+				for(int a = 0; a < axis.length; a++) {
+			    	log.debug(axis[a]);
+					if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long") || axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
+						j = a;
+						break;
+					}
+				}
+				log.debug(j);
+				
+				c1 = tx.TransformPoint(Double.parseDouble(minValues[j]), Double.parseDouble(minValues[j+1]));
+				c2 = tx.TransformPoint(Double.parseDouble(maxValues[j]), Double.parseDouble(maxValues[j+1]));
+			    
 				spatialExtent.put(c1[1]);
-				spatialExtent.put(c2[0]);
-				spatialExtent.put(c2[1]);			
+				spatialExtent.put(c1[0]);
+				spatialExtent.put(c2[1]);
+				spatialExtent.put(c2[0]);			
 									
 				extentCollection.put("spatial", spatialExtent);
 				extentCollection.put("temporal", temporalExtent);

@@ -119,7 +119,7 @@ public class TestUDFPythonWithDynamicHyperCubeNetCDF {
 				fail();
 				return;
 			}
-			new HyperCubeFactory().writeHyperCubeToNetCDF(firstHyperCube, "src/test/resources/udf_example_hypercube_ndvi_result.nc");
+			new HyperCubeFactory().writeHyperCubeToNetCDFBandAsDimension(firstHyperCube, udfResponse.getString("proj"), "src/test/resources/udf_example_hypercube_ndvi_result.nc");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			System.err.println(e.getMessage());
