@@ -447,12 +447,21 @@ public class HyperCubeFactory {
 			}
 			int[] shape = null;
 			int i=0;
-			for(String bandName: bandIndices.keySet()){
+			int noOfBands = bandIndices.size();
+			if( noOfBands > 0) {
+				for(String bandName: bandIndices.keySet()){
+					Variable bandVar = writer.addVariable(bandName, DataType.DOUBLE, dims);
+					bandVars.put(bandName, bandVar);
+					shape = bandVar.getShape();
+					writer.addGlobalAttribute(new Attribute("Band"+i, bandName));
+					i=i+1;
+				}
+			}else {
+				String bandName = hyperCube.getString("id");
 				Variable bandVar = writer.addVariable(bandName, DataType.DOUBLE, dims);
 				bandVars.put(bandName, bandVar);
 				shape = bandVar.getShape();
 				writer.addGlobalAttribute(new Attribute("Band"+i, bandName));
-				i=i+1;
 			}
 			// add metadata attributes to file concerning openEO job and crs
 			//writer.addGlobalAttribute(new Attribute("EPSG", srs));
@@ -478,14 +487,69 @@ public class HyperCubeFactory {
 			
 			writer.flush();
 			
-			int noOfBands = bandIndices.size();
-			log.debug("Band Dimension Index: " + bandDimensionIndex);
-			// now write data of each individual band to disk:
-			for(String bandName: bandIndices.keySet()){
+			if( noOfBands > 0) {
+				log.debug("Band Dimension Index: " + bandDimensionIndex);
+				// now write data of each individual band to disk:
+				for(String bandName: bandIndices.keySet()){
+					log.debug("Writing data of band: " + bandName);
+					// First create variable for band
+					Variable bandVar = bandVars.get(bandName);
+					Integer bandIndex = bandIndices.get(bandName);
+					
+	//				int[] shape = bandVar.getShape();
+					int[] indexND =  new int[shape.length];
+					
+					
+					log.debug("Number of dimensions: " + shape.length);
+					
+					ArrayDouble dataArray = new ArrayDouble(shape);
+					Index dataIndex = dataArray.getIndex();
+					
+					// run loop over all pixels in band variable as one linear dimension
+					for (long index1D = 0; index1D < bandVar.getSize(); index1D++) {				
+						JSONArray subDimArray = hyperCube.getJSONArray("data");
+						long divider = index1D;
+						
+						// find mapping between the mapping of the linear representation and the n-dimensional array description
+						for(int n = shape.length-1; n >= 0; n--) {
+							indexND[n] =  (int) (divider % shape[n]);
+							divider /= shape[n];
+						}
+						String indexS = "";
+						
+						// find value in n-dimensional hypercube at current position in linear domain
+						int bandFoundSubstractor = 0;
+						for(int k = 0; k < shape.length; k++) {
+							if(k == bandDimensionIndex) {
+								subDimArray = subDimArray.getJSONArray(bandIndex);
+								indexS += bandIndex + " ";
+								bandFoundSubstractor = 1;
+							}else {
+								subDimArray = subDimArray.getJSONArray(indexND[k - bandFoundSubstractor]);
+								indexS += indexND[k] + " ";
+							}
+						}
+						Double value = null; 
+						if(noOfBands-1 == bandDimensionIndex) {
+							indexS += bandIndex;				
+							value = subDimArray.getDouble(bandIndex);
+						}else {
+							indexS += indexND[shape.length-1];				
+							value = subDimArray.getDouble(indexND[shape.length-1]);
+						}
+						log.trace(index1D + " | " + indexS + " : " + value);
+						dataArray.setDouble(dataIndex.set(indexND), value);
+					}
+					
+					writer.write(bandVar, new int[shape.length], dataArray);
+					writer.flush();
+					log.debug("Finished writing data of band: " + bandName);
+				}
+			} else {
+				String bandName = hyperCube.getString("id");
 				log.debug("Writing data of band: " + bandName);
 				// First create variable for band
 				Variable bandVar = bandVars.get(bandName);
-				Integer bandIndex = bandIndices.get(bandName);
 				
 //				int[] shape = bandVar.getShape();
 				int[] indexND =  new int[shape.length];
@@ -511,23 +575,12 @@ public class HyperCubeFactory {
 					// find value in n-dimensional hypercube at current position in linear domain
 					int bandFoundSubstractor = 0;
 					for(int k = 0; k < shape.length; k++) {
-						if(k == bandDimensionIndex) {
-							subDimArray = subDimArray.getJSONArray(bandIndex);
-							indexS += bandIndex + " ";
-							bandFoundSubstractor = 1;
-						}else {
-							subDimArray = subDimArray.getJSONArray(indexND[k - bandFoundSubstractor]);
-							indexS += indexND[k] + " ";
-						}
+						subDimArray = subDimArray.getJSONArray(indexND[k - bandFoundSubstractor]);
+						indexS += indexND[k] + " ";
 					}
 					Double value = null; 
-					if(noOfBands-1 == bandDimensionIndex) {
-						indexS += bandIndex;				
-						value = subDimArray.getDouble(bandIndex);
-					}else {
-						indexS += indexND[shape.length-1];				
-						value = subDimArray.getDouble(indexND[shape.length-1]);
-					}
+					indexS += indexND[shape.length-1];				
+					value = subDimArray.getDouble(indexND[shape.length-1]);
 					log.trace(index1D + " | " + indexS + " : " + value);
 					dataArray.setDouble(dataIndex.set(indexND), value);
 				}
