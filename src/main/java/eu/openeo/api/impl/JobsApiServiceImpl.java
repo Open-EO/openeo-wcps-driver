@@ -339,7 +339,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 
 		log.debug("The following job was submitted: \n" + storeBatchJobRequest.toString());
 		processGraphJSON = (JSONObject) storeBatchJobRequest.getProcessGraph();
-
+		//TODO enable to switch between rasdaman and open data cube, based on dataset present in process graph
 		WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
 		log.info("Graph of job successfully parsed and job saved with ID: " + jobID);
 		if(wcpsFactory.isWithUDF()) {

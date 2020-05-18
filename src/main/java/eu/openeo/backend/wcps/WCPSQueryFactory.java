@@ -3132,6 +3132,7 @@ public class WCPSQueryFactory {
 	 * @return
 	 */
 	private JSONObject parseOpenEOProcessGraph() {
+		//TODO why do we create an object here, that we never touch again and return that empty object?
 		JSONObject result = null;
 		JSONArray nodesArray = new JSONArray();
 		JSONArray nodesSortedArray = new JSONArray();
