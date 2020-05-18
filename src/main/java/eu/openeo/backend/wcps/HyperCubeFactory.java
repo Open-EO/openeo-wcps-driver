@@ -18,11 +18,8 @@ import org.jdom2.input.SAXBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import ucar.ma2.ArrayChar;
 import ucar.ma2.ArrayDouble;
-import ucar.ma2.ArrayInt;
 import ucar.ma2.ArrayLong;
-import ucar.ma2.ArrayString;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -44,6 +41,7 @@ public class HyperCubeFactory {
 		SAXBuilder saxBuilder = new SAXBuilder();
 		try {
 			Document capabilititesDoc = (Document) saxBuilder.build(inputStream);
+			inputStream.close();
 			List<Namespace> namespaces = capabilititesDoc.getNamespacesIntroduced();
 			Element rootNode = capabilititesDoc.getRootElement();
 			Namespace defaultNS = rootNode.getNamespace();
@@ -383,6 +381,7 @@ public class HyperCubeFactory {
 	}
 	
 	public int writeHyperCubeToNetCDFBandAsVariable(JSONObject hyperCube, String srs, String path) {
+		log.debug("Hypercube " + hyperCube.getInt("id") + " will be transformed into netcdf: ");
 		try {
 			NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, path, null);
 			JSONArray dimensionsArray = hyperCube.getJSONArray("dimensions");
@@ -448,8 +447,10 @@ public class HyperCubeFactory {
 			int[] shape = null;
 			int i=0;
 			int noOfBands = bandIndices.size();
-			if( noOfBands > 0) {
+			log.debug("Hypercube " + hyperCube.getInt("id") + " has " + noOfBands + " bands");
+			if( noOfBands > 0) {	
 				for(String bandName: bandIndices.keySet()){
+					log.debug("Creating variable for band: " + bandName);
 					Variable bandVar = writer.addVariable(bandName, DataType.DOUBLE, dims);
 					bandVars.put(bandName, bandVar);
 					shape = bandVar.getShape();
@@ -458,6 +459,7 @@ public class HyperCubeFactory {
 				}
 			}else {
 				String bandName = hyperCube.getString("id");
+				log.debug("Creating variable for band: " + bandName);
 				Variable bandVar = writer.addVariable(bandName, DataType.DOUBLE, dims);
 				bandVars.put(bandName, bandVar);
 				shape = bandVar.getShape();

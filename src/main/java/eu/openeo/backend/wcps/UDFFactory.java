@@ -34,6 +34,7 @@ public class UDFFactory {
 		this.udfDescriptor = new JSONObject();
 		
 		byte[] codeBlob = IOUtils.toByteArray(codeStream);
+		codeStream.close();
 		JSONObject codeBlock = new JSONObject();
 		codeBlock.put("language", udfLanString);
 		codeBlock.put("source", new String(codeBlob, StandardCharset.UTF_8));	
