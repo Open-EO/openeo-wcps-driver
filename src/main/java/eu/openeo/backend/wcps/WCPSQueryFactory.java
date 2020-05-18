@@ -553,7 +553,7 @@ public class WCPSQueryFactory {
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}
 			
-			if (currentProcessID.equals("if")) {
+			if (currentProcessID.equals("if_custom")) {
 				StringBuilder wcpsIFpayLoad = new StringBuilder("");
 				String payLoad = null;
 				int accept = 0;
@@ -586,7 +586,7 @@ public class WCPSQueryFactory {
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}
 			
-			if (currentProcessID.equals("mask")) {
+			if (currentProcessID.equals("mask_custom")) {
 				StringBuilder wcpsArrayFilterpayLoad = new StringBuilder("");
 				String payLoad = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
@@ -2367,7 +2367,6 @@ public class WCPSQueryFactory {
 		else {
 			resultBuilder.append(", \"" + this.outputFormat + "\" )");
 		}
-		resultBuilder.append(", \"" + this.outputFormat + "\" )");
 		log.debug("Save payload : ");
 		log.debug(resultBuilder);
 		return resultBuilder.toString();

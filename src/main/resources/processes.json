@@ -61,7 +61,46 @@
             "title": "Resampling explained in the openEO glossary"
         }
     ]
-    },    
+    },
+    {
+    "id": "if_custom",
+    "summary": "If-Then-Else conditional",
+    "description": "If the value passed is `true`, returns the value of the `accept` parameter, otherwise returns the value of the `reject` parameter.\n\nThis is basically an if-then-else construct as in other programming languages.",
+    "categories": [
+        "logic",
+        "comparison",
+        "masks"
+    ],
+    "parameters": {
+        "value" : {
+            "description": "A boolean value.",
+            "schema": {
+                "type": "boolean",
+                "format": "raster-cube"
+            }
+        },
+        "accept": {
+            "description": "A value that is returned if the boolean value is `true`.",
+            "schema": {
+                "type": "number"
+            }
+        },
+        "reject": {
+            "description": "A value that is returned if the boolean value is **not** `true`. Defaults to `null`.",
+            "schema": {
+                "type": "number"
+            },
+            "required": false
+        }
+    },
+    "returns": {
+        "description": "Either the `accept` or `reject` argument depending on the given boolean value.",
+        "schema": {
+            "type": "object",
+            "format": "raster-cube"
+        }
+    }
+    },
     {
     "id": "merge_cubes",
     "summary": "Merging two data cubes",
