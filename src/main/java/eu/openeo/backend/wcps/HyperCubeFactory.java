@@ -381,7 +381,7 @@ public class HyperCubeFactory {
 	}
 	
 	public int writeHyperCubeToNetCDFBandAsVariable(JSONObject hyperCube, String srs, String path) {
-		log.debug("Hypercube " + hyperCube.getInt("id") + " will be transformed into netcdf: ");
+		log.debug("Hypercube " + hyperCube.getString("id") + " will be transformed into netcdf: ");
 		try {
 			NetcdfFileWriter writer = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, path, null);
 			JSONArray dimensionsArray = hyperCube.getJSONArray("dimensions");
@@ -447,7 +447,7 @@ public class HyperCubeFactory {
 			int[] shape = null;
 			int i=0;
 			int noOfBands = bandIndices.size();
-			log.debug("Hypercube " + hyperCube.getInt("id") + " has " + noOfBands + " bands");
+			log.debug("Hypercube " + hyperCube.getString("id") + " has " + noOfBands + " bands");
 			if( noOfBands > 0) {	
 				for(String bandName: bandIndices.keySet()){
 					log.debug("Creating variable for band: " + bandName);
@@ -575,9 +575,8 @@ public class HyperCubeFactory {
 					String indexS = "";
 					
 					// find value in n-dimensional hypercube at current position in linear domain
-					int bandFoundSubstractor = 0;
-					for(int k = 0; k < shape.length; k++) {
-						subDimArray = subDimArray.getJSONArray(indexND[k - bandFoundSubstractor]);
+					for(int k = 0; k < shape.length-1; k++) {
+						subDimArray = subDimArray.getJSONArray(indexND[k]);
 						indexS += indexND[k] + " ";
 					}
 					Double value = null; 
