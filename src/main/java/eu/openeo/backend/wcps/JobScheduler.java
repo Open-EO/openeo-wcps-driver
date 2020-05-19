@@ -28,9 +28,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.jdbc.JdbcConnectionSource;
-import com.j256.ormlite.support.ConnectionSource;
+//import com.j256.ormlite.dao.DaoManager;
+//import com.j256.ormlite.jdbc.JdbcConnectionSource;
+//import com.j256.ormlite.support.ConnectionSource;
 
 import eu.openeo.backend.wcps.events.JobEvent;
 import eu.openeo.backend.wcps.events.JobEventListener;
@@ -44,32 +44,34 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 	Logger log = LogManager.getLogger();
 	
 	private Dao<BatchJobResponse,String> jobDao = null;
-	private ConnectionSource connection = null;
+//	private ConnectionSource connection = null;
 	private String wcpsEndpoint = null;
 	private JSONObject processGraphJSON = new JSONObject();
 	private JSONObject processGraphAfterUDF = null;
 	
-	public JobScheduler() {
-		try {
-			String dbURL = "jdbc:sqlite:" + ConvenienceHelper.readProperties("job-database");
-			wcpsEndpoint = ConvenienceHelper.readProperties("wcps-endpoint");
-			connection =  new JdbcConnectionSource(dbURL);
-			jobDao = DaoManager.createDao(connection, BatchJobResponse.class);
-		} catch (SQLException sqle) {
-			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
-			StringBuilder builder = new StringBuilder();
-			for( StackTraceElement element: sqle.getStackTrace()) {
-				builder.append(element.toString()+"\n");
-			}
-			log.error(builder.toString());
-		} catch (IOException ioe) {
-			log.error("An error occured while reading properties file: " + ioe.getMessage());
-			StringBuilder builder = new StringBuilder();
-			for( StackTraceElement element: ioe.getStackTrace()) {
-				builder.append(element.toString()+"\n");
-			}
-			log.error(builder.toString());
-		}
+	public JobScheduler(Dao<BatchJobResponse,String> jobDao, String wcpsEndpoint) {
+		this.jobDao = jobDao;
+		this.wcpsEndpoint = wcpsEndpoint;
+//		try {
+////			String dbURL = "jdbc:sqlite:" + ConvenienceHelper.readProperties("job-database");
+////			wcpsEndpoint = ConvenienceHelper.readProperties("wcps-endpoint");
+////			connection =  new JdbcConnectionSource(dbURL);
+////			jobDao = DaoManager.createDao(connection, BatchJobResponse.class);
+////		} catch (SQLException sqle) {
+////			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
+////			StringBuilder builder = new StringBuilder();
+////			for( StackTraceElement element: sqle.getStackTrace()) {
+////				builder.append(element.toString()+"\n");
+////			}
+////			log.error(builder.toString());
+//		} catch (IOException ioe) {
+//			log.error("An error occured while reading properties file: " + ioe.getMessage());
+//			StringBuilder builder = new StringBuilder();
+//			for( StackTraceElement element: ioe.getStackTrace()) {
+//				builder.append(element.toString()+"\n");
+//			}
+//			log.error(builder.toString());
+//		}
 	}
 
 	@Override

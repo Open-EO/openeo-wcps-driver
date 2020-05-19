@@ -575,9 +575,8 @@ public class HyperCubeFactory {
 					String indexS = "";
 					
 					// find value in n-dimensional hypercube at current position in linear domain
-					int bandFoundSubstractor = 0;
-					for(int k = 0; k < shape.length; k++) {
-						subDimArray = subDimArray.getJSONArray(indexND[k - bandFoundSubstractor]);
+					for(int k = 0; k < shape.length-1; k++) {
+						subDimArray = subDimArray.getJSONArray(indexND[k]);
 						indexS += indexND[k] + " ";
 					}
 					Double value = null; 
