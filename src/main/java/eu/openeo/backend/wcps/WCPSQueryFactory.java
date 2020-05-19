@@ -595,15 +595,28 @@ public class WCPSQueryFactory {
 					for (String fromType : processArguments.getJSONObject("data").keySet()) {
 						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
 							payLoad = wcpsPayLoad.toString();
-							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm") + " " + processArguments.getString("comparator") + " " + processArguments.getString("threshold")+",");
 							varPayLoad.append(" $payLoad"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$rm")+",");
 						}
 						else if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("data").getString("from_node");
 							payLoad = storedPayLoads.getString(dataNode);
 							log.debug("Array Filterd Process : ");
-							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm") + " " + processArguments.getString("comparator") + " " + processArguments.getString("threshold")+",");
 							varPayLoad.append(" $payLoad"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$rm")+",");
+						}
+					}
+				}
+				
+				if (processArguments.get("mask") instanceof JSONObject) {
+					for (String fromType : processArguments.getJSONObject("mask").keySet()) {
+						if (fromType.equals("from_argument") && processArguments.getJSONObject("mask").getString("from_argument").equals("data")) {
+							payLoad = wcpsPayLoad.toString();
+							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm")+",");
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = processArguments.getJSONObject("mask").getString("from_node");
+							payLoad = storedPayLoads.getString(dataNode);
+							log.debug("Array Filterd Process : ");
+							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm")+",");
 						}
 					}
 				}
@@ -614,7 +627,7 @@ public class WCPSQueryFactory {
 				StringBuilder wcpsStringBuilderMaskThresPayload = basicWCPSStringBuilder(varPayLoad.toString());
 				wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsArrayFilterpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsArrayFilterpayLoad.toString());
-				log.debug("Array Filterd Process PayLoad is : ");
+				log.debug("Mask Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}
 			
@@ -2863,6 +2876,17 @@ public class WCPSQueryFactory {
 						}
 					}
 				}
+				nextNodeName.put(currentNode, fromNodes);				
+			}
+			else if (argumentsKey.contentEquals("mask")) {
+				if (currentNodeProcessArguments.get("mask") instanceof JSONObject) {
+					for (String fromKey : currentNodeProcessArguments.getJSONObject("mask").keySet()) {
+						if (fromKey.contentEquals("from_node")) {
+							nextFromNode = currentNodeProcessArguments.getJSONObject("mask").getString("from_node");
+							fromNodes.put(nextFromNode);
+						}
+					}
+				}				
 				nextNodeName.put(currentNode, fromNodes);				
 			}
 			else if (argumentsKey.contentEquals("value")) {
