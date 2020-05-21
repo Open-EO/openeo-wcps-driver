@@ -51,18 +51,21 @@ public class JobsApiServiceImpl extends JobsApiService {
 	private Dao<BatchJobResponse, String> jobDao = null;
 	private EventListenerList listenerList = new EventListenerList();
 	private JobScheduler jobScheduler = null;
+	private String wcpsEndpoint = null;
 
 	public JobsApiServiceImpl() {
 		try {
 			String dbURL = "jdbc:sqlite:" + ConvenienceHelper.readProperties("job-database");
 			connection = new JdbcConnectionSource(dbURL);
+			this.wcpsEndpoint = ConvenienceHelper.readProperties("wcps-endpoint");
 			try {
 				TableUtils.createTable(connection, BatchJobResponse.class);
 			} catch (SQLException sqle) {
 				log.debug("Create Table failed, probably exists already: " + sqle.getMessage());
 			}
 			jobDao = DaoManager.createDao(connection, BatchJobResponse.class);
-			this.jobScheduler = new JobScheduler();
+			log.debug("JobsApiServiceImpl() has been called and established a connection to the openEO DB."); 
+			this.jobScheduler = new JobScheduler(jobDao, wcpsEndpoint);
 			this.addJobListener(jobScheduler);
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
@@ -90,7 +93,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 				try {
 					jobs.put(new JSONObject((String) storedBatchJob.toString()));
 				}catch(Exception e1) {
-					log.error("An error occured while serializing job to json: " + e1.getMessage());
+					log.error("An error occured while serializing job (" + storedBatchJob.getId() + ") to json: " + e1.getMessage());
 					StringBuilder builder = new StringBuilder();
 					for (StackTraceElement element : e1.getStackTrace()) {
 						builder.append(element.toString() + "\n");
@@ -339,7 +342,7 @@ public class JobsApiServiceImpl extends JobsApiService {
 
 		log.debug("The following job was submitted: \n" + storeBatchJobRequest.toString());
 		processGraphJSON = (JSONObject) storeBatchJobRequest.getProcessGraph();
-
+		//TODO enable to switch between rasdaman and open data cube, based on dataset present in process graph
 		WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphJSON);
 		log.info("Graph of job successfully parsed and job saved with ID: " + jobID);
 		if(wcpsFactory.isWithUDF()) {

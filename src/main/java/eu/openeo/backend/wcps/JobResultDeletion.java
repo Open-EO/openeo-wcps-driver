@@ -6,7 +6,8 @@ import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Date;
 
-import org.apache.logging.log4j.LogManager;import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -27,6 +28,7 @@ public class JobResultDeletion implements Runnable {
 			String dbURL = "jdbc:sqlite:" + ConvenienceHelper.readProperties("job-database");
 			connection = new JdbcConnectionSource(dbURL);		
 			jobDao = DaoManager.createDao(connection, BatchJobResponse.class);
+			log.debug("JobResultDeletion() has been called and established a connection to the openEO DB."); 
 		} catch (SQLException sqle) {
 			StringBuilder builder = new StringBuilder();
 			for (StackTraceElement element : sqle.getStackTrace()) {
@@ -82,7 +84,6 @@ public class JobResultDeletion implements Runnable {
 					}
 				}
 			}		
-			
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 			StringBuilder builder = new StringBuilder();

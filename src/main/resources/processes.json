@@ -61,7 +61,80 @@
             "title": "Resampling explained in the openEO glossary"
         }
     ]
-    },    
+    },
+    {
+    "id": "if_custom",
+    "summary": "If-Then-Else conditional",
+    "description": "If the value passed is `true`, returns the value of the `accept` parameter, otherwise returns the value of the `reject` parameter.\n\nThis is basically an if-then-else construct as in other programming languages.",
+    "categories": [
+        "logic",
+        "comparison",
+        "masks"
+    ],
+    "parameters": {
+        "value" : {
+            "description": "A boolean value.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube"
+            }
+        },
+        "accept": {
+            "description": "A value that is returned if the boolean value is `true`.",
+            "schema": {
+                "type": "number"
+            }
+        },
+        "reject": {
+            "description": "A value that is returned if the boolean value is **not** `true`. Defaults to `null`.",
+            "schema": {
+                "type": "number"
+            },
+            "required": false
+        }
+    },
+    "returns": {
+        "description": "Either the `accept` or `reject` argument depending on the given boolean value.",
+        "schema": {
+            "type": "object",
+            "format": "raster-cube"
+        }
+    }
+    },
+    {
+    "id": "mask_custom",
+    "summary": "Apply a raster mask",
+    "description": "Applies a mask to a raster data cube. To apply a vector mask use ``mask_polygon()``.\n\nA mask is a raster data cube for which corresponding pixels among `data` and `mask` are compared and those pixels in `data` are replaced whose pixels in `mask` are non-zero (for numbers) or `true` (for boolean values). The pixel values are replaced with the value specified for `replacement`, which defaults to `null` (no data).\n\nThe data cubes have to be compatible so that each dimension in mask must also be available in the raster data cube with the same name, type, reference system, resolution and labels. Dimensions can be missing in the mask with the result that the mask is applied for each label of the missing dimension in the data cube. The process fails if there's an incompatibility found between the raster data cube and the mask.",
+    "categories": [
+        "masks"
+    ],
+    "parameters": {
+        "data": {
+            "description": "A raster data cube.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube",
+                "required": true
+            }
+        },
+        "mask": {
+            
+            "description": "A mask as raster data cube. Every pixel in `data` must have a corresponding element in `mask`.",
+            "schema": {
+                "type": "object",
+                "format": "raster-cube",
+                "required": true
+            }
+        }
+    },
+    "returns": {
+        "description": "The masked raster data cube.",
+        "schema": {
+            "type": "object",
+            "format": "raster-cube"
+        }
+    }
+    },
     {
     "id": "merge_cubes",
     "summary": "Merging two data cubes",

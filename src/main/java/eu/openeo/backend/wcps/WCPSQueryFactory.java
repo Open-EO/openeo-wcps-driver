@@ -553,7 +553,7 @@ public class WCPSQueryFactory {
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}
 			
-			if (currentProcessID.equals("if")) {
+			if (currentProcessID.equals("if_custom")) {
 				StringBuilder wcpsIFpayLoad = new StringBuilder("");
 				String payLoad = null;
 				int accept = 0;
@@ -586,7 +586,7 @@ public class WCPSQueryFactory {
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}
 			
-			if (currentProcessID.equals("mask")) {
+			if (currentProcessID.equals("mask_custom")) {
 				StringBuilder wcpsArrayFilterpayLoad = new StringBuilder("");
 				String payLoad = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
@@ -595,15 +595,28 @@ public class WCPSQueryFactory {
 					for (String fromType : processArguments.getJSONObject("data").keySet()) {
 						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
 							payLoad = wcpsPayLoad.toString();
-							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm") + " " + processArguments.getString("comparator") + " " + processArguments.getString("threshold")+",");
 							varPayLoad.append(" $payLoad"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$rm")+",");
 						}
 						else if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("data").getString("from_node");
 							payLoad = storedPayLoads.getString(dataNode);
 							log.debug("Array Filterd Process : ");
-							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm") + " " + processArguments.getString("comparator") + " " + processArguments.getString("threshold")+",");
 							varPayLoad.append(" $payLoad"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$rm")+",");
+						}
+					}
+				}
+				
+				if (processArguments.get("mask") instanceof JSONObject) {
+					for (String fromType : processArguments.getJSONObject("mask").keySet()) {
+						if (fromType.equals("from_argument") && processArguments.getJSONObject("mask").getString("from_argument").equals("data")) {
+							payLoad = wcpsPayLoad.toString();
+							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm")+",");
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = processArguments.getJSONObject("mask").getString("from_node");
+							payLoad = storedPayLoads.getString(dataNode);
+							log.debug("Array Filterd Process : ");
+							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm")+",");
 						}
 					}
 				}
@@ -614,7 +627,7 @@ public class WCPSQueryFactory {
 				StringBuilder wcpsStringBuilderMaskThresPayload = basicWCPSStringBuilder(varPayLoad.toString());
 				wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsArrayFilterpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsArrayFilterpayLoad.toString());
-				log.debug("Array Filterd Process PayLoad is : ");
+				log.debug("Mask Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}
 			
@@ -2367,7 +2380,6 @@ public class WCPSQueryFactory {
 		else {
 			resultBuilder.append(", \"" + this.outputFormat + "\" )");
 		}
-		resultBuilder.append(", \"" + this.outputFormat + "\" )");
 		log.debug("Save payload : ");
 		log.debug(resultBuilder);
 		return resultBuilder.toString();
@@ -2866,6 +2878,17 @@ public class WCPSQueryFactory {
 				}
 				nextNodeName.put(currentNode, fromNodes);				
 			}
+			else if (argumentsKey.contentEquals("mask")) {
+				if (currentNodeProcessArguments.get("mask") instanceof JSONObject) {
+					for (String fromKey : currentNodeProcessArguments.getJSONObject("mask").keySet()) {
+						if (fromKey.contentEquals("from_node")) {
+							nextFromNode = currentNodeProcessArguments.getJSONObject("mask").getString("from_node");
+							fromNodes.put(nextFromNode);
+						}
+					}
+				}				
+				nextNodeName.put(currentNode, fromNodes);				
+			}
 			else if (argumentsKey.contentEquals("value")) {
 				if (currentNodeProcessArguments.get("value") instanceof JSONObject) {
 					for (String fromKey : currentNodeProcessArguments.getJSONObject("value").keySet()) {
@@ -3132,6 +3155,7 @@ public class WCPSQueryFactory {
 	 * @return
 	 */
 	private JSONObject parseOpenEOProcessGraph() {
+		//TODO why do we create an object here, that we never touch again and return that empty object?
 		JSONObject result = null;
 		JSONArray nodesArray = new JSONArray();
 		JSONArray nodesSortedArray = new JSONArray();

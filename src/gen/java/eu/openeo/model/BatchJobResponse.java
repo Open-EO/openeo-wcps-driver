@@ -38,6 +38,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import eu.openeo.dao.JSONObjectPersister;
+import eu.openeo.dao.JobsDaoImpl;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -46,7 +47,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(description = "Defines full metadata of batch jobs that have been submitted by users.")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJerseyServerCodegen", date = "2019-07-22T13:33:50.326+02:00[Europe/Rome]")
-@DatabaseTable(tableName = "jobs")
+@DatabaseTable(daoClass = JobsDaoImpl.class, tableName = "jobs")
 public class BatchJobResponse implements Serializable {
 	/**
 	 * 

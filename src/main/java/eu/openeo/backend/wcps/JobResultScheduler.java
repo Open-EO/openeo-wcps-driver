@@ -1,5 +1,6 @@
 package eu.openeo.backend.wcps;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,7 +41,11 @@ public class JobResultScheduler extends GenericServlet {
 		try {
 			scheduler = Executors.newSingleThreadScheduledExecutor();
 			Runnable command = new JobResultDeletion();	
-			
+			File f = new File(ConvenienceHelper.readProperties("temp-dir"));
+			if(!f.exists()) {
+				f.mkdir();
+				log.info("Created openEO working directory in: " + f.getAbsolutePath());
+			}
 			//Official schedule time get from the property files
 			TimeUnit unit = TimeUnit.MINUTES;
 			long period = Integer.parseInt(ConvenienceHelper.readProperties("servlet-remove-file-expiry"));

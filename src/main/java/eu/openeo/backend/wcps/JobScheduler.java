@@ -28,9 +28,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.jdbc.JdbcConnectionSource;
-import com.j256.ormlite.support.ConnectionSource;
+//import com.j256.ormlite.dao.DaoManager;
+//import com.j256.ormlite.jdbc.JdbcConnectionSource;
+//import com.j256.ormlite.support.ConnectionSource;
 
 import eu.openeo.backend.wcps.events.JobEvent;
 import eu.openeo.backend.wcps.events.JobEventListener;
@@ -44,32 +44,34 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 	Logger log = LogManager.getLogger();
 	
 	private Dao<BatchJobResponse,String> jobDao = null;
-	private ConnectionSource connection = null;
+//	private ConnectionSource connection = null;
 	private String wcpsEndpoint = null;
 	private JSONObject processGraphJSON = new JSONObject();
 	private JSONObject processGraphAfterUDF = null;
 	
-	public JobScheduler() {
-		try {
-			String dbURL = "jdbc:sqlite:" + ConvenienceHelper.readProperties("job-database");
-			wcpsEndpoint = ConvenienceHelper.readProperties("wcps-endpoint");
-			connection =  new JdbcConnectionSource(dbURL);
-			jobDao = DaoManager.createDao(connection, BatchJobResponse.class);
-		} catch (SQLException sqle) {
-			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
-			StringBuilder builder = new StringBuilder();
-			for( StackTraceElement element: sqle.getStackTrace()) {
-				builder.append(element.toString()+"\n");
-			}
-			log.error(builder.toString());
-		} catch (IOException ioe) {
-			log.error("An error occured while reading properties file: " + ioe.getMessage());
-			StringBuilder builder = new StringBuilder();
-			for( StackTraceElement element: ioe.getStackTrace()) {
-				builder.append(element.toString()+"\n");
-			}
-			log.error(builder.toString());
-		}
+	public JobScheduler(Dao<BatchJobResponse,String> jobDao, String wcpsEndpoint) {
+		this.jobDao = jobDao;
+		this.wcpsEndpoint = wcpsEndpoint;
+//		try {
+////			String dbURL = "jdbc:sqlite:" + ConvenienceHelper.readProperties("job-database");
+////			wcpsEndpoint = ConvenienceHelper.readProperties("wcps-endpoint");
+////			connection =  new JdbcConnectionSource(dbURL);
+////			jobDao = DaoManager.createDao(connection, BatchJobResponse.class);
+////		} catch (SQLException sqle) {
+////			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
+////			StringBuilder builder = new StringBuilder();
+////			for( StackTraceElement element: sqle.getStackTrace()) {
+////				builder.append(element.toString()+"\n");
+////			}
+////			log.error(builder.toString());
+//		} catch (IOException ioe) {
+//			log.error("An error occured while reading properties file: " + ioe.getMessage());
+//			StringBuilder builder = new StringBuilder();
+//			for( StackTraceElement element: ioe.getStackTrace()) {
+//				builder.append(element.toString()+"\n");
+//			}
+//			log.error(builder.toString());
+//		}
 	}
 
 	@Override
@@ -222,9 +224,10 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				saveHyperCubeToDisk(udfDescriptor, inputHyperCubeDebugPath);
 				
 				// stream UDF in form of json hypercube object to udf endpoint via http post method 
-				try (OutputStream os = con.getOutputStream()) {
+				try (OutputStream postUDFStream = con.getOutputStream()) {
 					byte[] udfBlob = udfDescriptor.toString().getBytes(StandardCharsets.UTF_8);
-					os.write(udfBlob, 0, udfBlob.length);
+					postUDFStream.write(udfBlob, 0, udfBlob.length);
+					postUDFStream.close();
 					log.info("Posting UDF to UDF Service endpoint.");
 				} catch (IOException e) {
 					log.error("\"An error occured when posting to udf service endpoint: " + e.getMessage());
@@ -236,13 +239,14 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				}
 				
 				// get result from udf endpoint in form of a json hypercube document.
-				try(BufferedReader br = new BufferedReader(
+				try(BufferedReader udfResultReader = new BufferedReader(
 						  new InputStreamReader(con.getInputStream(), "utf-8"))) {
 						    StringBuilder response = new StringBuilder();
 						    String responseLine = null;
-						    while ((responseLine = br.readLine()) != null) {
+						    while ((responseLine = udfResultReader.readLine()) != null) {
 						        response.append(responseLine.trim());
 						    }
+						    udfResultReader.close();
 				    log.info("Received result from UDF endpoint.");
 					JSONObject udfResponse = new JSONObject(response.toString());
 					JSONArray hyperCubes = udfResponse.getJSONArray("hypercubes");
@@ -266,19 +270,19 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 						Process importProcess = importProcessBuilder.start();
 						StringBuilder importProcessLogger = new StringBuilder();
 
-						BufferedReader outReader = new BufferedReader(
+						BufferedReader importProcessLogReader = new BufferedReader(
 								new InputStreamReader(importProcess.getInputStream()));
 
 						String outLine;
-						while ((outLine = outReader.readLine()) != null) {
+						while ((outLine = importProcessLogReader.readLine()) != null) {
 							importProcessLogger.append(outLine + "\n");
 						}
 						
-						BufferedReader errorReader = new BufferedReader(
+						BufferedReader importProcessLogErrorReader = new BufferedReader(
 								new InputStreamReader(importProcess.getErrorStream()));
 
 						String line;
-						while ((line = errorReader.readLine()) != null) {
+						while ((line = importProcessLogErrorReader.readLine()) != null) {
 							importProcessLogger.append(line + "\n");
 						}
 
@@ -290,6 +294,8 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 							log.error("Import to rasdaman failed!");
 							log.error(importProcessLogger.toString());
 						}
+						importProcessLogReader.close();
+						importProcessLogErrorReader.close();
 					}catch(IOException e) {
 						log.error("\"An io error occured when launching import to cube: " + e.getMessage());
 						StringBuilder builder = new StringBuilder();
@@ -325,31 +331,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 						builder.append(element.toString() + "\n");
 					}
 					log.error(builder.toString());
-					try {
-						log.debug("Error stream content below this line:");
-						BufferedReader br = new BufferedReader(new InputStreamReader(con.getErrorStream(), "utf-8"));
-						StringBuilder response = new StringBuilder();
-						String responseLine = null;
-						while ((responseLine = br.readLine()) != null) {
-							response.append(responseLine.trim());
-						}
-						JSONObject responseJSON = new JSONObject(response.toString());
-						log.debug(responseJSON.toString(4));
-					} catch (UnsupportedEncodingException e1) {
-						log.error("An error occured when encoding response of udf service endpoint " + e.getMessage());
-						StringBuilder builderNested = new StringBuilder();
-						for (StackTraceElement element : e.getStackTrace()) {
-							builderNested.append(element.toString() + "\n");
-						}
-						log.error(builderNested.toString());
-					} catch (IOException e1) {
-						log.error("An error occured when receiving error stream from udf service endpoint " + e.getMessage());
-						StringBuilder builderNested = new StringBuilder();
-						for (StackTraceElement element : e.getStackTrace()) {
-							builderNested.append(element.toString() + "\n");
-						}
-						log.error(builderNested.toString());
-					}
+					logErrorStream(con.getErrorStream());
 				}
 			}
 			
@@ -358,7 +340,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				URL url = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
 						+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
 				executeWCPS(url, job, wcpsFactory);
-				}
+			}
 		} catch (SQLException sqle) {
 			log.error("An error occured while performing an SQL-query: " + sqle.getMessage());
 			StringBuilder builder = new StringBuilder();
@@ -377,7 +359,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 
 	@Override
 	public void jobExecuted(JobEvent jobEvent) {
-		
+	//TODO check if this is still needed. Currently this event chain is unused...	
 	}
 	
 	private void executeWCPS(URL url, BatchJobResponse job, WCPSQueryFactory wcpsQuery) {
@@ -420,6 +402,8 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				fileOutputStream.write(dataBuffer, 0, bytesRead);
 			}
 			log.debug("File saved correctly");
+			in.close();
+			fileOutputStream.close();
 		} catch (IOException e) {
 			log.error("An error occured when downloading the file of the current job: " + e.getMessage());
 			StringBuilder builder = new StringBuilder();
@@ -627,9 +611,48 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 			firstHyperCubeStream.close();
 			//TODO fire udf finished event here!
 		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
+			log.error("File not found: " + e1.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e1.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("An error occured during writing of file: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
+		}
+	}
+	
+	private void logErrorStream(InputStream errorStream) {
+		try {
+			log.debug("Error stream content below this line:");
+			BufferedReader br = new BufferedReader(new InputStreamReader(errorStream, "utf-8"));
+			StringBuilder response = new StringBuilder();
+			String responseLine = null;
+			while ((responseLine = br.readLine()) != null) {
+				response.append(responseLine.trim());
+			}
+			br.close();
+			JSONObject responseJSON = new JSONObject(response.toString());
+			log.debug(responseJSON.toString(4));
+		} catch (UnsupportedEncodingException e) {
+			log.error("An error occured when encoding response of udf service endpoint " + e.getMessage());
+			StringBuilder builderNested = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builderNested.append(element.toString() + "\n");
+			}
+			log.error(builderNested.toString());
+		} catch (IOException e) {
+			log.error("An error occured when receiving error stream from udf service endpoint " + e.getMessage());
+			StringBuilder builderNested = new StringBuilder();
+			for (StackTraceElement element : e.getStackTrace()) {
+				builderNested.append(element.toString() + "\n");
+			}
+			log.error(builderNested.toString());
 		}
 	}
 
