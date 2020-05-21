@@ -5,7 +5,9 @@ import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-@DatabaseTable(tableName = "user")
+import eu.openeo.dao.UserDaoImpl;
+
+@DatabaseTable(daoClass = UserDaoImpl.class, tableName = "user")
 public class User {
 	
 	@JsonProperty("roles")
