@@ -395,6 +395,8 @@ public class HyperCubeFactory {
 			Integer bandDimensionIndex = -1;
 			//for( int d = 0; d<dimensionsArray.length(); d++) {
 			int d = 0;
+			JSONArray dimsArray = new JSONArray();
+			int noOfDims = 0;
 			while(iterator.hasNext()) {
 				JSONObject dimensionDescriptor = (JSONObject) iterator.next();
 				//JSONObject dimensionDescriptor = dimensionsArray.getJSONObject(d);
@@ -419,6 +421,9 @@ public class HyperCubeFactory {
 					}
 					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
 					dims.add(dimension);
+					dimsArray.put(dimensionDescriptor.getString("name"));
+					noOfDims = noOfDims + 1;
+					writer.addGlobalAttribute(new Attribute("Time", dimensionDescriptor.getString("name")));
 				//If it contains a band axis create a corresponding variable for each band for the outgoing netcdf file
 				}else if(dimensionDescriptor.getString("name").toLowerCase().equals("band")) {
 					log.debug("Found band dimension: " + dimensionDescriptor.getString("name"));
@@ -427,9 +432,10 @@ public class HyperCubeFactory {
 						bandIndices.put(coordinateLables.getString(i), new Integer(i));
 					}
 					bandDimensionIndex = new Integer(d);
+					
 					log.debug("Band Dimension Index: " + bandDimensionIndex);
 				//For any other axis just create it and add it as a dimension to the outgoing netcdf file
-				}else {	
+				}else {
 					log.debug("Creating dimension: " + dimensionDescriptor.getString("name"));
 					Variable dimVar = writer.addVariable(dimensionDescriptor.getString("name"), DataType.DOUBLE, currentDim);
 					dimVar.addAttribute(new Attribute("resolution", new Double(coordinateLables.getDouble(1) -coordinateLables.getDouble(0))));
@@ -441,6 +447,14 @@ public class HyperCubeFactory {
 					}
 					coordinateArray.put(dimensionDescriptor.getString("name"),dataArray);
 					dims.add(dimension);
+					dimsArray.put(dimensionDescriptor.getString("name"));
+					noOfDims = noOfDims + 1;
+					if(dimensionDescriptor.getString("name").toLowerCase().equals("x")) {
+						writer.addGlobalAttribute(new Attribute("X", dimensionDescriptor.getString("name")));
+					}
+                    if(dimensionDescriptor.getString("name").toLowerCase().equals("y")) {
+                    	writer.addGlobalAttribute(new Attribute("Y", dimensionDescriptor.getString("name")));
+					}
 				}
 				d++;
 			}
@@ -448,7 +462,7 @@ public class HyperCubeFactory {
 			int i=0;
 			int noOfBands = bandIndices.size();
 			log.debug("Hypercube " + hyperCube.getString("id") + " has " + noOfBands + " bands");
-			if( noOfBands > 0) {	
+			if( noOfBands > 0) {
 				for(String bandName: bandIndices.keySet()){
 					log.debug("Creating variable for band: " + bandName);
 					Variable bandVar = writer.addVariable(bandName, DataType.DOUBLE, dims);
@@ -457,6 +471,7 @@ public class HyperCubeFactory {
 					writer.addGlobalAttribute(new Attribute("Band"+i, bandName));
 					i=i+1;
 				}
+				writer.addGlobalAttribute(new Attribute("Bands", i));
 			}else {
 				String bandName = hyperCube.getString("id");
 				log.debug("Creating variable for band: " + bandName);
@@ -464,10 +479,14 @@ public class HyperCubeFactory {
 				bandVars.put(bandName, bandVar);
 				shape = bandVar.getShape();
 				writer.addGlobalAttribute(new Attribute("Band"+i, bandName));
+				writer.addGlobalAttribute(new Attribute("Bands", 1));
 			}
 			// add metadata attributes to file concerning openEO job and crs
 			//writer.addGlobalAttribute(new Attribute("EPSG", srs));
-			writer.addGlobalAttribute(new Attribute("Bands", i));
+			writer.addGlobalAttribute(new Attribute("NoOfSpatioTemporalDimensions", noOfDims));
+			for (int a = 0; a < dimsArray.length(); a++) {
+				writer.addGlobalAttribute(new Attribute("Dim"+a, dimsArray.getString(a)));
+			}
 			writer.addGlobalAttribute(new Attribute("EPSG", Integer.parseInt(srs.replace("EPSG:", ""))));
 			writer.addGlobalAttribute(new Attribute("JOB", path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'))));
 			// write header of netcdf file to disk.

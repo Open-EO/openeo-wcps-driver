@@ -2588,17 +2588,17 @@ public class WCPSQueryFactory {
 			String axisUpperCase = axis.toUpperCase();
 			String low = filter.getLowerBound();
 			String toDate = filter.getUpperBound();
-			DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-			Date toDateNew;			
-			try {
-				toDateNew = toDateNewFormat.parse(toDate);
-				toDateNew.setTime(toDateNew.getTime() - 1);
-				toDate = toDateNewFormat.format(toDateNew);
-				log.debug("To Date"+toDate);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+//			Date toDateNew;			
+//			try {
+//				toDateNew = toDateNewFormat.parse(toDate);
+//				toDateNew.setTime(toDateNew.getTime() - 1);
+//				toDate = toDateNewFormat.format(toDateNew);
+//				log.debug("To Date"+toDate);
+//			} catch (ParseException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 			String high = toDate;
 			stringBuilder.append(axis + "(");
 			if ((axisUpperCase.contains("DATE") || axisUpperCase.contains("TIME") || axisUpperCase.contains("ANSI") || axisUpperCase.contains("UNIX")) && !low.contains("$")) {
@@ -3549,17 +3549,17 @@ public class WCPSQueryFactory {
 			}
 			else {
 				toDate = extentArray.get(1).toString();
-				DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-				Date toDateNew;			
-				try {
-					toDateNew = toDateNewFormat.parse(toDate);
-					toDateNew.setTime(toDateNew.getTime() - 1);
-					toDate = toDateNewFormat.format(toDateNew);
-					log.debug("To Date"+toDate);
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+//				Date toDateNew;			
+//				try {
+//					toDateNew = toDateNewFormat.parse(toDate);
+//					toDateNew.setTime(toDateNew.getTime() - 1);
+//					toDate = toDateNewFormat.format(toDateNew);
+//					log.debug("To Date"+toDate);
+//				} catch (ParseException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 			}
 			if (fromDate != null && toDate != null) {
 				log.debug("Temporal Extent is: |" + fromDate + "|:|" + toDate + "|");
