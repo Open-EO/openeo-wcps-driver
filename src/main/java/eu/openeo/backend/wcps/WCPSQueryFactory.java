@@ -3479,8 +3479,17 @@ public class WCPSQueryFactory {
 
 			extent = jsonresp.getJSONObject("extent");
 			JSONArray temporal = extent.getJSONArray("temporal");
-			String templower = temporal.get(0).toString();
-			String tempupper = temporal.get(1).toString();
+			String templower = null;
+			String tempupper = null;
+			
+			try {
+				templower = temporal.get(0).toString();
+				tempupper = temporal.get(1).toString();
+			}			
+			catch (JSONException e) {
+				log.error("An error occured: " + e.getMessage());
+				
+			}
 			
 			log.debug("Temporal Extent is: ");
 			log.debug(temporal);
