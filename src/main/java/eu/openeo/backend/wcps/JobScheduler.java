@@ -393,7 +393,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 			log.error(builder.toString());
 		}
 		String fileName = job.getId() + "." + wcpsQuery.getOutputFormat();
-		log.debug("The output file will be saved here: \n" + (filePath + fileName).toString());		
+		log.debug("The output file will be saved here: \n" + (filePath + fileName).toString());
 
 		try (BufferedInputStream in = new BufferedInputStream(url.openStream());
 				FileOutputStream fileOutputStream = new FileOutputStream(filePath + fileName)) {
