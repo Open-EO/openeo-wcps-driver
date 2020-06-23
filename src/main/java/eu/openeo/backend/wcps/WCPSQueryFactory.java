@@ -164,17 +164,51 @@ public class WCPSQueryFactory {
 		boolean containsLinearScale = false;
 		boolean containsApplyProcess = false;
 		boolean containsResampleProcess = false;
+		boolean collDims2D = false;
 		//int loadedCubes = 1;
 
 		myLoop:		for(int i = 0; i < nodesSortedArray.length(); i++) {
 			String nodeKeyOfCurrentProcess = nodesSortedArray.getString(i);
 			JSONObject currentProcess = processGraph.getJSONObject(nodeKeyOfCurrentProcess);
-			String currentProcessID = currentProcess.getString("process_id");
+			String currentProcessID = currentProcess.getString("process_id");			
 			JSONObject currentProcessArguments = currentProcess.getJSONObject("arguments");
 			log.debug("Building WCPS Query for : " + currentProcessID);			
 			
 			if (currentProcessID.equals("load_collection")) {
 				String collectionID = currentProcessArguments.getString("id");
+				
+				JSONObject jsonresp = null;
+				try {
+					jsonresp = readJsonFromUrl(ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collectionID);
+				} catch (JSONException e) {
+					log.error("An error occured: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for (StackTraceElement element : e.getStackTrace()) {
+						builder.append(element.toString() + "\n");
+					}
+					log.error(builder.toString());
+				} catch (IOException e) {
+					log.error("An error occured: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for (StackTraceElement element : e.getStackTrace()) {
+						builder.append(element.toString() + "\n");
+					}
+					log.error(builder.toString());
+				}
+
+				JSONObject extent = jsonresp.getJSONObject("extent");
+				JSONArray temporal = extent.getJSONArray("temporal");
+				String templower = null;
+				
+				try {
+					templower = temporal.get(0).toString();					
+				}			
+				catch (JSONException e) {
+					collDims2D = true;
+					log.error("An error occured: " + e.getMessage());
+					
+				}				
+				
 				wcpsPayLoad.append(createFilteredCollectionString("$"+collectionID+nodeKeyOfCurrentProcess, collectionID));
 				log.debug("Initial PayLoad WCPS is: ");
 				log.debug(wcpsPayLoad);
@@ -183,6 +217,7 @@ public class WCPSQueryFactory {
 				wcpsPayLoad = new StringBuilder("");
 				log.debug("Load Collection PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
+				log.info("Collection Dims : " + collDims2D);
 				//loadedCubes = loadedCubes+1;
 			}
 			if (currentProcessID.equals("merge_cubes")) {
@@ -551,8 +586,7 @@ public class WCPSQueryFactory {
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMaskColorpayLoad.toString());
 				log.debug("Mask Colored Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
-			}
-			
+			}			
 			if (currentProcessID.equals("if_custom")) {
 				StringBuilder wcpsIFpayLoad = new StringBuilder("");
 				String payLoad = null;
@@ -584,8 +618,7 @@ public class WCPSQueryFactory {
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsIFpayLoad.toString());
 				log.debug("IF Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
-			}
-			
+			}			
 			if (currentProcessID.equals("mask_custom")) {
 				StringBuilder wcpsArrayFilterpayLoad = new StringBuilder("");
 				String payLoad = null;
@@ -629,8 +662,7 @@ public class WCPSQueryFactory {
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsArrayFilterpayLoad.toString());
 				log.debug("Mask Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
-			}
-			
+			}			
 			if (currentProcessID.equals("array_filter")) {
 				StringBuilder wcpsArrayFilterpayLoad = new StringBuilder("");
 				String payLoad = null;
@@ -661,8 +693,7 @@ public class WCPSQueryFactory {
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsArrayFilterpayLoad.toString());
 				log.debug("Array Filterd Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
-			}
-			
+			}			
 			if (currentProcessID.equals("normalized_difference")) {
 				containsNormDiffProcess = true;
 				StringBuilder wcpsNormDiffpayLoad = new StringBuilder("((double)");
@@ -971,7 +1002,8 @@ public class WCPSQueryFactory {
 			if (currentProcessID.equals("save_result")) {
 				String savePayload = wcpsStringBuilder.toString();
 				StringBuilder wcpsStringBuilderSaveResult = new StringBuilder("");
-				wcpsStringBuilderSaveResult.append(createReturnResultWCPSString(nodeKeyOfCurrentProcess, savePayload));
+				log.info("Collection Dims : " + collDims2D);
+				wcpsStringBuilderSaveResult.append(createReturnResultWCPSString(nodeKeyOfCurrentProcess, savePayload, collDims2D));
 				wcpsStringBuilder = wcpsStringBuilderSaveResult;
 			}
 		}
@@ -2366,16 +2398,22 @@ public class WCPSQueryFactory {
 		String stretchString = null;
 			StringBuilder stretchBuilder = new StringBuilder("");
 			stretchBuilder.append(name + "(" + payLoad + ")");
-			stretchString = stretchBuilder.toString();			
+			stretchString = stretchBuilder.toString();
 		
 		return stretchString;
 	}
 
-	private String createReturnResultWCPSString(String returnResultNodeKey, String payload) {
+	private String createReturnResultWCPSString(String returnResultNodeKey, String payload, Boolean collDims2D) {
 		StringBuilder resultBuilder = new StringBuilder("");
 		resultBuilder.append(payload);
+		log.info("Collection Dims : " + collDims2D);
 		if (this.outputFormat.equals("netcdf")) {
-			resultBuilder.append(", \"" + this.outputFormat + "\" ," + "\"{ \\\"transpose\\\": [1,2] }\"" + ")");
+			if (collDims2D) {
+				resultBuilder.append(", \"" + this.outputFormat + "\" ," + "\"{ \\\"transpose\\\": [0,1] }\"" + ")");
+			}
+			else if (!collDims2D) {
+				resultBuilder.append(", \"" + this.outputFormat + "\" ," + "\"{ \\\"transpose\\\": [1,2] }\"" + ")");
+			}			
 		}
 		else {
 			resultBuilder.append(", \"" + this.outputFormat + "\" )");
@@ -2588,17 +2626,17 @@ public class WCPSQueryFactory {
 			String axisUpperCase = axis.toUpperCase();
 			String low = filter.getLowerBound();
 			String toDate = filter.getUpperBound();
-			DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-			Date toDateNew;			
-			try {
-				toDateNew = toDateNewFormat.parse(toDate);
-				toDateNew.setTime(toDateNew.getTime() - 1);
-				toDate = toDateNewFormat.format(toDateNew);
-				log.debug("To Date"+toDate);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+//			Date toDateNew;			
+//			try {
+//				toDateNew = toDateNewFormat.parse(toDate);
+//				toDateNew.setTime(toDateNew.getTime() - 1);
+//				toDate = toDateNewFormat.format(toDateNew);
+//				log.debug("To Date"+toDate);
+//			} catch (ParseException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 			String high = toDate;
 			stringBuilder.append(axis + "(");
 			if ((axisUpperCase.contains("DATE") || axisUpperCase.contains("TIME") || axisUpperCase.contains("ANSI") || axisUpperCase.contains("UNIX")) && !low.contains("$")) {
@@ -3479,8 +3517,17 @@ public class WCPSQueryFactory {
 
 			extent = jsonresp.getJSONObject("extent");
 			JSONArray temporal = extent.getJSONArray("temporal");
-			String templower = temporal.get(0).toString();
-			String tempupper = temporal.get(1).toString();
+			String templower = null;
+			String tempupper = null;
+			
+			try {
+				templower = temporal.get(0).toString();
+				tempupper = temporal.get(1).toString();
+			}			
+			catch (JSONException e) {
+				log.error("An error occured: " + e.getMessage());
+				
+			}
 			
 			log.debug("Temporal Extent is: ");
 			log.debug(temporal);
@@ -3549,17 +3596,17 @@ public class WCPSQueryFactory {
 			}
 			else {
 				toDate = extentArray.get(1).toString();
-				DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-				Date toDateNew;			
-				try {
-					toDateNew = toDateNewFormat.parse(toDate);
-					toDateNew.setTime(toDateNew.getTime() - 1);
-					toDate = toDateNewFormat.format(toDateNew);
-					log.debug("To Date"+toDate);
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+//				Date toDateNew;			
+//				try {
+//					toDateNew = toDateNewFormat.parse(toDate);
+//					toDateNew.setTime(toDateNew.getTime() - 1);
+//					toDate = toDateNewFormat.format(toDateNew);
+//					log.debug("To Date"+toDate);
+//				} catch (ParseException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 			}
 			if (fromDate != null && toDate != null) {
 				log.debug("Temporal Extent is: |" + fromDate + "|:|" + toDate + "|");

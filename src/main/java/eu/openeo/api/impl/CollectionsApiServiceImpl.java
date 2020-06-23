@@ -128,30 +128,87 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 		    int xIndex = 0;
 		    int yIndex = 0;
 		    JSONObject[] dimObjects = new JSONObject[axis.length+1];
+		    
+JSONArray bandArray = new JSONArray();			
+			
+			dimObjects[0] = new JSONObject();
+			dimObjects[0].put("type", "bands");
+			dimObjects[0].put("axis", "spectral");
+			JSONArray bandValues = new JSONArray();
+			log.debug("number of bands found: " + bandsListSwe.size());
+			if (bandsMeta) {
+				try {
+					for(int c = 0; c < bandsList.size(); c++) {
+						JSONObject product = new JSONObject();				
+						String bandWave = null;
+						Element band = bandsList.get(c);
+						String bandId = band.getName();
+
+						try {
+							bandWave = band.getChildText("WAVELENGTH");
+						}catch(Exception e) {
+							log.warn("Error in parsing band wave-lenght:" + e.getMessage());
+						}
+						try {
+							product.put("common_name", band.getChildText("common_name"));
+						}catch(Exception e) {
+							log.warn("Error in parsing band common name:" + e.getMessage());
+						}				
+						product.put("name", bandId);
+						product.put("center_wavelength", bandWave);
+						bandValues.put(bandId);
+						try {
+							product.put("gsd", band.getChildText("gsd"));
+						}catch(Exception e) {
+							log.warn("Error in parsing band gsd:" + e.getMessage());
+						}
+						bandArray.put(product);
+					}
+				}catch(Exception e) {
+					log.warn("Error in parsing bands :" + e.getMessage());
+				}
+			}
+			else {
+				for(int c = 0; c < bandsListSwe.size(); c++) {
+					JSONObject product = new JSONObject();
+					String bandId = bandsListSwe.get(c).getAttributeValue("name");
+					
+					product.put("name", bandId);					
+					bandValues.put(bandId);					
+					bandArray.put(product);
+				}
+			}
+			
+			try {
+				dimObjects[0].put("values", bandValues);
+		    }catch(Exception e) {
+		    	log.warn("Error in Band values :" + e.getMessage());
+		    }
+		    
 		    for(int a = 0; a < axis.length; a++) {
 		    	log.debug(axis[a]);
 				if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long")){
 					xIndex=a;
-					dimObjects[0] = new JSONObject();
-					dimObjects[0].put("axis", axis[a]);
-					dimObjects[0].put("type", "spatial");
-					dimObjects[0].put("reference_system", Long.parseLong(srsDescription));
-				}
-				if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
-					yIndex=a;
 					dimObjects[1] = new JSONObject();
 					dimObjects[1].put("axis", axis[a]);
 					dimObjects[1].put("type", "spatial");
 					dimObjects[1].put("reference_system", Long.parseLong(srsDescription));
 				}
+				if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
+					yIndex=a;
+					dimObjects[2] = new JSONObject();
+					dimObjects[2].put("axis", axis[a]);
+					dimObjects[2].put("type", "spatial");
+					dimObjects[2].put("reference_system", Long.parseLong(srsDescription));
+				}
 				if(axis[a].equals("DATE")  || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
 					temporalExtent.put(minValues[a].replaceAll("\"", ""));
 					temporalExtent.put(maxValues[a].replaceAll("\"", ""));
-					dimObjects[2] = new JSONObject();
-					dimObjects[2].put("axis", axis[a]);
-					dimObjects[2].put("type", "temporal");
-					dimObjects[2].put("extent", temporalExtent);
-					dimObjects[2].put("step", JSONObject.NULL);
+					dimObjects[3] = new JSONObject();
+					dimObjects[3].put("axis", axis[a]);
+					dimObjects[3].put("type", "temporal");
+					dimObjects[3].put("extent", temporalExtent);
+					dimObjects[3].put("step", JSONObject.NULL);
 				}
 		    }
 		    
@@ -263,61 +320,6 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			JSONObject properties = new JSONObject();
 			JSONObject other_properties = new JSONObject();
 			
-			JSONArray bandArray = new JSONArray();			
-			
-			dimObjects[3] = new JSONObject();
-			dimObjects[3].put("type", "bands");
-			dimObjects[3].put("axis", "spectral");
-			JSONArray bandValues = new JSONArray();
-			log.debug("number of bands found: " + bandsListSwe.size());
-			if (bandsMeta) {
-				try {
-					for(int c = 0; c < bandsList.size(); c++) {
-						JSONObject product = new JSONObject();				
-						String bandWave = null;
-						Element band = bandsList.get(c);
-						String bandId = band.getName();
-
-						try {
-							bandWave = band.getChildText("WAVELENGTH");
-						}catch(Exception e) {
-							log.warn("Error in parsing band wave-lenght:" + e.getMessage());
-						}
-						try {
-							product.put("common_name", band.getChildText("common_name"));
-						}catch(Exception e) {
-							log.warn("Error in parsing band common name:" + e.getMessage());
-						}				
-						product.put("name", bandId);
-						product.put("center_wavelength", bandWave);
-						bandValues.put(bandId);
-						try {
-							product.put("gsd", band.getChildText("gsd"));
-						}catch(Exception e) {
-							log.warn("Error in parsing band gsd:" + e.getMessage());
-						}
-						bandArray.put(product);
-					}
-				}catch(Exception e) {
-					log.warn("Error in parsing bands :" + e.getMessage());
-				}
-			}
-			else {
-				for(int c = 0; c < bandsListSwe.size(); c++) {
-					JSONObject product = new JSONObject();
-					String bandId = bandsListSwe.get(c).getAttributeValue("name");
-					
-					product.put("name", bandId);					
-					bandValues.put(bandId);					
-					bandArray.put(product);
-				}
-			}
-			
-			try {
-				dimObjects[3].put("values", bandValues);
-		    }catch(Exception e) {
-		    	log.warn("Error in Band values :" + e.getMessage());
-		    }
 		
 			JSONArray epsg_values = new JSONArray();
 			epsg_values.put(Double.parseDouble(srsDescription));

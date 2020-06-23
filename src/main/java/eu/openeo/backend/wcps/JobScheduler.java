@@ -266,7 +266,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 					try {
 						ProcessBuilder importProcessBuilder = new ProcessBuilder();
 						importProcessBuilder.command("bash", "-c", "/tmp/openeo/udf_result/import_udf_multi.sh " + netCDFPath);
-						
+						log.debug(netCDFPath);
 						Process importProcess = importProcessBuilder.start();
 						StringBuilder importProcessLogger = new StringBuilder();
 
@@ -312,6 +312,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 						log.error(builder.toString());
 					}
 					// continue processing of process_graph after the UDF
+					log.debug(processGraphAfterUDF);
 					WCPSQueryFactory wcpsFactory = new WCPSQueryFactory(processGraphAfterUDF);
 					URL urlUDF = new URL(wcpsEndpoint + "?SERVICE=WCS" + "&VERSION=2.0.1" + "&REQUEST=ProcessCoverages" + "&QUERY="
 							+ URLEncoder.encode(wcpsFactory.getWCPSString(), "UTF-8").replace("+", "%20"));
@@ -392,7 +393,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 			log.error(builder.toString());
 		}
 		String fileName = job.getId() + "." + wcpsQuery.getOutputFormat();
-		log.debug("The output file will be saved here: \n" + (filePath + fileName).toString());		
+		log.debug("The output file will be saved here: \n" + (filePath + fileName).toString());
 
 		try (BufferedInputStream in = new BufferedInputStream(url.openStream());
 				FileOutputStream fileOutputStream = new FileOutputStream(filePath + fileName)) {
