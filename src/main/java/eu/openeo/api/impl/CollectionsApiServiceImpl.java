@@ -127,10 +127,8 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 		    String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
 		    int xIndex = 0;
 		    int yIndex = 0;
-		    JSONObject[] dimObjects = new JSONObject[axis.length+1];
-		    
-JSONArray bandArray = new JSONArray();			
-			
+		    JSONObject[] dimObjects = new JSONObject[axis.length+1];	    
+            JSONArray bandArray = new JSONArray();			
 			dimObjects[0] = new JSONObject();
 			dimObjects[0].put("type", "bands");
 			dimObjects[0].put("axis", "spectral");

@@ -894,7 +894,6 @@ public class WCPSQueryFactory {
 				containsApplyProcess = true;
 				StringBuilder wcpsApplypayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderApply = basicWCPSStringBuilder(varPayLoad.toString());
-				String dimension = currentProcess.getJSONObject("arguments").getString("dimension");
 				String payLoad = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
 				String collectionID = null;
@@ -916,7 +915,7 @@ public class WCPSQueryFactory {
 				
 				String filterString = payLoad;
 				filterString = filterString.substring(collectionVar.length());
-				wcpsApplypayLoad.append(createApplyWCPSString(nodeKeyOfCurrentProcess, payLoad, filterString, collectionVar, collectionID, dimension));
+				wcpsApplypayLoad.append(createApplyWCPSString(nodeKeyOfCurrentProcess, payLoad, filterString, collectionVar, collectionID));
 				wcpsPayLoad=wcpsApplypayLoad;
 				wcpsStringBuilder = wcpsStringBuilderApply.append(wcpsApplypayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsApplypayLoad.toString());
@@ -1057,7 +1056,7 @@ public class WCPSQueryFactory {
 		}
 	}
 	
-	private String createApplyWCPSString(String applyNodeKey, String payLoad, String filterString, String collectionVar, String collectionID, String dimension) {
+	private String createApplyWCPSString(String applyNodeKey, String payLoad, String filterString, String collectionVar, String collectionID) {
 		String applyBuilderExtend = null;
 		JSONObject applyProcesses = processGraph.getJSONObject(applyNodeKey).getJSONObject("arguments").getJSONObject("process").getJSONObject("callback");
 
@@ -1580,8 +1579,7 @@ public class WCPSQueryFactory {
 				applyPayLoads.put(nodeKey, applyBuilderExtend);
 				log.debug("Not Equal Process PayLoad is : ");
 				log.debug(applyPayLoads.get(nodeKey));
-			}
-			
+			}			
 			if (name.equals("eq")) {
 				String x = null;
 				String y = null;
@@ -1620,8 +1618,7 @@ public class WCPSQueryFactory {
 				applyPayLoads.put(nodeKey, applyBuilderExtend);
 				log.debug("Equal Process PayLoad is : ");
 				log.debug(applyPayLoads.get(nodeKey));
-			}
-			
+			}			
 			if (name.equals("array_element")) {
 				JSONObject arrayData =  applyProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
 				int arrayIndex = arrayData.getInt("index");
@@ -1631,8 +1628,7 @@ public class WCPSQueryFactory {
 							String dataNode = processGraph.getJSONObject(applyNodeKey).getJSONObject("arguments").getJSONObject("data").getString("from_node");
 							String loadCollNode = getFilterCollectionNode();
 							//if (dataNode.equals(loadCollNode)) {
-							applyBuilderExtend = createBandWCPSString(collectionID, arrayIndex, applyNodeKey, filterString, collectionVar);
-								
+							applyBuilderExtend = createBandWCPSString(collectionID, arrayIndex, applyNodeKey, filterString, collectionVar);								
 							//}
 						}
 						else if (fromType.equals("from_node")) {
@@ -1671,74 +1667,6 @@ public class WCPSQueryFactory {
 				log.debug("Count Process PayLoad is : ");
 				log.debug(applyPayLoads.get(nodeKey));
 			}
-			if (name.equals("mean")) {
-				String meanPayLoad = null;
-				JSONObject meanArguments =  applyProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
-				if (meanArguments.get("data") instanceof JSONObject) {
-					for (String fromType : meanArguments.getJSONObject("data").keySet()) {
-						if (fromType.equals("from_argument") && meanArguments.getJSONObject("data").getString("from_argument").equals("x")) {
-							meanPayLoad = payLoad;
-						}
-						else if (fromType.equals("from_node")) {
-							String dataNode = meanArguments.getJSONObject("data").getString("from_node");
-							meanPayLoad = applyPayLoads.getString(dataNode);
-						}						
-					}
-				}
-				else if (meanArguments.get("data") instanceof JSONArray) {
-					meanPayLoad = String.valueOf(meanArguments.getJSONArray("data"));
-				}
-				applyBuilderExtend = createMeanWCPSString(applyNodeKey, meanPayLoad, applyProcesses, dimension, collectionVar, collectionID);
-				applyPayLoads.put(nodeKey, applyBuilderExtend);
-				log.debug("Mean Process PayLoad is : ");
-				log.debug(applyPayLoads.get(nodeKey));
-			}
-			if (name.equals("min")) {
-				String minPayLoad = null;
-				JSONObject minArguments = applyProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
-				if (minArguments.get("data") instanceof JSONObject) {
-					for (String fromType : minArguments.getJSONObject("data").keySet()) {
-						if (fromType.equals("from_argument") && minArguments.getJSONObject("data").getString("from_argument").equals("x")) {							
-							minPayLoad = payLoad;
-						}
-						else if (fromType.equals("from_node")) {
-							String dataNode = minArguments.getJSONObject("data").getString("from_node");
-							minPayLoad = applyPayLoads.getString(dataNode);
-						}
-					}
-				}
-				else if (minArguments.get("data") instanceof JSONArray) {
-					minPayLoad = String.valueOf(minArguments.getJSONArray("data"));
-				}
-				applyBuilderExtend = createMinWCPSString(applyNodeKey, minPayLoad, applyProcesses, dimension, collectionVar, collectionID);
-				applyPayLoads.put(nodeKey, applyBuilderExtend);
-				log.debug("Min Process PayLoad is : ");
-				log.debug(applyPayLoads.get(nodeKey));
-			}
-			if (name.equals("max")) {
-				String maxPayLoad = null;
-				JSONObject maxArguments = applyProcesses.getJSONObject(nodeKey).getJSONObject("arguments");
-				String dataNode = null;
-				if (maxArguments.get("data") instanceof JSONObject) {
-					for (String fromType : maxArguments.getJSONObject("data").keySet()) {
-						if (fromType.equals("from_argument") && maxArguments.getJSONObject("data").getString("from_argument").equals("x")) {							
-							maxPayLoad = payLoad;
-						}
-						else if (fromType.equals("from_node")) {
-							dataNode = maxArguments.getJSONObject("data").getString("from_node");
-							maxPayLoad = applyPayLoads.getString(dataNode);
-						}
-					}
-				}
-				else if (maxArguments.get("data") instanceof JSONArray) {
-					maxPayLoad = String.valueOf(maxArguments.getJSONArray("data"));
-				}
-				applyBuilderExtend = createMaxWCPSString(applyNodeKey, maxPayLoad, applyProcesses, dimension, collectionVar, collectionID);
-				applyPayLoads.put(nodeKey, applyBuilderExtend);
-				log.debug("Max Process PayLoad is : ");
-				log.debug(applyPayLoads.get(nodeKey));
-			}
-			
 			if (name.equals("and")) {
 				JSONArray andArray =  applyProcesses.getJSONObject(nodeKey).getJSONObject("arguments").getJSONArray("expressions");
 				JSONArray andArrayreturn = new JSONArray();
