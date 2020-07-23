@@ -102,7 +102,7 @@ public class WCPSQueryFactory {
 //				wcpsStringBuilder.append(", ");
 //			}
 //		}
-		wcpsStringBuilder = basicWCPSStringBuilder(varPayLoad.toString());		
+		wcpsStringBuilder = basicWCPSStringBuilder(varPayLoad.toString());
 		saveNodeAsArray.put(saveNode);
 		nodesArray.put(saveNodeAsArray);
 		
@@ -227,6 +227,7 @@ public class WCPSQueryFactory {
 				String payLoad1 = null;
 				String payLoad2 = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
+				JSONObject mergeProcesses = processArguments.getJSONObject("overlap_resolver").getJSONObject("callback");
 				if (processArguments.get("cube1") instanceof JSONObject) {
 					for (String fromType : processArguments.getJSONObject("cube1").keySet()) {
 						
@@ -245,8 +246,39 @@ public class WCPSQueryFactory {
 						}
 					}
 				}
-				String overlapResolver =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments").getString("overlap_resolver");
-				wcpsMergepayLoad.append("("+payLoad1+")"+overlapResolver+"("+payLoad2+")");
+				
+				JSONArray mergeNodesArray = new JSONArray();
+				String endMergeNode = null;
+				JSONArray endMergeNodeAsArray = new JSONArray();
+				for (String mergeProcessKey : mergeProcesses.keySet()) {
+					JSONObject mergeProcess =  mergeProcesses.getJSONObject(mergeProcessKey);
+					for (String applierField : mergeProcess.keySet()) {
+						if (applierField.equals("result")) {
+							Boolean resultFlag = mergeProcess.getBoolean("result");
+							if (resultFlag) {
+								endMergeNode = mergeProcessKey;
+								endMergeNodeAsArray.put(endMergeNode);
+								log.debug("End Merge Process is : " + mergeProcesses.getJSONObject(endMergeNode).getString("process_id"));
+							}
+						}
+					}
+				}
+				
+				log.debug("Cube1 : " + payLoad1);
+				log.debug("Cube2 : " + payLoad2);
+				String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
+				if (overlapResolver.equals( "sum")) {
+				wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
+			    }
+				if (overlapResolver.equals( "subtract")) {
+					wcpsMergepayLoad.append("("+payLoad1+")"+"-"+"("+payLoad2+")");
+				    }
+				if (overlapResolver.equals( "product")) {
+					wcpsMergepayLoad.append("("+payLoad1+")"+"*"+"("+payLoad2+")");
+				    }
+				if (overlapResolver.equals( "divide")) {
+					wcpsMergepayLoad.append("("+payLoad1+")"+"/"+"("+payLoad2+")");
+				    }
 				wcpsPayLoad=wcpsMergepayLoad;
 				wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMergepayLoad.toString());
@@ -1067,8 +1099,8 @@ public class WCPSQueryFactory {
 		
 		for (String applyProcessKey : applyProcesses.keySet()) {
 			JSONObject applyProcess =  applyProcesses.getJSONObject(applyProcessKey);
-			for (String reducerField : applyProcess.keySet()) {
-				if (reducerField.equals("result")) {
+			for (String applierField : applyProcess.keySet()) {
+				if (applierField.equals("result")) {
 					Boolean resultFlag = applyProcess.getBoolean("result");
 					if (resultFlag) {
 						endApplyNode = applyProcessKey;

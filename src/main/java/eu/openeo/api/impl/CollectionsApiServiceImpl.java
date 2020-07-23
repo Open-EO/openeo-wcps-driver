@@ -527,10 +527,8 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				Element coverage = coverageList.get(c);
 				log.debug("root node info: " + coverage.getName() + ":" + coverage.getChildText("CoverageId", defaultNS));		
 				
-				JSONObject product = new JSONObject();
-				
-                JSONObject extentCollection = new JSONObject();
-				
+				JSONObject product = new JSONObject();				
+                JSONObject extentCollection = new JSONObject();				
 				JSONArray spatialExtent = new JSONArray();
 				JSONArray temporalExtent =  new JSONArray();
 				
@@ -564,7 +562,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
 				Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
 				Element metadataElement = rootNodeCollections.getChild("CoverageDescription", defaultNSCollections).getChild("metadata", gmlNS).getChild("Extension", gmlNS);
-								
+				
 					//metadataObj = new JSONObject(metadataString1);
 					//String metadataString2 = metadataString1.replaceAll("\\n","");
 					//String metadataString3 = metadataString2.replaceAll("\"\"","\"");

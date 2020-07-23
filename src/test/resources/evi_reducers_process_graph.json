@@ -2,7 +2,7 @@
   "dc": {
     "process_id": "load_collection",
     "arguments": {
-      "id": "openEO_S2_32632_10m_L2A",
+      "id": "openEO_S2_32632_10m_L2A_D22",
       "spatial_extent": {
         "west": 11.282358169555662,
         "south": 46.46411291724846,
@@ -11,7 +11,7 @@
       },
       "temporal_extent": [
         "2018-06-04T00:00:00.000Z",
-        "2018-06-23T00:00:00.000Z"
+        "2018-06-21T00:00:00.000Z"
       ],
       "bands": ["nir", "red", "blue"],
       "properties": null
