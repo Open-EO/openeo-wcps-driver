@@ -21,22 +21,6 @@
     	<AppenderRef ref="STDOUT"/>
 		<AppenderRef ref="FILE"/>
     </Logger>
-    <Logger name="eu.openeo.backend.wcps.JobScheduler" level="debug" additivity="false">
-    	<AppenderRef ref="STDOUT"/>
-		<AppenderRef ref="FILE"/>
-    </Logger>
-    <Logger name="eu.openeo.backend.wcps.WCPSQueryFactory" level="debug" additivity="false">
-    	<AppenderRef ref="STDOUT"/>
-		<AppenderRef ref="FILE"/>
-    </Logger>
-    <Logger name="eu.openeo.api.impl.CollectionsApiServiceImpl" level="error" additivity="false">
-    	<AppenderRef ref="STDOUT"/>
-		<AppenderRef ref="FILE"/>
-    </Logger>
-    <Logger name="eu.openeo.backend.wcps.HyperCubeFactory" level="debug" additivity="false">
-    	<AppenderRef ref="STDOUT"/>
-		<AppenderRef ref="FILE"/>
-    </Logger>
     <Logger name="eu.openeo.api.impl" level="error" additivity="false">
     	<AppenderRef ref="STDOUT"/>
 		<AppenderRef ref="FILE"/>
