@@ -226,6 +226,11 @@ public class WCPSQueryFactory {
 				StringBuilder wcpsStringBuilderMerge = basicWCPSStringBuilder(varPayLoad.toString());
 				String payLoad1 = null;
 				String payLoad2 = null;
+				String cube1 = null;
+				String cube2 = null;
+				String endMergeNode = null;
+				JSONArray mergeNodesArray = new JSONArray();					
+				JSONArray endMergeNodeAsArray = new JSONArray();
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
 				JSONObject mergeProcesses = processArguments.getJSONObject("overlap_resolver").getJSONObject("callback");
 				if (processArguments.get("cube1") instanceof JSONObject) {
@@ -233,6 +238,7 @@ public class WCPSQueryFactory {
 						
 						if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("cube1").getString("from_node");
+							cube1 = processGraph.getJSONObject(getFilterCollectionNode(dataNode)).getJSONObject("arguments").getString("id");
 							payLoad1 = storedPayLoads.getString(dataNode);
 						}
 					}
@@ -242,50 +248,177 @@ public class WCPSQueryFactory {
 						
 						if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("cube2").getString("from_node");
+							cube2 = processGraph.getJSONObject(getFilterCollectionNode(dataNode)).getJSONObject("arguments").getString("id");
 							payLoad2 = storedPayLoads.getString(dataNode);
 						}
 					}
 				}
 				
-				JSONArray mergeNodesArray = new JSONArray();
-				String endMergeNode = null;
-				JSONArray endMergeNodeAsArray = new JSONArray();
-				for (String mergeProcessKey : mergeProcesses.keySet()) {
-					JSONObject mergeProcess =  mergeProcesses.getJSONObject(mergeProcessKey);
-					for (String applierField : mergeProcess.keySet()) {
-						if (applierField.equals("result")) {
-							Boolean resultFlag = mergeProcess.getBoolean("result");
-							if (resultFlag) {
-								endMergeNode = mergeProcessKey;
-								endMergeNodeAsArray.put(endMergeNode);
-								log.debug("End Merge Process is : " + mergeProcesses.getJSONObject(endMergeNode).getString("process_id"));
+				int noOfDimsCube1 = 0;
+				int noOfDimsCube2 = 0;
+				JSONObject collectionSTACMetdataCube1 = null;
+				JSONObject collectionSTACMetdataCube2 = null;
+				try {
+					collectionSTACMetdataCube1 = readJsonFromUrl(
+							ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + cube1);
+				} catch (JSONException e) {
+					log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				} catch (IOException e) {
+					log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				}
+				try {
+					collectionSTACMetdataCube2 = readJsonFromUrl(
+							ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + cube2);
+				} catch (JSONException e) {
+					log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				} catch (IOException e) {
+					log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				}
+				
+				JSONObject dimsCube1 = (JSONObject) (((JSONObject) collectionSTACMetdataCube1.get("properties")).get("cube:dimensions"));		
+				for (String dimsCube1Keys : dimsCube1.keySet()) {
+					noOfDimsCube1 = noOfDimsCube1+1;
+				}
+				
+				JSONObject dimsCube2 = (JSONObject) (((JSONObject) collectionSTACMetdataCube2.get("properties")).get("cube:dimensions"));		
+				for (String dimsCube2Keys : dimsCube2.keySet()) {
+					noOfDimsCube2 = noOfDimsCube2+1;
+				}
+				
+				if (noOfDimsCube1==noOfDimsCube2 && (!payLoad2.contains("condense") && !payLoad1.contains("condense"))) {
+					log.debug("Cubes are of same dimensions");					
+					for (String mergeProcessKey : mergeProcesses.keySet()) {
+						JSONObject mergeProcess =  mergeProcesses.getJSONObject(mergeProcessKey);
+						for (String applierField : mergeProcess.keySet()) {
+							if (applierField.equals("result")) {
+								Boolean resultFlag = mergeProcess.getBoolean("result");
+								if (resultFlag) {
+									endMergeNode = mergeProcessKey;
+									endMergeNodeAsArray.put(endMergeNode);
+									log.debug("End Merge Process is : " + mergeProcesses.getJSONObject(endMergeNode).getString("process_id"));
+								}
 							}
 						}
 					}
+
+					log.debug("Cube1 : " + payLoad1);
+					log.debug("Cube2 : " + payLoad2);
+					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
+					if (overlapResolver.equals( "sum")) {
+						wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
+					}
+					if (overlapResolver.equals( "subtract")) {
+						wcpsMergepayLoad.append("("+payLoad1+")"+"-"+"("+payLoad2+")");
+					}
+					if (overlapResolver.equals( "product")) {
+						wcpsMergepayLoad.append("("+payLoad1+")"+"*"+"("+payLoad2+")");
+					}
+					if (overlapResolver.equals( "divide")) {
+						wcpsMergepayLoad.append("("+payLoad1+")"+"/"+"("+payLoad2+")");
+					}
+					wcpsPayLoad=wcpsMergepayLoad;
+					wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
+					storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMergepayLoad.toString());
+					log.debug("Merge Cubes Process PayLoad is : ");
+					log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 				}
 				
-				log.debug("Cube1 : " + payLoad1);
-				log.debug("Cube2 : " + payLoad2);
-				String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
-				if (overlapResolver.equals( "sum")) {
-				wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
-			    }
-				if (overlapResolver.equals( "subtract")) {
-					wcpsMergepayLoad.append("("+payLoad1+")"+"-"+"("+payLoad2+")");
-				    }
-				if (overlapResolver.equals( "product")) {
-					wcpsMergepayLoad.append("("+payLoad1+")"+"*"+"("+payLoad2+")");
-				    }
-				if (overlapResolver.equals( "divide")) {
-					wcpsMergepayLoad.append("("+payLoad1+")"+"/"+"("+payLoad2+")");
-				    }
-				wcpsPayLoad=wcpsMergepayLoad;
-				wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
-				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMergepayLoad.toString());
-				log.debug("Merge Cubes Process PayLoad is : ");
-				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
+				else if (noOfDimsCube1==noOfDimsCube2 && (payLoad2.contains("condense") && !payLoad1.contains("condense"))) {
+					String timeImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(" Y"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(" N"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(",").matcher(timeImageCrsDomain).replaceAll("");
+					String XImageCrsDomain = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
+					XImageCrsDomain = Pattern.compile(" Y"+"\\(.*?\\)").matcher(XImageCrsDomain).replaceAll("");
+					XImageCrsDomain = Pattern.compile(" N"+"\\(.*?\\)").matcher(XImageCrsDomain).replaceAll("");
+					XImageCrsDomain = Pattern.compile(",").matcher(XImageCrsDomain).replaceAll("");
+					String YImageCrsDomain = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
+					YImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
+					YImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
+					YImageCrsDomain = Pattern.compile(",").matcher(YImageCrsDomain).replaceAll("");
+					
+//					String payLoad1Merge = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" DATE\\(\\$T\\)");
+//					payLoad1Merge = Pattern.compile(" Y"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" Y"+"\\(\\$Y\\)");
+//					payLoad1Merge = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" X"+"\\(\\$X\\)");
+//					payLoad1Merge = Pattern.compile(" E"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" E"+"\\(\\$Y\\)");
+//					payLoad1Merge = Pattern.compile(" N"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" N"+"\\(\\$X\\)");
+					
+					String payLoad1Merge = payLoad1.replaceAll("\\sDATE"+"\\(.*?\\)", " DATE\\(\\$T\\)").replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X\\)");
+//					payLoad1Merge.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y\\)");
+//					payLoad1Merge.replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X\\)");
+//					String payLoad2Merge = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" DATE\\(\\$T\\)");
+//					payLoad2Merge = Pattern.compile(" Y"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" Y"+"\\(\\$Y\\)");
+//					payLoad2Merge = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" X"+"\\(\\$X\\)");
+//					payLoad2Merge = Pattern.compile(" E"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" E"+"\\(\\$Y\\)");
+//					payLoad2Merge = Pattern.compile(" N"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" N"+"\\(\\$X\\)");
+					
+					String payLoad2Merge = payLoad2.replaceAll("\\sDATE"+"\\(.*?\\)", " DATE\\(\\$T\\)").replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X\\)");
+//					payLoad2Merge.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y\\)");
+//					payLoad2Merge.replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X\\)");
+					
+					log.debug(timeImageCrsDomain);
+					log.debug(XImageCrsDomain);
+					log.debug(YImageCrsDomain);
+					log.debug(payLoad1Merge);
+					log.debug(payLoad2Merge);
+					
+					for (String mergeProcessKey : mergeProcesses.keySet()) {
+						JSONObject mergeProcess =  mergeProcesses.getJSONObject(mergeProcessKey);
+						for (String applierField : mergeProcess.keySet()) {
+							if (applierField.equals("result")) {
+								Boolean resultFlag = mergeProcess.getBoolean("result");
+								if (resultFlag) {
+									endMergeNode = mergeProcessKey;
+									endMergeNodeAsArray.put(endMergeNode);
+									log.debug("End Merge Process is : " + mergeProcesses.getJSONObject(endMergeNode).getString("process_id"));
+								}
+							}
+						}
+					}
+					log.debug("Cube1 : " + payLoad1);
+					log.debug("Cube2 : " + payLoad2);
+					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
+					if (overlapResolver.equals( "sum")) {
+						wcpsMergepayLoad.append("("+ " coverage meanTime over $T t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y y(imageCrsDomain("+YImageCrsDomain+", Y)), $X x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + ")"+"+"+"("+payLoad2Merge+")");
+					}
+					if (overlapResolver.equals( "subtract")) {
+						wcpsMergepayLoad.append("("+ " coverage meanTime over $T t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y y(imageCrsDomain("+YImageCrsDomain+", Y)), $X x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + ")"+"-"+"("+payLoad2Merge+")");
+					}
+					if (overlapResolver.equals( "product")) {
+						wcpsMergepayLoad.append("("+ " coverage meanTime over $T t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y y(imageCrsDomain("+YImageCrsDomain+", Y)), $X x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + ")"+"*"+"("+payLoad2Merge+")");
+					}
+					if (overlapResolver.equals( "divide")) {
+						wcpsMergepayLoad.append("("+ " coverage meanTime over $T t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y y(imageCrsDomain("+YImageCrsDomain+", Y)), $X x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + ")"+"/"+"("+payLoad2Merge+")");
+					}
+					wcpsPayLoad=wcpsMergepayLoad;
+					wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
+					storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMergepayLoad.toString());
+					log.debug("Merge Cubes Process PayLoad is : ");
+					log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
+				}
 			}
-			if (currentProcessID.equals("resample_cube_spatial")) {
+			if (currentProcessID.equals("resample_spatial_cube")) {
 				containsResampleProcess = true;
 				StringBuilder wcpsResamplepayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderResample = basicWCPSStringBuilder(varPayLoad.toString());
@@ -3253,16 +3386,17 @@ public class WCPSQueryFactory {
 //		}catch(JSONException e) {
 //			log.error("no epsg code was detected!");
 //		}
-//		if(projectionEPSGCode == 0) {
-//			return "";
-//		}
 		StringBuilder resampleBuilder = new StringBuilder("scale(" );
 		//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
 		resampleBuilder.append(payload);
 		resampleBuilder.append(" ,{"
-				+ xAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + xLow + ":" + xScale + ")" + ","
-				+ yAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + yLow + ":" + yScale + ")" + ""
+				+ xAxis + "(" + xLow + ":" + xScale + ")" + ","
+				+ yAxis + "(" + yLow + ":" + yScale + ")" + ""
 				+ "})");
+//		resampleBuilder.append(" ,{"
+//				+ xAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + xLow + ":" + xScale + ")" + ","
+//				+ yAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + yLow + ":" + yScale + ")" + ""
+//				+ "})");
 		return resampleBuilder.toString();
 	}
 
@@ -3369,7 +3503,7 @@ public class WCPSQueryFactory {
 				String axisUpperCase = axis.toUpperCase();
 				String low = filter.getLowerBound();
 				String high = filter.getUpperBound();
-				stringBuilder.append(axis + "(");
+				stringBuilder.append(" " + axis + "(");
 				if ((axisUpperCase.contains("DATE") || axisUpperCase.contains("TIME") || axisUpperCase.contains("ANSI") || axisUpperCase.contains("UNIX")) && !low.contains("$")) {
 					stringBuilder.append("\"");
 				}
@@ -3427,7 +3561,7 @@ public class WCPSQueryFactory {
 //				e.printStackTrace();
 //			}
 			String high = toDate;
-			stringBuilder.append(axis + "(");
+			stringBuilder.append(" " + axis + "(");
 			if ((axisUpperCase.contains("DATE") || axisUpperCase.contains("TIME") || axisUpperCase.contains("ANSI") || axisUpperCase.contains("UNIX")) && !low.contains("$")) {
 				stringBuilder.append("\"");
 			}
