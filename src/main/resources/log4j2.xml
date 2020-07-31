@@ -9,7 +9,7 @@
     </Console>
   </Appenders>
   <Loggers>   
-    <Logger name="eu.openeo.backend.auth" level="warn" additivity="false">
+    <Logger name="eu.openeo.backend.auth" level="debug" additivity="false">
     	<AppenderRef ref="STDOUT"/>
 		<AppenderRef ref="FILE"/>
     </Logger>
@@ -17,14 +17,26 @@
     	<AppenderRef ref="STDOUT"/>
 		<AppenderRef ref="FILE"/>
     </Logger>
-    <Logger name="eu.openeo.backend.wcps.JobResultScheduler" level="error" additivity="false">
+    <Logger name="eu.openeo.backend.wcps.JobResultScheduler" level="debug" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>
+    <Logger name="eu.openeo.backend.wcps.HyperCubeFactory" level="debug" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>
+    <Logger name="eu.openeo.backend.wcps.JobScheduler" level="debug" additivity="false">
     	<AppenderRef ref="STDOUT"/>
 		<AppenderRef ref="FILE"/>
     </Logger>
     <Logger name="eu.openeo.api.impl" level="error" additivity="false">
     	<AppenderRef ref="STDOUT"/>
 		<AppenderRef ref="FILE"/>
-    </Logger>   
+    </Logger>
+    <Logger name="eu.openeo.api.impl.JobsApiServiceImpl" level="debug" additivity="false">
+    	<AppenderRef ref="STDOUT"/>
+		<AppenderRef ref="FILE"/>
+    </Logger>    
     <Logger name="eu.openeo.api.ApiOriginFilter" level="error" additivity="false">
     	<AppenderRef ref="STDOUT"/>
 		<AppenderRef ref="FILE"/>
@@ -37,7 +49,7 @@
     	<AppenderRef ref="STDOUT"/>
 		<AppenderRef ref="FILE"/>
     </Logger>
-    <Logger name="eu.openeo" level="info" additivity="false">
+    <Logger name="eu.openeo" level="error" additivity="false">
     	<AppenderRef ref="STDOUT"/>
 		<AppenderRef ref="FILE"/>
     </Logger>
