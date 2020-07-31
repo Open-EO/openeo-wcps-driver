@@ -226,6 +226,7 @@ public class JobScheduler implements JobEventListener, UDFEventListener{
 				// stream UDF in form of json hypercube object to udf endpoint via http post method 
 				try (OutputStream postUDFStream = con.getOutputStream()) {
 					byte[] udfBlob = udfDescriptor.toString().getBytes(StandardCharsets.UTF_8);
+					//log.debug(new String(udfBlob, StandardCharsets. UTF_8));
 					postUDFStream.write(udfBlob, 0, udfBlob.length);
 					postUDFStream.close();
 					log.info("Posting UDF to UDF Service endpoint.");

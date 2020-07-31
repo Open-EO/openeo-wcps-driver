@@ -127,10 +127,8 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 		    String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
 		    int xIndex = 0;
 		    int yIndex = 0;
-		    JSONObject[] dimObjects = new JSONObject[axis.length+1];
-		    
-JSONArray bandArray = new JSONArray();			
-			
+		    JSONObject[] dimObjects = new JSONObject[axis.length+1];	    
+            JSONArray bandArray = new JSONArray();			
 			dimObjects[0] = new JSONObject();
 			dimObjects[0].put("type", "bands");
 			dimObjects[0].put("axis", "spectral");
@@ -529,10 +527,8 @@ JSONArray bandArray = new JSONArray();
 				Element coverage = coverageList.get(c);
 				log.debug("root node info: " + coverage.getName() + ":" + coverage.getChildText("CoverageId", defaultNS));		
 				
-				JSONObject product = new JSONObject();
-				
-                JSONObject extentCollection = new JSONObject();
-				
+				JSONObject product = new JSONObject();				
+                JSONObject extentCollection = new JSONObject();				
 				JSONArray spatialExtent = new JSONArray();
 				JSONArray temporalExtent =  new JSONArray();
 				
@@ -566,7 +562,7 @@ JSONArray bandArray = new JSONArray();
 				Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
 				Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
 				Element metadataElement = rootNodeCollections.getChild("CoverageDescription", defaultNSCollections).getChild("metadata", gmlNS).getChild("Extension", gmlNS);
-								
+				
 					//metadataObj = new JSONObject(metadataString1);
 					//String metadataString2 = metadataString1.replaceAll("\\n","");
 					//String metadataString3 = metadataString2.replaceAll("\"\"","\"");

@@ -24,6 +24,7 @@ public class ConvenienceHelper {
 		properties.load(stream);
 
 		String value = properties.getProperty(key);
+		stream.close();
 
 		return value;
 	}
@@ -40,7 +41,9 @@ public class ConvenienceHelper {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream stream = classLoader.getResourceAsStream("output_formats.json");
 		JSONObject outputFormats = new JSONObject(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
+		stream.close();
 		JSONObject currentFormat = outputFormats.getJSONObject(output);
+		
 		if (currentFormat != null) {
 			return currentFormat.getString("mime-type");
 		}
@@ -60,6 +63,7 @@ public class ConvenienceHelper {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream stream = classLoader.getResourceAsStream("output_formats.json");
 		JSONObject outputFormats = new JSONObject(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
+		stream.close();
 		JSONObject currentFormat = outputFormats.getJSONObject(output);
 		if (currentFormat != null) {
 			return currentFormat.getString("rasdaman_name");
@@ -73,6 +77,7 @@ public class ConvenienceHelper {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream stream = classLoader.getResourceAsStream("output_formats.json");
 		JSONObject outputFormats = new JSONObject(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
+		stream.close();
 		for (String formatName : outputFormats.keySet()) {
 			JSONObject currentObject = outputFormats.getJSONObject(formatName);
 			if (currentObject.getString("mime-type").equals(mimeTypeName)) {
@@ -88,6 +93,7 @@ public class ConvenienceHelper {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream stream = classLoader.getResourceAsStream("output_formats.json");
 		JSONObject outputFormats = new JSONObject(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
+		stream.close();
 		for (String formatName : outputFormats.keySet()) {
 			JSONObject currentObject = outputFormats.getJSONObject(formatName);
 			if (currentObject.getString("rasdaman_name").equals(rasName)) {
