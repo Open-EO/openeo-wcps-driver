@@ -411,6 +411,29 @@ public class WCPSQueryFactory {
 				
 				else if (noOfDimsCube1==noOfDimsCube2 && !temporalStartCube1.equals(temporalEndCube1) && !temporalStartCube2.equals(temporalEndCube2) && payLoad2.contains("condense") && !payLoad2.contains("coverage") && payLoad1.contains("coverage")) {
 					log.debug("Cubes are of same dimension after condensing too");
+					String timeImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(" Y"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(" N"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(",").matcher(timeImageCrsDomain).replaceAll("");
+					String XImageCrsDomain = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
+					XImageCrsDomain = Pattern.compile(" Y"+"\\(.*?\\)").matcher(XImageCrsDomain).replaceAll("");
+					XImageCrsDomain = Pattern.compile(" N"+"\\(.*?\\)").matcher(XImageCrsDomain).replaceAll("");
+					XImageCrsDomain = Pattern.compile(",").matcher(XImageCrsDomain).replaceAll("");
+					String YImageCrsDomain = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
+					YImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
+					YImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
+					YImageCrsDomain = Pattern.compile(",").matcher(YImageCrsDomain).replaceAll("");					
+					
+					String payLoad1Merge = payLoad1.replaceAll("\\sDATE"+"\\(.*?\\)", " DATE\\(\\$T" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$X" + nodeKeyOfCurrentProcess + "\\)");
+   				    String payLoad2Merge = payLoad2.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$X" + nodeKeyOfCurrentProcess + "\\)");;
+									
+					log.debug(timeImageCrsDomain);
+					log.debug(XImageCrsDomain);
+					log.debug(YImageCrsDomain);
+					log.debug(payLoad1Merge);
+					log.debug(payLoad2Merge);
+					
 					for (String mergeProcessKey : mergeProcesses.keySet()) {
 						JSONObject mergeProcess =  mergeProcesses.getJSONObject(mergeProcessKey);
 						for (String applierField : mergeProcess.keySet()) {
@@ -428,16 +451,37 @@ public class WCPSQueryFactory {
 					log.debug("Cube2 : " + payLoad2);
 					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
 					if (overlapResolver.equals( "sum")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
+						if (dimsXY) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "+" + "("+payLoad2Merge+")");
+						}
+						else if(dimsEN) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "+" + "("+payLoad2Merge+")");
+						}
+						
 					}
 					if (overlapResolver.equals( "subtract")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"-"+"("+payLoad2+")");
+						if (dimsXY) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "-" + "("+payLoad2Merge+")");
+						}
+						else if(dimsEN) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "-" + "("+payLoad2Merge+")");
+						}
 					}
 					if (overlapResolver.equals( "product")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"*"+"("+payLoad2+")");
+						if (dimsXY) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "*" + "("+payLoad2Merge+")");
+						}
+						else if(dimsEN) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "*" + "("+payLoad2Merge+")");
+						}
 					}
 					if (overlapResolver.equals( "divide")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"/"+"("+payLoad2+")");
+						if (dimsXY) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "/" + "("+payLoad2Merge+")");
+						}
+						else if(dimsEN) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "/" + "("+payLoad2Merge+")");
+						}
 					}
 					wcpsPayLoad=wcpsMergepayLoad;
 					wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
@@ -449,6 +493,31 @@ public class WCPSQueryFactory {
 				
 				else if (noOfDimsCube1==noOfDimsCube2 && !temporalStartCube1.equals(temporalEndCube1) && !temporalStartCube2.equals(temporalEndCube2) && payLoad2.contains("condense") && !payLoad2.contains("coverage") && !payLoad1.contains("coverage")) {
 					log.debug("Cubes are of same dimension after condensing too");
+					String timeImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(" Y"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(" N"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+					timeImageCrsDomain = Pattern.compile(",").matcher(timeImageCrsDomain).replaceAll("");
+					String XImageCrsDomain = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
+					XImageCrsDomain = Pattern.compile(" Y"+"\\(.*?\\)").matcher(XImageCrsDomain).replaceAll("");
+					XImageCrsDomain = Pattern.compile(" N"+"\\(.*?\\)").matcher(XImageCrsDomain).replaceAll("");
+					XImageCrsDomain = Pattern.compile(",").matcher(XImageCrsDomain).replaceAll("");
+					String YImageCrsDomain = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
+					YImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
+					YImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
+					YImageCrsDomain = Pattern.compile(",").matcher(YImageCrsDomain).replaceAll("");
+					
+					
+					String payLoad1Merge = payLoad1.replaceAll("\\sDATE"+"\\(.*?\\)", " DATE\\(\\$T" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$X" + nodeKeyOfCurrentProcess + "\\)");
+//										
+					String payLoad2Merge = payLoad2.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$X" + nodeKeyOfCurrentProcess + "\\)");;
+//										
+					log.debug(timeImageCrsDomain);
+					log.debug(XImageCrsDomain);
+					log.debug(YImageCrsDomain);
+					log.debug(payLoad1Merge);
+					log.debug(payLoad2Merge);
+					
 					for (String mergeProcessKey : mergeProcesses.keySet()) {
 						JSONObject mergeProcess =  mergeProcesses.getJSONObject(mergeProcessKey);
 						for (String applierField : mergeProcess.keySet()) {
@@ -466,16 +535,37 @@ public class WCPSQueryFactory {
 					log.debug("Cube2 : " + payLoad2);
 					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
 					if (overlapResolver.equals( "sum")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
+						if (dimsXY) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "+" + "("+payLoad2Merge+")");
+						}
+						else if(dimsEN) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "+" + "("+payLoad2Merge+")");
+						}
+						
 					}
 					if (overlapResolver.equals( "subtract")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"-"+"("+payLoad2+")");
+						if (dimsXY) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "-" + "("+payLoad2Merge+")");
+						}
+						else if(dimsEN) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "-" + "("+payLoad2Merge+")");
+						}
 					}
 					if (overlapResolver.equals( "product")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"*"+"("+payLoad2+")");
+						if (dimsXY) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "*" + "("+payLoad2Merge+")");
+						}
+						else if(dimsEN) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "*" + "("+payLoad2Merge+")");
+						}
 					}
 					if (overlapResolver.equals( "divide")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"/"+"("+payLoad2+")");
+						if (dimsXY) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "/" + "("+payLoad2Merge+")");
+						}
+						else if(dimsEN) {
+							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "/" + "("+payLoad2Merge+")");
+						}
 					}
 					wcpsPayLoad=wcpsMergepayLoad;
 					wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
@@ -500,9 +590,9 @@ public class WCPSQueryFactory {
 							}
 						}
 					}
+
 					log.debug("Cube1 : " + payLoad1);
 					log.debug("Cube2 : " + payLoad2);
-					payLoad2.replaceAll("\\$T", "\\$T"+nodeKeyOfCurrentProcess).replaceAll("\\$Y", "\\$Y"+nodeKeyOfCurrentProcess).replaceAll("\\$X", "\\$X"+nodeKeyOfCurrentProcess);
 					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
 					if (overlapResolver.equals( "sum")) {
 						wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
@@ -539,6 +629,7 @@ public class WCPSQueryFactory {
 							}
 						}
 					}
+
 					log.debug("Cube1 : " + payLoad1);
 					log.debug("Cube2 : " + payLoad2);
 					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
@@ -577,25 +668,11 @@ public class WCPSQueryFactory {
 					YImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
 					YImageCrsDomain = Pattern.compile(",").matcher(YImageCrsDomain).replaceAll("");
 					
-//					String payLoad1Merge = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" DATE\\(\\$T\\)");
-//					payLoad1Merge = Pattern.compile(" Y"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" Y"+"\\(\\$Y\\)");
-//					payLoad1Merge = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" X"+"\\(\\$X\\)");
-//					payLoad1Merge = Pattern.compile(" E"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" E"+"\\(\\$Y\\)");
-//					payLoad1Merge = Pattern.compile(" N"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" N"+"\\(\\$X\\)");
 					
 					String payLoad1Merge = payLoad1.replaceAll("\\sDATE"+"\\(.*?\\)", " DATE\\(\\$T" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$X" + nodeKeyOfCurrentProcess + "\\)");
-//					payLoad1Merge.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y\\)");
-//					payLoad1Merge.replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X\\)");
-//					String payLoad2Merge = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" DATE\\(\\$T\\)");
-//					payLoad2Merge = Pattern.compile(" Y"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" Y"+"\\(\\$Y\\)");
-//					payLoad2Merge = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" X"+"\\(\\$X\\)");
-//					payLoad2Merge = Pattern.compile(" E"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" E"+"\\(\\$Y\\)");
-//					payLoad2Merge = Pattern.compile(" N"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" N"+"\\(\\$X\\)");
-					
+//										
 					String payLoad2Merge = payLoad2.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$X" + nodeKeyOfCurrentProcess + "\\)");;
-//					payLoad2Merge.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y\\)");
-//					payLoad2Merge.replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X\\)");
-					
+//										
 					log.debug(timeImageCrsDomain);
 					log.debug(XImageCrsDomain);
 					log.debug(YImageCrsDomain);
@@ -659,7 +736,8 @@ public class WCPSQueryFactory {
 					
 				}
 				
-				else if (noOfDimsCube1==noOfDimsCube2 && !temporalStartCube1.equals(temporalEndCube1) && temporalStartCube2.equals(temporalEndCube2) && !payLoad2.contains("condense") && payLoad1.contains("coverage")) {
+				else if (noOfDimsCube1==noOfDimsCube2 && temporalStartCube1.equals(temporalEndCube1) && temporalStartCube2.equals(temporalEndCube2)) {
+					log.debug("Time Series Cubes");
 					for (String mergeProcessKey : mergeProcesses.keySet()) {
 						JSONObject mergeProcess =  mergeProcesses.getJSONObject(mergeProcessKey);
 						for (String applierField : mergeProcess.keySet()) {
@@ -673,81 +751,21 @@ public class WCPSQueryFactory {
 							}
 						}
 					}
-					
-					String timeImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
-					timeImageCrsDomain = Pattern.compile(" Y"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
-					timeImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
-					timeImageCrsDomain = Pattern.compile(" N"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
-					timeImageCrsDomain = Pattern.compile(",").matcher(timeImageCrsDomain).replaceAll("");
-					String XImageCrsDomain = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
-					XImageCrsDomain = Pattern.compile(" Y"+"\\(.*?\\)").matcher(XImageCrsDomain).replaceAll("");
-					XImageCrsDomain = Pattern.compile(" N"+"\\(.*?\\)").matcher(XImageCrsDomain).replaceAll("");
-					XImageCrsDomain = Pattern.compile(",").matcher(XImageCrsDomain).replaceAll("");
-					String YImageCrsDomain = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad1).replaceAll("");
-					YImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
-					YImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
-					YImageCrsDomain = Pattern.compile(",").matcher(YImageCrsDomain).replaceAll("");
-					
-//					String payLoad1Merge = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" DATE\\(\\$T\\)");
-//					payLoad1Merge = Pattern.compile(" Y"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" Y"+"\\(\\$Y\\)");
-//					payLoad1Merge = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" X"+"\\(\\$X\\)");
-//					payLoad1Merge = Pattern.compile(" E"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" E"+"\\(\\$Y\\)");
-//					payLoad1Merge = Pattern.compile(" N"+"\\(.*?\\)").matcher(payLoad1).replaceAll(" N"+"\\(\\$X\\)");
-					
-					String payLoad1Merge = payLoad1.replaceAll("\\sDATE"+"\\(.*?\\)", " DATE\\(\\$Tt\\)").replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Yy\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$Xx\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Yy\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$Xx\\)");
-//					payLoad1Merge.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y\\)");
-//					payLoad1Merge.replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X\\)");
-//					String payLoad2Merge = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" DATE\\(\\$T\\)");
-//					payLoad2Merge = Pattern.compile(" Y"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" Y"+"\\(\\$Y\\)");
-//					payLoad2Merge = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" X"+"\\(\\$X\\)");
-//					payLoad2Merge = Pattern.compile(" E"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" E"+"\\(\\$Y\\)");
-//					payLoad2Merge = Pattern.compile(" N"+"\\(.*?\\)").matcher(payLoad2).replaceAll(" N"+"\\(\\$X\\)");
-					
-					String payLoad2Merge = payLoad2.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Yy\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$Xx\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Yy\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$Xx\\)");;
-//					payLoad2Merge.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y\\)");
-//					payLoad2Merge.replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X\\)");
-					
-					log.debug(timeImageCrsDomain);
-					log.debug(XImageCrsDomain);
-					log.debug(YImageCrsDomain);
-					log.debug(payLoad1Merge);
-					log.debug(payLoad2Merge);
-					
+
 					log.debug("Cube1 : " + payLoad1);
 					log.debug("Cube2 : " + payLoad2);
 					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
 					if (overlapResolver.equals( "sum")) {
-						if (dimsXY) {
-							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "+" + "("+payLoad2Merge+")");
-						}
-						else if(dimsEN) {
-							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "+" + "("+payLoad2Merge+")");
-						}
-						
+						wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
 					}
 					if (overlapResolver.equals( "subtract")) {
-						if (dimsXY) {
-							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "-" + "("+payLoad2Merge+")");
-						}
-						else if(dimsEN) {
-							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "-" + "("+payLoad2Merge+")");
-						}
+						wcpsMergepayLoad.append("("+payLoad1+")"+"-"+"("+payLoad2+")");
 					}
 					if (overlapResolver.equals( "product")) {
-						if (dimsXY) {
-							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "*" + "("+payLoad2Merge+")");
-						}
-						else if(dimsEN) {
-							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "*" + "("+payLoad2Merge+")");
-						}
+						wcpsMergepayLoad.append("("+payLoad1+")"+"*"+"("+payLoad2+")");
 					}
 					if (overlapResolver.equals( "divide")) {
-						if (dimsXY) {
-							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", Y)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", X)) values " + payLoad1Merge + "/" + "("+payLoad2Merge+")");
-						}
-						else if(dimsEN) {
-							wcpsMergepayLoad.append(" coverage meanTime over $T" + nodeKeyOfCurrentProcess + " t(imageCrsDomain(" +timeImageCrsDomain+ ", DATE)), $Y" + nodeKeyOfCurrentProcess + " y(imageCrsDomain("+YImageCrsDomain+", N)), $X" + nodeKeyOfCurrentProcess + " x(imageCrsDomain(" +XImageCrsDomain+ ", E)) values " + payLoad1Merge + "/" + "("+payLoad2Merge+")");
-						}
+						wcpsMergepayLoad.append("("+payLoad1+")"+"/"+"("+payLoad2+")");
 					}
 					wcpsPayLoad=wcpsMergepayLoad;
 					wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
@@ -755,7 +773,7 @@ public class WCPSQueryFactory {
 					log.debug("Merge Cubes Process PayLoad is : " + wcpsMergepayLoad.toString());
 					log.debug("Merge Cubes Process Stored for Node " + nodeKeyOfCurrentProcess + " : " + storedPayLoads.get(nodeKeyOfCurrentProcess));
 					
-				}				
+				}
 				
 			}
 			if (currentProcessID.equals("resample_spatial_cube")) {
@@ -767,7 +785,11 @@ public class WCPSQueryFactory {
 				String collectionID = null;
 				String targetCollectionID = null;
 				String collectionVar = null;
+				String temporalStartCube1 = null;
+				String temporalEndCube1 = null;
 				if (processArguments.get("data") instanceof JSONObject) {
+					temporalStartCube1 = processGraph.getJSONObject(getFilterCollectionNode(nodeKeyOfCurrentProcess)).getJSONObject("arguments").getJSONArray("temporal_extent").getString(0);
+					temporalEndCube1 = processGraph.getJSONObject(getFilterCollectionNode(nodeKeyOfCurrentProcess)).getJSONObject("arguments").getJSONArray("temporal_extent").getString(1);
 					for (String fromType : processArguments.getJSONObject("data").keySet()) {
 						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
 							payLoad = wcpsPayLoad.toString();
@@ -799,6 +821,7 @@ public class WCPSQueryFactory {
 				String yLow = null;
 				String xHigh = null;
 				String yHigh = null;
+				String tempAxis = null;
 				for (int f = 0; f < filters.size(); f++) {
 					Filter filter = filters.get(f);
 					String axis = filter.getAxis();
@@ -813,6 +836,10 @@ public class WCPSQueryFactory {
 							xAxis = axis.replace("_"+ collectionID, "");
 							xLow = filter.getLowerBound();
 							xHigh = filter.getUpperBound();
+						}
+						if (axisUpperCase.equals("DATE") || axisUpperCase.equals("TIME") || axisUpperCase.equals("ANSI") || axisUpperCase.equals("UNIX")) {
+							tempAxis = axis.replace("_"+ collectionID, "");
+							
 						}
 					}
 				}
@@ -864,7 +891,9 @@ public class WCPSQueryFactory {
 				for(int c = 0; c < targetBandsArray.length(); c++) {
 					resTarget = targetBandsArray.getJSONObject(c).getString("gsd");
 				}
-				wcpsResamplepayLoad.append(createResampleSpatialCubeWCPSString(nodeKeyOfCurrentProcess, payLoad, resSource, resTarget, xAxis, xLow, xHigh, yAxis, yLow, yHigh));
+//				String resTargetTemporal = null;
+//				resTargetTemporal = ((JSONObject) targetCollectionSTACMetdata.getJSONObject("properties")).getJSONObject("cube:dimensions").getJSONObject(tempAxis).getString("step");
+				wcpsResamplepayLoad.append(createResampleSpatialCubeWCPSString(nodeKeyOfCurrentProcess, payLoad, resSource, resTarget, xAxis, xLow, xHigh, yAxis, yLow, yHigh, tempAxis, temporalStartCube1, temporalEndCube1));
 				wcpsPayLoad=wcpsResamplepayLoad;
 				wcpsStringBuilder = wcpsStringBuilderResample.append(wcpsResamplepayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsResamplepayLoad.toString());
@@ -1103,11 +1132,6 @@ public class WCPSQueryFactory {
 				
 				if (processArguments.get("value") instanceof JSONObject) {
 					for (String fromType : processArguments.getJSONObject("value").keySet()) {
-//						if (fromType.equals("from_argument") && processArguments.getJSONObject("value").getString("from_argument").equals("data")) {
-//							payLoad = wcpsPayLoad.toString();
-//							accept = processArguments.getDouble("accept");
-//							reject = processArguments.getDouble("reject");
-//						}
 						if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("value").getString("from_node");
 							payLoad = storedPayLoads.getString(dataNode);
@@ -1137,22 +1161,21 @@ public class WCPSQueryFactory {
 				
 				if (processArguments.get("accept") instanceof JSONObject) {
 					if (processArguments.get("reject") instanceof JSONObject) {
-						wcpsIFpayLoad.append("("+payLoad+"*"+acceptPayLoad+"+"+"(not "+payLoad+")*"+rejectPayLoad+")");
+						wcpsIFpayLoad.append("("+payLoad+"*"+acceptPayLoad+"+"+"(not "+payLoad.replaceAll("\\$T", "\\$T" + nodeKeyOfCurrentProcess).replaceAll("\\$Y", "\\$Y" + nodeKeyOfCurrentProcess).replaceAll("\\$X", "\\$X" + nodeKeyOfCurrentProcess).replaceAll("\\$N", "\\$N" + nodeKeyOfCurrentProcess).replaceAll("\\$E", "\\$E" + nodeKeyOfCurrentProcess)+")*"+rejectPayLoad+")");
 					}
 					else {
-						wcpsIFpayLoad.append("("+payLoad+"*"+acceptPayLoad+"+"+"(not "+payLoad+")*"+reject+")");
+						wcpsIFpayLoad.append("("+payLoad+"*"+acceptPayLoad+"+"+"(not "+payLoad.replaceAll("\\$T", "\\$T" + nodeKeyOfCurrentProcess).replaceAll("\\$Y", "\\$Y" + nodeKeyOfCurrentProcess).replaceAll("\\$X", "\\$X" + nodeKeyOfCurrentProcess).replaceAll("\\$N", "\\$N" + nodeKeyOfCurrentProcess).replaceAll("\\$E", "\\$E" + nodeKeyOfCurrentProcess)+")*"+reject+")");
 					}					
 				}
 				else {
 					if (processArguments.get("reject") instanceof JSONObject) {
-						wcpsIFpayLoad.append("("+payLoad+"*"+accept+"+"+"(not "+payLoad+")*"+rejectPayLoad+")");
+						wcpsIFpayLoad.append("("+payLoad+"*"+accept+"+"+"(not "+payLoad.replaceAll("\\$T", "\\$T" + nodeKeyOfCurrentProcess).replaceAll("\\$Y", "\\$Y" + nodeKeyOfCurrentProcess).replaceAll("\\$X", "\\$X" + nodeKeyOfCurrentProcess).replaceAll("\\$N", "\\$N" + nodeKeyOfCurrentProcess).replaceAll("\\$E", "\\$E" + nodeKeyOfCurrentProcess)+")*"+rejectPayLoad+")");
 					}
 					else {
-						wcpsIFpayLoad.append("("+payLoad+"*"+accept+"+"+"(not "+payLoad+")*"+reject+")");
+						wcpsIFpayLoad.append("("+payLoad+"*"+accept+"+"+"(not "+payLoad.replaceAll("\\$T", "\\$T" + nodeKeyOfCurrentProcess).replaceAll("\\$Y", "\\$Y" + nodeKeyOfCurrentProcess).replaceAll("\\$X", "\\$X" + nodeKeyOfCurrentProcess).replaceAll("\\$N", "\\$N" + nodeKeyOfCurrentProcess).replaceAll("\\$E", "\\$E" + nodeKeyOfCurrentProcess)+")*"+reject+")");
 					}	
 				}				
 				
-				//wcpsIFpayLoad.append("("+payLoad+"*"+accept + ")");
 				wcpsPayLoad=wcpsIFpayLoad;
 				StringBuilder wcpsStringBuilderMaskThresPayload = basicWCPSStringBuilder(varPayLoad.toString());
 				wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsIFpayLoad.toString());
@@ -3718,19 +3741,21 @@ public class WCPSQueryFactory {
 		return resampleBuilder.toString();
 	}
 	
-	private String createResampleSpatialCubeWCPSString(String resampleNodeKey, String payload, String resSource, String resTarget, String xAxis, String xLow, String xHigh, String yAxis, String yLow, String yHigh) {
+	private String createResampleSpatialCubeWCPSString(String resampleNodeKey, String payload, String resSource, String resTarget, String xAxis, String xLow, String xHigh, String yAxis, String yLow, String yHigh, String tempAxis, String temporalStartCube1, String temporalEndCube1) {
 		double res = Double.parseDouble(resSource)/Double.parseDouble(resTarget);
 		log.debug(xHigh+xLow);
 		log.debug(yHigh+yLow);
 		double xScale = (double)((Double.parseDouble(xHigh)-Double.parseDouble(xLow))*res)+Double.parseDouble(xLow);
 		double yScale = (double)((Double.parseDouble(yHigh)-Double.parseDouble(yLow))*res)+Double.parseDouble(yLow);
 		int projectionEPSGCode = 0;
+		StringBuilder resampleBuilder = new StringBuilder("scale(" );
+		if (temporalStartCube1.equals(temporalEndCube1)) {
 //		try {
 //			projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getInt("projection");
 //		}catch(JSONException e) {
 //			log.error("no epsg code was detected!");
 //		}
-		StringBuilder resampleBuilder = new StringBuilder("scale(" );
+		
 		//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
 		resampleBuilder.append(payload);
 		resampleBuilder.append(" ,{"
@@ -3741,6 +3766,27 @@ public class WCPSQueryFactory {
 //				+ xAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + xLow + ":" + xScale + ")" + ","
 //				+ yAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + yLow + ":" + yScale + ")" + ""
 //				+ "})");
+		}
+		else if (!temporalStartCube1.equals(temporalEndCube1)) {
+//			try {
+//				projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getInt("projection");
+//			}catch(JSONException e) {
+//				log.error("no epsg code was detected!");
+//			}
+			//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
+			resampleBuilder.append(payload);
+			resampleBuilder.append(" ,{"
+					+ tempAxis + "(" + '"' + temporalStartCube1 + '"' + ":" + '"' + temporalEndCube1 + '"' + ")" + ","
+					+ xAxis + "(" + xLow + ":" + xScale + ")" + ","
+					+ yAxis + "(" + yLow + ":" + yScale + ")" + ""
+					+ "})");
+//			resampleBuilder.append(" ,{"
+//			+ xAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + xLow + ":" + xScale + ")" + ","
+//			+ yAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + yLow + ":" + yScale + ")" + ""
+//			+ "})");
+			
+			
+		}
 		return resampleBuilder.toString();
 	}
 
@@ -4329,7 +4375,7 @@ public class WCPSQueryFactory {
 			}
 			if (argumentsKey.contentEquals("expressions")) {
 				if (applyProcessArguments.get("expressions") instanceof JSONObject) {
-					for (String fromKey : applyProcessArguments.getJSONObject("data").keySet()) {
+					for (String fromKey : applyProcessArguments.getJSONObject("expressions").keySet()) {
 						if (fromKey.contentEquals("from_node")) {
 							nextFromNode = applyProcessArguments.getJSONObject("expressions").getString("from_node");
 							fromNodes.put(nextFromNode);
