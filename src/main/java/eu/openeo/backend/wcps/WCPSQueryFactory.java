@@ -590,29 +590,65 @@ public class WCPSQueryFactory {
 			if (currentProcessID.equals("if_custom")) {
 				StringBuilder wcpsIFpayLoad = new StringBuilder("");
 				String payLoad = null;
-				int accept = 0;
-				int reject = 0;
+				String acceptPayLoad = null;
+				String rejectPayLoad = null;
+				double accept = 0;
+				double reject = 0;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
 				
 				if (processArguments.get("value") instanceof JSONObject) {
 					for (String fromType : processArguments.getJSONObject("value").keySet()) {
-						if (fromType.equals("from_argument") && processArguments.getJSONObject("value").getString("from_argument").equals("data")) {
-							payLoad = wcpsPayLoad.toString();
-							accept = processArguments.getInt("accept");
-							reject = processArguments.getInt("reject");
-						}
-						else if (fromType.equals("from_node")) {
+//						if (fromType.equals("from_argument") && processArguments.getJSONObject("value").getString("from_argument").equals("data")) {
+//							payLoad = wcpsPayLoad.toString();
+//							accept = processArguments.getDouble("accept");
+//							reject = processArguments.getDouble("reject");
+//						}
+						if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("value").getString("from_node");
 							payLoad = storedPayLoads.getString(dataNode);
-							log.debug("If Process : ");
-							accept = processArguments.getInt("accept");
-							reject = processArguments.getInt("reject");
+							log.debug("IF Process : ");
+							if (processArguments.get("accept") instanceof JSONObject) {
+								String acceptDataNode = processArguments.getJSONObject("accept").getString("from_node");
+								acceptPayLoad = storedPayLoads.getString(acceptDataNode);
+								log.debug("Accept Payload : " + acceptPayLoad);
+							}
+							else {
+								accept = processArguments.getDouble("accept");
+								log.debug("Accept Payload : " + accept);
+							}
+							if (processArguments.get("reject") instanceof JSONObject) {
+								String rejectDataNode = processArguments.getJSONObject("reject").getString("from_node");
+								rejectPayLoad = storedPayLoads.getString(rejectDataNode);
+								log.debug("Reject Payload : " + rejectPayLoad);
+							}
+							else {
+								reject = processArguments.getDouble("reject");
+								log.debug("Reject Payload : " + reject);
+							}
+							
 						}
 					}
 				}
 				
-				wcpsIFpayLoad.append("("+payLoad+"*"+accept+"+"+"(not "+payLoad+")*"+reject+")");
-				wcpsPayLoad=wcpsIFpayLoad;				
+				if (processArguments.get("accept") instanceof JSONObject) {
+					if (processArguments.get("reject") instanceof JSONObject) {
+						wcpsIFpayLoad.append("("+payLoad+"*"+acceptPayLoad+"+"+"(not "+payLoad+")*"+rejectPayLoad+")");
+					}
+					else {
+						wcpsIFpayLoad.append("("+payLoad+"*"+acceptPayLoad+"+"+"(not "+payLoad+")*"+reject+")");
+					}					
+				}
+				else {
+					if (processArguments.get("reject") instanceof JSONObject) {
+						wcpsIFpayLoad.append("("+payLoad+"*"+accept+"+"+"(not "+payLoad+")*"+rejectPayLoad+")");
+					}
+					else {
+						wcpsIFpayLoad.append("("+payLoad+"*"+accept+"+"+"(not "+payLoad+")*"+reject+")");
+					}	
+				}				
+				
+				//wcpsIFpayLoad.append("("+payLoad+"*"+accept + ")");
+				wcpsPayLoad=wcpsIFpayLoad;
 				StringBuilder wcpsStringBuilderMaskThresPayload = basicWCPSStringBuilder(varPayLoad.toString());
 				wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsIFpayLoad.toString());
 				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsIFpayLoad.toString());
@@ -654,7 +690,10 @@ public class WCPSQueryFactory {
 					}
 				}
 				
-				wcpsArrayFilterpayLoad.append("(($filterArray"+nodeKeyOfCurrentProcess+")"+"*$payLoad"+nodeKeyOfCurrentProcess+")");
+				double replacement = 0;
+				replacement = processArguments.getDouble("replacement");
+				
+				wcpsArrayFilterpayLoad.append("(($filterArray"+nodeKeyOfCurrentProcess+")"+"*$payLoad"+nodeKeyOfCurrentProcess+")" + " + " + "((not($filterArray"+nodeKeyOfCurrentProcess+"))"+"*"+replacement+")");
 				wcpsPayLoad=wcpsArrayFilterpayLoad;
 				
 				StringBuilder wcpsStringBuilderMaskThresPayload = basicWCPSStringBuilder(varPayLoad.toString());
@@ -1350,7 +1389,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (gteArguments.get("x") instanceof Double) {
+				else {
 					x = String.valueOf(gteArguments.getDouble("x"));
 				}
 				if (gteArguments.get("y") instanceof JSONObject) {
@@ -1365,7 +1404,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (gteArguments.get("y") instanceof Double) {
+				else {
 					y = String.valueOf(gteArguments.getDouble("y"));
 				}
 				applyBuilderExtend = createGreatThanEqWCPSString(x, y);
@@ -1390,7 +1429,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (gtArguments.get("x") instanceof Double) {
+				else {
 					x = String.valueOf(gtArguments.getDouble("x"));
 				}
 				if (gtArguments.get("y") instanceof JSONObject) {
@@ -1405,7 +1444,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (gtArguments.get("y") instanceof Double) {
+				else {
 					y = String.valueOf(gtArguments.getDouble("y"));
 				}
 				applyBuilderExtend = createGreatThanWCPSString(x, y);
@@ -1430,7 +1469,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (lteArguments.get("x") instanceof Double) {
+				else {
 					x = String.valueOf(lteArguments.getDouble("x"));
 				}
 				if (lteArguments.get("y") instanceof JSONObject) {
@@ -1445,7 +1484,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (lteArguments.get("y") instanceof Double) {
+				else {
 					y = String.valueOf(lteArguments.getDouble("y"));
 				}
 				applyBuilderExtend = createLessThanEqWCPSString(x, y);
@@ -1470,7 +1509,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (ltArguments.get("x") instanceof Double) {
+				else {
 					x = String.valueOf(ltArguments.getDouble("x"));
 				}
 				if (ltArguments.get("y") instanceof JSONObject) {
@@ -1485,7 +1524,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (ltArguments.get("y") instanceof Integer) {
+				else {
 					y = String.valueOf(ltArguments.getInt("y"));
 				}
 				applyBuilderExtend = createLessThanWCPSString(x, y);
@@ -1510,7 +1549,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (neqArguments.get("x") instanceof Double) {
+				else {
 					x = String.valueOf(neqArguments.getDouble("x"));
 				}
 				if (neqArguments.get("y") instanceof JSONObject) {
@@ -1525,7 +1564,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (neqArguments.get("y") instanceof Double) {
+				else {
 					y = String.valueOf(neqArguments.getDouble("y"));
 				}
 				applyBuilderExtend = createNotEqWCPSString(x, y);
@@ -1550,7 +1589,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (eqArguments.get("x") instanceof Double) {
+				else {
 					x = String.valueOf(eqArguments.getDouble("x"));
 				}
 				if (eqArguments.get("y") instanceof JSONObject) {
@@ -1565,7 +1604,7 @@ public class WCPSQueryFactory {
 						}						
 					}
 				}
-				else if (eqArguments.get("y") instanceof Double) {
+				else {
 					y = String.valueOf(eqArguments.getDouble("y"));
 				}
 				applyBuilderExtend = createEqWCPSString(x, y);
@@ -2927,6 +2966,31 @@ public class WCPSQueryFactory {
 				}				
 				nextNodeName.put(currentNode, fromNodes);				
 			}
+			
+			else if (argumentsKey.contentEquals("accept")) {
+				if (currentNodeProcessArguments.get("accept") instanceof JSONObject) {
+					for (String fromKey : currentNodeProcessArguments.getJSONObject("accept").keySet()) {
+						if (fromKey.contentEquals("from_node")) {
+							nextFromNode = currentNodeProcessArguments.getJSONObject("accept").getString("from_node");
+							fromNodes.put(nextFromNode);
+						}
+					}
+				}				
+				nextNodeName.put(currentNode, fromNodes);				
+			}
+			
+			else if (argumentsKey.contentEquals("reject")) {
+				if (currentNodeProcessArguments.get("reject") instanceof JSONObject) {
+					for (String fromKey : currentNodeProcessArguments.getJSONObject("reject").keySet()) {
+						if (fromKey.contentEquals("from_node")) {
+							nextFromNode = currentNodeProcessArguments.getJSONObject("reject").getString("from_node");
+							fromNodes.put(nextFromNode);
+						}
+					}
+				}				
+				nextNodeName.put(currentNode, fromNodes);				
+			}
+			
 			else if (argumentsKey.contentEquals("value")) {
 				if (currentNodeProcessArguments.get("value") instanceof JSONObject) {
 					for (String fromKey : currentNodeProcessArguments.getJSONObject("value").keySet()) {

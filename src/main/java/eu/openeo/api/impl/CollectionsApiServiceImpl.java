@@ -171,8 +171,7 @@ JSONArray bandArray = new JSONArray();
 			else {
 				for(int c = 0; c < bandsListSwe.size(); c++) {
 					JSONObject product = new JSONObject();
-					String bandId = bandsListSwe.get(c).getAttributeValue("name");
-					
+					String bandId = bandsListSwe.get(c).getAttributeValue("name");					
 					product.put("name", bandId);					
 					bandValues.put(bandId);					
 					bandArray.put(product);
@@ -270,11 +269,11 @@ JSONArray bandArray = new JSONArray();
 			JSONArray xExtent = new JSONArray();
 			xExtent.put(c1[1]);
 			xExtent.put(c2[1]);
-			dimObjects[0].put("extent", xExtent);
+			dimObjects[1].put("extent", xExtent);
 			JSONArray yExtent = new JSONArray();
 			yExtent.put(c1[0]);
 			yExtent.put(c2[0]);
-			dimObjects[1].put("extent", yExtent);			
+			dimObjects[2].put("extent", yExtent);			
 			
 			JSONArray links = new JSONArray();
 			

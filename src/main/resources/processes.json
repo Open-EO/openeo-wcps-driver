@@ -88,7 +88,7 @@
         "reject": {
             "description": "A value that is returned if the boolean value is **not** `true`. Defaults to `null`.",
             "schema": {
-                "type": "number"
+                "type": "any"
             },
             "required": false
         }
