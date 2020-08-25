@@ -63,7 +63,7 @@
     ]
     },
     {
-    "id": "if_custom",
+    "id": "if",
     "summary": "If-Then-Else conditional",
     "description": "If the value passed is `true`, returns the value of the `accept` parameter, otherwise returns the value of the `reject` parameter.\n\nThis is basically an if-then-else construct as in other programming languages.",
     "categories": [
@@ -75,34 +75,36 @@
         "value" : {
             "description": "A boolean value.",
             "schema": {
-                "type": "object",
-                "format": "raster-cube"
+                "type": [
+                    "boolean",
+                    "null"
+                ]
             }
         },
         "accept": {
             "description": "A value that is returned if the boolean value is `true`.",
             "schema": {
-                "type": "number"
-            }
+                "type": "any"
+            },
+            "required": true
         },
         "reject": {
             "description": "A value that is returned if the boolean value is **not** `true`. Defaults to `null`.",
             "schema": {
-                "type": "any"
-            },
-            "required": false
+                "type": "any",
+                "default": null
+            }
         }
     },
     "returns": {
         "description": "Either the `accept` or `reject` argument depending on the given boolean value.",
         "schema": {
-            "type": "object",
-            "format": "raster-cube"
+            "type": "any"
         }
     }
     },
     {
-    "id": "mask_custom",
+    "id": "mask",
     "summary": "Apply a raster mask",
     "description": "Applies a mask to a raster data cube. To apply a vector mask use ``mask_polygon()``.\n\nA mask is a raster data cube for which corresponding pixels among `data` and `mask` are compared and those pixels in `data` are replaced whose pixels in `mask` are non-zero (for numbers) or `true` (for boolean values). The pixel values are replaced with the value specified for `replacement`, which defaults to `null` (no data).\n\nThe data cubes have to be compatible so that each dimension in mask must also be available in the raster data cube with the same name, type, reference system, resolution and labels. Dimensions can be missing in the mask with the result that the mask is applied for each label of the missing dimension in the data cube. The process fails if there's an incompatibility found between the raster data cube and the mask.",
     "categories": [
@@ -125,10 +127,22 @@
                 "format": "raster-cube",
                 "required": true
             }
+        },
+        "replacement": {
+            
+            "description": "The value used to replace masked values with.",
+            "schema": {
+                "type": [
+                    "number",
+                    "boolean",
+                    "string",
+                    "null"
+                ]
+            }
         }
     },
     "returns": {
-        "description": "The masked raster data cube.",
+        "description": "A masked raster data cube with the same dimensions. The dimension properties (name, type, labels, reference system and resolution) remain unchanged.",
         "schema": {
             "type": "object",
             "format": "raster-cube"
