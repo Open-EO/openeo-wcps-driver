@@ -75,10 +75,8 @@
         "value" : {
             "description": "A boolean value.",
             "schema": {
-                "type": [
-                    "boolean",
-                    "null"
-                ]
+                "type": "object",
+                "format": "raster-cube"
             }
         },
         "accept": {

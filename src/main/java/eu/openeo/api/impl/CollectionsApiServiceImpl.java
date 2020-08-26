@@ -128,7 +128,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 		    int xIndex = 0;
 		    int yIndex = 0;
 		    JSONObject[] dimObjects = new JSONObject[axis.length+1];	    
-            JSONArray bandArray = new JSONArray();			
+            JSONArray bandArray = new JSONArray();
 			dimObjects[0] = new JSONObject();
 			dimObjects[0].put("type", "bands");
 			dimObjects[0].put("axis", "spectral");
@@ -204,8 +204,15 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 					dimObjects[3] = new JSONObject();
 					dimObjects[3].put("axis", axis[a]);
 					dimObjects[3].put("type", "temporal");
-					dimObjects[3].put("extent", temporalExtent);
-					dimObjects[3].put("step", JSONObject.NULL);
+					dimObjects[3].put("extent", temporalExtent);					
+					try {
+						List<Element> tList = rootNode.getChild("CoverageDescription", defaultNS).getChild("domainSet", gmlNS).getChild("RectifiedGrid", gmlNS).getChildren("offsetVector", gmlNS);
+						String[] taxis = tList.get(a).getValue().split(" ");
+						dimObjects[3].put("step", taxis[a]);
+				    }catch(Exception e) {
+				    	dimObjects[3].put("step", JSONObject.NULL);
+				    	log.warn("Irregular Axis :" + e.getMessage());
+				    }
 				}
 		    }
 		    

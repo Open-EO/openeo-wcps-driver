@@ -1121,7 +1121,7 @@ public class WCPSQueryFactory {
 				log.debug("Mask Colored Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}			
-			if (currentProcessID.equals("if_custom")) {
+			if (currentProcessID.equals("if")) {
 				StringBuilder wcpsIFpayLoad = new StringBuilder("");
 				String payLoad = null;
 				String acceptPayLoad = null;
@@ -1183,7 +1183,7 @@ public class WCPSQueryFactory {
 				log.debug("IF Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
 			}			
-			if (currentProcessID.equals("mask_custom")) {
+			if (currentProcessID.equals("mask")) {
 				StringBuilder wcpsArrayFilterpayLoad = new StringBuilder("");
 				String payLoad = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
