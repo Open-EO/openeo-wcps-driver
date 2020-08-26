@@ -776,7 +776,125 @@ public class WCPSQueryFactory {
 				}
 				
 			}
-			if (currentProcessID.equals("resample_spatial_cube")) {
+			if (currentProcessID.equals("resample_cube_temporal")) {
+				containsResampleProcess = true;
+				StringBuilder wcpsResamplepayLoad = new StringBuilder("");
+				StringBuilder wcpsStringBuilderResample = basicWCPSStringBuilder(varPayLoad.toString());
+				String payLoad = null;
+				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
+				String collectionID = null;
+				String targetCollectionID = null;
+				String collectionVar = null;
+				String temporalStartCube1 = null;
+				String temporalEndCube1 = null;
+				if (processArguments.get("data") instanceof JSONObject) {
+					temporalStartCube1 = processGraph.getJSONObject(getFilterCollectionNode(nodeKeyOfCurrentProcess)).getJSONObject("arguments").getJSONArray("temporal_extent").getString(0);
+					temporalEndCube1 = processGraph.getJSONObject(getFilterCollectionNode(nodeKeyOfCurrentProcess)).getJSONObject("arguments").getJSONArray("temporal_extent").getString(1);
+					for (String fromType : processArguments.getJSONObject("data").keySet()) {
+						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+							payLoad = wcpsPayLoad.toString();
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = processArguments.getJSONObject("data").getString("from_node");
+							String collectionNodeKey = getFilterCollectionNode(dataNode);
+							collectionID = processGraph.getJSONObject(collectionNodeKey).getJSONObject("arguments").getString("id");
+							collectionVar = "$"+collectionID+getFilterCollectionNode(currentProcessArguments.getJSONObject("data").getString("from_node"));
+							payLoad = storedPayLoads.getString(dataNode);
+						}
+					}
+				}
+				if (processArguments.get("target") instanceof JSONObject) {
+					for (String fromType : processArguments.getJSONObject("target").keySet()) {
+						if (fromType.equals("from_argument") && processArguments.getJSONObject("target").getString("from_argument").equals("target")) {
+							payLoad = wcpsPayLoad.toString();
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = processArguments.getJSONObject("target").getString("from_node");
+							String collectionNodeKey = getFilterCollectionNode(dataNode);
+							targetCollectionID = processGraph.getJSONObject(collectionNodeKey).getJSONObject("arguments").getString("id");
+						}
+					}
+				}
+				String xAxis = null;
+				String yAxis = null;
+				String xLow = null;
+				String yLow = null;
+				String xHigh = null;
+				String yHigh = null;
+				String tempAxis = null;
+				String tempLow = null;
+				String tempHigh = null;
+				for (int f = 0; f < filters.size(); f++) {
+					Filter filter = filters.get(f);
+					if(filter.getAxis().contains(collectionID)) {
+						String axisUpperCase = filter.getAxis().replace("_"+ collectionID, "").toUpperCase();
+						if (axisUpperCase.equals("N") || axisUpperCase.equals("Y") || axisUpperCase.equals("LAT")) {
+							yAxis = filter.getAxis().replace("_"+ collectionID, "");
+							yLow = filter.getLowerBound();
+							yHigh = filter.getUpperBound();
+						}
+						if (axisUpperCase.equals("E") || axisUpperCase.equals("X") || axisUpperCase.equals("LONG")) {
+							xAxis = filter.getAxis().replace("_"+ collectionID, "");
+							xLow = filter.getLowerBound();
+							xHigh = filter.getUpperBound();
+						}
+						if (axisUpperCase.equals("DATE") || axisUpperCase.equals("TIME") || axisUpperCase.equals("ANSI") || axisUpperCase.equals("UNIX")) {
+							tempAxis = filter.getAxis().replace("_"+ collectionID, "");
+							tempLow = filter.getLowerBound();
+							tempHigh = filter.getUpperBound();
+						}
+					}
+				}
+				JSONObject collectionSTACMetdata = null;
+				try {
+					collectionSTACMetdata = readJsonFromUrl(
+							ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collectionID);
+				} catch (JSONException e) {
+					log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				} catch (IOException e) {
+					log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				}
+				String resSource = ((JSONObject) collectionSTACMetdata.get("properties")).getJSONObject("cube:dimensions").getJSONObject(tempAxis).getString("step");
+				
+				JSONObject targetCollectionSTACMetdata = null;
+				try {
+					targetCollectionSTACMetdata = readJsonFromUrl(
+							ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + targetCollectionID);
+				} catch (JSONException e) {
+					log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				} catch (IOException e) {
+					log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				}
+				String resTarget = ((JSONObject) targetCollectionSTACMetdata.get("properties")).getJSONObject("cube:dimensions").getJSONObject(tempAxis).getString("step");
+				
+				wcpsResamplepayLoad.append(createResampleTemporalCubeWCPSString(nodeKeyOfCurrentProcess, payLoad, resSource, resTarget, xAxis, xLow, xHigh, yAxis, yLow, yHigh, tempAxis, tempLow, tempHigh, temporalStartCube1, temporalEndCube1));
+				wcpsPayLoad=wcpsResamplepayLoad;
+				wcpsStringBuilder = wcpsStringBuilderResample.append(wcpsResamplepayLoad.toString());
+				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsResamplepayLoad.toString());
+				log.debug("Resample Temoral Process PayLoad is : ");
+				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
+			}
+			if (currentProcessID.equals("resample_cube_spatial")) {
 				containsResampleProcess = true;
 				StringBuilder wcpsResamplepayLoad = new StringBuilder("");
 				StringBuilder wcpsStringBuilderResample = basicWCPSStringBuilder(varPayLoad.toString());
@@ -3740,7 +3858,57 @@ public class WCPSQueryFactory {
 				+ "}, {})");
 		return resampleBuilder.toString();
 	}
-	
+	private String createResampleTemporalCubeWCPSString(String resampleNodeKey, String payload, String resSource, String resTarget, String xAxis, String xLow, String xHigh, String yAxis, String yLow, String yHigh, String tempAxis, String tempLow, String tempHigh, String temporalStartCube1, String temporalEndCube1) {
+		double res = Double.parseDouble(resSource)/Double.parseDouble(resTarget);
+		DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		long tempLowUnix = 0;
+		long tempHighUnix = 0;
+		try {
+			tempLowUnix = toDateNewFormat.parse(tempLow).getTime() / 1000L;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			tempHighUnix = toDateNewFormat.parse(tempHigh).getTime() / 1000L;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		long tempScaleUnix = Math.round(((tempHighUnix-tempLowUnix)*res)+tempLowUnix);
+		Date tempScaleDate =  new java.util.Date(tempScaleUnix*1000L);
+		String tempScale = toDateNewFormat.format(tempScaleDate);
+		log.debug(tempLowUnix);
+		log.debug(tempHighUnix);
+		log.debug(tempScaleUnix);
+		log.debug(res);
+		
+		StringBuilder resampleBuilder = new StringBuilder("" );
+		if (!payload.contains("scale")) {
+			resampleBuilder.append("scale(");
+			resampleBuilder.append(payload);
+			resampleBuilder.append(" ,{"
+					+ tempAxis + "(" + '"' + temporalStartCube1 + '"' + ":" + '"' + tempScale + '"' + ")" + ","
+					+ xAxis + "(" + xLow + ":" + xHigh + ")" + ","
+					+ yAxis + "(" + yLow + ":" + yHigh + ")" + ""
+					+ "})");
+//			resampleBuilder.append(" ,{"
+//			+ xAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + xLow + ":" + xScale + ")" + ","
+//			+ yAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + yLow + ":" + yScale + ")" + ""
+//			+ "})");
+		}
+		
+		else if (payload.contains("scale")) {
+			log.debug(payload);
+			log.debug(tempLow + " " +tempHigh);
+			log.debug(temporalStartCube1 + " " + tempScale);
+			
+			resampleBuilder.append(payload.replaceAll("\\{DATE\\(.*?\\)", "\\{DATE\\(" + '"' + temporalStartCube1 + '"' + ":" + '"' + tempScale + '"' + "\\)"));
+		}
+		return resampleBuilder.toString();
+	}
 	private String createResampleSpatialCubeWCPSString(String resampleNodeKey, String payload, String resSource, String resTarget, String xAxis, String xLow, String xHigh, String yAxis, String yLow, String yHigh, String tempAxis, String temporalStartCube1, String temporalEndCube1) {
 		double res = Double.parseDouble(resSource)/Double.parseDouble(resTarget);
 		log.debug(xHigh+xLow);
@@ -3783,8 +3951,7 @@ public class WCPSQueryFactory {
 //			resampleBuilder.append(" ,{"
 //			+ xAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + xLow + ":" + xScale + ")" + ","
 //			+ yAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + yLow + ":" + yScale + ")" + ""
-//			+ "})");
-			
+//			+ "})");			
 			
 		}
 		return resampleBuilder.toString();
