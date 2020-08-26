@@ -3863,6 +3863,8 @@ public class WCPSQueryFactory {
 		DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		long tempLowUnix = 0;
 		long tempHighUnix = 0;
+		long temporalStartCube1Unix = 0;
+		long temporalEndCube1Unix = 0;
 		try {
 			tempLowUnix = toDateNewFormat.parse(tempLow).getTime() / 1000L;
 		} catch (ParseException e) {
@@ -3877,6 +3879,19 @@ public class WCPSQueryFactory {
 			e.printStackTrace();
 		}
 		
+		try {
+			temporalStartCube1Unix = toDateNewFormat.parse(temporalStartCube1).getTime() / 1000L;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			temporalEndCube1Unix = toDateNewFormat.parse(temporalEndCube1).getTime() / 1000L;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		long tempScaleUnix = Math.round(((tempHighUnix-tempLowUnix)*res)+tempLowUnix);
 		Date tempScaleDate =  new java.util.Date(tempScaleUnix*1000L);
 		String tempScale = toDateNewFormat.format(tempScaleDate);
@@ -3885,12 +3900,21 @@ public class WCPSQueryFactory {
 		log.debug(tempScaleUnix);
 		log.debug(res);
 		
+		temporalStartCube1Unix = Math.round(temporalStartCube1Unix - Double.parseDouble(resTarget)/2);
+		Date tempStartCube1date =  new java.util.Date(temporalStartCube1Unix*1000L);
+		temporalStartCube1 = toDateNewFormat.format(tempStartCube1date);
+		
+		temporalEndCube1Unix = Math.round(temporalEndCube1Unix - Double.parseDouble(resTarget)/2);
+		Date tempEndCube1date =  new java.util.Date(temporalEndCube1Unix*1000L);
+		temporalEndCube1 = toDateNewFormat.format(tempEndCube1date);
+		
 		StringBuilder resampleBuilder = new StringBuilder("" );
 		if (!payload.contains("scale")) {
 			resampleBuilder.append("scale(");
+			payload.replaceAll("\\s(DATE\\(.*?\\)", "\\s(DATE\\(" + '"' + temporalStartCube1 + '"' + ":" + '"' + temporalEndCube1 + '"' + "\\)");
 			resampleBuilder.append(payload);
 			resampleBuilder.append(" ,{"
-					+ tempAxis + "(" + '"' + temporalStartCube1 + '"' + ":" + '"' + tempScale + '"' + ")" + ","
+					+ tempAxis + "(" + '"' + tempLow + '"' + ":" + '"' + tempScale + '"' + ")" + ","
 					+ xAxis + "(" + xLow + ":" + xHigh + ")" + ","
 					+ yAxis + "(" + yLow + ":" + yHigh + ")" + ""
 					+ "})");
@@ -3905,7 +3929,7 @@ public class WCPSQueryFactory {
 			log.debug(tempLow + " " +tempHigh);
 			log.debug(temporalStartCube1 + " " + tempScale);
 			
-			resampleBuilder.append(payload.replaceAll("\\{DATE\\(.*?\\)", "\\{DATE\\(" + '"' + temporalStartCube1 + '"' + ":" + '"' + tempScale + '"' + "\\)"));
+			resampleBuilder.append(payload.replaceAll("DATE\\(.*?\\)", "DATE\\(" + '"' + temporalStartCube1 + '"' + ":" + '"' + temporalEndCube1 + '"' + "\\)").replaceAll("\\{DATE\\(.*?\\)", "\\{DATE\\(" + '"' + tempLow + '"' + ":" + '"' + tempScale + '"' + "\\)"));
 		}
 		return resampleBuilder.toString();
 	}
