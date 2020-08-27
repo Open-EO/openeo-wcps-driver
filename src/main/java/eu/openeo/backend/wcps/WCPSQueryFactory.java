@@ -3911,7 +3911,7 @@ public class WCPSQueryFactory {
 		log.debug(tempHighUnix);
 		log.debug(tempScaleUnix);
 		log.debug(res);
-		
+		if (res<1) {
 		temporalStartCube1Unix = Math.round(temporalStartCube1Unix - Double.parseDouble(resTarget)/2);
 		Date tempStartCube1date =  new java.util.Date(temporalStartCube1Unix*1000L);
 		temporalStartCube1 = toDateNewFormat.format(tempStartCube1date);
@@ -3919,13 +3919,19 @@ public class WCPSQueryFactory {
 		temporalEndCube1Unix = Math.round(temporalEndCube1Unix - Double.parseDouble(resTarget)/2);
 		Date tempEndCube1date =  new java.util.Date(temporalEndCube1Unix*1000L);
 		temporalEndCube1 = toDateNewFormat.format(tempEndCube1date);
-		
-		StringBuilder resampleBuilder = new StringBuilder("" );
+		}
+		else if (res>1) {
+			temporalStartCube1Unix = Math.round(temporalStartCube1Unix + Double.parseDouble(resTarget));
+			Date tempStartCube1date =  new java.util.Date(temporalStartCube1Unix*1000L);
+			temporalStartCube1 = toDateNewFormat.format(tempStartCube1date);
+			
+			temporalEndCube1Unix = Math.round(temporalEndCube1Unix + Double.parseDouble(resTarget));
+			Date tempEndCube1date =  new java.util.Date(temporalEndCube1Unix*1000L);
+			temporalEndCube1 = toDateNewFormat.format(tempEndCube1date);
+			}
+		StringBuilder resampleBuilder = new StringBuilder("");
 		if (!payload.contains("scale")) {
-			resampleBuilder.append("scale(");
-			payload.replaceAll("\\s(DATE\\(.*?\\)", "\\s(DATE\\(" + '"' + temporalStartCube1 + '"' + ":" + '"' + temporalEndCube1 + '"' + "\\)");
-			resampleBuilder.append(payload);
-			resampleBuilder.append(" ,{"
+			resampleBuilder.append("scale(").append(payload.replaceAll(tempAxis + "\\(" + '"' + ".*?\\)", tempAxis + "\\(" + '"' + temporalStartCube1 + '"' + ":" + '"' + temporalEndCube1 + '"' + "\\)")).append(" ,{"
 					+ tempAxis + "(" + '"' + tempLow + '"' + ":" + '"' + tempScale + '"' + ")" + ","
 					+ xAxis + "(" + xLow + ":" + xHigh + ")" + ","
 					+ yAxis + "(" + yLow + ":" + yHigh + ")" + ""
@@ -3935,34 +3941,49 @@ public class WCPSQueryFactory {
 //			+ yAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + yLow + ":" + yScale + ")" + ""
 //			+ "})");
 		}
-		
 		else if (payload.contains("scale")) {
 			log.debug(payload);
 			log.debug(tempLow + " " +tempHigh);
-			log.debug(temporalStartCube1 + " " + tempScale);
-			
-			resampleBuilder.append(payload.replaceAll("DATE\\(.*?\\)", "DATE\\(" + '"' + temporalStartCube1 + '"' + ":" + '"' + temporalEndCube1 + '"' + "\\)").replaceAll("\\{DATE\\(.*?\\)", "\\{DATE\\(" + '"' + tempLow + '"' + ":" + '"' + tempScale + '"' + "\\)"));
+			log.debug(temporalStartCube1 + " " + tempScale);			
+			resampleBuilder.append(payload.replaceAll(tempAxis + "\\(" + '"' + ".*?\\)", tempAxis + "\\(" + '"' + temporalStartCube1 + '"' + ":" + '"' + temporalEndCube1 + '"' + "\\)").replaceAll("\\{" + tempAxis + "\\(.*?\\)", "\\{" + tempAxis + "\\(" + '"' + tempLow + '"' + ":" + '"' + tempScale + '"' + "\\)"));
 		}
 		return resampleBuilder.toString();
 	}
 	private String createResampleSpatialCubeWCPSString(String resampleNodeKey, String payload, String resSource, String resTarget, String xAxis, String xLow, String xHigh, String yAxis, String yLow, String yHigh, String tempAxis, String temporalStartCube1, String temporalEndCube1) {
 		//TODO Remove the extra adding of half the resolution in the scale range for Dates when the Rasdaman fixes the issue of shifting
 		double res = Double.parseDouble(resSource)/Double.parseDouble(resTarget);
-		log.debug(xHigh+xLow);
-		log.debug(yHigh+yLow);
+		log.debug(xLow + " " + xHigh);
+		log.debug(yLow + " " + yHigh);
 		double xScale = (double)((Double.parseDouble(xHigh)-Double.parseDouble(xLow))*res)+Double.parseDouble(xLow);
 		double yScale = (double)((Double.parseDouble(yHigh)-Double.parseDouble(yLow))*res)+Double.parseDouble(yLow);
-		int projectionEPSGCode = 0;
+		
+		String xLow1 = null;
+		String xHigh1 = null;
+		String yLow1 = null;
+		String yHigh1 = null;
 		StringBuilder resampleBuilder = new StringBuilder("scale(" );
+		if (res<1) {
+			xLow1 = Double.toString(Double.parseDouble(xLow) - Double.parseDouble(resTarget)/2);
+			yLow1 = Double.toString(Double.parseDouble(yLow) - Double.parseDouble(resTarget)/2);
+			xHigh1 = Double.toString(Double.parseDouble(xHigh) - Double.parseDouble(resTarget)/2);
+			yHigh1 = Double.toString(Double.parseDouble(yHigh) - Double.parseDouble(resTarget)/2);
+		}
+		else if (res>1) {
+			xLow1 = Double.toString(Double.parseDouble(xLow) + Double.parseDouble(resSource));
+			yLow1 = Double.toString(Double.parseDouble(yLow) + Double.parseDouble(resSource));
+			xHigh1 = Double.toString(Double.parseDouble(xHigh) + Double.parseDouble(resSource));
+			yHigh1 = Double.toString(Double.parseDouble(yHigh) + Double.parseDouble(resSource));
+		}
+		log.debug("Shifted X : " + xLow1 + " " + xHigh1);
+		log.debug("Shifted Y : " + yLow1 + " " + yHigh1);
 		if (temporalStartCube1.equals(temporalEndCube1)) {
 //		try {
 //			projectionEPSGCode = processGraph.getJSONObject(resampleNodeKey).getJSONObject("arguments").getInt("projection");
 //		}catch(JSONException e) {
 //			log.error("no epsg code was detected!");
-//		}
-		
+//		}		
 		//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
-		resampleBuilder.append(payload);
+		resampleBuilder.append(payload.replaceAll(xAxis + "\\(" + xLow + ":" + xHigh + "\\)",xAxis + "\\(" + xLow1 + ":" + xHigh1 + "\\)").replaceAll(yAxis + "\\(" + yLow + ":" + yHigh + "\\)",yAxis + "\\(" + yLow1 + "\\:" + yHigh1 + "\\)"));
 		resampleBuilder.append(" ,{"
 				+ xAxis + "(" + xLow + ":" + xScale + ")" + ","
 				+ yAxis + "(" + yLow + ":" + yScale + ")" + ""
@@ -3979,12 +4000,13 @@ public class WCPSQueryFactory {
 //				log.error("no epsg code was detected!");
 //			}
 			//TODO read the name of the spatial coordinate axis from describeCoverage or filter elements in order to correctly apply (E,N), (lat,lon) or X,Y depending on coordinate system
-			resampleBuilder.append(payload);
+			
+			resampleBuilder.append(payload.replaceAll(xAxis + "\\(" + xLow + ":" + xHigh + "\\)",xAxis + "\\(" + xLow1 + ":" + xHigh1 + "\\)").replaceAll(yAxis + "\\(" + yLow + ":" + yHigh + "\\)",yAxis + "\\(" + yLow1 + ":" + yHigh1 + "\\)"));
 			resampleBuilder.append(" ,{"
 					+ tempAxis + "(" + '"' + temporalStartCube1 + '"' + ":" + '"' + temporalEndCube1 + '"' + ")" + ","
 					+ xAxis + "(" + xLow + ":" + xScale + ")" + ","
 					+ yAxis + "(" + yLow + ":" + yScale + ")" + ""
-					+ "})");
+					+ "})");			
 //			resampleBuilder.append(" ,{"
 //			+ xAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + xLow + ":" + xScale + ")" + ","
 //			+ yAxis + ":" +"\"CRS:http://10.8.244.147:8080/def/crs/EPSG/0/" + projectionEPSGCode + "\"" + "(" + yLow + ":" + yScale + ")" + ""
@@ -4762,18 +4784,15 @@ public class WCPSQueryFactory {
 					nodesSortedArray.remove(j);
 				}
 			}
-		}
-				
+		}				
 		nodesArray.remove(nodesArray.length()-1);		
-		
 		for (int i = nodesArray.length()-1; i>0; i--) {
 			if (nodesArray.getJSONArray(i).length()>0) {				
 				for (int a = 0; a < nodesArray.getJSONArray(i).length(); a++) {
 					nodesSortedArray.put(nodesArray.getJSONArray(i).getString(a));
 				}
 			}
-		}		
-				
+		}
 		nodesSortedArray.put(saveNode);
 		for (int i = 0; i < nodesSortedArray.length(); i++) {
 			for (int j = i + 1 ; j < nodesSortedArray.length(); j++) {
@@ -4794,7 +4813,6 @@ public class WCPSQueryFactory {
 
 	private void executeProcesses(String processID, String processNodeKey) {
 		JSONObject processNode = processGraph.getJSONObject(processNodeKey);
-
 		if (processID.equals("load_collection")) {
 			String collection = null;
 			JSONObject loadCollectionNode = processGraph.getJSONObject(processNodeKey);
@@ -4824,8 +4842,7 @@ public class WCPSQueryFactory {
 			}
 			int srs = 0;			
 			srs = ((JSONObject) collectionSTACMetdata.get("properties")).getInt("eo:epsg");
-			log.debug("srs is: " + srs);
-			
+			log.debug("srs is: " + srs);			
 			JSONArray processDataCubeTempExt = new JSONArray();
 			JSONObject spatialExtentNode = new JSONObject();
 			createDateRangeFilterFromArgs(processDataCubeTempExt, collection, true);
@@ -4849,8 +4866,7 @@ public class WCPSQueryFactory {
 					}
 				}
 			}
-		}
-		
+		}		
 		else if (processID.contains("_time")) {
 			log.debug(processNode);
 			String fromNode = processNode.getJSONObject("arguments").getJSONObject("data").getString("from_node");
@@ -4858,7 +4874,6 @@ public class WCPSQueryFactory {
 			String collectionID = processGraph.getJSONObject(collectionNodeKey).getJSONObject("arguments").getString("id");
 			createTemporalAggregate(processID, collectionID, processNodeKey);
 		}
-
 		else if (processID.contains("reduce")) {
 			String dimension = processNode.getJSONObject("arguments").getString("dimension");
 			String fromNode = processNode.getJSONObject("arguments").getJSONObject("data").getString("from_node");
@@ -4881,8 +4896,7 @@ public class WCPSQueryFactory {
 					builder.append(element.toString() + "\n");
 				}
 				log.error(builder.toString());
-			}
-			
+			}			
 			String temporalAxis = null;
 			for (String tempAxis1 : jsonresp.getJSONObject("properties").getJSONObject("cube:dimensions").keySet()) {
 				String tempAxis1UpperCase = tempAxis1.toUpperCase();
@@ -4899,14 +4913,12 @@ public class WCPSQueryFactory {
 				}
 			}
 		}
-
 		else if (processID.equals("ndvi")) {
 			JSONObject processAggregate = processGraph.getJSONObject(processNodeKey);			    
 			String collectionNode = getFilterCollectionNode(processNodeKey);
 			String collection = processGraph.getJSONObject(collectionNode).getJSONObject("arguments").getString("id");			
 			createNDVIAggregateFromProcess(processAggregate, collection);
 		}
-
 		else if (processID.equals("filter_temporal")) {
 			String filterCollectionNodeKey = null;
 			String filterTempNodeKey = processNodeKey;
@@ -4920,7 +4932,6 @@ public class WCPSQueryFactory {
 			extentArray = (JSONArray) processFilterArguments.get("extent");
 			createDateRangeFilterFromArgs(extentArray, coll, false);
 		}
-
 		else if (processID.equals("filter_bbox")) {
 			String filterCollectionNodeKey = null;
 			String filterBboxNodeKey = processNodeKey;
@@ -4930,7 +4941,6 @@ public class WCPSQueryFactory {
 			String coll = (String) loadCollectionNode.get("id");
 			JSONObject processFilter = processGraph.getJSONObject(filterBboxNodeKey);
 			JSONObject processFilterArguments = processFilter.getJSONObject("arguments");
-
 			int srs = 0;
 			JSONObject jsonresp = null;
 			try {
@@ -4950,14 +4960,12 @@ public class WCPSQueryFactory {
 				}
 				log.error(builder.toString());
 			}
-
 			srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");
 			log.debug("srs is: " + srs);
 			if (srs > 0) {
 				createBoundingBoxFilterFromArgs(processFilterArguments, srs, coll, false);
 			}
-		}
-		
+		}		
 		else if (processID.equals("filter_polygon")) {
 			String filterCollectionNodeKey = null;
 			String filterPolygonNodeKey = processNodeKey;
@@ -4967,7 +4975,6 @@ public class WCPSQueryFactory {
 			String coll = (String) loadCollectionNode.get("id");
 			JSONObject processFilter = processGraph.getJSONObject(filterPolygonNodeKey);
 			JSONObject processFilterArguments = processFilter.getJSONObject("arguments").getJSONObject("polygons");
-
 			int srs = 0;
 			JSONObject jsonresp = null;
 			try {
@@ -4987,9 +4994,7 @@ public class WCPSQueryFactory {
 				}
 				log.error(builder.toString());
 			}
-
-			srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");
-			
+			srs = ((JSONObject) jsonresp.get("properties")).getInt("eo:epsg");			
 			if (srs > 0) {
 				log.debug("Polygon Extent is : " + processFilterArguments.getJSONArray("coordinates"));
 				createPolygonFilter(processFilterArguments, srs, coll);
@@ -5022,8 +5027,7 @@ public class WCPSQueryFactory {
 					String filterfromNode = loadCollectionNodeKeyArguments.getJSONObject("expression").getString("from_node");					
 					filterCollectionNodeKey = getFilterCollectionNode(filterfromNode);
 				}
-			}
-		
+			}		
 		return filterCollectionNodeKey;
 	}
 	
@@ -5072,8 +5076,7 @@ public class WCPSQueryFactory {
 			extent = jsonresp.getJSONObject("extent");
 			JSONArray temporal = extent.getJSONArray("temporal");
 			String templower = null;
-			String tempupper = null;
-			
+			String tempupper = null;			
 			try {
 				templower = temporal.get(0).toString();
 				tempupper = temporal.get(1).toString();
@@ -5082,7 +5085,6 @@ public class WCPSQueryFactory {
 				log.error("An error occured: " + e.getMessage());
 				
 			}
-			
 			log.debug("Temporal Extent is: ");
 			log.debug(temporal);
 			
@@ -5132,7 +5134,6 @@ public class WCPSQueryFactory {
 				}
 				log.error(builder.toString());
 			}
-
 			extent = jsonresp.getJSONObject("extent");
 			JSONArray temporal = extent.getJSONArray("temporal");
 			String templower = temporal.get(0).toString();
@@ -5280,13 +5281,11 @@ public class WCPSQueryFactory {
 			right = Double.toString(eastupper);
 			top = Double.toString(northupper);
 			bottom = Double.toString(southlower).toString();
-
 			SpatialReference src = new SpatialReference();
 			src.ImportFromEPSG(4326);
 			SpatialReference dst = new SpatialReference();
 			dst.ImportFromEPSG(srs);
-			log.debug("SRS is :" + srs);
-			
+			log.debug("SRS is :" + srs);			
 			CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 			double[] c1 = null;
 			double[] c2 = null;
@@ -5301,8 +5300,7 @@ public class WCPSQueryFactory {
 			log.debug("EAST: "+right);
 			log.debug("NORTH: "+top);
 			String spatAxisX = null;
-			String spatAxisY = null;
-			
+			String spatAxisY = null;			
 			if (left != null && right != null && top != null && bottom != null) {
 				Filter eastFilter = null;
 				Filter westFilter = null;
@@ -5333,7 +5331,6 @@ public class WCPSQueryFactory {
 				log.error("No spatial information could be found in process!");
 			}
 		}
-
 		else {
 			JSONObject jsonresp = null;
 			String spatAxisX = null;
@@ -5342,7 +5339,6 @@ public class WCPSQueryFactory {
 				String argsKeyStr = (String) argsKey;
 				if (argsKeyStr.equals("extent") || argsKeyStr.equals("spatial_extent")) {
 					JSONObject extentObject = (JSONObject) argsObject.get(argsKeyStr);
-
 					for (Object extentKey : extentObject.keySet()) {
 						String extentKeyStr = extentKey.toString();
 						JSONObject extent;
@@ -5364,7 +5360,6 @@ public class WCPSQueryFactory {
 							}
 							log.error(builder.toString());
 						}
-
 						extent = jsonresp.getJSONObject("extent");
 						JSONArray spatial = extent.getJSONArray("spatial");
 						
@@ -5406,19 +5401,17 @@ public class WCPSQueryFactory {
 							}
 						}
 					}
-
 					SpatialReference src = new SpatialReference();
 					src.ImportFromEPSG(4326);
 					SpatialReference dst = new SpatialReference();
 					dst.ImportFromEPSG(srs);
 					log.debug("SRS is : " + srs);
-
 					CoordinateTransformation tx = new CoordinateTransformation(src, dst);
 					double[] c1 = null;
 					double[] c2 = null;
 					c1 = tx.TransformPoint(Double.parseDouble(bottom), Double.parseDouble(left));
 					c2 = tx.TransformPoint(Double.parseDouble(top), Double.parseDouble(right));
-					
+					//TODO include other CRS exceptions of different axis order
 					if (srs==3035) {
 						left = Double.toString(c1[1]);
 						bottom = Double.toString(c1[0]);
@@ -5464,9 +5457,8 @@ public class WCPSQueryFactory {
 						if(current.getPrefix().equals("gmlrgrid")) {
 							gmlrgridNS = current;
 						}
-					}
-					
-					log.debug("root node info: " + rootNode.getName());		
+					}					
+					log.debug("root node info: " + rootNode.getName());
 							
 					Element coverageDescElement = rootNode.getChild("CoverageDescription", defaultNS);
 					Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
@@ -5497,8 +5489,7 @@ public class WCPSQueryFactory {
 					left = Double.toString(Double.parseDouble(minValues[xIndex]) + resSource*( Math.round(((Double.parseDouble(left) - Double.parseDouble(minValues[xIndex]))/resSource))));
 					right = Double.toString(Double.parseDouble(maxValues[xIndex]) - resSource*(Math.round(((Double.parseDouble(maxValues[xIndex]) - Double.parseDouble(right))/resSource))));
 					bottom = Double.toString(Double.parseDouble(minValues[yIndex]) + resSource*(Math.round(((Double.parseDouble(bottom) - Double.parseDouble(minValues[yIndex]))/resSource))));
-					top = Double.toString(Double.parseDouble(maxValues[yIndex]) - resSource*(Math.round(((Double.parseDouble(maxValues[yIndex]) - Double.parseDouble(top))/resSource))));
-					
+					top = Double.toString(Double.parseDouble(maxValues[yIndex]) - resSource*(Math.round(((Double.parseDouble(maxValues[yIndex]) - Double.parseDouble(top))/resSource))));					
 			}
 			catch (MalformedURLException e) {
 				log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
@@ -5617,7 +5608,6 @@ public class WCPSQueryFactory {
 			}
 			log.error(builder.toString());
 		}
-
 		JSONArray bandsArray = ((JSONObject) collectionSTACMetdata.get("properties")).getJSONArray("eo:bands");		
 		for(int c = 0; c < bandsArray.length(); c++) {
 			String bandCommon = bandsArray.getJSONObject(c).getString("common_name");
