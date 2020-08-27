@@ -106,12 +106,12 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				
 			}catch(StringIndexOutOfBoundsException e) {
 				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
-				srsDescription = srsDescription.replaceAll("EPSG:","");							
-			}			
+				srsDescription = srsDescription.replaceAll("EPSG:","");
+			}
 			
-            JSONObject extentCollection = new JSONObject();			
+            JSONObject extentCollection = new JSONObject();
 			JSONArray spatialExtent = new JSONArray();
-			JSONArray temporalExtent =  new JSONArray();			
+			JSONArray temporalExtent =  new JSONArray();
 			
 			SpatialReference src = new SpatialReference();
 			src.ImportFromEPSG(Integer.parseInt(srsDescription));

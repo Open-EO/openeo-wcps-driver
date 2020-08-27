@@ -1,86 +1,90 @@
 [
-	{
+  {
     "id": "resample_cube_temporal",
-    "summary": "Resample a temporal dimension to match a target data cube",
-    "description": "Resamples the given temporal dimension from a source data cube to align with the corresponding dimension of the given target data cube. Returns a new data cube with the resampled dimension.\n\nIf the dimension is not set or is set to `null`, the data cube is expected to have one temporal dimension only.",
+    "summary": "Resample a temporal dimension to a target data cube",
+    "description": "Resamples a temporal dimension from a source data cube to a target data cube and return the results as a new data cube.\n\nIf the dimension is not set or is set to `null`, the data cube is expected to only have one temporal dimension.",
     "categories": [
         "cubes",
         "aggregate & resample"
     ],
-    "parameters": [
-        {
-            "name": "data",
+    "parameter_order": ["data", "target", "method", "dimension", "binary"],
+    "parameters": {
+        "data": {
             "description": "A data cube.",
             "schema": {
                 "type": "object",
-                "subtype": "raster-cube"
-            }
+                "format": "raster-cube"
+            },
+            "required": true
         },
-        {
-            "name": "target",
+        "target": {
             "description": "A data cube that describes the temporal target resolution.",
             "schema": {
                 "type": "object",
-                "subtype": "raster-cube"
-            }
+                "format": "raster-cube"
+            },
+            "required": true
         },
-        {
-            "name": "method",
-            "description": "A resampling method to be applied, could be a reducer for downsampling or other methods for upsampling. A reducer is a single process such as ``mean()`` or a set of processes, which computes a single value for a list of values, see the category 'reducer' for such processes.",
+        "method": {
+            "description": "A resampling method to be applied, could be a reducer for downsampling or other methods for upsampling. The reducer must be a callable process (or a set of processes as process graph) such as ``mean()`` that accepts by default array as input. The process can also work on two values by setting the parameter `binary` to `true`.",
             "schema": {
-                "type": "object",
-                "subtype": "process-graph",
-                "parameters": [
+                "anyOf": [
                     {
-                        "name": "data",
-                        "description": "A labeled array with elements of any type.",
-                        "schema": {
-                            "type": "array",
-                            "subtype": "labeled-array",
-                            "items": {
-                                "description": "Any data type."
+                        "title": "Unary behaviour",
+                        "description": "Passes an array to the reducer.",
+                        "type": "object",
+                        "format": "callback",
+                        "parameters": {
+                            "data": {
+                                "description": "An array with elements of any data type.",
+                                "type": "array",
+                                "items": {
+                                    "description": "Any data type."
+                                }
                             }
-                        }
+                        } 
                     },
                     {
-                        "name": "context",
-                        "description": "Additional data passed by the user.",
-                        "schema": {
-                            "description": "Any data type."
-                        },
-                        "optional": true,
-                        "default": null
+                        "title": "Binary behaviour",
+                        "description": "Passes two values to the reducer.",
+                        "type": "object",
+                        "format": "callback",
+                        "parameters": {
+                            "x": {
+                                "description": "The first value. Any data type could be passed."
+                            },
+                            "y": {
+                                "description": "The second value. Any data type could be passed."
+                            }
+                        } 
                     }
                 ]
-            }
+            },
+            "required": true
         },
-        {
-            "name": "dimension",
-            "description": "The name of the temporal dimension to resample, which must exist with this name in both data cubes. If the dimension is not set or is set to `null`, the data cube is expected to only have one temporal dimension. Fails with a `TooManyDimensions` error if it has more dimensions. Fails with a `DimensionNotAvailable` error if the specified dimension does not exist.",
+        "dimension": {
+            "description": "The temporal dimension to resample, which must exist with this name in both data cubes. If the dimension is not set or is set to `null`, the data cube is expected to only have one temporal dimension. Fails with a `TooManyDimensions` error if it has more dimensions. Fails with a `DimensionNotAvailable` error if the specified dimension does not exist.\n\n**Note:** The default dimensions a data cube provides are described in the collection's metadata field `cube:dimensions`.",
             "schema": {
                 "type": [
                     "string",
                     "null"
-                ]
-            },
-            "default": null,
-            "optional": true
+                ],
+                "default": null
+            }
         },
-        {
-            "name": "context",
-            "description": "Additional data to be passed to the process specified for the parameter `method`.",
+        "binary": {
+            "description": "Specifies whether the process should pass two values to the reducer specified as resampling method or a list of values (default).\n\nIf the process passes two values, the reducer must be both associative and commutative as the execution may be executed in parallel and therefore the order of execution is arbitrary.\n\nThis parameter is especially useful for UDFs passed as reducers. Back-ends may still optimize and parallelize processes that work on list of values.",
             "schema": {
-                "description": "Any data type."
-            },
-            "optional": true,
-            "default": null
+                "type": "boolean",
+                "default": false
+            }
         }
-    ],
+    },
     "returns": {
-        "description": "A raster data cube with the same dimensions and the same dimension properties (name, type, labels, reference system and resolution) for all non-temporal dimensions. For the temporal dimension the name and type remain unchanged, but the reference system changes and the labels and resolution may change.",
+        "description": "A data cube with potentially lower temporal resolution and potentially lower cardinality, but the same number of dimensions as the original data cube.",
         "schema": {
             "type": "object",
-            "subtype": "raster-cube"
+            "format": "raster-cube"
         }
     },
     "exceptions": {
@@ -93,9 +97,19 @@
     },
     "links": [
         {
-            "href": "https://openeo.org/documentation/1.0/glossary.html#resample-changing-data-cube-geometry",
+            "rel": "about",
+            "href": "https://open-eo.github.io/openeo-api/processes/#openeo-specific-formats",
+            "title": "Information about the supported temporal formats."
+        },
+        {
+            "href": "https://open-eo.github.io/openeo-api/glossary/#aggregation-and-resampling",
             "rel": "about",
             "title": "Resampling explained in the openEO glossary"
+        },
+        {
+            "rel": "about",
+            "href": "https://en.wikipedia.org/wiki/Reduction_Operator",
+            "title": "Background information on reduction operators (binary reducers) by Wikipedia"
         }
     ]
     },
@@ -171,81 +185,99 @@
         "comparison",
         "masks"
     ],
+    "parameter_order": ["expression", "accept", "reject"],
     "parameters": {
-        "value" : {
+        "expression" : {
             "description": "A boolean value.",
             "schema": {
-                "type": "object",
-                "format": "raster-cube"
-            }
-        },
-        "accept": {
-            "description": "A value that is returned if the boolean value is `true`.",
-            "schema": {
-                "type": "any"
+                "type": [
+                    "boolean",
+                    "null"
+                ]
             },
             "required": true
         },
-        "reject": {
-            "description": "A value that is returned if the boolean value is **not** `true`. Defaults to `null`.",
+        "accept": {
+            "description": "A value that is returned if the boolean value is `true`. Defaults to `true`.",
             "schema": {
-                "type": "any",
-                "default": null
+                "description": "Any data type is allowed.",
+                "default": true
+            }
+        },
+        "reject": {
+            "description": "A value that is returned if the boolean value is `false`. Defaults to `false`.",
+            "schema": {
+                "description": "Any data type is allowed.",
+                "default": false
             }
         }
     },
     "returns": {
-        "description": "Either the `accept` or `reject` argument depending on the given boolean value.",
+        "description": "Either the `accept` or `reject` argument depending on the given boolean expression.",
         "schema": {
-            "type": "any"
+            "description": "Any data type is allowed."
         }
     }
     },
     {
     "id": "mask",
-    "summary": "Apply a raster mask",
-    "description": "Applies a mask to a raster data cube. To apply a vector mask use ``mask_polygon()``.\n\nA mask is a raster data cube for which corresponding pixels among `data` and `mask` are compared and those pixels in `data` are replaced whose pixels in `mask` are non-zero (for numbers) or `true` (for boolean values). The pixel values are replaced with the value specified for `replacement`, which defaults to `null` (no data).\n\nThe data cubes have to be compatible so that each dimension in mask must also be available in the raster data cube with the same name, type, reference system, resolution and labels. Dimensions can be missing in the mask with the result that the mask is applied for each label of the missing dimension in the data cube. The process fails if there's an incompatibility found between the raster data cube and the mask.",
+    "summary": "Apply a mask",
+    "description": "Applies a mask to a raster data cube. A mask can either be specified as:\n\n* **Raster data cube** for which parallel pixels among `data` and `mask` are compared and those pixels in `data` are replaced, which are non-zero (for numbers) or `true` (for boolean values) in `mask`.\n* **GeoJSON or vector data cube** containing one or more polygons. All pixels for which the point at the pixel center intersects with the corresponding polygon (as defined in the Simple Features standard by the OGC) are replaced.\n\nThe pixel values are replaced with the value specified for `replacement`, which defaults to `null` (no data). No data values will be left untouched by the masking operation.",
     "categories": [
         "masks"
     ],
+    "parameter_order": ["data", "mask", "replacement"],
     "parameters": {
         "data": {
             "description": "A raster data cube.",
             "schema": {
                 "type": "object",
-                "format": "raster-cube",
-                "required": true
-            }
+                "format": "raster-cube"
+            },
+            "required": true
         },
         "mask": {
-            
-            "description": "A mask as raster data cube. Every pixel in `data` must have a corresponding element in `mask`.",
+            "description": "Either a raster data cube, a GeoJSON object or a vector data cube.\n\nFor **raster data cubes**, both data cubes must be compatible so that every pixel in `data` has a parallel element in `mask`.\n\nFor **GeoJSON** the provided types can be one of the following:\n\n* A `Polygon` geometry,\n* a `GeometryCollection` containing Polygons,\n* a `Feature` with a `Polygon` geometry or\n* a `FeatureCollection` containing `Feature`s with a `Polygon` geometry.",
             "schema": {
+                "anyOf": [
+                    {
                 "type": "object",
-                "format": "raster-cube",
-                "required": true
-            }
+                        "format": "geojson"
+                    },
+                    {
+                        "type": "object",
+                        "format": "vector-cube"
+                    },
+                    {
+                        "type": "object",
+                "format": "raster-cube"
+                    }
+                ]
+            },
+            "required": true
         },
         "replacement": {
-            
-            "description": "The value used to replace masked values with.",
+            "description": "The value used to replace non-zero and `true` values with.",
             "schema": {
-                "type": [
-                    "number",
-                    "boolean",
-                    "string",
-                    "null"
-                ]
+                "type": ["number","boolean","string","null"],
+                "default": null
             }
         }
     },
     "returns": {
-        "description": "A masked raster data cube with the same dimensions. The dimension properties (name, type, labels, reference system and resolution) remain unchanged.",
+        "description": "The masked raster data cube.",
         "schema": {
             "type": "object",
             "format": "raster-cube"
         }
+    },
+    "links": [
+        {
+            "href": "http://www.opengeospatial.org/standards/sfa",
+            "rel": "about",
+            "title": "Simple Features standard by the OGC"
     }
+    ]
     },
     {
     "id": "merge_cubes",

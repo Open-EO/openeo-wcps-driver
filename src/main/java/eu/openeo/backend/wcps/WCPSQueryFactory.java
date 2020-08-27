@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
@@ -12,18 +14,27 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
+
+import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
+import org.jdom2.input.SAXBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.lang.Math;
 
+import eu.openeo.api.ApiResponseMessage;
 import eu.openeo.backend.wcps.domain.Aggregate;
 import eu.openeo.backend.wcps.domain.Collection;
 import eu.openeo.backend.wcps.domain.Filter;
@@ -1248,10 +1259,10 @@ public class WCPSQueryFactory {
 				double reject = 0;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
 				
-				if (processArguments.get("value") instanceof JSONObject) {
-					for (String fromType : processArguments.getJSONObject("value").keySet()) {
+				if (processArguments.get("expression") instanceof JSONObject) {
+					for (String fromType : processArguments.getJSONObject("expression").keySet()) {
 						if (fromType.equals("from_node")) {
-							String dataNode = processArguments.getJSONObject("value").getString("from_node");
+							String dataNode = processArguments.getJSONObject("expression").getString("from_node");
 							payLoad = storedPayLoads.getString(dataNode);
 							log.debug("IF Process : ");
 							if (processArguments.get("accept") instanceof JSONObject) {
@@ -3859,6 +3870,7 @@ public class WCPSQueryFactory {
 		return resampleBuilder.toString();
 	}
 	private String createResampleTemporalCubeWCPSString(String resampleNodeKey, String payload, String resSource, String resTarget, String xAxis, String xLow, String xHigh, String yAxis, String yLow, String yHigh, String tempAxis, String tempLow, String tempHigh, String temporalStartCube1, String temporalEndCube1) {
+		//TODO Remove the extra adding of half the resolution in the scale range for Dates when the Rasdaman fixes the issue of shifting
 		double res = Double.parseDouble(resSource)/Double.parseDouble(resTarget);
 		DateFormat toDateNewFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		long tempLowUnix = 0;
@@ -3934,6 +3946,7 @@ public class WCPSQueryFactory {
 		return resampleBuilder.toString();
 	}
 	private String createResampleSpatialCubeWCPSString(String resampleNodeKey, String payload, String resSource, String resTarget, String xAxis, String xLow, String xHigh, String yAxis, String yLow, String yHigh, String tempAxis, String temporalStartCube1, String temporalEndCube1) {
+		//TODO Remove the extra adding of half the resolution in the scale range for Dates when the Rasdaman fixes the issue of shifting
 		double res = Double.parseDouble(resSource)/Double.parseDouble(resTarget);
 		log.debug(xHigh+xLow);
 		log.debug(yHigh+yLow);
@@ -4456,17 +4469,17 @@ public class WCPSQueryFactory {
 				nextNodeName.put(currentNode, fromNodes);				
 			}
 			
-			else if (argumentsKey.contentEquals("value")) {
-				if (currentNodeProcessArguments.get("value") instanceof JSONObject) {
-					for (String fromKey : currentNodeProcessArguments.getJSONObject("value").keySet()) {
+			else if (argumentsKey.contentEquals("expression")) {
+				if (currentNodeProcessArguments.get("expression") instanceof JSONObject) {
+					for (String fromKey : currentNodeProcessArguments.getJSONObject("expression").keySet()) {
 						if (fromKey.contentEquals("from_node")) {
-							nextFromNode = currentNodeProcessArguments.getJSONObject("value").getString("from_node");
+							nextFromNode = currentNodeProcessArguments.getJSONObject("expression").getString("from_node");
 							fromNodes.put(nextFromNode);
 						}
 					}
 				}
-				else if (currentNodeProcessArguments.get("value") instanceof JSONArray) {
-					JSONArray reduceData = currentNodeProcessArguments.getJSONArray("value");
+				else if (currentNodeProcessArguments.get("expression") instanceof JSONArray) {
+					JSONArray reduceData = currentNodeProcessArguments.getJSONArray("expression");
 					for(int a = 0; a < reduceData.length(); a++) {
 						if (reduceData.get(a) instanceof JSONObject) {
 							for (String fromKey : reduceData.getJSONObject(a).keySet()) {
@@ -5005,8 +5018,8 @@ public class WCPSQueryFactory {
 					String filterfromNode = loadCollectionNodeKeyArguments.getJSONObject("band1").getString("from_node");					
 					filterCollectionNodeKey = getFilterCollectionNode(filterfromNode);
 				}
-				else if (argumentsKey.contentEquals("value")) {
-					String filterfromNode = loadCollectionNodeKeyArguments.getJSONObject("value").getString("from_node");					
+				else if (argumentsKey.contentEquals("expression")) {
+					String filterfromNode = loadCollectionNodeKeyArguments.getJSONObject("expression").getString("from_node");					
 					filterCollectionNodeKey = getFilterCollectionNode(filterfromNode);
 				}
 			}
@@ -5205,7 +5218,35 @@ public class WCPSQueryFactory {
 		String right = null;
 		String top = null;
 		String bottom = null;
-		
+		double resSource = 0;
+		JSONObject collectionSTACMetdata = null;
+		try {
+			collectionSTACMetdata = readJsonFromUrl(
+					ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + collectionID);
+		} catch (JSONException e) {
+			log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
+		} catch (IOException e) {
+			log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+			StringBuilder builder = new StringBuilder();
+			for( StackTraceElement element: e.getStackTrace()) {
+				builder.append(element.toString()+"\n");
+			}
+			log.error(builder.toString());
+		}
+		JSONArray bandsArray = ((JSONObject) collectionSTACMetdata.get("properties")).getJSONArray("eo:bands");		
+		try {
+			for(int c = 0; c < bandsArray.length(); c++) {
+				resSource = Double.parseDouble(bandsArray.getJSONObject(c).getString("gsd"));
+			}
+		}
+		catch (JSONException e) {
+
+		}
 		if (spatNull) {
 			JSONObject extent;
 			JSONObject jsonresp = null;
@@ -5344,7 +5385,7 @@ public class WCPSQueryFactory {
 							leftlower = Double.parseDouble(left);
 							if (leftlower < westlower) {
 								left = Double.toString(westlower);
-							}							
+							}
 						} else if (extentKeyStr.equals("east")) {
 							right = "" + extentObject.get(extentKeyStr).toString();
 							rightupper = Double.parseDouble(right);
@@ -5390,13 +5431,90 @@ public class WCPSQueryFactory {
 						right = Double.toString(c2[0]);
 						top = Double.toString(c2[1]);
 					}
-
-					log.debug("WEST: "+left);
-					log.debug("SOUTH: "+bottom);
-					log.debug("EAST: "+right);
-					log.debug("NORTH: "+top);				
 				}
 			}
+			if (resSource!=0) {
+				URL url;
+				try {
+					url = new URL(ConvenienceHelper.readProperties("wcps-endpoint")
+							+ "?SERVICE=WCS&VERSION=2.0.1&REQUEST=DescribeCoverage&COVERAGEID=" + collectionID);
+
+					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+					conn.setRequestMethod("GET");
+					SAXBuilder builder = new SAXBuilder();
+					Document capabilititesDoc = (Document) builder.build(conn.getInputStream());
+					List<Namespace> namespaces = capabilititesDoc.getNamespacesIntroduced();
+					Element rootNode = capabilititesDoc.getRootElement();
+					Namespace defaultNS = rootNode.getNamespace();
+					Namespace gmlNS = null;
+					Namespace sweNS = null;
+					Namespace gmlCovNS =  null;
+					Namespace gmlrgridNS = null;
+					for (int n = 0; n < namespaces.size(); n++) {
+						Namespace current = namespaces.get(n);
+						if(current.getPrefix().equals("swe")) {
+							sweNS = current;
+						}
+						if(current.getPrefix().equals("gmlcov")) {
+							gmlCovNS = current;
+						}
+						if(current.getPrefix().equals("gml")) {
+							gmlNS = current;
+						}
+						if(current.getPrefix().equals("gmlrgrid")) {
+							gmlrgridNS = current;
+						}
+					}
+					
+					log.debug("root node info: " + rootNode.getName());		
+							
+					Element coverageDescElement = rootNode.getChild("CoverageDescription", defaultNS);
+					Element boundedByElement = coverageDescElement.getChild("boundedBy", gmlNS);
+					Element boundingBoxElement = boundedByElement.getChild("Envelope", gmlNS);
+					String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
+					String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
+					String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
+					int xIndex = 0;
+				    int yIndex = 0;
+					
+					for(int a = 0; a < axis.length; a++) {
+				    	log.debug(axis[a]);
+						if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long")){
+							xIndex = a;
+						}
+						if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
+							yIndex = a;
+						}
+					}
+					log.debug("Left: "+left);
+					log.debug("Right: "+right);
+					log.debug("Bottom: "+bottom);
+					log.debug("Top: "+top);
+					log.debug("MinX: "+minValues[xIndex]);
+					log.debug("MaxX: "+maxValues[xIndex]);
+					log.debug("MinY: "+minValues[yIndex]);
+					log.debug("MaxY: "+maxValues[yIndex]);
+					left = Double.toString(Double.parseDouble(minValues[xIndex]) + resSource*( Math.round(((Double.parseDouble(left) - Double.parseDouble(minValues[xIndex]))/resSource))));
+					right = Double.toString(Double.parseDouble(maxValues[xIndex]) - resSource*(Math.round(((Double.parseDouble(maxValues[xIndex]) - Double.parseDouble(right))/resSource))));
+					bottom = Double.toString(Double.parseDouble(minValues[yIndex]) + resSource*(Math.round(((Double.parseDouble(bottom) - Double.parseDouble(minValues[yIndex]))/resSource))));
+					top = Double.toString(Double.parseDouble(maxValues[yIndex]) - resSource*(Math.round(((Double.parseDouble(maxValues[yIndex]) - Double.parseDouble(top))/resSource))));
+					
+			}
+			catch (MalformedURLException e) {
+				log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
+				
+			} catch (IOException e) {
+				log.error("An error occured while describing coverage from WCPS endpoint: " + e.getMessage());
+				
+			} catch (JDOMException e) {
+				log.error("An error occured while requesting capabilities from WCPS endpoint: " + e.getMessage());
+				
+			}
+			}
+			log.debug("WEST: "+left);
+			log.debug("EAST: "+right);
+			log.debug("SOUTH: "+bottom);			
+			log.debug("NORTH: "+top);
 			if (left != null && right != null && top != null && bottom != null) {
 				Filter eastFilter = null;
 				Filter westFilter = null;
