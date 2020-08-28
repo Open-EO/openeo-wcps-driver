@@ -3964,15 +3964,15 @@ public class WCPSQueryFactory {
 		StringBuilder resampleBuilder = new StringBuilder("scale(" );
 		if (res<1) {
 			xLow1 = Double.toString(Double.parseDouble(xLow) - Double.parseDouble(resTarget)/2);
-			yLow1 = Double.toString(Double.parseDouble(yLow) - Double.parseDouble(resTarget)/2);
+			yLow1 = Double.toString(Double.parseDouble(yLow) + Double.parseDouble(resTarget)/2);
 			xHigh1 = Double.toString(Double.parseDouble(xHigh) - Double.parseDouble(resTarget)/2);
-			yHigh1 = Double.toString(Double.parseDouble(yHigh) - Double.parseDouble(resTarget)/2);
+			yHigh1 = Double.toString(Double.parseDouble(yHigh) + Double.parseDouble(resTarget)/2);
 		}
 		else if (res>1) {
 			xLow1 = Double.toString(Double.parseDouble(xLow) + Double.parseDouble(resSource));
-			yLow1 = Double.toString(Double.parseDouble(yLow) + Double.parseDouble(resSource));
+			yLow1 = Double.toString(Double.parseDouble(yLow) - Double.parseDouble(resSource));
 			xHigh1 = Double.toString(Double.parseDouble(xHigh) + Double.parseDouble(resSource));
-			yHigh1 = Double.toString(Double.parseDouble(yHigh) + Double.parseDouble(resSource));
+			yHigh1 = Double.toString(Double.parseDouble(yHigh) - Double.parseDouble(resSource));
 		}
 		log.debug("Shifted X : " + xLow1 + " " + xHigh1);
 		log.debug("Shifted Y : " + yLow1 + " " + yHigh1);
