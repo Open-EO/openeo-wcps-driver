@@ -365,16 +365,16 @@ public class WCPSQueryFactory {
 					log.debug("Cube2 : " + payLoad2);
 					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
 					if (overlapResolver.equals( "sum")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"+"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "subtract")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"-"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"-"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "product")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"*"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"*"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "divide")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"/"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"/"+"("+payLoad2+"))");
 					}
 					wcpsPayLoad=wcpsMergepayLoad;
 					wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
@@ -404,16 +404,16 @@ public class WCPSQueryFactory {
 					log.debug("Cube2 : " + payLoad2);
 					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
 					if (overlapResolver.equals( "sum")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"+"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "subtract")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"-"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"-"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "product")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"*"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"*"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "divide")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"/"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"/"+"("+payLoad2+"))");
 					}
 					wcpsPayLoad=wcpsMergepayLoad;
 					wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
@@ -609,16 +609,16 @@ public class WCPSQueryFactory {
 					log.debug("Cube2 : " + payLoad2);
 					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
 					if (overlapResolver.equals( "sum")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"+"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "subtract")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"-"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"-"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "product")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"*"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"*"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "divide")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"/"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"/"+"("+payLoad2+"))");
 					}
 					wcpsPayLoad=wcpsMergepayLoad;
 					wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
@@ -648,16 +648,16 @@ public class WCPSQueryFactory {
 					log.debug("Cube2 : " + payLoad2);
 					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
 					if (overlapResolver.equals( "sum")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"+"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "subtract")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"-"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"-"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "product")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"*"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"*"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "divide")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"/"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"/"+"("+payLoad2+"))");
 					}
 					wcpsPayLoad=wcpsMergepayLoad;
 					wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
@@ -860,16 +860,16 @@ public class WCPSQueryFactory {
 					log.debug("Cube2 : " + payLoad2);
 					String overlapResolver =  mergeProcesses.getJSONObject(endMergeNode).getString("process_id");
 					if (overlapResolver.equals( "sum")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"+"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"+"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "subtract")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"-"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"-"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "product")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"*"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"*"+"("+payLoad2+"))");
 					}
 					if (overlapResolver.equals( "divide")) {
-						wcpsMergepayLoad.append("("+payLoad1+")"+"/"+"("+payLoad2+")");
+						wcpsMergepayLoad.append("(("+payLoad1+")"+"/"+"("+payLoad2+"))");
 					}
 					wcpsPayLoad=wcpsMergepayLoad;
 					wcpsStringBuilder = wcpsStringBuilderMerge.append(wcpsMergepayLoad.toString());
@@ -1400,7 +1400,7 @@ public class WCPSQueryFactory {
 					else {
 						wcpsIFpayLoad.append("("+payLoad+"*"+accept+"+"+"(not "+payLoad.replaceAll("pm", "pm" + nodeKeyOfCurrentProcess).replaceAll("\\$T", "\\$T" + nodeKeyOfCurrentProcess).replaceAll("\\$Y", "\\$Y" + nodeKeyOfCurrentProcess).replaceAll("\\$X", "\\$X" + nodeKeyOfCurrentProcess).replaceAll("\\$N", "\\$N" + nodeKeyOfCurrentProcess).replaceAll("\\$E", "\\$E" + nodeKeyOfCurrentProcess)+")*"+reject+")");
 					}	
-				}				
+				}
 				
 				wcpsPayLoad=wcpsIFpayLoad;
 				StringBuilder wcpsStringBuilderMaskThresPayload = basicWCPSStringBuilder(varPayLoad.toString());
@@ -1413,6 +1413,7 @@ public class WCPSQueryFactory {
 			if (currentProcessID.equals("mask")) {
 				StringBuilder wcpsArrayFilterpayLoad = new StringBuilder("");
 				String payLoad = null;
+				String maskpayLoad = null;
 				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
 				
 //				if (processArguments.get("data") instanceof JSONObject) {
@@ -1460,11 +1461,11 @@ public class WCPSQueryFactory {
 				if (processArguments.get("mask") instanceof JSONObject) {
 					for (String fromType : processArguments.getJSONObject("mask").keySet()) {
 						if (fromType.equals("from_argument") && processArguments.getJSONObject("mask").getString("from_argument").equals("data")) {
-							payLoad = wcpsPayLoad.toString();							
+							maskpayLoad = wcpsPayLoad.toString();							
 						}
 						else if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("mask").getString("from_node");
-							payLoad = storedPayLoads.getString(dataNode);							
+							maskpayLoad = storedPayLoads.getString(dataNode);							
 						}
 					}
 				}
@@ -1481,10 +1482,10 @@ public class WCPSQueryFactory {
 				
 				try {
 					replacement = processArguments.getDouble("replacement");
-					wcpsArrayFilterpayLoad.append("(("+payLoad.replaceAll("\\$pm", "\\$qm")+")"+"*"+")" + " + " + "((not("+payLoad.replaceAll("\\$pm", "\\$rm")+"))"+"*"+replacement+")");
+					wcpsArrayFilterpayLoad.append("(("+maskpayLoad.replaceAll("\\$pm", "\\$qm")+")"+"*"+ payLoad +")" + " + " + "((not("+maskpayLoad.replaceAll("\\$pm", "\\$rm")+"))"+"*"+replacement+")");
 					wcpsPayLoad=wcpsArrayFilterpayLoad;
 				}catch(Exception e) {
-					wcpsArrayFilterpayLoad.append("(("+payLoad.replaceAll("\\$pm", "\\$qm")+")"+"*"+")" + " + " + "((not("+payLoad.replaceAll("\\$pm", "\\$rm")+"))"+")");
+					wcpsArrayFilterpayLoad.append("(("+maskpayLoad.replaceAll("\\$pm", "\\$qm")+")"+"*"+ payLoad +")" + " + " + "((not("+maskpayLoad.replaceAll("\\$pm", "\\$rm")+"))"+")");
 					wcpsPayLoad=wcpsArrayFilterpayLoad;
 				}
 				
