@@ -763,8 +763,7 @@ public class WCPSQueryFactory {
 //					String YImageCrsDomain = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoadCRS).replaceAll("");
 //					YImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
 //					YImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
-//					YImageCrsDomain = Pattern.compile(",").matcher(YImageCrsDomain).replaceAll("");
-					
+//					YImageCrsDomain = Pattern.compile(",").matcher(YImageCrsDomain).replaceAll("");					
 					
 //					String payLoad1Merge = payLoad1.replaceAll("\\sDATE"+"\\(.*?\\)", " DATE\\(\\$T" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$X" + nodeKeyOfCurrentProcess + "\\)");						
 					String payLoad2Merge = payLoad2.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y" + nodeKeyofCube1 + "\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X" + nodeKeyofCube1 + "\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Y" + nodeKeyofCube1 + "\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$X" + nodeKeyofCube1 + "\\)");;
@@ -876,10 +875,269 @@ public class WCPSQueryFactory {
 					storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMergepayLoad.toString());
 					log.debug("Merge Cubes Process PayLoad is : " + wcpsMergepayLoad.toString());
 					log.debug("Merge Cubes Process Stored for Node " + nodeKeyOfCurrentProcess + " : " + storedPayLoads.get(nodeKeyOfCurrentProcess));
-					
+				}				
+			}
+			if (currentProcessID.equals("mask")) {
+				StringBuilder wcpsMaskpayLoad = new StringBuilder("");
+				double replacement = 0;
+				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
+				StringBuilder wcpsStringBuilderMaskThresPayload = basicWCPSStringBuilder(varPayLoad.toString());
+				String payLoad1 = null;
+				String payLoad2 = null;
+				String payLoadCRS = null;
+				String cube1 = null;
+				String cube2 = null;
+				String temporalStartCube1 = null;
+				String temporalEndCube1 = null;
+				String temporalStartCube2 = null;
+				String temporalEndCube2 = null;
+				String nodeKeyofCube1 = null;
+				
+				if (processArguments.get("data") instanceof JSONObject) {
+					for (String fromType : processArguments.getJSONObject("data").keySet()) {
+						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+							payLoad1 = wcpsPayLoad.toString();
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = processArguments.getJSONObject("data").getString("from_node");							
+							nodeKeyofCube1 = processArguments.getJSONObject("cube1").getString("from_node");
+							temporalStartCube1 = processGraph.getJSONObject(getFilterCollectionNode(dataNode)).getJSONObject("arguments").getJSONArray("temporal_extent").getString(0);
+							temporalEndCube1 = processGraph.getJSONObject(getFilterCollectionNode(dataNode)).getJSONObject("arguments").getJSONArray("temporal_extent").getString(1);
+							cube1 = processGraph.getJSONObject(getFilterCollectionNode(dataNode)).getJSONObject("arguments").getString("id");
+							payLoad1 = storedPayLoads.getString(dataNode);
+							payLoadCRS = createFilteredCollectionString("$"+cube1+getFilterCollectionNode(dataNode), cube1);
+							log.debug(payLoad1);
+						}
+					}
+				}				
+				if (processArguments.get("mask") instanceof JSONObject) {
+					for (String fromType : processArguments.getJSONObject("mask").keySet()) {
+						if (fromType.equals("from_argument") && processArguments.getJSONObject("mask").getString("from_argument").equals("data")) {
+							payLoad2 = wcpsPayLoad.toString();							
+						}
+						else if (fromType.equals("from_node")) {
+							String dataNode = processArguments.getJSONObject("mask").getString("from_node");
+							cube2 = processGraph.getJSONObject(getFilterCollectionNode(dataNode)).getJSONObject("arguments").getString("id");
+							temporalStartCube2 = processGraph.getJSONObject(getFilterCollectionNode(dataNode)).getJSONObject("arguments").getJSONArray("temporal_extent").getString(0);
+							temporalEndCube2 = processGraph.getJSONObject(getFilterCollectionNode(dataNode)).getJSONObject("arguments").getJSONArray("temporal_extent").getString(1);
+							payLoad2 = storedPayLoads.getString(dataNode);
+						}
+					}
+				}				
+				
+				int noOfDimsCube1 = 0;
+				int noOfDimsCube2 = 0;
+				JSONObject collectionSTACMetdataCube1 = null;
+				JSONObject collectionSTACMetdataCube2 = null;
+				try {
+					collectionSTACMetdataCube1 = readJsonFromUrl(
+							ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + cube1);
+				} catch (JSONException e) {
+					log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				} catch (IOException e) {
+					log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				}
+				try {
+					collectionSTACMetdataCube2 = readJsonFromUrl(
+							ConvenienceHelper.readProperties("openeo-endpoint") + "/collections/" + cube2);
+				} catch (JSONException e) {
+					log.error("An error occured while parsing json from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
+				} catch (IOException e) {
+					log.error("An error occured while receiving data from STAC metadata endpoint: " + e.getMessage());
+					StringBuilder builder = new StringBuilder();
+					for( StackTraceElement element: e.getStackTrace()) {
+						builder.append(element.toString()+"\n");
+					}
+					log.error(builder.toString());
 				}
 				
+				JSONObject dimsCube1 = (JSONObject) (((JSONObject) collectionSTACMetdataCube1.get("properties")).get("cube:dimensions"));		
+				for (String dimsCube1Keys : dimsCube1.keySet()) {
+					noOfDimsCube1 = noOfDimsCube1+1;
+				}
+				
+				JSONObject dimsCube2 = (JSONObject) (((JSONObject) collectionSTACMetdataCube2.get("properties")).get("cube:dimensions"));		
+				for (String dimsCube2Keys : dimsCube2.keySet()) {
+					noOfDimsCube2 = noOfDimsCube2+1;
+				}
+				
+				boolean dimsXY = false;
+				boolean dimsEN = false;
+				JSONObject dimAxisName = null;
+				try {
+					dimAxisName = dimsCube1.getJSONObject("E");
+					dimsEN = true;
+				}catch(Exception e) {
+				}
+				try {
+					dimAxisName = dimsCube1.getJSONObject("Y");
+					dimsXY = true;
+				}catch(Exception e) {
+				}
+				log.debug(temporalStartCube1);
+				log.debug(temporalEndCube1);
+				log.debug(temporalStartCube2);
+				log.debug(temporalEndCube2);
+								
+				if (noOfDimsCube1==noOfDimsCube2 && !temporalStartCube1.equals(temporalEndCube1) && !temporalStartCube2.equals(temporalEndCube2) && !payLoad2.contains("condense") && !payLoad1.contains("coverage") && !payLoad1.contains("condense")) {
+					try {
+						replacement = processArguments.getDouble("replacement");
+						wcpsMaskpayLoad.append("(" + payLoad1 + "*" + "(not("+payLoad2.replaceAll("\\$pm", "\\$rm")+")"+")" + " + " + "(("+payLoad2.replaceAll("\\$pm", "\\$qm")+")"+"*"+replacement+"))");
+						wcpsPayLoad=wcpsMaskpayLoad;
+					}catch(Exception e) {
+						wcpsMaskpayLoad.append("(" + payLoad1 + "*" + "(not("+payLoad2.replaceAll("\\$pm", "\\$rm")+")"+")");
+						wcpsPayLoad=wcpsMaskpayLoad;
+					}
+					
+					wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsMaskpayLoad.toString());
+					storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMaskpayLoad.toString());
+					log.debug("Process Stored for Node " + nodeKeyOfCurrentProcess + " : " + storedPayLoads.get(nodeKeyOfCurrentProcess));
+					log.debug("Mask Process PayLoad is : ");
+				}
+				
+				else if (noOfDimsCube1==noOfDimsCube2 && !temporalStartCube1.equals(temporalEndCube1) && temporalStartCube2.equals(temporalEndCube2) && !payLoad2.contains("condense") && payLoad1.contains("coverage") && payLoad1.contains("condense")) {
+//					String timeImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoadCRS).replaceAll("");
+//					timeImageCrsDomain = Pattern.compile(" Y"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+//					timeImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+//					timeImageCrsDomain = Pattern.compile(" N"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
+//					timeImageCrsDomain = Pattern.compile(",").matcher(timeImageCrsDomain).replaceAll("");
+//					String XImageCrsDomain = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoadCRS).replaceAll("");
+//					XImageCrsDomain = Pattern.compile(" Y"+"\\(.*?\\)").matcher(XImageCrsDomain).replaceAll("");
+//					XImageCrsDomain = Pattern.compile(" N"+"\\(.*?\\)").matcher(XImageCrsDomain).replaceAll("");
+//					XImageCrsDomain = Pattern.compile(",").matcher(XImageCrsDomain).replaceAll("");
+//					String YImageCrsDomain = Pattern.compile(" DATE"+"\\(.*?\\)").matcher(payLoadCRS).replaceAll("");
+//					YImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
+//					YImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(YImageCrsDomain).replaceAll("");
+//					YImageCrsDomain = Pattern.compile(",").matcher(YImageCrsDomain).replaceAll("");					
+					
+//					String payLoad1Merge = payLoad1.replaceAll("\\sDATE"+"\\(.*?\\)", " DATE\\(\\$T" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Y" + nodeKeyOfCurrentProcess + "\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$X" + nodeKeyOfCurrentProcess + "\\)");						
+					String payLoad2Merge = payLoad2.replaceAll("\\sY"+"\\(.*?\\)", " Y\\(\\$Y" + nodeKeyofCube1 + "\\)").replaceAll("\\sX"+"\\(.*?\\)", " X\\(\\$X" + nodeKeyofCube1 + "\\)").replaceAll("\\sN"+"\\(.*?\\)", " N\\(\\$Y" + nodeKeyofCube1 + "\\)").replaceAll("\\sE"+"\\(.*?\\)", " E\\(\\$X" + nodeKeyofCube1 + "\\)");;
+										
+//					log.debug(timeImageCrsDomain);
+//					log.debug(XImageCrsDomain);
+//					log.debug(YImageCrsDomain);
+//					log.debug(payLoad1Merge);
+					log.debug(payLoad2Merge);					
+					log.debug("Cube1 : " + payLoad1);
+					log.debug("Cube2 : " + payLoad2);
+					
+					try {
+						replacement = processArguments.getDouble("replacement");
+						wcpsMaskpayLoad.append("" + payLoad1 + "*(not("+payLoad2Merge.replaceAll("\\$pm", "\\$rm")+"))" + "+("+payLoad2Merge.replaceAll("\\$pm", "\\$rrm")+")*" + replacement +")");					
+						wcpsPayLoad=wcpsMaskpayLoad;
+					}catch(Exception e) {
+						wcpsMaskpayLoad.append("" + payLoad1 + "*(not("+payLoad2Merge.replaceAll("\\$pm", "\\$rm")+"))");					
+						wcpsPayLoad=wcpsMaskpayLoad;
+					}
+					
+					wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsMaskpayLoad.toString());
+					storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMaskpayLoad.toString());
+					log.debug("Process Stored for Node " + nodeKeyOfCurrentProcess + " : " + storedPayLoads.get(nodeKeyOfCurrentProcess));
+					log.debug("Mask Process PayLoad is : ");
+				}			
+				
 			}
+//			if (currentProcessID.equals("mask_custom")) {
+//				StringBuilder wcpsArrayFilterpayLoad = new StringBuilder("");
+//				String payLoad = null;
+//				String maskpayLoad = null;
+//				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
+//				
+////				if (processArguments.get("data") instanceof JSONObject) {
+////					for (String fromType : processArguments.getJSONObject("data").keySet()) {
+////						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+////							payLoad = wcpsPayLoad.toString();
+////							varPayLoad.append(" $payLoad"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$rm")+",");
+////						}
+////						else if (fromType.equals("from_node")) {
+////							String dataNode = processArguments.getJSONObject("data").getString("from_node");
+////							payLoad = storedPayLoads.getString(dataNode);
+////							log.debug("Array Filterd Process : ");
+////							varPayLoad.append(" $payLoad"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$rm")+",");
+////						}
+////					}
+////				}
+////				
+////				if (processArguments.get("mask") instanceof JSONObject) {
+////					for (String fromType : processArguments.getJSONObject("mask").keySet()) {
+////						if (fromType.equals("from_argument") && processArguments.getJSONObject("mask").getString("from_argument").equals("data")) {
+////							payLoad = wcpsPayLoad.toString();
+////							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := not(" + payLoad.replaceAll("\\$pm", "\\$qm")+")"+",");
+////						}
+////						else if (fromType.equals("from_node")) {
+////							String dataNode = processArguments.getJSONObject("mask").getString("from_node");
+////							payLoad = storedPayLoads.getString(dataNode);
+////							log.debug("Array Filterd Process : ");
+////							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := not(" + payLoad.replaceAll("\\$pm", "\\$qm")+")"+",");
+////						}
+////					}
+////				}
+//				
+//				if (processArguments.get("data") instanceof JSONObject) {
+//					for (String fromType : processArguments.getJSONObject("data").keySet()) {
+//						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
+//							payLoad = wcpsPayLoad.toString();							
+//						}
+//						else if (fromType.equals("from_node")) {
+//							String dataNode = processArguments.getJSONObject("data").getString("from_node");
+//							payLoad = storedPayLoads.getString(dataNode);							
+//						}
+//					}
+//				}
+//				
+//				if (processArguments.get("mask") instanceof JSONObject) {
+//					for (String fromType : processArguments.getJSONObject("mask").keySet()) {
+//						if (fromType.equals("from_argument") && processArguments.getJSONObject("mask").getString("from_argument").equals("data")) {
+//							maskpayLoad = wcpsPayLoad.toString();							
+//						}
+//						else if (fromType.equals("from_node")) {
+//							String dataNode = processArguments.getJSONObject("mask").getString("from_node");
+//							maskpayLoad = storedPayLoads.getString(dataNode);							
+//						}
+//					}
+//				}
+//				
+//				double replacement = 0;
+////				try {
+////					replacement = processArguments.getDouble("replacement");
+////					wcpsArrayFilterpayLoad.append("(($filterArray"+nodeKeyOfCurrentProcess+")"+"*$payLoad"+nodeKeyOfCurrentProcess+")" + " + " + "((not($filterArray"+nodeKeyOfCurrentProcess+"))"+"*"+replacement+")");
+////					wcpsPayLoad=wcpsArrayFilterpayLoad;
+////				}catch(Exception e) {
+////					wcpsArrayFilterpayLoad.append("(($filterArray"+nodeKeyOfCurrentProcess+")"+"*$payLoad"+nodeKeyOfCurrentProcess+")" + " + " + "((not($filterArray"+nodeKeyOfCurrentProcess+"))"+")");
+////					wcpsPayLoad=wcpsArrayFilterpayLoad;
+////				}
+//				
+//				try {
+//					replacement = processArguments.getDouble("replacement");
+//					wcpsArrayFilterpayLoad.append("(not("+maskpayLoad.replaceAll("\\$pm", "\\$rm")+")"+"*"+ payLoad +")" + " + " + "(("+maskpayLoad.replaceAll("\\$pm", "\\$qm")+")"+"*"+replacement+")");
+//					wcpsPayLoad=wcpsArrayFilterpayLoad;
+//				}catch(Exception e) {
+//					wcpsArrayFilterpayLoad.append("(not("+maskpayLoad.replaceAll("\\$pm", "\\$rm")+")"+"*"+ payLoad +")" + " + " + "(("+maskpayLoad.replaceAll("\\$pm", "\\$qm")+")"+")");
+//					wcpsPayLoad=wcpsArrayFilterpayLoad;
+//				}
+//				
+//				StringBuilder wcpsStringBuilderMaskThresPayload = basicWCPSStringBuilder(varPayLoad.toString());
+//				wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsArrayFilterpayLoad.toString());
+//				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsArrayFilterpayLoad.toString());
+//				log.debug("Process Stored for Node " + nodeKeyOfCurrentProcess + " : " + storedPayLoads.get(nodeKeyOfCurrentProcess));
+//				log.debug("Mask Process PayLoad is : ");
+//				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
+//			}
 			if (currentProcessID.equals("resample_cube_temporal")) {
 				containsResampleProcess = true;
 				StringBuilder wcpsResamplepayLoad = new StringBuilder("");
@@ -1409,93 +1667,7 @@ public class WCPSQueryFactory {
 				log.debug("Process Stored for Node " + nodeKeyOfCurrentProcess + " : " + storedPayLoads.get(nodeKeyOfCurrentProcess));
 				log.debug("IF Process PayLoad is : ");
 				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
-			}			
-			if (currentProcessID.equals("mask")) {
-				StringBuilder wcpsArrayFilterpayLoad = new StringBuilder("");
-				String payLoad = null;
-				String maskpayLoad = null;
-				JSONObject processArguments =  processGraph.getJSONObject(nodeKeyOfCurrentProcess).getJSONObject("arguments");
-				
-//				if (processArguments.get("data") instanceof JSONObject) {
-//					for (String fromType : processArguments.getJSONObject("data").keySet()) {
-//						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
-//							payLoad = wcpsPayLoad.toString();
-//							varPayLoad.append(" $payLoad"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$rm")+",");
-//						}
-//						else if (fromType.equals("from_node")) {
-//							String dataNode = processArguments.getJSONObject("data").getString("from_node");
-//							payLoad = storedPayLoads.getString(dataNode);
-//							log.debug("Array Filterd Process : ");
-//							varPayLoad.append(" $payLoad"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$rm")+",");
-//						}
-//					}
-//				}
-//				
-//				if (processArguments.get("mask") instanceof JSONObject) {
-//					for (String fromType : processArguments.getJSONObject("mask").keySet()) {
-//						if (fromType.equals("from_argument") && processArguments.getJSONObject("mask").getString("from_argument").equals("data")) {
-//							payLoad = wcpsPayLoad.toString();
-//							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm")+",");
-//						}
-//						else if (fromType.equals("from_node")) {
-//							String dataNode = processArguments.getJSONObject("mask").getString("from_node");
-//							payLoad = storedPayLoads.getString(dataNode);
-//							log.debug("Array Filterd Process : ");
-//							varPayLoad.append(" $filterArray"+ nodeKeyOfCurrentProcess + " := " + payLoad.replaceAll("\\$pm", "\\$qm")+",");
-//						}
-//					}
-//				}
-				
-				if (processArguments.get("data") instanceof JSONObject) {
-					for (String fromType : processArguments.getJSONObject("data").keySet()) {
-						if (fromType.equals("from_argument") && processArguments.getJSONObject("data").getString("from_argument").equals("data")) {
-							payLoad = wcpsPayLoad.toString();							
-						}
-						else if (fromType.equals("from_node")) {
-							String dataNode = processArguments.getJSONObject("data").getString("from_node");
-							payLoad = storedPayLoads.getString(dataNode);							
-						}
-					}
-				}
-				
-				if (processArguments.get("mask") instanceof JSONObject) {
-					for (String fromType : processArguments.getJSONObject("mask").keySet()) {
-						if (fromType.equals("from_argument") && processArguments.getJSONObject("mask").getString("from_argument").equals("data")) {
-							maskpayLoad = wcpsPayLoad.toString();							
-						}
-						else if (fromType.equals("from_node")) {
-							String dataNode = processArguments.getJSONObject("mask").getString("from_node");
-							maskpayLoad = storedPayLoads.getString(dataNode);							
-						}
-					}
-				}
-				
-				double replacement = 0;
-//				try {
-//					replacement = processArguments.getDouble("replacement");
-//					wcpsArrayFilterpayLoad.append("(($filterArray"+nodeKeyOfCurrentProcess+")"+"*$payLoad"+nodeKeyOfCurrentProcess+")" + " + " + "((not($filterArray"+nodeKeyOfCurrentProcess+"))"+"*"+replacement+")");
-//					wcpsPayLoad=wcpsArrayFilterpayLoad;
-//				}catch(Exception e) {
-//					wcpsArrayFilterpayLoad.append("(($filterArray"+nodeKeyOfCurrentProcess+")"+"*$payLoad"+nodeKeyOfCurrentProcess+")" + " + " + "((not($filterArray"+nodeKeyOfCurrentProcess+"))"+")");
-//					wcpsPayLoad=wcpsArrayFilterpayLoad;
-//				}
-				
-				try {
-					replacement = processArguments.getDouble("replacement");
-					wcpsArrayFilterpayLoad.append("(("+maskpayLoad.replaceAll("\\$pm", "\\$qm")+")"+"*"+ payLoad +")" + " + " + "((not("+maskpayLoad.replaceAll("\\$pm", "\\$rm")+"))"+"*"+replacement+")");
-					wcpsPayLoad=wcpsArrayFilterpayLoad;
-				}catch(Exception e) {
-					wcpsArrayFilterpayLoad.append("(("+maskpayLoad.replaceAll("\\$pm", "\\$qm")+")"+"*"+ payLoad +")" + " + " + "((not("+maskpayLoad.replaceAll("\\$pm", "\\$rm")+"))"+")");
-					wcpsPayLoad=wcpsArrayFilterpayLoad;
-				}
-				
-				StringBuilder wcpsStringBuilderMaskThresPayload = basicWCPSStringBuilder(varPayLoad.toString());
-				wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsArrayFilterpayLoad.toString());
-				storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsArrayFilterpayLoad.toString());
-				log.debug("Process Stored for Node " + nodeKeyOfCurrentProcess + " : " + storedPayLoads.get(nodeKeyOfCurrentProcess));
-				log.debug("Mask Process PayLoad is : ");
-				log.debug(storedPayLoads.get(nodeKeyOfCurrentProcess));
-			}			
+			}						
 			if (currentProcessID.equals("array_filter")) {
 				StringBuilder wcpsArrayFilterpayLoad = new StringBuilder("");
 				String payLoad = null;
