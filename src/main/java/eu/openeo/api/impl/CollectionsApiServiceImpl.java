@@ -333,19 +333,24 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			
 			JSONArray platform_values = new JSONArray();
 			JSONObject pltfrmvalues = new JSONObject();
-			platform_values.put("Sentinel-2A");
-			platform_values.put("Sentinel-2B");
+			String platform = null;
+			try {
+				platform = metadataElement.getChildText("Platform", gmlNS);
+			    }catch(Exception e) {
+			    	log.warn("Error in parsing Project Name :" + e.getMessage());
+			    }
+			platform_values.put(platform);
 			pltfrmvalues.put("values", platform_values);
 			
 			String title = null;
 			String description = null;
 			try {
-			title = metadataElement.getChildText("Project", gmlNS);
+			title = metadataElement.getChildText("Title", gmlNS);
 		    }catch(Exception e) {
 		    	log.warn("Error in parsing Project Name :" + e.getMessage());
 		    }
 		    try {
-			description = metadataElement.getChildText("Title", gmlNS);
+			description = metadataElement.getChildText("Description", gmlNS);
             }catch(Exception e) {
             	log.warn("Error in parsing Title :" + e.getMessage());
 	        }
