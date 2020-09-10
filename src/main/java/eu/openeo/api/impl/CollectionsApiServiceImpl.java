@@ -92,6 +92,12 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			log.warn("Error in parsing bands :" + e.getMessage());
 		    }
 			List<Element> bandsListSwe = rootNode.getChild("CoverageDescription", defaultNS).getChild("rangeType", gmlNS).getChild("DataRecord", sweNS).getChildren("field", sweNS);
+			String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
+			JSONObject[] dimObjects = new JSONObject[axis.length+1];
+			JSONArray bandArray = new JSONArray();
+			JSONObject extentCollection = new JSONObject();
+			JSONArray spatialExtent = new JSONArray();
+			JSONArray temporalExtent =  new JSONArray();
 			
 			//metadataObj = new JSONObject(metadataString1);
 			//String metadataString2 = metadataString1.replaceAll("\\n","");
@@ -100,6 +106,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			//JSONArray slices = metadataObj.getJSONArray("slices");
 			
 			String srsDescription = boundingBoxElement.getAttributeValue("srsName");
+			if (srsDescription.contains("EPSG")) {
 			try {
 				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
 				srsDescription = srsDescription.replaceAll("EPSG:","");
@@ -107,11 +114,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			}catch(StringIndexOutOfBoundsException e) {
 				srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
 				srsDescription = srsDescription.replaceAll("EPSG:","");
-			}
-			
-            JSONObject extentCollection = new JSONObject();
-			JSONArray spatialExtent = new JSONArray();
-			JSONArray temporalExtent =  new JSONArray();
+			}           
 			
 			SpatialReference src = new SpatialReference();
 			src.ImportFromEPSG(Integer.parseInt(srsDescription));
@@ -122,13 +125,10 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
 			String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");			
 			
-			CoordinateTransformation tx = new CoordinateTransformation(src, dst);
+			CoordinateTransformation tx = new CoordinateTransformation(src, dst);		    
 		    
-		    String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
 		    int xIndex = 0;
-		    int yIndex = 0;
-		    JSONObject[] dimObjects = new JSONObject[axis.length+1];	    
-            JSONArray bandArray = new JSONArray();
+		    int yIndex = 0;            
 			dimObjects[0] = new JSONObject();
 			dimObjects[0].put("type", "bands");
 			dimObjects[0].put("axis", "spectral");
@@ -278,7 +278,121 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			JSONArray yExtent = new JSONArray();
 			yExtent.put(c1[0]);
 			yExtent.put(c2[0]);
-			dimObjects[2].put("extent", yExtent);			
+			dimObjects[2].put("extent", yExtent);
+			}
+			else {
+				srsDescription = "0";				
+				
+				String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
+				String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");	    
+			               
+				dimObjects[0] = new JSONObject();
+				dimObjects[0].put("type", "bands");
+				dimObjects[0].put("axis", "spectral");
+				JSONArray bandValues = new JSONArray();
+				log.debug("number of bands found: " + bandsListSwe.size());
+				if (bandsMeta) {
+					try {
+						for(int c = 0; c < bandsList.size(); c++) {
+							JSONObject product = new JSONObject();				
+							String bandWave = null;
+							Element band = bandsList.get(c);
+							String bandId = band.getName();
+
+							try {
+								bandWave = band.getChildText("WAVELENGTH");
+							}catch(Exception e) {
+								log.warn("Error in parsing band wave-lenght:" + e.getMessage());
+							}
+							try {
+								product.put("common_name", band.getChildText("common_name"));
+							}catch(Exception e) {
+								log.warn("Error in parsing band common name:" + e.getMessage());
+							}				
+							product.put("name", bandId);
+							product.put("center_wavelength", bandWave);
+							bandValues.put(bandId);
+							try {
+								product.put("gsd", band.getChildText("gsd"));
+							}catch(Exception e) {
+								log.warn("Error in parsing band gsd:" + e.getMessage());
+							}
+							bandArray.put(product);
+						}
+					}catch(Exception e) {
+						log.warn("Error in parsing bands :" + e.getMessage());
+					}
+				}
+				else {
+					for(int c = 0; c < bandsListSwe.size(); c++) {
+						JSONObject product = new JSONObject();
+						String bandId = bandsListSwe.get(c).getAttributeValue("name");					
+						product.put("name", bandId);					
+						bandValues.put(bandId);					
+						bandArray.put(product);
+					}
+				}
+				
+				try {
+					dimObjects[0].put("values", bandValues);
+			    }catch(Exception e) {
+			    	log.warn("Error in Band values :" + e.getMessage());
+			    }
+			    
+			    for(int a = 0; a < axis.length; a++) {
+			    	log.debug(axis[a]);
+					if(axis[a].equals("i")){						
+						dimObjects[1] = new JSONObject();
+						dimObjects[1].put("axis", axis[a]);
+						dimObjects[1].put("type", "spatial");
+						dimObjects[1].put("reference_system", Long.parseLong(srsDescription));
+					}
+					if(axis[a].equals("j")){
+						dimObjects[2] = new JSONObject();
+						dimObjects[2].put("axis", axis[a]);
+						dimObjects[2].put("type", "spatial");
+						dimObjects[2].put("reference_system", Long.parseLong(srsDescription));
+					}
+					if(axis[a].equals("DATE")  || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
+						temporalExtent.put(minValues[a].replaceAll("\"", ""));
+						temporalExtent.put(maxValues[a].replaceAll("\"", ""));
+						dimObjects[3] = new JSONObject();
+						dimObjects[3].put("axis", axis[a]);
+						dimObjects[3].put("type", "temporal");
+						dimObjects[3].put("extent", temporalExtent);					
+						try {
+							List<Element> tList = rootNode.getChild("CoverageDescription", defaultNS).getChild("domainSet", gmlNS).getChild("RectifiedGrid", gmlNS).getChildren("offsetVector", gmlNS);
+							String[] taxis = tList.get(a).getValue().split(" ");
+							dimObjects[3].put("step", taxis[a]);
+					    }catch(Exception e) {
+					    	dimObjects[3].put("step", JSONObject.NULL);
+					    	log.warn("Irregular Axis :" + e.getMessage());
+					    }
+					}
+			    }
+				int j = 0;
+				
+				for(int a = 0; a < axis.length; a++) {
+			    	log.debug(axis[a]);
+					if(axis[a].equals("i") || axis[a].equals("j")){
+						j = a;
+						break;
+					}
+				}
+				spatialExtent.put(minValues[j]);
+				spatialExtent.put(minValues[j+1]);
+				spatialExtent.put(maxValues[j]);
+				spatialExtent.put(maxValues[j+1]);
+				
+				JSONArray xExtent = new JSONArray();
+				xExtent.put(minValues[j]);
+				xExtent.put(maxValues[j]);
+				dimObjects[1].put("extent", xExtent);
+				JSONArray yExtent = new JSONArray();
+				yExtent.put(minValues[j+1]);
+				yExtent.put(maxValues[j+1]);
+				dimObjects[2].put("extent", yExtent);
+			}
 			
 			JSONArray links = new JSONArray();
 			
@@ -583,75 +697,118 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				
 				String srsDescription = boundingBoxElement.getAttributeValue("srsName");
 				log.debug(srsDescription);
-				try {
-					srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
-					srsDescription = srsDescription.replaceAll("EPSG:","");
-					
-				}catch(StringIndexOutOfBoundsException e) {
-					srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
-					srsDescription = srsDescription.replaceAll("EPSG:","");			
-				}
-				log.debug(srsDescription);				
-				
-				SpatialReference src = new SpatialReference();
-				src.ImportFromEPSG(Integer.parseInt(srsDescription));
+				if (srsDescription.contains("EPSG")) {
+					try {
+						srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG"), srsDescription.indexOf("&")).replace("/0/", ":");
+						srsDescription = srsDescription.replaceAll("EPSG:","");
 
-				SpatialReference dst = new SpatialReference();
-				dst.ImportFromEPSG(4326);
-				
-				log.debug(boundingBoxElement.getChildText("lowerCorner", gmlNS));
-			    log.debug(boundingBoxElement.getChildText("upperCorner", gmlNS));
-				String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
-				String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
-				
-			    CoordinateTransformation tx = new CoordinateTransformation(src, dst);
-			    
-			    String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
-			    int xIndex = 0;
-			    int yIndex = 0;
-			    for(int a = 0; a < axis.length; a++) {
-			    	log.debug(axis[a]);
-					if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long")){
-						xIndex=a;
+					}catch(StringIndexOutOfBoundsException e) {					
+						srsDescription = srsDescription.substring(srsDescription.indexOf("EPSG")).replace("/0/", ":");
+						srsDescription = srsDescription.replaceAll("EPSG:","");
+
+					}				
+					log.debug(srsDescription);				
+
+					SpatialReference src = new SpatialReference();
+					src.ImportFromEPSG(Integer.parseInt(srsDescription));
+
+					SpatialReference dst = new SpatialReference();
+					dst.ImportFromEPSG(4326);
+
+					log.debug(boundingBoxElement.getChildText("lowerCorner", gmlNS));
+					log.debug(boundingBoxElement.getChildText("upperCorner", gmlNS));
+					String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
+					String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
+
+					CoordinateTransformation tx = new CoordinateTransformation(src, dst);
+
+					String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
+					int xIndex = 0;
+					int yIndex = 0;
+					for(int a = 0; a < axis.length; a++) {
+						log.debug(axis[a]);
+						if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long")){
+							xIndex=a;
+						}
+						if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
+							yIndex=a;
+						}
+						if(axis[a].equals("DATE")  || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
+							temporalExtent.put(minValues[a].replaceAll("\"", ""));
+							temporalExtent.put(maxValues[a].replaceAll("\"", ""));
+						}
 					}
-					if(axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
-						yIndex=a;
+
+					//				double[] c1 = null;
+					//				double[] c2 = null;
+					//				c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
+					//				c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));
+
+					double[] c1 = null;
+					double[] c2 = null;
+					int j = 0;
+
+					for(int a = 0; a < axis.length; a++) {
+						log.debug(axis[a]);
+						if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long") || axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
+							j = a;
+							break;
+						}
 					}
-					if(axis[a].equals("DATE")  || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
-						temporalExtent.put(minValues[a].replaceAll("\"", ""));
-						temporalExtent.put(maxValues[a].replaceAll("\"", ""));
-					}
-			    }
-			    
-//				double[] c1 = null;
-//				double[] c2 = null;
-//				c1 = tx.TransformPoint(Double.parseDouble(minValues[xIndex]), Double.parseDouble(minValues[yIndex]));
-//				c2 = tx.TransformPoint(Double.parseDouble(maxValues[xIndex]), Double.parseDouble(maxValues[yIndex]));
-				
-			    double[] c1 = null;
-				double[] c2 = null;
-				int j = 0;
-				
-				for(int a = 0; a < axis.length; a++) {
-			    	log.debug(axis[a]);
-					if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long") || axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
-						j = a;
-						break;
-					}
+					log.debug(j);
+
+					c1 = tx.TransformPoint(Double.parseDouble(minValues[j]), Double.parseDouble(minValues[j+1]));
+					c2 = tx.TransformPoint(Double.parseDouble(maxValues[j]), Double.parseDouble(maxValues[j+1]));
+
+					spatialExtent.put(c1[1]);
+					spatialExtent.put(c1[0]);
+					spatialExtent.put(c2[1]);
+					spatialExtent.put(c2[0]);			
+
+					extentCollection.put("spatial", spatialExtent);
+					extentCollection.put("temporal", temporalExtent);
 				}
-				log.debug(j);
-				
-				c1 = tx.TransformPoint(Double.parseDouble(minValues[j]), Double.parseDouble(minValues[j+1]));
-				c2 = tx.TransformPoint(Double.parseDouble(maxValues[j]), Double.parseDouble(maxValues[j+1]));
-			    
-				spatialExtent.put(c1[1]);
-				spatialExtent.put(c1[0]);
-				spatialExtent.put(c2[1]);
-				spatialExtent.put(c2[0]);			
-									
-				extentCollection.put("spatial", spatialExtent);
-				extentCollection.put("temporal", temporalExtent);
-				
+				else {
+					srsDescription = "0";
+					
+					log.debug(boundingBoxElement.getChildText("lowerCorner", gmlNS));
+					log.debug(boundingBoxElement.getChildText("upperCorner", gmlNS));
+					String[] minValues = boundingBoxElement.getChildText("lowerCorner", gmlNS).split(" ");
+					String[] maxValues = boundingBoxElement.getChildText("upperCorner", gmlNS).split(" ");
+					String[] axis = boundingBoxElement.getAttribute("axisLabels").getValue().split(" ");
+					int xIndex = 0;
+					int yIndex = 0;
+					for(int a = 0; a < axis.length; a++) {
+						log.debug(axis[a]);
+						if(axis[a].equals("i")){
+							xIndex=a;
+						}
+						if(axis[a].equals("j")){
+							yIndex=a;
+						}
+						if(axis[a].equals("DATE")  || axis[a].equals("TIME") || axis[a].equals("ANSI") || axis[a].equals("Time") || axis[a].equals("Date") || axis[a].equals("time") || axis[a].equals("ansi") || axis[a].equals("date") || axis[a].equals("unix")){
+							temporalExtent.put(minValues[a].replaceAll("\"", ""));
+							temporalExtent.put(maxValues[a].replaceAll("\"", ""));
+						}
+					}
+					int j = 0;
+
+					for(int a = 0; a < axis.length; a++) {
+						log.debug(axis[a]);
+						if(axis[a].equals("E") || axis[a].equals("X") || axis[a].equals("Long") || axis[a].equals("N") || axis[a].equals("Y") || axis[a].equals("Lat")){
+							j = a;
+							break;
+						}
+					}
+					log.debug(j);
+					spatialExtent.put(minValues[j+1]);
+					spatialExtent.put(minValues[j]);
+					spatialExtent.put(maxValues[j+1]);
+					spatialExtent.put(maxValues[j]);			
+
+					extentCollection.put("spatial", spatialExtent);
+					extentCollection.put("temporal", temporalExtent);
+				}
 				JSONArray linksPerCollection = new JSONArray();
 				
 				JSONObject linkDescPerCollection = new JSONObject();
