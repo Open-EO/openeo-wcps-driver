@@ -900,7 +900,7 @@ public class WCPSQueryFactory {
 						}
 						else if (fromType.equals("from_node")) {
 							String dataNode = processArguments.getJSONObject("data").getString("from_node");							
-							nodeKeyofCube1 = processArguments.getJSONObject("cube1").getString("from_node");
+							nodeKeyofCube1 = processArguments.getJSONObject("data").getString("from_node");
 							temporalStartCube1 = processGraph.getJSONObject(getFilterCollectionNode(dataNode)).getJSONObject("arguments").getJSONArray("temporal_extent").getString(0);
 							temporalEndCube1 = processGraph.getJSONObject(getFilterCollectionNode(dataNode)).getJSONObject("arguments").getJSONArray("temporal_extent").getString(1);
 							cube1 = processGraph.getJSONObject(getFilterCollectionNode(dataNode)).getJSONObject("arguments").getString("id");
@@ -909,7 +909,7 @@ public class WCPSQueryFactory {
 							log.debug(payLoad1);
 						}
 					}
-				}				
+				}
 				if (processArguments.get("mask") instanceof JSONObject) {
 					for (String fromType : processArguments.getJSONObject("mask").keySet()) {
 						if (fromType.equals("from_argument") && processArguments.getJSONObject("mask").getString("from_argument").equals("data")) {
@@ -1009,8 +1009,37 @@ public class WCPSQueryFactory {
 					log.debug("Process Stored for Node " + nodeKeyOfCurrentProcess + " : " + storedPayLoads.get(nodeKeyOfCurrentProcess));
 					log.debug("Mask Process PayLoad is : ");
 				}
-				
-				else if (noOfDimsCube1==noOfDimsCube2 && !temporalStartCube1.equals(temporalEndCube1) && temporalStartCube2.equals(temporalEndCube2) && !payLoad2.contains("condense") && payLoad1.contains("coverage") && payLoad1.contains("condense")) {
+				else if (noOfDimsCube1==noOfDimsCube2 && !temporalStartCube1.equals(temporalEndCube1) && !temporalStartCube2.equals(temporalEndCube2) && !payLoad2.contains("condense") && payLoad1.contains("coverage") && payLoad1.contains("condense")) {
+					try {
+						replacement = processArguments.getDouble("replacement");
+						wcpsMaskpayLoad.append("(" + payLoad1 + "*" + "(not("+payLoad2.replaceAll("\\$pm", "\\$rm")+")"+")" + " + " + "(("+payLoad2.replaceAll("\\$pm", "\\$qm")+")"+"*"+replacement+"))");
+						wcpsPayLoad=wcpsMaskpayLoad;
+					}catch(Exception e) {
+						wcpsMaskpayLoad.append("(" + payLoad1 + "*" + "(not("+payLoad2.replaceAll("\\$pm", "\\$rm")+")"+")");
+						wcpsPayLoad=wcpsMaskpayLoad;
+					}
+					
+					wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsMaskpayLoad.toString());
+					storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMaskpayLoad.toString());
+					log.debug("Process Stored for Node " + nodeKeyOfCurrentProcess + " : " + storedPayLoads.get(nodeKeyOfCurrentProcess));
+					log.debug("Mask Process PayLoad is : ");
+				}
+				else if (noOfDimsCube1==noOfDimsCube2 && !temporalStartCube1.equals(temporalEndCube1) && !temporalStartCube2.equals(temporalEndCube2) && !payLoad2.contains("condense") && payLoad1.contains("coverage") && !payLoad1.contains("condense")) {
+					try {
+						replacement = processArguments.getDouble("replacement");
+						wcpsMaskpayLoad.append("(" + payLoad1 + "*(not("+payLoad2.replaceAll("\\$pm", "\\$rm")+")"+")" + " + " + "(("+payLoad2.replaceAll("\\$pm", "\\$qm")+")"+"*"+replacement+"))");
+						wcpsPayLoad=wcpsMaskpayLoad;
+					}catch(Exception e) {
+						wcpsMaskpayLoad.append("(" + payLoad1 + "*(not("+payLoad2.replaceAll("\\$pm", "\\$rm")+")"+")");
+						wcpsPayLoad=wcpsMaskpayLoad;
+					}
+					
+					wcpsStringBuilder=wcpsStringBuilderMaskThresPayload.append(wcpsMaskpayLoad.toString());
+					storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMaskpayLoad.toString());
+					log.debug("Process Stored for Node " + nodeKeyOfCurrentProcess + " : " + storedPayLoads.get(nodeKeyOfCurrentProcess));
+					log.debug("Mask Process PayLoad is : ");
+				}
+				else if (noOfDimsCube1==noOfDimsCube2 && !temporalStartCube1.equals(temporalEndCube1) && temporalStartCube2.equals(temporalEndCube2) && payLoad2.contains("condense") && !payLoad2.contains("coverage") && payLoad1.contains("coverage") && payLoad1.contains("condense")) {
 //					String timeImageCrsDomain = Pattern.compile(" X"+"\\(.*?\\)").matcher(payLoadCRS).replaceAll("");
 //					timeImageCrsDomain = Pattern.compile(" Y"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
 //					timeImageCrsDomain = Pattern.compile(" E"+"\\(.*?\\)").matcher(timeImageCrsDomain).replaceAll("");
@@ -1049,7 +1078,7 @@ public class WCPSQueryFactory {
 					storedPayLoads.put(nodeKeyOfCurrentProcess, wcpsMaskpayLoad.toString());
 					log.debug("Process Stored for Node " + nodeKeyOfCurrentProcess + " : " + storedPayLoads.get(nodeKeyOfCurrentProcess));
 					log.debug("Mask Process PayLoad is : ");
-				}			
+				}
 				
 			}
 //			if (currentProcessID.equals("mask_custom")) {
@@ -3850,13 +3879,25 @@ public class WCPSQueryFactory {
 			}
 			JSONArray bandsArray = ((JSONObject) collectionSTACMetdata.get("properties")).getJSONArray("eo:bands");
 			for(int c = 0; c < bandsArray.length(); c++) {
-				String bandCommon = bandsArray.getJSONObject(c).getString("common_name");	
-				if (bandCommon.equals(bandfromIndex)) {
-					bandName = bandsArray.getJSONObject(c).getString("name");
-					break;
+				try {
+					String bandCommon = bandsArray.getJSONObject(c).getString("common_name");	
+					if (bandCommon.equals(bandfromIndex)) {
+						bandName = bandsArray.getJSONObject(c).getString("name");
+						break;
+					}
+					else {
+						bandName = bandfromIndex;
+					}
 				}
-				else {
-					bandName = bandfromIndex;
+				catch (Exception e) {
+					String bandCommon = bandsArray.getJSONObject(c).getString("name");	
+					if (bandCommon.equals(bandfromIndex)) {
+						bandName = bandsArray.getJSONObject(c).getString("name");
+						break;
+					}
+					else {
+						bandName = bandfromIndex;
+					}
 				}
 			}
 			stretchBuilder.append(createBandSubsetString(collectionVar, bandName, filterString));		
@@ -5728,6 +5769,12 @@ public class WCPSQueryFactory {
 					c2 = tx.TransformPoint(Double.parseDouble(top), Double.parseDouble(right));
 					//TODO include other CRS exceptions of different axis order
 					if (srs==3035) {
+						left = Double.toString(c1[1]);
+						bottom = Double.toString(c1[0]);
+						right = Double.toString(c2[1]);
+						top = Double.toString(c2[0]);
+					}
+					else if (srs==4326) {
 						left = Double.toString(c1[1]);
 						bottom = Double.toString(c1[0]);
 						right = Double.toString(c2[1]);
