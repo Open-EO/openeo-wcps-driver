@@ -1592,15 +1592,19 @@ public class WCPSQueryFactory {
 				}
 				JSONArray bandsArray = ((JSONObject) collectionSTACMetdata.get("properties")).getJSONArray("eo:bands");		
 				for(int c = 0; c < bandsArray.length(); c++) {
-					String bandCommon = bandsArray.getJSONObject(c).getString("common_name");
-//					String bandCommon = bandsArray.getJSONObject(c).getString("name");
-					if (bandCommon.equals(bandfromIndex)) {
-						bandName = bandsArray.getJSONObject(c).getString("name");
-						break;
+					try {
+						String bandCommon = bandsArray.getJSONObject(c).getString("common_name");	
+						if (bandCommon.equals(bandfromIndex)) {
+							bandName = bandsArray.getJSONObject(c).getString("name");
+							break;
+						}
+						else {
+							bandName = bandfromIndex;
+						}
 					}
-					else {
+					catch (Exception e) {
 						bandName = bandfromIndex;
-					}
+						}
 			    }
 				wcpsFilterpayLoad.append(createBandSubsetString(collectionVar, bandName, filterString));
 				wcpsPayLoad=wcpsFilterpayLoad;
@@ -3890,14 +3894,8 @@ public class WCPSQueryFactory {
 					}
 				}
 				catch (Exception e) {
-					String bandCommon = bandsArray.getJSONObject(c).getString("name");	
-					if (bandCommon.equals(bandfromIndex)) {
-						bandName = bandsArray.getJSONObject(c).getString("name");
-						break;
-					}
-					else {
-						bandName = bandfromIndex;
-					}
+					bandName = bandfromIndex;
+					
 				}
 			}
 			stretchBuilder.append(createBandSubsetString(collectionVar, bandName, filterString));		
