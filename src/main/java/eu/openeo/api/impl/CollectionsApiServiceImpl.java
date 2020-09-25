@@ -450,7 +450,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			String platform = null;
 			try {
 				platform = metadataElement.getChildText("Platform", gmlNS);
-			    }catch(Exception e) {
+			}catch(Exception e) {
 			    	log.warn("Error in parsing Project Name :" + e.getMessage());
 			    }
 			platform_values.put(platform);
@@ -495,19 +495,19 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 		    	log.warn("Error in parsing metadata slice :" + e.getMessage());
 		    }
 			try {
-				properties.put("sci:citation", props.getChildText("CITATION"));
+				properties.put("sci:citation", metadataElement.getChildText("Citation", gmlNS));
 			}catch(Exception e) {
 				log.warn("Error in parsing Constellation:" + e.getMessage());
 			}
 
 			try {
-				properties.put("eo:constellation", props.getChildText("CONSTELLATON"));
+				properties.put("eo:constellation", metadataElement.getChildText("Constellation", gmlNS));
 			}catch(Exception e) {
 				log.warn("Error in parsing Constellation:" + e.getMessage());
 			}				
 
 			try {				
-				properties.put("eo:instrument", props.getChildText("INSTRUMENT"));
+				properties.put("eo:instrument", metadataElement.getChildText("Instrument", gmlNS));
 			}catch(Exception e) {
 				log.warn("Error in parsing Instrument:" + e.getMessage());
 			}
