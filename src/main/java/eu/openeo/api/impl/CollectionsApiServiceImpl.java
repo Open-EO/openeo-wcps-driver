@@ -419,12 +419,20 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			links.put(linkAbout);
 		
 			JSONArray keywords = new JSONArray();
+			
 			//String keyword1 = metadataObj.getString("Project");
 			//keywords.put(keyword1);
 			
 			//String providerName = metadataObj.getString("Creator");
 			
 			JSONArray roles1 = new JSONArray();
+			roles1.put("Provider");
+			try {
+				roles1.put(metadataElement.getChildText("Role", gmlNS));
+			}catch(Exception e) {
+				log.warn("Error in parsing Role :" + e.getMessage());
+			}
+			
 			//String role1 = metadataObj.getString("Roles");
 			//keywords.put(role1);
 			
@@ -451,7 +459,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			try {
 				platform = metadataElement.getChildText("Platform", gmlNS);
 			}catch(Exception e) {
-			    	log.warn("Error in parsing Project Name :" + e.getMessage());
+			    	log.warn("Error in parsing Platform Name :" + e.getMessage());
 			    }
 			platform_values.put(platform);
 			pltfrmvalues.put("values", platform_values);
@@ -461,12 +469,12 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			try {
 			title = metadataElement.getChildText("Title", gmlNS);
 		    }catch(Exception e) {
-		    	log.warn("Error in parsing Project Name :" + e.getMessage());
+		    	log.warn("Error in parsing Title :" + e.getMessage());
 		    }
 		    try {
 			description = metadataElement.getChildText("Description", gmlNS);
             }catch(Exception e) {
-            	log.warn("Error in parsing Title :" + e.getMessage());
+            	log.warn("Error in parsing Description :" + e.getMessage());
 	        }
 		    
 			JSONArray cloud_cover = new JSONArray();
