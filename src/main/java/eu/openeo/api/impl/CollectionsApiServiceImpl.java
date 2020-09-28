@@ -438,9 +438,9 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			
 			JSONArray provider1 = new JSONArray();
 			JSONObject provider1Info = new JSONObject();
-			provider1Info.put("name", "Eurac Research - Institute for Earth Observation");
+			provider1Info.put("name", ConvenienceHelper.readProperties("provider-name"));
 			provider1Info.put("roles", roles1);
-			provider1Info.put("url", "http://www.eurac.edu");
+			provider1Info.put("url", ConvenienceHelper.readProperties("provider-url"));
 			provider1.put(provider1Info);			
 			
 			JSONObject properties = new JSONObject();
@@ -838,6 +838,12 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				//String providerName1 = metadataObj.getString("Creator");
 				
 				JSONArray roles1 = new JSONArray();
+				roles1.put("Distributor");
+				try {
+					roles1.put(metadataElement.getChildText("Role", gmlNS));
+				}catch(Exception e) {
+					log.warn("Error in parsing Role :" + e.getMessage());
+				}
 				//String role1 = metadataObj.getString("Roles");
 				//keywords.put(role1);
 				
