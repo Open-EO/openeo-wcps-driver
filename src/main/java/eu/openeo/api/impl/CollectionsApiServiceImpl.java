@@ -426,7 +426,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			//String providerName = metadataObj.getString("Creator");
 			
 			JSONArray roles1 = new JSONArray();
-			roles1.put("Provider");
+			roles1.put("Distributor");
 			try {
 				roles1.put(metadataElement.getChildText("Role", gmlNS));
 			}catch(Exception e) {
