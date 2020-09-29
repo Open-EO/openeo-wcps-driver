@@ -426,7 +426,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 			//String providerName = metadataObj.getString("Creator");
 			
 			JSONArray roles1 = new JSONArray();
-			roles1.put("Distributor");
+			roles1.put("host");
 			try {
 				roles1.put(metadataElement.getChildText("Role", gmlNS));
 			}catch(Exception e) {
@@ -838,7 +838,7 @@ public class CollectionsApiServiceImpl extends CollectionsApiService {
 				//String providerName1 = metadataObj.getString("Creator");
 				
 				JSONArray roles1 = new JSONArray();
-				roles1.put("Distributor");
+				roles1.put("host");
 				try {
 					roles1.put(metadataElement.getChildText("Role", gmlNS));
 				}catch(Exception e) {
