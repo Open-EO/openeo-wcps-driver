@@ -1,5 +1,7 @@
 # OpenEO WCPS driver prototype for proof of concept
 
+This driver has been *deprecated* in favor of the [openeo-spring-driver](https://github.com/Open-EO/openeo-spring-driver)
+
 [![Status](https://img.shields.io/badge/Status-proof--of--concept-yellow.svg)]()
 
 ## Information
